@@ -71,3 +71,12 @@ describe("weekPlanningToText", () => {
     expect(text).toContain("Verzamelen 13u45.");
   });
 });
+
+import { masDistance } from "./mas";
+
+describe("masDistance", () => {
+  it("computes the distance per repetition", () => {
+    expect(masDistance(16, 100, 15)).toBe(67); // 4.44 m/s × 15 s
+    expect(masDistance(18, 95, 30)).toBe(143);
+  });
+});

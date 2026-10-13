@@ -4,7 +4,7 @@ import type { Staff } from "@iassistent/staff-engine/content";
 
 import bundle from "@/generated/staff.json";
 
-import { buildRoleContext, weekLabels } from "./context";
+import { buildRoleContext, loadHistory, sessionAu, weekLabels } from "./context";
 import { addDays, isoWeekday, mondayOf, weekDates } from "./dates";
 import { weekPlanSchema } from "./validation";
 
@@ -70,6 +70,7 @@ describe("buildRoleContext", () => {
       notes: null,
       players: [
         {
+          id: "p9",
           shirt_number: 9,
           primary_position: "ST",
           secondary_positions: ["RW"],
@@ -83,6 +84,15 @@ describe("buildRoleContext", () => {
       visionAnswers: { [`${firstTheme.id}.${firstQuestion.id}`]: "4-3-3" },
       questionnaire: staff.vision,
       matchDays: staff.matchDays,
+      periodization: staff.periodization,
+      season: { competitionStartDate: "2026-09-06", periodizationWeeks: 4 },
+      tests: staff.tests,
+      testResults: [
+        { player_id: "p9", test_code: "vameval", test_date: "2026-08-20", result: 15.5 },
+        { player_id: "p9", test_code: "vameval", test_date: "2026-09-01", result: 16 },
+      ],
+      history: [],
+      staff: { "physical-coach": { weektype: "deload" } },
       feedback: null,
     });
 
@@ -93,11 +103,41 @@ describe("buildRoleContext", () => {
       training: { aanvang: "19:30", duur_min: 90 },
     });
     expect(context.kern).toEqual([
-      { rugnummer: 9, posities: ["ST", "RW"], voet: "rechts", beschikbaar: false, status: "geblesseerd", terug_verwacht: "2026-11-01" },
+      {
+        rugnummer: 9,
+        posities: ["ST", "RW"],
+        voet: "rechts",
+        beschikbaar: false,
+        status: "geblesseerd",
+        terug_verwacht: "2026-11-01",
+        mas_kmh: 16,
+        mas_test_datum: "2026-09-01",
+      },
     ]);
+    expect(context.weekinput.periodisering).toMatchObject({ fase: "competitie", week_in_cyclus: 4 });
+    expect(context.testen[0]).toMatchObject({ test: "vameval", laatste_test: "2026-09-01", nieuwe_test_nodig: false });
+    expect(context.staf).toEqual({ "physical-coach": { weektype: "deload" } });
     expect(JSON.stringify(context)).not.toMatch(/first_name|last_name/);
     expect(context.visie.antwoorden).toEqual([
       { thema: firstTheme.titel, vraag: firstQuestion.vraag, antwoord: "4-3-3" },
     ]);
+  });
+});
+
+describe("loadHistory", () => {
+  it("sums the actual training load per week", () => {
+    expect(sessionAu(5.5, 80)).toBe(440);
+    const history = loadHistory(
+      [{ week_start: "2026-10-12", weektype: "extensief", planned_au: 1300 }],
+      [
+        { session_date: "2026-10-13", kind: "training", rpe: 5, duration_min: 80, attendance: 18 },
+        { session_date: "2026-10-15", kind: "training", rpe: 7, duration_min: 90, attendance: 17 },
+        { session_date: "2026-10-18", kind: "match", rpe: 8, duration_min: 95, attendance: null },
+        { session_date: "2026-10-20", kind: "training", rpe: 4, duration_min: 60, attendance: null },
+      ],
+    );
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({ gepland_au: 1300, werkelijk_au: 400 + 630 });
+    expect(history[0]!.sessies).toHaveLength(3);
   });
 });

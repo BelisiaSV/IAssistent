@@ -26,6 +26,8 @@ export const SHARED_FILES = {
   formations: "formaties.json",
   vision: "visieprofiel.json",
   matchDays: "wedstrijddagen.json",
+  periodization: "periodisering.json",
+  tests: "testen.json",
 } as const;
 
 /** Markdown files in _gedeeld that the prompt builder uses. */

@@ -1,3 +1,5 @@
+import type { WeekPeriodization } from "./shared/periodization";
+
 /**
  * Data a role gets about the week. Keys are Dutch because this data goes to the
  * AI as-is (all AI input and output is Dutch). No player names: rugnummer only.
@@ -12,6 +14,7 @@ export interface WeekDayInput {
 
 export interface WeekInput {
   week_van: string;
+  periodisering: WeekPeriodization;
   vorige_wedstrijd: string | null;
   notitie: string | null;
   dagen: WeekDayInput[];
@@ -24,6 +27,26 @@ export interface SquadPlayer {
   beschikbaar: boolean;
   status: string;
   terug_verwacht: string | null;
+  /** Latest MAS in km/h (VAMEVAL) and its date. */
+  mas_kmh: number | null;
+  mas_test_datum: string | null;
+}
+
+export interface LoadHistoryWeek {
+  week_van: string;
+  weektype: string | null;
+  gepland_au: number | null;
+  werkelijk_au: number | null;
+  sessies: { datum: string; soort: "training" | "wedstrijd"; rpe: number; duur_min: number; au: number; aanwezigen: number | null }[];
+}
+
+export interface TestStatus {
+  test: string;
+  naam: string;
+  laatste_test: string | null;
+  interval_weken: number;
+  nieuwe_test_nodig: boolean;
+  spelers_met_resultaat: number;
 }
 
 export interface VisionContext {
@@ -40,5 +63,9 @@ export interface RoleContext {
   weekinput: WeekInput;
   kern: SquadPlayer[];
   visie: VisionContext;
+  belastingshistoriek: LoadHistoryWeek[];
+  testen: TestStatus[];
+  /** Approved proposals of other roles for this week, by role id. */
+  staf: Record<string, unknown>;
   feedback: RoleFeedback | null;
 }

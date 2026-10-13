@@ -19,9 +19,13 @@
    visie van de coach (speelwijze, balbezit, balverlies, omschakelingen) naar voetbalvormen die
    passen bij het label van de dag. Houd de totale duur binnen wat de coach opgeeft (standaard
    ongeveer 90 minuten).
-4. **Belasting per onderdeel.** Geef bij elk onderdeel: duur in minuten, reeksen, werk per reeks,
-   rust tussen reeksen, intensiteit (laag, matig, hoog, maximaal) en een doel-RPE (1–10). De
-   dagbelasting moet passen bij het label: hoogst op MD-4/MD-3, laag op MD-1 en MD+1/MD+2.
+4. **Belasting per onderdeel.** Is er een goedgekeurd belastingsplan van de Physical Coach
+   (zie "Staf"), dan volg je het: de belasting, doel-RPE, maximale duur en richtlijnen per dag,
+   en je neemt zijn fysieke blokken met hun belasting letterlijk over in de training. Zonder
+   belastingsplan stel je de belasting zelf voor. Geef bij elk onderdeel: duur in minuten,
+   reeksen, werk per reeks, rust tussen reeksen, intensiteit (laag, matig, hoog, maximaal) en
+   een doel-RPE (1–10). De dagbelasting past bij het label: hoogst op MD-4/MD-3, laag op MD-1
+   en MD+1/MD+2.
 5. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief
    doelmannen). Vermeld terreingrootte en materiaal kort.
 6. **Niet-beschikbare spelers.** Geef voor geblesseerde, geschorste of afwezige spelers een kort

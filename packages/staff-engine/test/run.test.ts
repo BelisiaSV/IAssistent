@@ -14,7 +14,9 @@ import {
   type Staff,
   StaffGenerationError,
   type StaffModelProvider,
+  testDue,
   validateOutput,
+  weekPeriodization,
 } from "../src/index";
 
 const STAFF_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../staff");
@@ -37,6 +39,7 @@ function context(): RoleContext {
   return {
     weekinput: {
       week_van: "2026-10-19",
+      periodisering: weekPeriodization("2026-10-19", "2026-09-06", 4, staff.periodization),
       vorige_wedstrijd: "2026-10-18",
       notitie: "Focus op omschakeling.",
       dagen: [
@@ -52,10 +55,13 @@ function context(): RoleContext {
       ],
     },
     kern: [
-      { rugnummer: 1, posities: ["GK"], voet: "rechts", beschikbaar: true, status: "beschikbaar", terug_verwacht: null },
-      { rugnummer: 9, posities: ["ST"], voet: "rechts", beschikbaar: false, status: "geblesseerd", terug_verwacht: "2026-11-01" },
+      { rugnummer: 1, posities: ["GK"], voet: "rechts", beschikbaar: true, status: "beschikbaar", terug_verwacht: null, mas_kmh: 16.5, mas_test_datum: "2026-09-01" },
+      { rugnummer: 9, posities: ["ST"], voet: "rechts", beschikbaar: false, status: "geblesseerd", terug_verwacht: "2026-11-01", mas_kmh: null, mas_test_datum: null },
     ],
     visie: { samenvatting: "Dominant voetbal.", antwoorden: [] },
+    belastingshistoriek: [],
+    testen: [],
+    staf: {},
     feedback: null,
   };
 }
@@ -72,10 +78,50 @@ describe("match days", () => {
   });
 });
 
+describe("periodization", () => {
+  it("counts cycle weeks from the week of the first competition match", () => {
+    const type = (week: string, cycle = 4) =>
+      weekPeriodization(week, "2026-09-06", cycle, staff.periodization).weektype?.code;
+    // 2026-09-06 is a Sunday: its week starts on Monday 2026-08-31.
+    expect(type("2026-08-24")).toBe("voorbereiding");
+    expect(type("2026-08-31")).toBe("normaal");
+    expect(type("2026-09-07")).toBe("extensief");
+    expect(type("2026-09-14")).toBe("intensief");
+    expect(type("2026-09-21")).toBe("deload");
+    expect(type("2026-09-28")).toBe("normaal");
+    expect(weekPeriodization("2026-10-05", "2026-09-06", 6, staff.periodization)).toMatchObject({
+      fase: "competitie",
+      cyclus_weken: 6,
+      week_in_cyclus: 6,
+    });
+    expect(weekPeriodization("2026-10-05", null, 4, staff.periodization).fase).toBeNull();
+  });
+
+  it("knows when a test is due", () => {
+    expect(testDue(null, "2026-10-19", 8)).toBe(true);
+    expect(testDue("2026-09-01", "2026-10-19", 8)).toBe(false);
+    expect(testDue("2026-08-25", "2026-10-19", 8)).toBe(true);
+  });
+});
+
 describe("assistant coach content", () => {
   it("has an example that matches its output schema", () => {
     const role = staff.roles.find((r) => r.id === "assistant-coach")!;
     expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
+  });
+});
+
+describe("physical coach", () => {
+  it("has an example that matches its output schema", () => {
+    const role = staff.roles.find((r) => r.id === "physical-coach")!;
+    expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
+  });
+
+  it("builds a valid load plan in test mode, with this week's type", async () => {
+    const result = await runRole(staff, "physical-coach", context(), exampleProvider);
+    const output = result.output as { weektype: string; dagen: { datum: string; soort: string }[] };
+    expect(output.weektype).toBe(context().weekinput.periodisering.weektype?.code);
+    expect(output.dagen.map((d) => d.soort)).toEqual(["rust", "training", "rust", "training", "rust", "rust", "wedstrijd"]);
   });
 });
 
@@ -88,6 +134,10 @@ describe("buildRolePrompt", () => {
     expect(system).toContain(role.instructions.trim().split("\n")[0]);
     expect(user).toContain('"tegenstander": "KFC Voorbeeld"');
     expect(user).toContain('"rugnummer": 9');
+    expect(system).toContain('"code": "deload"');
+
+    const withStaff = buildRolePrompt(staff, role, { ...context(), staf: { "physical-coach": { weektype: "intensief" } } });
+    expect(withStaff.user).toContain('"physical-coach"');
   });
 });
 
@@ -96,7 +146,7 @@ describe("runRole with the example provider", () => {
     const result = await runRole(staff, "assistant-coach", context(), exampleProvider);
     const output = result.output as { dagen: { datum: string; soort: string; md: string | null; tijdstip: string | null }[]; individueel: { rugnummer: number }[] };
     expect(result.provider).toBe("example");
-    expect(result.contentVersion).toBe("0.1.0");
+    expect(result.contentVersion).toBe(staff.roles.find((r) => r.id === "assistant-coach")!.meta.versie);
     expect(output.dagen.map((d) => [d.datum, d.soort, d.md])).toEqual([
       ["2026-10-19", "rust", "MD+1"],
       ["2026-10-20", "training", "MD+2"],
@@ -111,7 +161,7 @@ describe("runRole with the example provider", () => {
   });
 
   it("refuses placeholder roles", async () => {
-    await expect(runRole(staff, "physical-coach", context(), exampleProvider)).rejects.toMatchObject({
+    await expect(runRole(staff, "tactical-coach", context(), exampleProvider)).rejects.toMatchObject({
       code: "role_not_ready",
     });
   });

@@ -98,6 +98,20 @@ beforeEach(async () => {
   );
   await write("_gedeeld/afspraken.md", "# Afspraken\n");
   await write("_gedeeld/visie-hoofdcoach.md", "# Visie\n");
+  await write(
+    "_gedeeld/periodisering.json",
+    JSON.stringify({
+      versie: "1",
+      standaard_cyclus: 1,
+      weektypes: [{ code: "normaal", naam: "N", belasting_pct: { min: 70, max: 75 }, km_zonder_wedstrijd: { min: 1, max: 2 }, uitleg: "x" }],
+      cycli: [{ weken: 1, volgorde: ["normaal"] }],
+      voor_start: { code: "voorbereiding", naam: "V", uitleg: "x" },
+    }),
+  );
+  await write(
+    "_gedeeld/testen.json",
+    JSON.stringify({ versie: "1", testen: [{ code: "t", naam: "T", resultaat: "r", eenheid: "u", min: 1, max: 2, interval_weken: 8, uitleg: "x" }] }),
+  );
   await write("_gedeeld/opdracht-systeem.md", "{{rol}}\n");
   await write("_gedeeld/opdracht-gebruiker.md", "{{weekinput}}\n");
 });
@@ -120,8 +134,10 @@ describe("loadStaff", () => {
       "_gedeeld/formaties.json",
       "_gedeeld/opdracht-gebruiker.md",
       "_gedeeld/opdracht-systeem.md",
+      "_gedeeld/periodisering.json",
       "_gedeeld/posities.json",
       "_gedeeld/rol-sjabloon.md",
+      "_gedeeld/testen.json",
       "_gedeeld/visie-hoofdcoach.md",
       "_gedeeld/visieprofiel.json",
       "_gedeeld/wedstrijddagen.json",
@@ -263,6 +279,24 @@ describe("shared content", () => {
     const issues = await validateStaff(root);
     expect(issues[0]?.path).toBe("_gedeeld/formaties.json");
     expect(issues[0]?.message).toMatch(/^formaties\.0\.posten\.0\.x:/);
+  });
+});
+
+describe("periodization content", () => {
+  it("reports cycles with unknown week types or the wrong length", async () => {
+    await write(
+      "_gedeeld/periodisering.json",
+      JSON.stringify({
+        versie: "1",
+        standaard_cyclus: 2,
+        weektypes: [{ code: "normaal", naam: "N", belasting_pct: { min: 70, max: 75 }, km_zonder_wedstrijd: { min: 1, max: 2 }, uitleg: "x" }],
+        cycli: [{ weken: 2, volgorde: ["normaal", "zwaar", "normaal"] }],
+        voor_start: { code: "voorbereiding", naam: "V", uitleg: "x" },
+      }),
+    );
+    const messages = (await validateStaff(root)).map((i) => i.message);
+    expect(messages).toContain("cyclus van 2 weken heeft 3 weken in de volgorde");
+    expect(messages).toContain('cyclus van 2 weken: onbekend weektype "zwaar"');
   });
 });
 

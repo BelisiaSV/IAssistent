@@ -56,8 +56,12 @@ export const exampleProvider: StaffModelProvider = {
         advies: advice.length ? advice[i % advice.length]!.advies : "",
       }));
 
+    // Keep the week type of this week when the role reports one (Physical Coach).
+    const weektype = context.weekinput.periodisering.weektype?.code;
+    const extra = "weektype" in example && weektype ? { weektype } : {};
+
     return {
-      output: { ...example, dagen, individueel },
+      output: { ...example, ...extra, dagen, individueel },
       provider: "example",
       model: null,
       usage: null,

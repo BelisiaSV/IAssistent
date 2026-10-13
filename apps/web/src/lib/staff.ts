@@ -12,3 +12,5 @@ export const positionCatalog = staff.positions;
 export const formationCatalog = staff.formations;
 export const visionQuestionnaire = staff.vision;
 export const matchDayCatalog = staff.matchDays;
+export const periodizationCatalog = staff.periodization;
+export const testCatalog = staff.tests;

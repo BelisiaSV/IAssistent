@@ -1,8 +1,7 @@
 "use server";
 
-import { FEATURE_FLAGS, type Json } from "@iassistent/db";
+import type { Json } from "@iassistent/db";
 import { runRole, StaffGenerationError } from "@iassistent/staff-engine";
-import type { VisionAnswers } from "@iassistent/staff-engine/content";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -12,10 +11,11 @@ import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { messages } from "@/lib/messages";
-import { staff, visionQuestionnaire, matchDayCatalog } from "@/lib/staff";
+import { weekRole } from "@/lib/roles";
+import { staff } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
-import { buildRoleContext } from "@/lib/weeks/context";
 import { addDays, isIsoDate, isoWeekday } from "@/lib/weeks/dates";
+import { contextForRole, loadWeek } from "@/lib/weeks/load";
 import {
   trainingScheduleSchema,
   type WeekMatch,
@@ -25,7 +25,6 @@ import {
 
 export type FormState = { error?: string; success?: string };
 
-const ROLE = "assistant-coach";
 const e = messages.weeks.errors;
 const pe = messages.proposals.errors;
 const uuid = z.uuid();
@@ -152,76 +151,62 @@ export async function saveWeekPlan(
 }
 
 /**
- * Asks the Assistant Coach for a (new version of the) week planning. The
+ * Asks a staff role for a (new version of its) proposal for the week. The
  * proposal row is created right away; the role runs after the response.
  */
 export async function requestProposal(
   teamId: string,
   weekStart: string,
+  roleId: string,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  if (!uuid.safeParse(teamId).success || !isMonday(weekStart)) return { error: e.invalidWeek };
+  const role = weekRole(roleId);
+  if (!role || !uuid.safeParse(teamId).success || !isMonday(weekStart)) return { error: e.invalidWeek };
   const feedback = String(formData.get("feedback") ?? "").trim();
   const isAdjustment = formData.get("adjust") === "1";
   if (isAdjustment && !feedback) return { error: pe.feedbackRequired };
   if (feedback.length > 2000) return { error: pe.feedbackTooLong };
 
   const user = await requireUser();
-  if (!(await isFeatureEnabled(FEATURE_FLAGS.assistantCoach))) return { error: messages.proposals.flagOff };
+  if (!(await isFeatureEnabled(role.flag))) return { error: messages.proposals.flagOff };
 
   const supabase = await createClient();
-  const { data: week } = await supabase
-    .from("week_plans")
-    .select("*")
-    .eq("team_id", teamId)
-    .eq("week_start", weekStart)
+  const { data: team } = await supabase
+    .from("teams")
+    .select("id, competition_start_date, periodization_weeks")
+    .eq("id", teamId)
     .maybeSingle();
-  if (!week) return { error: pe.noWeek };
+  if (!team) return { error: pe.requestFailed };
 
-  const [{ data: players }, { data: profile }, { data: previous }] = await Promise.all([
-    supabase.from("players").select("*").eq("team_id", teamId),
+  const [data, { data: profile }] = await Promise.all([
+    loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", user.id).maybeSingle(),
-    supabase
-      .from("staff_proposals")
-      .select("output")
-      .eq("week_plan_id", week.id)
-      .eq("role", ROLE)
-      .in("status", ["ready", "approved"])
-      .order("version", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
   ]);
+  if (!data.week) return { error: pe.noWeek };
 
-  const parsedWeek = weekPlanSchema(weekStart).safeParse({
-    trainings: week.trainings,
-    matches: week.matches,
-    previousMatchDate: week.previous_match_date,
-    notes: week.notes ?? "",
-  });
-  if (!parsedWeek.success) return { error: firstIssue(parsedWeek.error) };
-
-  const context = buildRoleContext({
-    weekStart,
-    trainings: parsedWeek.data.trainings,
-    matches: parsedWeek.data.matches,
-    previousMatchDate: parsedWeek.data.previousMatchDate,
-    notes: parsedWeek.data.notes,
-    players: players ?? [],
-    visionSummary: profile?.vision_summary ?? null,
-    visionAnswers: ((profile?.vision ?? {}) as { antwoorden?: VisionAnswers }).antwoorden ?? {},
-    questionnaire: visionQuestionnaire,
-    matchDays: matchDayCatalog,
-    feedback: feedback && previous?.output ? { previousOutput: previous.output, comment: feedback } : null,
-  });
+  const previous = data.proposals.find(
+    (p) => p.role === role.id && (p.status === "ready" || p.status === "approved") && p.output,
+  );
+  let context;
+  try {
+    context = contextForRole(data, weekStart, {
+      uses: role.uses,
+      vision: profile ? { summary: profile.vision_summary, vision: profile.vision } : null,
+      feedback: feedback && previous?.output ? { previousOutput: previous.output, comment: feedback } : null,
+    });
+  } catch (cause) {
+    console.error("requestProposal: invalid week", cause);
+    return { error: pe.noWeek };
+  }
 
   const provider = getStaffProvider();
   const { data: proposal, error } = await supabase
     .from("staff_proposals")
     .insert({
       team_id: teamId,
-      week_plan_id: week.id,
-      role: ROLE,
+      week_plan_id: data.week.id,
+      role: role.id,
       provider: provider.id,
       feedback: feedback || null,
     })
@@ -236,7 +221,7 @@ export async function requestProposal(
   // Run the role after the response is sent; the page polls until it is done.
   after(async () => {
     try {
-      const result = await runRole(staff, ROLE, context, provider);
+      const result = await runRole(staff, role.id, context, provider);
       const { error: updateError } = await supabase
         .from("staff_proposals")
         .update({
@@ -260,7 +245,86 @@ export async function requestProposal(
   });
 
   revalidatePath(weekPath(teamId, weekStart));
-  redirect(`${weekPath(teamId, weekStart)}?v=${proposal.version}`);
+  redirect(`${weekPath(teamId, weekStart)}?${role.param}=${proposal.version}`);
+}
+
+const seasonSchema = z.object({
+  competitionStartDate: z.union([z.literal("").transform(() => null), z.string().refine(isIsoDate, e.date)]),
+  periodizationWeeks: z.coerce.number().refine((n) => [4, 6, 8].includes(n), e.cycle),
+});
+
+export async function saveSeasonSettings(
+  teamId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
+  const parsed = seasonSchema.safeParse({
+    competitionStartDate: String(formData.get("competitionStartDate") ?? ""),
+    periodizationWeeks: formData.get("periodizationWeeks"),
+  });
+  if (!parsed.success) return { error: firstIssue(parsed.error) };
+
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("teams")
+    .update({
+      competition_start_date: parsed.data.competitionStartDate,
+      periodization_weeks: parsed.data.periodizationWeeks,
+    })
+    .eq("id", teamId)
+    .select("id");
+  if (error || !data?.length) {
+    console.error("saveSeasonSettings failed", error);
+    return { error: e.saveFailed };
+  }
+  revalidatePath(`/teams/${teamId}/weeks`, "layout");
+  return { success: messages.weeks.season.saved };
+}
+
+const sessionLoadSchema = z.object({
+  date: z.string().refine(isIsoDate, e.date),
+  kind: z.enum(["training", "match"]),
+  rpe: z.union([z.literal(""), z.coerce.number().min(0, e.rpe).max(10, e.rpe)]),
+  duration: z.coerce.number().int(e.duration).min(1, e.duration).max(300, e.duration),
+  attendance: z.union([z.literal("").transform(() => null), z.coerce.number().int().min(0).max(60)]),
+});
+
+/** Stores (or with an empty RPE removes) the actual load of a session. */
+export async function saveSessionLoad(
+  teamId: string,
+  weekStart: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  if (!uuid.safeParse(teamId).success || !isMonday(weekStart)) return { error: e.invalidWeek };
+  const parsed = sessionLoadSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  const load = parsed.data;
+
+  await requireUser();
+  const supabase = await createClient();
+  const { error } =
+    load.rpe === ""
+      ? await supabase.from("session_loads").delete().eq("team_id", teamId).eq("session_date", load.date).eq("kind", load.kind)
+      : await supabase.from("session_loads").upsert(
+          {
+            team_id: teamId,
+            session_date: load.date,
+            kind: load.kind,
+            rpe: load.rpe,
+            duration_min: load.duration,
+            attendance: load.attendance,
+          },
+          { onConflict: "team_id,session_date,kind" },
+        );
+  if (error) {
+    console.error("saveSessionLoad failed", error);
+    return { error: e.saveFailed };
+  }
+  revalidatePath(weekPath(teamId, weekStart));
+  return { success: messages.weeks.load.saved };
 }
 
 export async function decideProposal(formData: FormData) {

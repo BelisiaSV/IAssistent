@@ -14,6 +14,8 @@ import { parseMarkdown, sectionHeadings } from "./markdown";
 import { createAjv } from "./output";
 import { TEMPLATE_PLACEHOLDERS, templatePlaceholders } from "./prompt";
 import { parseMatchDays } from "./shared/matchdays";
+import { parsePeriodization } from "./shared/periodization";
+import { parseTests } from "./shared/tests";
 import { parseFormations } from "./shared/formations";
 import { parsePositions } from "./shared/positions";
 import { parseVisionQuestionnaire } from "./shared/vision";
@@ -99,11 +101,18 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
     parseMatchDays(readSharedJson(shared, SHARED_FILES.matchDays, issues)),
     issues,
   );
+  const periodization = collect(
+    parsePeriodization(readSharedJson(shared, SHARED_FILES.periodization, issues)),
+    issues,
+  );
+  const tests = collect(parseTests(readSharedJson(shared, SHARED_FILES.tests, issues)), issues);
   checkTemplates(shared, issues);
 
-  if (!positions || !formations || !vision || !matchDays) return { staff: null, issues };
+  if (!positions || !formations || !vision || !matchDays || !periodization || !tests) {
+    return { staff: null, issues };
+  }
   return {
-    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays },
+    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays, periodization, tests },
     issues,
   };
 }
