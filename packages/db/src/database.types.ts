@@ -212,6 +212,53 @@ export type Database = {
           },
         ];
       };
+      lineups: {
+        Row: {
+          id: string;
+          team_id: string;
+          title: string;
+          match_date: string | null;
+          opponent: string | null;
+          formation: string;
+          starters: Json;
+          bench: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          title: string;
+          match_date?: string | null;
+          opponent?: string | null;
+          formation: string;
+          starters?: Json;
+          bench?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          title?: string;
+          match_date?: string | null;
+          opponent?: string | null;
+          formation?: string;
+          starters?: Json;
+          bench?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lineups_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       memberships: {
         Row: {
           id: string;
@@ -284,7 +331,12 @@ export type Database = {
           first_name: string;
           last_name: string;
           shirt_number: number | null;
-          position: string | null;
+          primary_position: string | null;
+          secondary_positions: string[];
+          preferred_foot: Database["public"]["Enums"]["preferred_foot"] | null;
+          joined_club_year: number | null;
+          expected_return_date: string | null;
+          archived_at: string | null;
           birth_year: number | null;
           status: Database["public"]["Enums"]["player_status"];
           notes: string | null;
@@ -297,7 +349,12 @@ export type Database = {
           first_name: string;
           last_name: string;
           shirt_number?: number | null;
-          position?: string | null;
+          primary_position?: string | null;
+          secondary_positions?: string[];
+          preferred_foot?: Database["public"]["Enums"]["preferred_foot"] | null;
+          joined_club_year?: number | null;
+          expected_return_date?: string | null;
+          archived_at?: string | null;
           birth_year?: number | null;
           status?: Database["public"]["Enums"]["player_status"];
           notes?: string | null;
@@ -310,7 +367,12 @@ export type Database = {
           first_name?: string;
           last_name?: string;
           shirt_number?: number | null;
-          position?: string | null;
+          primary_position?: string | null;
+          secondary_positions?: string[];
+          preferred_foot?: Database["public"]["Enums"]["preferred_foot"] | null;
+          joined_club_year?: number | null;
+          expected_return_date?: string | null;
+          archived_at?: string | null;
           birth_year?: number | null;
           status?: Database["public"]["Enums"]["player_status"];
           notes?: string | null;
@@ -394,6 +456,7 @@ export type Database = {
     Enums: {
       membership_role: "club_owner" | "assistant_coach";
       player_status: "available" | "injured" | "suspended" | "unavailable";
+      preferred_foot: "left" | "right" | "both";
     };
     CompositeTypes: {
       [_ in never]: never;

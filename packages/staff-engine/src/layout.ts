@@ -19,3 +19,9 @@ export const ROLE_DIRS = {
 
 /** Role ids are English kebab-case and equal to the folder name. */
 export const ROLE_ID_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
+
+/** Structured shared content in _gedeeld (JSON), loaded and validated by the engine. */
+export const SHARED_FILES = {
+  positions: "posities.json",
+  formations: "formaties.json",
+} as const;

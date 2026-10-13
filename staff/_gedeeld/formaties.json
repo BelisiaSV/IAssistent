@@ -1,0 +1,125 @@
+{
+  "versie": "0.1.0",
+  "uitleg": "x: 0 = links, 100 = rechts. y: 0 = doel tegenstander (boven), 100 = eigen doel (onder). Elke formatie heeft 11 posten; post-id is uniek binnen de formatie, positie verwijst naar een code uit posities.json.",
+  "formaties": [
+    {
+      "code": "4-4-2",
+      "naam": "4-4-2",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LB", "positie": "LB", "x": 14, "y": 70 },
+        { "id": "LCB", "positie": "CB", "x": 37, "y": 75 },
+        { "id": "RCB", "positie": "CB", "x": 63, "y": 75 },
+        { "id": "RB", "positie": "RB", "x": 86, "y": 70 },
+        { "id": "LM", "positie": "LM", "x": 14, "y": 45 },
+        { "id": "LCM", "positie": "CM", "x": 38, "y": 50 },
+        { "id": "RCM", "positie": "CM", "x": 62, "y": 50 },
+        { "id": "RM", "positie": "RM", "x": 86, "y": 45 },
+        { "id": "LST", "positie": "ST", "x": 38, "y": 18 },
+        { "id": "RST", "positie": "ST", "x": 62, "y": 18 }
+      ]
+    },
+    {
+      "code": "4-3-3",
+      "naam": "4-3-3",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LB", "positie": "LB", "x": 14, "y": 70 },
+        { "id": "LCB", "positie": "CB", "x": 37, "y": 75 },
+        { "id": "RCB", "positie": "CB", "x": 63, "y": 75 },
+        { "id": "RB", "positie": "RB", "x": 86, "y": 70 },
+        { "id": "CDM", "positie": "CDM", "x": 50, "y": 56 },
+        { "id": "LCM", "positie": "CM", "x": 30, "y": 45 },
+        { "id": "RCM", "positie": "CM", "x": 70, "y": 45 },
+        { "id": "LW", "positie": "LW", "x": 15, "y": 20 },
+        { "id": "ST", "positie": "ST", "x": 50, "y": 15 },
+        { "id": "RW", "positie": "RW", "x": 85, "y": 20 }
+      ]
+    },
+    {
+      "code": "4-2-3-1",
+      "naam": "4-2-3-1",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LB", "positie": "LB", "x": 14, "y": 70 },
+        { "id": "LCB", "positie": "CB", "x": 37, "y": 75 },
+        { "id": "RCB", "positie": "CB", "x": 63, "y": 75 },
+        { "id": "RB", "positie": "RB", "x": 86, "y": 70 },
+        { "id": "LDM", "positie": "CDM", "x": 38, "y": 57 },
+        { "id": "RDM", "positie": "CDM", "x": 62, "y": 57 },
+        { "id": "LM", "positie": "LM", "x": 15, "y": 33 },
+        { "id": "CAM", "positie": "CAM", "x": 50, "y": 35 },
+        { "id": "RM", "positie": "RM", "x": 85, "y": 33 },
+        { "id": "ST", "positie": "ST", "x": 50, "y": 14 }
+      ]
+    },
+    {
+      "code": "4-1-4-1",
+      "naam": "4-1-4-1",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LB", "positie": "LB", "x": 14, "y": 70 },
+        { "id": "LCB", "positie": "CB", "x": 37, "y": 75 },
+        { "id": "RCB", "positie": "CB", "x": 63, "y": 75 },
+        { "id": "RB", "positie": "RB", "x": 86, "y": 70 },
+        { "id": "CDM", "positie": "CDM", "x": 50, "y": 59 },
+        { "id": "LM", "positie": "LM", "x": 14, "y": 40 },
+        { "id": "LCM", "positie": "CM", "x": 37, "y": 44 },
+        { "id": "RCM", "positie": "CM", "x": 63, "y": 44 },
+        { "id": "RM", "positie": "RM", "x": 86, "y": 40 },
+        { "id": "ST", "positie": "ST", "x": 50, "y": 14 }
+      ]
+    },
+    {
+      "code": "3-5-2",
+      "naam": "3-5-2",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LCB", "positie": "CB", "x": 28, "y": 74 },
+        { "id": "CB", "positie": "CB", "x": 50, "y": 77 },
+        { "id": "RCB", "positie": "CB", "x": 72, "y": 74 },
+        { "id": "LWB", "positie": "LWB", "x": 10, "y": 50 },
+        { "id": "LCM", "positie": "CM", "x": 32, "y": 47 },
+        { "id": "CDM", "positie": "CDM", "x": 50, "y": 57 },
+        { "id": "RCM", "positie": "CM", "x": 68, "y": 47 },
+        { "id": "RWB", "positie": "RWB", "x": 90, "y": 50 },
+        { "id": "LST", "positie": "ST", "x": 38, "y": 17 },
+        { "id": "RST", "positie": "ST", "x": 62, "y": 17 }
+      ]
+    },
+    {
+      "code": "3-4-3",
+      "naam": "3-4-3",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LCB", "positie": "CB", "x": 28, "y": 74 },
+        { "id": "CB", "positie": "CB", "x": 50, "y": 77 },
+        { "id": "RCB", "positie": "CB", "x": 72, "y": 74 },
+        { "id": "LWB", "positie": "LWB", "x": 12, "y": 50 },
+        { "id": "LCM", "positie": "CM", "x": 38, "y": 52 },
+        { "id": "RCM", "positie": "CM", "x": 62, "y": 52 },
+        { "id": "RWB", "positie": "RWB", "x": 88, "y": 50 },
+        { "id": "LW", "positie": "LW", "x": 18, "y": 22 },
+        { "id": "ST", "positie": "ST", "x": 50, "y": 15 },
+        { "id": "RW", "positie": "RW", "x": 82, "y": 22 }
+      ]
+    },
+    {
+      "code": "5-3-2",
+      "naam": "5-3-2",
+      "posten": [
+        { "id": "GK", "positie": "GK", "x": 50, "y": 90 },
+        { "id": "LWB", "positie": "LWB", "x": 10, "y": 64 },
+        { "id": "LCB", "positie": "CB", "x": 28, "y": 74 },
+        { "id": "CB", "positie": "CB", "x": 50, "y": 77 },
+        { "id": "RCB", "positie": "CB", "x": 72, "y": 74 },
+        { "id": "RWB", "positie": "RWB", "x": 90, "y": 64 },
+        { "id": "LCM", "positie": "CM", "x": 30, "y": 47 },
+        { "id": "CM", "positie": "CM", "x": 50, "y": 52 },
+        { "id": "RCM", "positie": "CM", "x": 70, "y": 47 },
+        { "id": "LST", "positie": "ST", "x": 38, "y": 17 },
+        { "id": "RST", "positie": "ST", "x": 62, "y": 17 }
+      ]
+    }
+  ]
+}

@@ -8,3 +8,5 @@ Afspraken die voor álle rollen gelden. Elke rol krijgt deze bestanden mee.
 - `woordenlijst.md` — vaste begrippen zodat alle rollen dezelfde taal spreken.
 - `rol-sjabloon.md` — sjabloon voor elke `rol.md`. De `##`-secties hier zijn verplicht in
   elke rol; `pnpm staff:validate` controleert dat.
+- `posities.json` — de posities (code, naam, linie) die spelers en formaties gebruiken.
+- `formaties.json` — formaties met hun posten op het veld (x/y in procent) voor de wedstrijdselectie.

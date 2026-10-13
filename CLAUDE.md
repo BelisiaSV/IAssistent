@@ -63,7 +63,7 @@ packages/staff-engine/    laadt en valideert /staff (geen voetbalinhoud, nog gee
 packages/db/              databasetypes + gedeelde constants (bucket, feature flag keys)
 services/video/           aparte videodienst — later
 staff/                    ALLE rolinhoud (markdown + JSON)
-  _gedeeld/               gedeelde afspraken + rol-sjabloon.md
+  _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json
   assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
 supabase/
@@ -85,6 +85,10 @@ voorstelt, staat in `/staff` (markdown/JSON) of in de database (bv. de visie van
 - Wél in code: structuur (bestands- en mapnamen van `/staff`, JSON-schema-validatie),
   datamodellen, UI-teksten van het platform zelf (`messages.ts`).
 - Twijfel? Zet het in `/staff` en laat de engine het inlezen.
+- Gestructureerde gedeelde inhoud (JSON in `_gedeeld`, bv. posities en formaties) wordt door de
+  staff-engine gevalideerd (`@iassistent/staff-engine/content`). De web-app importeert die JSON
+  bij de build via de alias `@staff/*` in `apps/web/src/lib/staff.ts`; ongeldige inhoud laat de
+  build falen. De database bewaart enkel codes (positie, formatie), nooit de inhoud zelf.
 - De staff-engine leest `/staff` in en valideert het: `pnpm staff:validate`. De verplichte
   secties van `rol.md` komen uit `staff/_gedeeld/rol-sjabloon.md`, niet uit de code.
 
@@ -164,5 +168,7 @@ Regels:
 
 - **Fase 1 (fundering)** — structuur, schema + RLS, login, team aanmaken, staff-engine die
   `/staff` inleest. **Geen AI-rollen en geen stafmeeting.**
-- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, spelersbeheer en visieprofiel; AI-calls;
+- **Fase 2a** — spelersbeheer (kern, status, posities, voorkeursvoet, seizoenen bij de club,
+  uit de kern halen) en wedstrijdselecties (formatie op het veld, basis en bank).
+- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, visieprofiel; CSV-import; AI-calls;
   stafmeeting; videodienst.

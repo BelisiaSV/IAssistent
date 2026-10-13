@@ -56,6 +56,7 @@ export default async function TeamsPage({
         primaryColor={team.primary_color}
         secondaryColor={team.secondary_color}
         badge={isHeadCoach ? undefined : m.readOnlyAccess}
+        href={`/teams/${team.id}`}
         actions={
           isHeadCoach && (
             <form action={action}>

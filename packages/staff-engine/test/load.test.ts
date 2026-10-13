@@ -30,6 +30,29 @@ const SCHEMA = JSON.stringify({
   type: "object",
 });
 
+const POSITIONS = {
+  versie: "0.1.0",
+  linies: [{ id: "doel", naam: "Doel" }, { id: "veld", naam: "Veld" }],
+  posities: [
+    { code: "GK", naam: "Doelman", linie: "doel" },
+    { code: "ST", naam: "Spits", linie: "veld" },
+  ],
+};
+
+const FORMATIONS = {
+  versie: "0.1.0",
+  formaties: [
+    {
+      code: "1-1",
+      naam: "1-1",
+      posten: [
+        { id: "GK", positie: "GK", x: 50, y: 90 },
+        { id: "ST", positie: "ST", x: 50, y: 10 },
+      ],
+    },
+  ],
+};
+
 let root: string;
 
 async function write(relativePath: string, content: string) {
@@ -55,6 +78,8 @@ beforeEach(async () => {
   root = await mkdtemp(path.join(tmpdir(), "staff-"));
   await write("_gedeeld/rol-sjabloon.md", TEMPLATE);
   await write("_gedeeld/afspraken.md", "# Afspraken\n");
+  await write("_gedeeld/posities.json", JSON.stringify(POSITIONS));
+  await write("_gedeeld/formaties.json", JSON.stringify(FORMATIONS));
 });
 
 afterEach(async () => {
@@ -72,8 +97,12 @@ describe("loadStaff", () => {
 
     expect(staff.shared.map((f) => f.path)).toEqual([
       "_gedeeld/afspraken.md",
+      "_gedeeld/formaties.json",
+      "_gedeeld/posities.json",
       "_gedeeld/rol-sjabloon.md",
     ]);
+    expect(staff.positions.posities.map((p) => p.code)).toEqual(["GK", "ST"]);
+    expect(staff.formations.formaties[0]?.posten).toHaveLength(2);
     expect(staff.roles).toHaveLength(1);
     const role = staff.roles[0]!;
     expect(role.meta).toEqual({
@@ -158,6 +187,60 @@ describe("validateStaff", () => {
   });
 });
 
+describe("shared content", () => {
+  it("reports a missing positions file", async () => {
+    await rm(path.join(root, "_gedeeld/posities.json"));
+    const issues = await validateStaff(root);
+    expect(issues).toContainEqual({ path: "_gedeeld/posities.json", message: "bestand ontbreekt" });
+  });
+
+  it("reports positions that point to an unknown line and duplicate codes", async () => {
+    await write(
+      "_gedeeld/posities.json",
+      JSON.stringify({
+        ...POSITIONS,
+        posities: [...POSITIONS.posities, { code: "GK", naam: "X", linie: "onbekend" }],
+      }),
+    );
+    const messages = (await validateStaff(root)).map((i) => i.message);
+    expect(messages).toContain('positie "GK" komt dubbel voor');
+    expect(messages).toContain('positie "GK" verwijst naar onbekende linie "onbekend"');
+  });
+
+  it("reports formation slots with unknown positions, duplicate ids or bad coordinates", async () => {
+    await write(
+      "_gedeeld/formaties.json",
+      JSON.stringify({
+        versie: "0.1.0",
+        formaties: [
+          {
+            code: "x",
+            naam: "x",
+            posten: [
+              { id: "A", positie: "CB", x: 10, y: 10 },
+              { id: "A", positie: "GK", x: 10, y: 10 },
+            ],
+          },
+        ],
+      }),
+    );
+    const messages = (await validateStaff(root)).map((i) => i.message);
+    expect(messages).toContain('formatie "x": post "A" komt dubbel voor');
+    expect(messages).toContain('formatie "x": post "A" verwijst naar onbekende positie "CB"');
+
+    await write(
+      "_gedeeld/formaties.json",
+      JSON.stringify({
+        versie: "0.1.0",
+        formaties: [{ code: "x", naam: "x", posten: [{ id: "A", positie: "GK", x: 120, y: 0 }] }],
+      }),
+    );
+    const issues = await validateStaff(root);
+    expect(issues[0]?.path).toBe("_gedeeld/formaties.json");
+    expect(issues[0]?.message).toMatch(/^formaties\.0\.posten\.0\.x:/);
+  });
+});
+
 describe("repository /staff", () => {
   it("is valid and contains the four roles", async () => {
     const staff = await loadStaff(REPO_STAFF_DIR);
@@ -167,5 +250,6 @@ describe("repository /staff", () => {
       "tactical-coach",
       "video-analyst",
     ]);
+    expect(staff.formations.formaties.length).toBeGreaterThan(0);
   });
 });
