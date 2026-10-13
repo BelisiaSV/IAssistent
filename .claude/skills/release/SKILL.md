@@ -51,7 +51,10 @@ eventuele nieuwe env-variabelen. Wacht op groene CI en akkoord van de gebruiker.
    supabase db push
    ```
    **Nooit** `supabase db reset` of de seed op productie.
-2. Nieuwe env-variabelen in Vercel (Production) zetten.
+2. Env-variabelen in Vercel: controleer bij **Settings → Environment Variables** dat elke
+   variabele (ook bestaande) zowel **Production** als **Preview** aangevinkt heeft. Een
+   variabele die alleen voor Preview staat, laat productie falen met "Internal Server Error".
+   `NEXT_PUBLIC_SITE_URL` is voor Production het productieadres. Na een wijziging: Redeploy.
 3. Merge de PR; Vercel deployt `main` naar productie.
 4. Tag de release: `git tag -a vX.Y.Z -m "<samenvatting>" && git push origin vX.Y.Z`.
 5. Rooktest op productie: aanmelden, teamoverzicht laden.
