@@ -16,6 +16,12 @@ De labels die de staf gebruikt voor dagen rond een wedstrijd (JSON):
 
 {{wedstrijddagen}}
 
+# Periodisering
+
+Weektypes en cycli die de staf gebruikt (JSON):
+
+{{periodisering}}
+
 # Je rol
 
 {{rol}}

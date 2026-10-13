@@ -152,6 +152,63 @@ export type Database = {
           },
         ];
       };
+      session_loads: {
+        Row: {
+          id: string;
+          team_id: string;
+          session_date: string;
+          kind: "training" | "match";
+          rpe: number;
+          duration_min: number;
+          attendance: number | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          session_date: string;
+          kind: "training" | "match";
+          rpe: number;
+          duration_min: number;
+          attendance?: number | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          session_date?: string;
+          kind?: "training" | "match";
+          rpe?: number;
+          duration_min?: number;
+          attendance?: number | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "session_loads_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "session_loads_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff_proposals: {
         Row: {
           id: string;
@@ -297,6 +354,8 @@ export type Database = {
           primary_color: string;
           secondary_color: string;
           training_schedule: Json;
+          competition_start_date: string | null;
+          periodization_weeks: number;
           archived_at: string | null;
           created_at: string;
           updated_at: string;
@@ -312,6 +371,8 @@ export type Database = {
           primary_color?: string;
           secondary_color?: string;
           training_schedule?: Json;
+          competition_start_date?: string | null;
+          periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -327,6 +388,8 @@ export type Database = {
           primary_color?: string;
           secondary_color?: string;
           training_schedule?: Json;
+          competition_start_date?: string | null;
+          periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -344,6 +407,61 @@ export type Database = {
             columns: ["club_id"];
             isOneToOne: false;
             referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      fitness_tests: {
+        Row: {
+          id: string;
+          team_id: string;
+          player_id: string;
+          test_code: string;
+          test_date: string;
+          result: number;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          player_id: string;
+          test_code: string;
+          test_date: string;
+          result: number;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          player_id?: string;
+          test_code?: string;
+          test_date?: string;
+          result?: number;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "fitness_tests_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "fitness_tests_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "players";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "fitness_tests_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
             referencedColumns: ["id"];
           },
         ];

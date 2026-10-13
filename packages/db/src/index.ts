@@ -9,5 +9,7 @@ export const TEAM_LOGO_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"] as
 export const FEATURE_FLAGS = {
   /** Assistent Coach: weekplanning op basis van de weekinput. */
   assistantCoach: "staff.assistant_coach",
+  /** Physical Coach: belastingsplan volgens de periodisering. */
+  physicalCoach: "staff.physical_coach",
 } as const satisfies Record<string, string>;
 export type FeatureFlagKey = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];

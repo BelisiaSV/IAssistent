@@ -14,3 +14,5 @@ Afspraken die voor álle rollen gelden. Elke rol krijgt deze bestanden mee.
 - `wedstrijddagen.json` — labels MD-4 … MD … MD+4 met uitleg; de volgorde bepaalt de voorrang.
 - `opdracht-systeem.md` en `opdracht-gebruiker.md` — sjablonen waarmee de staff-engine de opdracht
   aan een AI-rol opbouwt. `{{…}}` zijn invulvelden; de engine controleert dat ze bestaan.
+- `periodisering.json` — weektypes (belasting %, km) en cycli van 4, 6 en 8 weken vanaf de eerste competitiewedstrijd.
+- `testen.json` — fysieke testen (VAMEVAL/MAS) met eenheid, grenzen en interval.

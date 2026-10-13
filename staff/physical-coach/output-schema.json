@@ -1,9 +1,326 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://iassistent.app/staff/physical-coach/output-schema.json",
-  "title": "Physical Coach — output",
-  "description": "Placeholder — structuur van de output van deze rol, nog in te vullen.",
+  "title": "Physical Coach — belastingsplan",
+  "description": "Belastingsplan van de week volgens de periodisering.",
   "type": "object",
-  "properties": {},
-  "additionalProperties": true
+  "additionalProperties": false,
+  "required": [
+    "weektype",
+    "weekfocus",
+    "dagen",
+    "weektotaal",
+    "test",
+    "cyclus_advies",
+    "individueel",
+    "aandachtspunten",
+    "vragen_aan_coach"
+  ],
+  "properties": {
+    "weektype": {
+      "type": "string",
+      "description": "Code van het weektype (bv. normaal, extensief, intensief, deload, voorbereiding)."
+    },
+    "weekfocus": {
+      "type": "string"
+    },
+    "dagen": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dag"
+      }
+    },
+    "weektotaal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "au_doel",
+        "km_doel",
+        "referentie_max_au",
+        "belasting_pct",
+        "vergelijking"
+      ],
+      "properties": {
+        "au_doel": {
+          "type": "integer"
+        },
+        "km_doel": {
+          "type": "number"
+        },
+        "referentie_max_au": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Maximale weekbelasting die als referentie dient."
+        },
+        "belasting_pct": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Geplande AU als % van de referentie."
+        },
+        "vergelijking": {
+          "type": "string",
+          "description": "Vergelijking met de vorige week(en)."
+        }
+      }
+    },
+    "test": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gepland",
+        "datum",
+        "toelichting"
+      ],
+      "properties": {
+        "gepland": {
+          "type": "boolean"
+        },
+        "datum": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "toelichting": {
+          "type": "string"
+        }
+      }
+    },
+    "cyclus_advies": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Advies over de cyclus (4, 6 of 8 weken) of null."
+    },
+    "individueel": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rugnummer",
+          "advies"
+        ],
+        "properties": {
+          "rugnummer": {
+            "type": "integer"
+          },
+          "advies": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "aandachtspunten": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vragen_aan_coach": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "dag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datum",
+        "md",
+        "soort",
+        "titel",
+        "tijdstip",
+        "totale_duur_min",
+        "belasting",
+        "rpe_doel",
+        "au_doel",
+        "km_doel",
+        "accenten",
+        "richtlijnen_training",
+        "fysieke_blokken",
+        "opmerking"
+      ],
+      "properties": {
+        "datum": {
+          "type": "string",
+          "format": "date"
+        },
+        "md": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Wedstrijddag-label of null."
+        },
+        "soort": {
+          "type": "string",
+          "enum": [
+            "training",
+            "wedstrijd",
+            "rust"
+          ]
+        },
+        "titel": {
+          "type": "string"
+        },
+        "tijdstip": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Aanvangsuur HH:MM of null."
+        },
+        "totale_duur_min": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Maximale duur van de training in minuten."
+        },
+        "belasting": {
+          "type": "string",
+          "enum": [
+            "rust",
+            "laag",
+            "matig",
+            "hoog",
+            "zeer hoog"
+          ]
+        },
+        "rpe_doel": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Doel-RPE (CR-10) van de sessie."
+        },
+        "au_doel": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Geplande sRPE: RPE x minuten."
+        },
+        "km_doel": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Geplande loopafstand in km."
+        },
+        "accenten": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Bv. kracht, snelheid, uithouding, herstel, preventie."
+        },
+        "richtlijnen_training": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Wat de Assistent Coach moet respecteren."
+        },
+        "fysieke_blokken": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blok"
+          }
+        },
+        "opmerking": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "blok": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "naam",
+        "doel",
+        "duur_min",
+        "reeksen",
+        "werk_per_reeks",
+        "rust_tussen_reeksen",
+        "intensiteit",
+        "rpe",
+        "mas_pct",
+        "werk_sec"
+      ],
+      "properties": {
+        "naam": {
+          "type": "string"
+        },
+        "doel": {
+          "type": "string"
+        },
+        "duur_min": {
+          "type": "integer"
+        },
+        "reeksen": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "werk_per_reeks": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Bv. 8 x 15/15 of 6 x 30 m."
+        },
+        "rust_tussen_reeksen": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "intensiteit": {
+          "type": "string",
+          "enum": [
+            "laag",
+            "matig",
+            "hoog",
+            "maximaal"
+          ]
+        },
+        "rpe": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Doel-RPE 1-10."
+        },
+        "mas_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Percentage van de MAS voor loopintervallen, anders null."
+        },
+        "werk_sec": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Werkduur per herhaling in seconden bij MAS-lopen, anders null."
+        }
+      }
+    }
+  }
 }

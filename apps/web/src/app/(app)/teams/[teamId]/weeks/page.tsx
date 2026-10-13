@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui";
 import { messages } from "@/lib/messages";
+import { periodizationCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/teams/queries";
 import { addDays, longDate, mondayOf, shortDate, todayInBelgium } from "@/lib/weeks/dates";
@@ -9,6 +10,7 @@ import { trainingScheduleSchema, type WeekMatch } from "@/lib/weeks/validation";
 
 import { openWeek } from "./actions";
 import { ScheduleForm } from "./schedule-form";
+import { SeasonForm } from "./season-form";
 
 const m = messages.weeks;
 
@@ -18,7 +20,7 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
   const supabase = await createClient();
   const { data } = await supabase
     .from("week_plans")
-    .select("id, week_start, matches, staff_proposals(version, status)")
+    .select("id, week_start, matches, staff_proposals(role, version, status)")
     .eq("team_id", team.id)
     .order("week_start", { ascending: false })
     .limit(30);
@@ -61,8 +63,10 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
         <ul className="divide-y divide-slate-100 rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
           {weeks.map((week) => {
             const proposals = week.staff_proposals ?? [];
-            const latest = [...proposals].sort((a, b) => b.version - a.version)[0];
-            const approved = proposals.some((p) => p.status === "approved");
+            const latest = [...proposals]
+              .filter((p) => p.role === "assistant-coach")
+              .sort((a, b) => b.version - a.version)[0];
+            const approved = proposals.some((p) => p.role === "assistant-coach" && p.status === "approved");
             const opponents = ((week.matches ?? []) as WeekMatch[]).map((match) => match.opponent);
             return (
               <li key={week.id}>
@@ -87,6 +91,14 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
         </ul>
       )}
 
+      {canEdit && (
+        <SeasonForm
+          teamId={team.id}
+          competitionStartDate={team.competition_start_date}
+          periodizationWeeks={team.periodization_weeks}
+          cycles={periodizationCatalog.cycli.map((c) => c.weken)}
+        />
+      )}
       {canEdit && <ScheduleForm teamId={team.id} initial={schedule.success ? schedule.data : []} />}
     </div>
   );

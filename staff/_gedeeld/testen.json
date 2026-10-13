@@ -1,0 +1,16 @@
+{
+  "versie": "0.1.0",
+  "uitleg": "Fysieke testen die de staf gebruikt. Het resultaat wordt per speler bewaard. interval_weken bepaalt wanneer de test opnieuw moet.",
+  "testen": [
+    {
+      "code": "vameval",
+      "naam": "VAMEVAL (MAS-test)",
+      "resultaat": "MAS",
+      "eenheid": "km/u",
+      "min": 8,
+      "max": 25,
+      "interval_weken": 8,
+      "uitleg": "Progressieve looptest: start aan 8 km/u, elke minuut +0,5 km/u, tempo via pieptonen met kegels om de 20 m. Het resultaat is de snelheid van de laatste volledig gelopen trap (maximale aerobe snelheid, MAS)."
+    }
+  ]
+}

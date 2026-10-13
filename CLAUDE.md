@@ -69,7 +69,8 @@ packages/db/              databasetypes + gedeelde constants (bucket, feature fl
 services/video/           aparte videodienst — later
 staff/                    ALLE rolinhoud (markdown + JSON)
   _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json,
-                          visieprofiel.json, wedstrijddagen.json (MD-labels),
+                          visieprofiel.json, wedstrijddagen.json (MD-labels), periodisering.json
+                          (weektypes + cycli 4/6/8 weken), testen.json (VAMEVAL/MAS),
                           opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI)
   assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -188,5 +189,12 @@ Regels:
   `teams.training_schedule`), MD-labels, voorstel aanvragen/aanpassen/goedkeuren
   (`staff_proposals`, alle versies bewaard), afdrukken en kopiëren als tekst. Feature flag
   `staff.assistant_coach`. Draait in testmodus tot de AI wordt aangezet.
-- Nog niet gebouwd: Physical/Tactical Coach, Video Analist, stafmeeting; UI voor T2-toegang,
+- **Fase 3b** — Physical Coach: belastingsplan per week (weektype uit de periodisering vanaf de
+  eerste competitiewedstrijd, `teams.competition_start_date` + `teams.periodization_weeks`),
+  werkelijke belasting per sessie (`session_loads`: gemiddelde RPE van de groep × minuten = AU),
+  tabblad Testen (`fitness_tests`, VAMEVAL/MAS, afstanden per speler voor MAS-lopen),
+  grafiek gepland/werkelijk. Volgorde: eerst Physical Coach; zijn **goedgekeurde** plan gaat via
+  `staf` mee naar de Assistent Coach (rolvolgorde in `apps/web/src/lib/roles.ts`). Feature flag
+  `staff.physical_coach`.
+- Nog niet gebouwd: Tactical Coach, Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

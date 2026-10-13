@@ -5,6 +5,8 @@
 export * from "./context";
 export * from "./shared/formations";
 export * from "./shared/matchdays";
+export * from "./shared/periodization";
+export * from "./shared/tests";
 export * from "./shared/positions";
 export * from "./shared/vision";
 export type { ParseResult } from "./shared/parse";

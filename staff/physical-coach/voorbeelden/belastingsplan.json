@@ -1,0 +1,210 @@
+{
+  "weektype": "extensief",
+  "weekfocus": "Extensieve week (80–85%): meer volume aan matige intensiteit, met de nadruk op aerobe uithouding in voetbalvormen. Eerste training na de wedstrijd licht.",
+  "dagen": [
+    {
+      "datum": "2026-10-12",
+      "md": "MD+1",
+      "soort": "rust",
+      "titel": "Actief herstel",
+      "tijdstip": null,
+      "totale_duur_min": null,
+      "belasting": "rust",
+      "rpe_doel": null,
+      "au_doel": null,
+      "km_doel": null,
+      "accenten": [
+        "herstel"
+      ],
+      "richtlijnen_training": null,
+      "fysieke_blokken": [],
+      "opmerking": "Basisspelers 20 min fietsen of wandelen; niet-gebruikte spelers compenseren dinsdag."
+    },
+    {
+      "datum": "2026-10-13",
+      "md": "MD+2",
+      "soort": "training",
+      "titel": "Heropbouw",
+      "tijdstip": "19:30",
+      "totale_duur_min": 80,
+      "belasting": "matig",
+      "rpe_doel": 5,
+      "au_doel": 400,
+      "km_doel": 5.5,
+      "accenten": [
+        "herstel",
+        "aerobe uithouding",
+        "preventie"
+      ],
+      "richtlijnen_training": "Grote ruimtes en lage druk; maximaal 15 min aan hoge intensiteit. Geen sprints boven 30 m.",
+      "fysieke_blokken": [
+        {
+          "naam": "Blessurepreventie",
+          "doel": "Hamstrings en adductoren (preventie).",
+          "duur_min": 12,
+          "reeksen": 2,
+          "werk_per_reeks": "Nordic hamstrings 2 x 6, Copenhagen 2 x 8 per kant",
+          "rust_tussen_reeksen": "1 min",
+          "intensiteit": "matig",
+          "rpe": 4,
+          "mas_pct": null,
+          "werk_sec": null
+        },
+        {
+          "naam": "Extensief MAS-lopen (niet-gebruikte spelers)",
+          "doel": "Compenseren van gemiste wedstrijdbelasting.",
+          "duur_min": 14,
+          "reeksen": 2,
+          "werk_per_reeks": "6 min 30/30",
+          "rust_tussen_reeksen": "3 min",
+          "intensiteit": "hoog",
+          "rpe": 7,
+          "mas_pct": 95,
+          "werk_sec": 30
+        }
+      ],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-14",
+      "md": "MD-4",
+      "soort": "rust",
+      "titel": "Rust",
+      "tijdstip": null,
+      "totale_duur_min": null,
+      "belasting": "rust",
+      "rpe_doel": null,
+      "au_doel": null,
+      "km_doel": null,
+      "accenten": [],
+      "richtlijnen_training": null,
+      "fysieke_blokken": [],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-15",
+      "md": "MD-3",
+      "soort": "training",
+      "titel": "Volumedag in voetbalvormen",
+      "tijdstip": "19:30",
+      "totale_duur_min": 90,
+      "belasting": "hoog",
+      "rpe_doel": 7,
+      "au_doel": 630,
+      "km_doel": 7.0,
+      "accenten": [
+        "aerobe uithouding",
+        "duels"
+      ],
+      "richtlijnen_training": "Partijvormen 8v8 tot 10v10 op twee derde terrein, blokken van 6–8 min. Totaal ±35 min wedstrijdvormen.",
+      "fysieke_blokken": [
+        {
+          "naam": "MAS-intervallen 30/30",
+          "doel": "Aerobe capaciteit (extensieve week).",
+          "duur_min": 16,
+          "reeksen": 2,
+          "werk_per_reeks": "7 min 30/30",
+          "rust_tussen_reeksen": "3 min",
+          "intensiteit": "hoog",
+          "rpe": 8,
+          "mas_pct": 95,
+          "werk_sec": 30
+        }
+      ],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-16",
+      "md": "MD-2",
+      "soort": "training",
+      "titel": "Snelheid en frisheid",
+      "tijdstip": "19:30",
+      "totale_duur_min": 70,
+      "belasting": "laag",
+      "rpe_doel": 4,
+      "au_doel": 280,
+      "km_doel": 4.0,
+      "accenten": [
+        "snelheid",
+        "activatie"
+      ],
+      "richtlijnen_training": "Korte, scherpe prikkels met volledige rust; geen lange vormen. Standaardsituaties mogen.",
+      "fysieke_blokken": [
+        {
+          "naam": "Sprints",
+          "doel": "Maximale snelheid op korte afstand.",
+          "duur_min": 10,
+          "reeksen": 2,
+          "werk_per_reeks": "5 x 20 m",
+          "rust_tussen_reeksen": "90 s tussen sprints, 3 min tussen reeksen",
+          "intensiteit": "maximaal",
+          "rpe": 6,
+          "mas_pct": null,
+          "werk_sec": null
+        }
+      ],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-17",
+      "md": "MD-1",
+      "soort": "rust",
+      "titel": "Rust",
+      "tijdstip": null,
+      "totale_duur_min": null,
+      "belasting": "rust",
+      "rpe_doel": null,
+      "au_doel": null,
+      "km_doel": null,
+      "accenten": [],
+      "richtlijnen_training": null,
+      "fysieke_blokken": [],
+      "opmerking": "Vroeg slapen, goed eten en drinken."
+    },
+    {
+      "datum": "2026-10-18",
+      "md": "MD",
+      "soort": "wedstrijd",
+      "titel": "Wedstrijd",
+      "tijdstip": "15:00",
+      "totale_duur_min": 90,
+      "belasting": "zeer hoog",
+      "rpe_doel": null,
+      "au_doel": null,
+      "km_doel": null,
+      "accenten": [],
+      "richtlijnen_training": null,
+      "fysieke_blokken": [],
+      "opmerking": null
+    }
+  ],
+  "weektotaal": {
+    "au_doel": 1310,
+    "km_doel": 16.5,
+    "referentie_max_au": 1600,
+    "belasting_pct": 82,
+    "vergelijking": "Ongeveer +12% ten opzichte van vorige week (normale week), passend bij de overgang naar een extensieve week."
+  },
+  "test": {
+    "gepland": false,
+    "datum": null,
+    "toelichting": "De laatste VAMEVAL is minder dan 8 weken oud; volgende test over 3 weken."
+  },
+  "cyclus_advies": null,
+  "individueel": [
+    {
+      "rugnummer": 5,
+      "advies": "Terugkeer: deze week enkel individueel lopen (extensief, 70% MAS) en preventieblok; volgende week gedeeltelijk in groep."
+    },
+    {
+      "rugnummer": 14,
+      "advies": "Geschorst: volledige week meetrainen; extra MAS-blok op donderdag."
+    }
+  ],
+  "aandachtspunten": [
+    "Vul na elke training de gemiddelde RPE van de groep in: dan wordt de referentie voor de maximale belasting nauwkeuriger."
+  ],
+  "vragen_aan_coach": [
+    "Hoeveel spelers speelden zondag minder dan 45 minuten?"
+  ]
+}

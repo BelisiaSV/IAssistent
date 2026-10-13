@@ -4,8 +4,8 @@ import type { Staff, StaffRole } from "./types";
 
 /** Placeholders the prompt templates in _gedeeld may use. */
 export const TEMPLATE_PLACEHOLDERS = {
-  system: ["afspraken", "visie_afspraken", "wedstrijddagen", "rol", "instructies", "referentie", "voorbeeld"],
-  user: ["visie", "weekinput", "kern", "feedback"],
+  system: ["afspraken", "visie_afspraken", "wedstrijddagen", "periodisering", "rol", "instructies", "referentie", "voorbeeld"],
+  user: ["visie", "weekinput", "kern", "belastingshistoriek", "testen", "staf", "feedback"],
 } as const;
 
 const PLACEHOLDER = /\{\{\s*([a-z_]+)\s*\}\}/g;
@@ -45,6 +45,7 @@ export function buildRolePrompt(staff: Staff, role: StaffRole, context: RoleCont
     afspraken: sharedText(staff, SHARED_TEXT_FILES.agreements),
     visie_afspraken: sharedText(staff, SHARED_TEXT_FILES.visionAgreements),
     wedstrijddagen: json(staff.matchDays.dagen),
+    periodisering: json({ weektypes: staff.periodization.weektypes, cycli: staff.periodization.cycli, voor_start: staff.periodization.voor_start }),
     rol: role.description.trim(),
     instructies: role.instructions.trim(),
     referentie: role.references.map((f) => `## ${f.path}\n\n${f.content.trim()}`).join("\n\n"),
@@ -54,6 +55,9 @@ export function buildRolePrompt(staff: Staff, role: StaffRole, context: RoleCont
     visie: json(context.visie),
     weekinput: json(context.weekinput),
     kern: json(context.kern),
+    belastingshistoriek: json(context.belastingshistoriek),
+    testen: json(context.testen),
+    staf: json(Object.keys(context.staf).length ? context.staf : null),
     feedback: json(context.feedback),
   });
   return { system, user };

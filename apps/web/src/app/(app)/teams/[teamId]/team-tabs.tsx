@@ -11,6 +11,7 @@ export function TeamTabs({ teamId }: { teamId: string }) {
     { href: `/teams/${teamId}/players`, label: messages.teamNav.players },
     { href: `/teams/${teamId}/lineups`, label: messages.teamNav.lineups },
     { href: `/teams/${teamId}/weeks`, label: messages.teamNav.weeks },
+    { href: `/teams/${teamId}/tests`, label: messages.teamNav.tests },
   ];
   return (
     <nav className="flex gap-1 border-b border-slate-200 print:hidden">
