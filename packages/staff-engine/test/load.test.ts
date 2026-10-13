@@ -92,6 +92,14 @@ beforeEach(async () => {
   await write("_gedeeld/posities.json", JSON.stringify(POSITIONS));
   await write("_gedeeld/formaties.json", JSON.stringify(FORMATIONS));
   await write("_gedeeld/visieprofiel.json", JSON.stringify(VISION));
+  await write(
+    "_gedeeld/wedstrijddagen.json",
+    JSON.stringify({ versie: "1", dagen: [{ code: "MD", naam: "MD", uitleg: "x", dagen_tot_wedstrijd: 0 }] }),
+  );
+  await write("_gedeeld/afspraken.md", "# Afspraken\n");
+  await write("_gedeeld/visie-hoofdcoach.md", "# Visie\n");
+  await write("_gedeeld/opdracht-systeem.md", "{{rol}}\n");
+  await write("_gedeeld/opdracht-gebruiker.md", "{{weekinput}}\n");
 });
 
 afterEach(async () => {
@@ -110,9 +118,13 @@ describe("loadStaff", () => {
     expect(staff.shared.map((f) => f.path)).toEqual([
       "_gedeeld/afspraken.md",
       "_gedeeld/formaties.json",
+      "_gedeeld/opdracht-gebruiker.md",
+      "_gedeeld/opdracht-systeem.md",
       "_gedeeld/posities.json",
       "_gedeeld/rol-sjabloon.md",
+      "_gedeeld/visie-hoofdcoach.md",
       "_gedeeld/visieprofiel.json",
+      "_gedeeld/wedstrijddagen.json",
     ]);
     expect(staff.positions.posities.map((p) => p.code)).toEqual(["GK", "ST"]);
     expect(staff.formations.formaties[0]?.posten).toHaveLength(2);
@@ -251,6 +263,15 @@ describe("shared content", () => {
     const issues = await validateStaff(root);
     expect(issues[0]?.path).toBe("_gedeeld/formaties.json");
     expect(issues[0]?.message).toMatch(/^formaties\.0\.posten\.0\.x:/);
+  });
+});
+
+describe("prompt templates", () => {
+  it("reports unknown placeholders", async () => {
+    await write("_gedeeld/opdracht-gebruiker.md", "{{weekinput}} {{onbekend}}\n");
+    const issues = await validateStaff(root);
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.message).toMatch(/onbekend invulveld \{\{onbekend\}\}/);
   });
 });
 

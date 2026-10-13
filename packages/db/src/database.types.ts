@@ -152,6 +152,139 @@ export type Database = {
           },
         ];
       };
+      staff_proposals: {
+        Row: {
+          id: string;
+          team_id: string;
+          week_plan_id: string;
+          role: string;
+          version: number;
+          status: Database["public"]["Enums"]["proposal_status"];
+          feedback: string | null;
+          output: Json | null;
+          error: string | null;
+          provider: string;
+          model: string | null;
+          usage: Json | null;
+          content_version: string | null;
+          created_by: string;
+          created_at: string;
+          decided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          week_plan_id: string;
+          role: string;
+          version?: number;
+          status?: Database["public"]["Enums"]["proposal_status"];
+          feedback?: string | null;
+          output?: Json | null;
+          error?: string | null;
+          provider: string;
+          model?: string | null;
+          usage?: Json | null;
+          content_version?: string | null;
+          created_by?: string;
+          created_at?: string;
+          decided_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          week_plan_id?: string;
+          role?: string;
+          version?: number;
+          status?: Database["public"]["Enums"]["proposal_status"];
+          feedback?: string | null;
+          output?: Json | null;
+          error?: string | null;
+          provider?: string;
+          model?: string | null;
+          usage?: Json | null;
+          content_version?: string | null;
+          created_by?: string;
+          created_at?: string;
+          decided_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_proposals_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_proposals_week_plan_id_fkey";
+            columns: ["week_plan_id"];
+            isOneToOne: false;
+            referencedRelation: "week_plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_proposals_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      week_plans: {
+        Row: {
+          id: string;
+          team_id: string;
+          week_start: string;
+          trainings: Json;
+          matches: Json;
+          previous_match_date: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          week_start: string;
+          trainings?: Json;
+          matches?: Json;
+          previous_match_date?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          week_start?: string;
+          trainings?: Json;
+          matches?: Json;
+          previous_match_date?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "week_plans_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "week_plans_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       teams: {
         Row: {
           id: string;
@@ -163,6 +296,7 @@ export type Database = {
           logo_path: string | null;
           primary_color: string;
           secondary_color: string;
+          training_schedule: Json;
           archived_at: string | null;
           created_at: string;
           updated_at: string;
@@ -177,6 +311,7 @@ export type Database = {
           logo_path?: string | null;
           primary_color?: string;
           secondary_color?: string;
+          training_schedule?: Json;
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -191,6 +326,7 @@ export type Database = {
           logo_path?: string | null;
           primary_color?: string;
           secondary_color?: string;
+          training_schedule?: Json;
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -451,12 +587,14 @@ export type Database = {
       is_club_owner: { Args: { p_club_id: string }; Returns: boolean };
       is_feature_enabled: { Args: { p_key: string }; Returns: boolean };
       is_team_head_coach: { Args: { p_team_id: string }; Returns: boolean };
+      staff_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
     };
     Enums: {
       membership_role: "club_owner" | "assistant_coach";
       player_status: "available" | "injured" | "suspended" | "unavailable";
       preferred_foot: "left" | "right" | "both";
+      proposal_status: "generating" | "ready" | "failed" | "approved" | "rejected";
     };
     CompositeTypes: {
       [_ in never]: never;

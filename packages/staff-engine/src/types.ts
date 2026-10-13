@@ -1,4 +1,5 @@
 import type { FormationCatalog } from "./shared/formations";
+import type { MatchDayCatalog } from "./shared/matchdays";
 import type { PositionCatalog } from "./shared/positions";
 import type { VisionQuestionnaire } from "./shared/vision";
 
@@ -47,6 +48,8 @@ export interface Staff {
   formations: FormationCatalog;
   /** _gedeeld/visieprofiel.json */
   vision: VisionQuestionnaire;
+  /** _gedeeld/wedstrijddagen.json */
+  matchDays: MatchDayCatalog;
 }
 
 export interface StaffIssue {

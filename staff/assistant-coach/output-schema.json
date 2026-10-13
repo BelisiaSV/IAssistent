@@ -1,9 +1,230 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://iassistent.app/staff/assistant-coach/output-schema.json",
-  "title": "Assistent Coach — output",
-  "description": "Placeholder — structuur van de output van deze rol, nog in te vullen.",
+  "title": "Assistent Coach — weekplanning",
+  "description": "Weekplanning met uitgewerkte trainingen en belasting per onderdeel.",
   "type": "object",
-  "properties": {},
-  "additionalProperties": true
+  "additionalProperties": false,
+  "required": [
+    "weekfocus",
+    "dagen",
+    "individueel",
+    "aandachtspunten",
+    "vragen_aan_coach"
+  ],
+  "properties": {
+    "weekfocus": {
+      "type": "string",
+      "description": "De focus van de week in één of twee zinnen."
+    },
+    "dagen": {
+      "type": "array",
+      "description": "Alle dagen van de week (maandag tot zondag), in volgorde.",
+      "items": {
+        "$ref": "#/$defs/dag"
+      }
+    },
+    "individueel": {
+      "type": "array",
+      "description": "Aanpassingen voor spelers die niet (volledig) beschikbaar zijn.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rugnummer",
+          "advies"
+        ],
+        "properties": {
+          "rugnummer": {
+            "type": "integer"
+          },
+          "advies": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "aandachtspunten": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vragen_aan_coach": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "dag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datum",
+        "md",
+        "soort",
+        "titel",
+        "doel",
+        "tijdstip",
+        "totale_duur_min",
+        "belasting",
+        "onderdelen",
+        "opmerking"
+      ],
+      "properties": {
+        "datum": {
+          "type": "string",
+          "format": "date"
+        },
+        "md": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Wedstrijddag-label (bv. MD-3), of null als de dag ver van een wedstrijd ligt."
+        },
+        "soort": {
+          "type": "string",
+          "enum": [
+            "training",
+            "wedstrijd",
+            "rust"
+          ]
+        },
+        "titel": {
+          "type": "string"
+        },
+        "doel": {
+          "type": "string"
+        },
+        "tijdstip": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Aanvangsuur (HH:MM) of null."
+        },
+        "totale_duur_min": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Totale duur in minuten of null."
+        },
+        "belasting": {
+          "type": "string",
+          "enum": [
+            "rust",
+            "laag",
+            "matig",
+            "hoog",
+            "zeer hoog"
+          ]
+        },
+        "onderdelen": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/onderdeel"
+          }
+        },
+        "opmerking": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Extra opmerking voor de dag of null."
+        }
+      }
+    },
+    "onderdeel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fase",
+        "naam",
+        "doel",
+        "organisatie",
+        "spelers",
+        "coachingspunten",
+        "duur_min",
+        "reeksen",
+        "werk_per_reeks",
+        "rust_tussen_reeksen",
+        "intensiteit",
+        "rpe"
+      ],
+      "properties": {
+        "fase": {
+          "type": "string",
+          "enum": [
+            "opwarming",
+            "kern",
+            "afsluiting"
+          ]
+        },
+        "naam": {
+          "type": "string"
+        },
+        "doel": {
+          "type": "string"
+        },
+        "organisatie": {
+          "type": "string",
+          "description": "Terrein, materiaal, opstelling."
+        },
+        "spelers": {
+          "type": "string",
+          "description": "Aantallen, bv. 8v8 + 2 doelmannen."
+        },
+        "coachingspunten": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "duur_min": {
+          "type": "integer"
+        },
+        "reeksen": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Aantal reeksen of null."
+        },
+        "werk_per_reeks": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Bv. 4 min of 6 x 30 m."
+        },
+        "rust_tussen_reeksen": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Bv. 2 min actieve rust."
+        },
+        "intensiteit": {
+          "type": "string",
+          "enum": [
+            "laag",
+            "matig",
+            "hoog",
+            "maximaal"
+          ]
+        },
+        "rpe": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Doel-RPE (1–10) of null."
+        }
+      }
+    }
+  }
 }

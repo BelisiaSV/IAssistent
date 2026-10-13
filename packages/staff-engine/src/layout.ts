@@ -25,4 +25,13 @@ export const SHARED_FILES = {
   positions: "posities.json",
   formations: "formaties.json",
   vision: "visieprofiel.json",
+  matchDays: "wedstrijddagen.json",
+} as const;
+
+/** Markdown files in _gedeeld that the prompt builder uses. */
+export const SHARED_TEXT_FILES = {
+  agreements: "afspraken.md",
+  visionAgreements: "visie-hoofdcoach.md",
+  systemTemplate: "opdracht-systeem.md",
+  userTemplate: "opdracht-gebruiker.md",
 } as const;

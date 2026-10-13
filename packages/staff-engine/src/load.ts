@@ -1,6 +1,5 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import { Ajv2020 } from "ajv/dist/2020.js";
 
 import {
   ROLE_DIRS,
@@ -9,8 +8,12 @@ import {
   ROLE_TEMPLATE_FILE,
   SHARED_DIR,
   SHARED_FILES,
+  SHARED_TEXT_FILES,
 } from "./layout";
 import { parseMarkdown, sectionHeadings } from "./markdown";
+import { createAjv } from "./output";
+import { TEMPLATE_PLACEHOLDERS, templatePlaceholders } from "./prompt";
+import { parseMatchDays } from "./shared/matchdays";
 import { parseFormations } from "./shared/formations";
 import { parsePositions } from "./shared/positions";
 import { parseVisionQuestionnaire } from "./shared/vision";
@@ -92,8 +95,41 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
     issues,
   );
 
-  if (!positions || !formations || !vision) return { staff: null, issues };
-  return { staff: { rootDir: root, shared, roles, positions, formations, vision }, issues };
+  const matchDays = collect(
+    parseMatchDays(readSharedJson(shared, SHARED_FILES.matchDays, issues)),
+    issues,
+  );
+  checkTemplates(shared, issues);
+
+  if (!positions || !formations || !vision || !matchDays) return { staff: null, issues };
+  return {
+    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays },
+    issues,
+  };
+}
+
+/** Required shared text files exist and templates only use known placeholders. */
+function checkTemplates(shared: StaffFile[], issues: StaffIssue[]) {
+  for (const fileName of Object.values(SHARED_TEXT_FILES)) {
+    const filePath = `${SHARED_DIR}/${fileName}`;
+    const file = shared.find((f) => f.path === filePath);
+    if (!file) {
+      issues.push({ path: filePath, message: "bestand ontbreekt" });
+      continue;
+    }
+    const allowed =
+      fileName === SHARED_TEXT_FILES.systemTemplate
+        ? TEMPLATE_PLACEHOLDERS.system
+        : fileName === SHARED_TEXT_FILES.userTemplate
+          ? TEMPLATE_PLACEHOLDERS.user
+          : null;
+    if (!allowed) continue;
+    for (const name of templatePlaceholders(file.content)) {
+      if (!(allowed as readonly string[]).includes(name)) {
+        issues.push({ path: filePath, message: `onbekend invulveld {{${name}}} (toegelaten: ${allowed.join(", ")})` });
+      }
+    }
+  }
 }
 
 function collect<T>(result: { value: T | null; issues: StaffIssue[] }, issues: StaffIssue[]) {
@@ -239,7 +275,7 @@ function parseSchema(
     return null;
   }
   try {
-    new Ajv2020({ strict: true }).compile(schema);
+    createAjv().compile(schema);
   } catch (error) {
     issues.push({ path: filePath, message: `geen geldig JSON Schema: ${(error as Error).message}` });
     return null;

@@ -10,9 +10,10 @@ export function TeamTabs({ teamId }: { teamId: string }) {
   const tabs = [
     { href: `/teams/${teamId}/players`, label: messages.teamNav.players },
     { href: `/teams/${teamId}/lineups`, label: messages.teamNav.lineups },
+    { href: `/teams/${teamId}/weeks`, label: messages.teamNav.weeks },
   ];
   return (
-    <nav className="flex gap-1 border-b border-slate-200">
+    <nav className="flex gap-1 border-b border-slate-200 print:hidden">
       {tabs.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (
