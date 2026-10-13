@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "staff:bundle": "pnpm --filter @iassistent/staff-engine run bundle ../../staff ../../apps/web/src/generated/staff.json",
+    "dev": "pnpm run staff:bundle && next dev",
+    "build": "pnpm run staff:bundle && next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "pnpm run staff:bundle && tsc --noEmit",
+    "test": "pnpm run staff:bundle && vitest run"
   },
   "dependencies": {
     "@iassistent/db": "workspace:*",

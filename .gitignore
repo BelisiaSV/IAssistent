@@ -11,3 +11,6 @@ coverage/
 supabase/.branches
 supabase/.temp
 next-env.d.ts
+
+# Generated from /staff at build time
+apps/web/src/generated/

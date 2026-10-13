@@ -1,0 +1,307 @@
+{
+  "weekfocus": "Herstel na de wedstrijd van zondag, daarna druk zetten na balverlies als rode draad, en fris naar de wedstrijd van zondag.",
+  "dagen": [
+    {
+      "datum": "2026-10-12",
+      "md": "MD+1",
+      "soort": "rust",
+      "titel": "Rust / actief herstel",
+      "doel": "Herstel na de wedstrijd.",
+      "tijdstip": null,
+      "totale_duur_min": null,
+      "belasting": "rust",
+      "onderdelen": [],
+      "opmerking": "Basisspelers: 20 min fietsen of wandelen op eigen tempo. Niet-gebruikte spelers: compensatie bij de eerstvolgende training."
+    },
+    {
+      "datum": "2026-10-13",
+      "md": "MD+2",
+      "soort": "training",
+      "titel": "Heropbouw en positiespel",
+      "doel": "Benen losmaken en balcirculatie onder lage druk.",
+      "tijdstip": "19:30",
+      "totale_duur_min": 80,
+      "belasting": "matig",
+      "onderdelen": [
+        {
+          "fase": "opwarming",
+          "naam": "Loopscholing met bal",
+          "doel": "Activeren en blessurepreventie.",
+          "organisatie": "Halve breedte, 4 kegellijnen, 1 bal per 2 spelers.",
+          "spelers": "Hele groep in duo's",
+          "coachingspunten": [
+            "Rechtop lopen, actieve armen",
+            "Korte, snelle eerste contacten"
+          ],
+          "duur_min": 15,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "laag",
+          "rpe": 3
+        },
+        {
+          "fase": "kern",
+          "naam": "Rondo 5v2",
+          "doel": "Snel combineren en lijnen openhouden.",
+          "organisatie": "Vierkant 12 x 12 m, 3 vakken.",
+          "spelers": "3 groepen van 7",
+          "coachingspunten": [
+            "Lichaam open naar het vervolg",
+            "Na balverlies direct jagen met twee"
+          ],
+          "duur_min": 20,
+          "reeksen": 4,
+          "werk_per_reeks": "4 min",
+          "rust_tussen_reeksen": "1 min",
+          "intensiteit": "matig",
+          "rpe": 5
+        },
+        {
+          "fase": "kern",
+          "naam": "Positiespel 6v6 + 3 kaatsers",
+          "doel": "Opbouw van achteruit volgens de visie.",
+          "organisatie": "Halve terrein 40 x 35 m, kaatsers op de flanken en centraal.",
+          "spelers": "6v6 + 3 kaatsers",
+          "coachingspunten": [
+            "Driehoeken maken",
+            "Spelen in de voeten van de vrije man"
+          ],
+          "duur_min": 25,
+          "reeksen": 3,
+          "werk_per_reeks": "7 min",
+          "rust_tussen_reeksen": "2 min",
+          "intensiteit": "matig",
+          "rpe": 6
+        },
+        {
+          "fase": "afsluiting",
+          "naam": "Uitlopen en stretching",
+          "doel": "Afbouwen.",
+          "organisatie": "Rond het terrein.",
+          "spelers": "Hele groep",
+          "coachingspunten": [
+            "Rustig ademhalen"
+          ],
+          "duur_min": 10,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "laag",
+          "rpe": 2
+        }
+      ],
+      "opmerking": "Niet-gebruikte spelers van zondag: extra 15 min intervallopen na de training."
+    },
+    {
+      "datum": "2026-10-14",
+      "md": "MD-4",
+      "soort": "rust",
+      "titel": "Rust",
+      "doel": "Volledige rust.",
+      "tijdstip": null,
+      "totale_duur_min": null,
+      "belasting": "rust",
+      "onderdelen": [],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-15",
+      "md": "MD-3",
+      "soort": "training",
+      "titel": "Druk na balverlies in wedstrijdvormen",
+      "doel": "Hoogste belasting van de week; omschakelen en tegendruk zetten.",
+      "tijdstip": "19:30",
+      "totale_duur_min": 90,
+      "belasting": "hoog",
+      "onderdelen": [
+        {
+          "fase": "opwarming",
+          "naam": "Dynamische opwarming + passvorm",
+          "doel": "Activeren en technische scherpte.",
+          "organisatie": "Halve terrein, passvorm in een ruit.",
+          "spelers": "Hele groep in 2 ruiten",
+          "coachingspunten": [
+            "Pass op de goede voet",
+            "Bewegen voor je de bal krijgt"
+          ],
+          "duur_min": 15,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "matig",
+          "rpe": 4
+        },
+        {
+          "fase": "kern",
+          "naam": "4v4 + doelmannen, kleine ruimte",
+          "doel": "Duels, intensiteit en direct tegendruk na balverlies.",
+          "organisatie": "Veld 30 x 25 m met 2 doelen.",
+          "spelers": "4v4 + 2 doelmannen, wissels klaar",
+          "coachingspunten": [
+            "Na balverlies binnen 5 seconden terugwinnen",
+            "Dichtstbijzijnde speler zet druk, de rest sluit aan"
+          ],
+          "duur_min": 20,
+          "reeksen": 5,
+          "werk_per_reeks": "3 min",
+          "rust_tussen_reeksen": "2 min actieve rust",
+          "intensiteit": "hoog",
+          "rpe": 8
+        },
+        {
+          "fase": "kern",
+          "naam": "Partijvorm 8v8 met omschakelzones",
+          "doel": "Toepassen van de visie op balverlies in grotere ruimte.",
+          "organisatie": "Twee derde terrein, 2 doelen.",
+          "spelers": "8v8 + 2 doelmannen",
+          "coachingspunten": [
+            "Compact blijven",
+            "Diepte zoeken na balverovering"
+          ],
+          "duur_min": 30,
+          "reeksen": 3,
+          "werk_per_reeks": "8 min",
+          "rust_tussen_reeksen": "2 min",
+          "intensiteit": "hoog",
+          "rpe": 7
+        },
+        {
+          "fase": "afsluiting",
+          "naam": "Uitlopen en mobiliteit",
+          "doel": "Afbouwen.",
+          "organisatie": "Rond het terrein.",
+          "spelers": "Hele groep",
+          "coachingspunten": [
+            "Rustig ademhalen"
+          ],
+          "duur_min": 10,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "laag",
+          "rpe": 2
+        }
+      ],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-16",
+      "md": "MD-2",
+      "soort": "training",
+      "titel": "Snelheid en standaardsituaties",
+      "doel": "Korte, scherpe prikkels en afspraken bij standaardsituaties.",
+      "tijdstip": "19:30",
+      "totale_duur_min": 70,
+      "belasting": "laag",
+      "onderdelen": [
+        {
+          "fase": "opwarming",
+          "naam": "Reactiespelletjes",
+          "doel": "Activeren en reactiesnelheid.",
+          "organisatie": "Strook van 20 m.",
+          "spelers": "Duo's",
+          "coachingspunten": [
+            "Explosief vertrekken",
+            "Kort remmen en draaien"
+          ],
+          "duur_min": 15,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "matig",
+          "rpe": 4
+        },
+        {
+          "fase": "kern",
+          "naam": "Sprints met afwerking",
+          "doel": "Snelheid op korte afstand.",
+          "organisatie": "Vanaf de middenlijn naar doel, 2 lijnen.",
+          "spelers": "Hele groep in 2 lijnen + doelmannen",
+          "coachingspunten": [
+            "Maximale snelheid, volledige rust tussendoor"
+          ],
+          "duur_min": 15,
+          "reeksen": 2,
+          "werk_per_reeks": "6 x 20 m",
+          "rust_tussen_reeksen": "90 s tussen sprints, 3 min tussen reeksen",
+          "intensiteit": "maximaal",
+          "rpe": 6
+        },
+        {
+          "fase": "kern",
+          "naam": "Standaardsituaties",
+          "doel": "Afspraken hoekschoppen en vrije trappen.",
+          "organisatie": "Strafschopgebied.",
+          "spelers": "Basisploeg vs. reserves",
+          "coachingspunten": [
+            "Iedereen kent zijn taak",
+            "Eerste bal winnen"
+          ],
+          "duur_min": 25,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "laag",
+          "rpe": 3
+        },
+        {
+          "fase": "afsluiting",
+          "naam": "Kort uitlopen",
+          "doel": "Afbouwen.",
+          "organisatie": "Rond het terrein.",
+          "spelers": "Hele groep",
+          "coachingspunten": [],
+          "duur_min": 5,
+          "reeksen": null,
+          "werk_per_reeks": null,
+          "rust_tussen_reeksen": null,
+          "intensiteit": "laag",
+          "rpe": 2
+        }
+      ],
+      "opmerking": null
+    },
+    {
+      "datum": "2026-10-17",
+      "md": "MD-1",
+      "soort": "rust",
+      "titel": "Rust",
+      "doel": "Rust en voorbereiding op de wedstrijd.",
+      "tijdstip": null,
+      "totale_duur_min": null,
+      "belasting": "rust",
+      "onderdelen": [],
+      "opmerking": "Vroeg slapen, goed eten en drinken."
+    },
+    {
+      "datum": "2026-10-18",
+      "md": "MD",
+      "soort": "wedstrijd",
+      "titel": "Wedstrijd",
+      "doel": "Toepassen van de afspraken van deze week.",
+      "tijdstip": "15:00",
+      "totale_duur_min": 90,
+      "belasting": "zeer hoog",
+      "onderdelen": [],
+      "opmerking": "Verzamelen 1u15 voor de aftrap."
+    }
+  ],
+  "individueel": [
+    {
+      "rugnummer": 5,
+      "advies": "Geblesseerd: geen groepstraining. Individueel programma volgens de kinesist; terugkeer opbouwen richting de verwachte datum."
+    },
+    {
+      "rugnummer": 14,
+      "advies": "Geschorst voor zondag: traint volledig mee en krijgt op vrijdag een extra belastend blok."
+    }
+  ],
+  "aandachtspunten": [
+    "Druk na balverlies is de rode draad: herhaal het coachingspunt in elke vorm.",
+    "Houd de groep op dinsdag kort; de wedstrijd van zondag was zwaar."
+  ],
+  "vragen_aan_coach": [
+    "Is het terrein op donderdag volledig beschikbaar, of enkel de helft?"
+  ]
+}

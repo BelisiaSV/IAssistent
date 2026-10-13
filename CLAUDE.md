@@ -39,7 +39,12 @@ Video Analist**.
   (testdata) en **productie**. **Voorlopig is er één project** (met seed-testdata) tot de tool
   klaar is voor echte coaches; het productieproject en een eigen SMTP komen later.
 - **Claude API** voor de AI-staf — **alleen server-side**, nooit in client components en
-  nooit met een `NEXT_PUBLIC_`-key. (Nog niet gebouwd in fase 1.)
+  nooit met een `NEXT_PUBLIC_`-key. Officiële SDK `@anthropic-ai/sdk` in `packages/staff-engine`
+  (`anthropicProvider`), standaardmodel `claude-opus-5-5`, structured outputs volgens de
+  `output-schema.json` van de rol, `fallbacks: "default"`.
+- **Testmodus (standaard):** zolang `STAFF_AI_PROVIDER=anthropic` en `ANTHROPIC_API_KEY` niet
+  gezet zijn, maakt de `exampleProvider` voorstellen uit `staff/<rol>/voorbeelden/` — geen AI,
+  geen kosten. Echte AI-runs: max. 5 per coach per dag (`staff_daily_limit()` in de database).
 - pnpm workspaces, Node 22, TypeScript 6 (TS 7 wordt nog niet ondersteund door typescript-eslint).
 
 ## Taal
@@ -64,7 +69,8 @@ packages/db/              databasetypes + gedeelde constants (bucket, feature fl
 services/video/           aparte videodienst — later
 staff/                    ALLE rolinhoud (markdown + JSON)
   _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json,
-                          visieprofiel.json (vragenlijst visie van de coach)
+                          visieprofiel.json, wedstrijddagen.json (MD-labels),
+                          opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI)
   assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
 supabase/
@@ -86,10 +92,15 @@ voorstelt, staat in `/staff` (markdown/JSON) of in de database (bv. de visie van
 - Wél in code: structuur (bestands- en mapnamen van `/staff`, JSON-schema-validatie),
   datamodellen, UI-teksten van het platform zelf (`messages.ts`).
 - Twijfel? Zet het in `/staff` en laat de engine het inlezen.
-- Gestructureerde gedeelde inhoud (JSON in `_gedeeld`, bv. posities en formaties) wordt door de
-  staff-engine gevalideerd (`@iassistent/staff-engine/content`). De web-app importeert die JSON
-  bij de build via de alias `@staff/*` in `apps/web/src/lib/staff.ts`; ongeldige inhoud laat de
-  build falen. De database bewaart enkel codes (positie, formatie), nooit de inhoud zelf.
+- De web-app leest `/staff` via een bundel: `pnpm run staff:bundle` (automatisch bij dev, build,
+  typecheck en test in `apps/web`) valideert alles met de staff-engine en schrijft
+  `apps/web/src/generated/staff.json` (niet in git). Ongeldige inhoud laat de build falen.
+  De database bewaart enkel codes (positie, formatie), nooit de inhoud zelf.
+- De opdracht aan een AI-rol wordt opgebouwd uit de sjablonen in `_gedeeld` (`{{invulvelden}}`)
+  + `rol.md`, `instructies.md`, `referentie/`, `voorbeelden/`. Ook de tekst van de opdracht is
+  inhoud: nooit prompttekst in code.
+- **Privacy:** de AI krijgt spelers enkel als rugnummer + posities + voet + status, nooit namen.
+  De app zet de namen er pas bij het tonen weer bij.
 - De staff-engine leest `/staff` in en valideert het: `pnpm staff:validate`. De verplichte
   secties van `rol.md` komen uit `staff/_gedeeld/rol-sjabloon.md`, niet uit de code.
 
@@ -173,5 +184,9 @@ Regels:
   uit de kern halen), wedstrijdselecties (formatie op het veld, basis en bank) en het
   visieprofiel (`/profile/vision`, vragenlijst uit `staff/_gedeeld/visieprofiel.json`, opgeslagen
   in `coach_profiles.vision` als `{ versie, antwoorden: { "<thema>.<vraag>": ... } }`).
-- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, visie delen; CSV-import; AI-calls;
-  stafmeeting; videodienst.
+- **Fase 3a** — Assistent Coach: weekinput per team (`week_plans`, standaard trainingsschema op
+  `teams.training_schedule`), MD-labels, voorstel aanvragen/aanpassen/goedkeuren
+  (`staff_proposals`, alle versies bewaard), afdrukken en kopiëren als tekst. Feature flag
+  `staff.assistant_coach`. Draait in testmodus tot de AI wordt aangezet.
+- Nog niet gebouwd: Physical/Tactical Coach, Video Analist, stafmeeting; UI voor T2-toegang,
+  clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.
