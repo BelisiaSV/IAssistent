@@ -2,7 +2,7 @@ import type { Database } from "@iassistent/db";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { env } from "@/lib/env";
+import { getEnv } from "@/lib/env";
 
 const PUBLIC_PATHS = ["/login", "/signup", "/auth"];
 
@@ -14,6 +14,7 @@ function isPublic(pathname: string) {
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  const env = getEnv();
   const supabase = createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,

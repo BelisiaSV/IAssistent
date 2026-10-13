@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { env } from "@/lib/env";
+import { getEnv } from "@/lib/env";
 import { messages } from "@/lib/messages";
 import { safeNextPath } from "@/lib/paths";
 import { createClient } from "@/lib/supabase/server";
@@ -33,7 +33,7 @@ function authErrorMessage(code: string | undefined): string {
 }
 
 function callbackUrl(next: string) {
-  const url = new URL("/auth/callback", env.NEXT_PUBLIC_SITE_URL);
+  const url = new URL("/auth/callback", getEnv().NEXT_PUBLIC_SITE_URL);
   url.searchParams.set("next", next);
   return url.toString();
 }

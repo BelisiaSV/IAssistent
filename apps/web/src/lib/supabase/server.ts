@@ -4,12 +4,13 @@ import type { Database } from "@iassistent/db";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-import { env } from "@/lib/env";
+import { getEnv } from "@/lib/env";
 
 /** Supabase client for server components, server actions and route handlers. */
 export async function createClient() {
   const cookieStore = await cookies();
 
+  const env = getEnv();
   return createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
