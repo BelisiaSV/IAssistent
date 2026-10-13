@@ -35,8 +35,9 @@ Video Analist**.
 ## Stack
 
 - **Next.js** (App Router, TypeScript) in `apps/web`, gehost op **Vercel**.
-- **Supabase** (Postgres, Auth, Storage) in de **EU-regio**. Twee projecten: **staging**
-  (testdata) en **productie**.
+- **Supabase** (Postgres, Auth, Storage) in de **EU-regio**. Doel: twee projecten, **staging**
+  (testdata) en **productie**. **Voorlopig is er één project** (met seed-testdata) tot de tool
+  klaar is voor echte coaches; het productieproject en een eigen SMTP komen later.
 - **Claude API** voor de AI-staf — **alleen server-side**, nooit in client components en
   nooit met een `NEXT_PUBLIC_`-key. (Nog niet gebouwd in fase 1.)
 - pnpm workspaces, Node 22, TypeScript 6 (TS 7 wordt nog niet ondersteund door typescript-eslint).
@@ -123,6 +124,8 @@ Gebruik de skill `feature-flag`.
 - `develop` = testomgeving (Vercel preview/staging + Supabase-staging).
 - `feature/<korte-naam>` per feature, vertakt van `develop`, PR naar `develop`.
 - Release: PR `develop` → `main` (skill `release`). Migraties eerst op staging, dan productie.
+  Zolang er één Supabase-project is, voer je een nieuwe migratie daarop uit zodra ze op
+  `develop` staat (SQL Editor of `supabase db push`).
 - Nooit rechtstreeks op `main` pushen. Nooit de seed op productie draaien.
 
 ## Lokaal ontwikkelen
