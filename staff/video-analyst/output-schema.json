@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/video-analyst/output-schema.json",
+  "title": "Video Analist — output",
+  "description": "Placeholder — structuur van de output van deze rol, nog in te vullen.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": true
+}

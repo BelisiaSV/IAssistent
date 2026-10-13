@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/tactical-coach/output-schema.json",
+  "title": "Tactical Coach — output",
+  "description": "Placeholder — structuur van de output van deze rol, nog in te vullen.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": true
+}

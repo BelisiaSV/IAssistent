@@ -1,0 +1,250 @@
+import { readdir, readFile, stat } from "node:fs/promises";
+import path from "node:path";
+import { Ajv2020 } from "ajv/dist/2020.js";
+
+import {
+  ROLE_DIRS,
+  ROLE_FILES,
+  ROLE_ID_PATTERN,
+  ROLE_TEMPLATE_FILE,
+  SHARED_DIR,
+} from "./layout";
+import { parseMarkdown, sectionHeadings } from "./markdown";
+import {
+  ROLE_STATUSES,
+  type RoleMeta,
+  type RoleStatus,
+  type Staff,
+  type StaffFile,
+  type StaffIssue,
+  type StaffRole,
+  StaffValidationError,
+} from "./types";
+
+interface LoadResult {
+  staff: Staff;
+  issues: StaffIssue[];
+}
+
+/** Loads /staff and throws a StaffValidationError if anything is wrong. */
+export async function loadStaff(rootDir: string): Promise<Staff> {
+  const { staff, issues } = await readStaff(rootDir);
+  if (issues.length > 0) throw new StaffValidationError(issues);
+  return staff;
+}
+
+/** Returns all problems in /staff without throwing. */
+export async function validateStaff(rootDir: string): Promise<StaffIssue[]> {
+  return (await readStaff(rootDir)).issues;
+}
+
+async function readStaff(rootDir: string): Promise<LoadResult> {
+  const root = path.resolve(rootDir);
+  const issues: StaffIssue[] = [];
+
+  if (!(await isDirectory(root))) {
+    issues.push({ path: ".", message: `map bestaat niet: ${root}` });
+    return { staff: { rootDir: root, shared: [], roles: [] }, issues };
+  }
+
+  const shared = await readFilesRecursive(root, SHARED_DIR);
+  if (!(await isDirectory(path.join(root, SHARED_DIR)))) {
+    issues.push({ path: SHARED_DIR, message: "map ontbreekt" });
+  }
+
+  const template = shared.find(
+    (f) => f.path === `${SHARED_DIR}/${ROLE_TEMPLATE_FILE}`,
+  );
+  const requiredSections = template
+    ? sectionHeadings(parseMarkdown(template.content).body)
+    : [];
+  if (!template) {
+    issues.push({
+      path: `${SHARED_DIR}/${ROLE_TEMPLATE_FILE}`,
+      message: "rolsjabloon ontbreekt",
+    });
+  }
+
+  const roles: StaffRole[] = [];
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name.startsWith("_") || entry.name.startsWith(".")) continue;
+    const role = await readRole(root, entry.name, requiredSections, issues);
+    if (role) roles.push(role);
+  }
+  roles.sort((a, b) => a.id.localeCompare(b.id));
+
+  return { staff: { rootDir: root, shared, roles }, issues };
+}
+
+async function readRole(
+  root: string,
+  id: string,
+  requiredSections: string[],
+  issues: StaffIssue[],
+): Promise<StaffRole | null> {
+  const before = issues.length;
+
+  if (!ROLE_ID_PATTERN.test(id)) {
+    issues.push({
+      path: id,
+      message: "rol-id moet Engelse kebab-case zijn (bv. tactical-coach)",
+    });
+  }
+
+  const descriptionPath = `${id}/${ROLE_FILES.description}`;
+  const instructionsPath = `${id}/${ROLE_FILES.instructions}`;
+  const schemaPath = `${id}/${ROLE_FILES.outputSchema}`;
+
+  const descriptionSource = await readText(root, descriptionPath, issues);
+  const instructions = await readText(root, instructionsPath, issues);
+  const schemaSource = await readText(root, schemaPath, issues);
+
+  let meta: RoleMeta | null = null;
+  let description = "";
+  if (descriptionSource !== null) {
+    const parsed = parseMarkdown(descriptionSource);
+    description = parsed.body;
+    meta = parseRoleMeta(id, parsed.frontmatter, descriptionPath, issues);
+
+    const present = new Set(sectionHeadings(parsed.body));
+    for (const section of requiredSections) {
+      if (!present.has(section)) {
+        issues.push({
+          path: descriptionPath,
+          message: `verplichte sectie ontbreekt: "## ${section}"`,
+        });
+      }
+    }
+  }
+
+  const outputSchema =
+    schemaSource === null ? null : parseSchema(schemaSource, schemaPath, issues);
+
+  for (const dir of Object.values(ROLE_DIRS)) {
+    if (!(await isDirectory(path.join(root, id, dir)))) {
+      issues.push({ path: `${id}/${dir}`, message: "map ontbreekt" });
+    }
+  }
+
+  if (issues.length > before || !meta || instructions === null || !outputSchema) {
+    return null;
+  }
+
+  return {
+    id,
+    meta,
+    description,
+    instructions,
+    outputSchema,
+    references: await readFilesRecursive(root, `${id}/${ROLE_DIRS.references}`),
+    examples: await readFilesRecursive(root, `${id}/${ROLE_DIRS.examples}`),
+    tests: await readFilesRecursive(root, `${id}/${ROLE_DIRS.tests}`),
+  };
+}
+
+function parseRoleMeta(
+  id: string,
+  frontmatter: Record<string, unknown> | null,
+  filePath: string,
+  issues: StaffIssue[],
+): RoleMeta | null {
+  if (!frontmatter) {
+    issues.push({ path: filePath, message: "frontmatter (---) ontbreekt" });
+    return null;
+  }
+  const before = issues.length;
+  const text = (key: string): string => {
+    const value = frontmatter[key];
+    if (typeof value === "string" && value.trim() !== "") return value.trim();
+    issues.push({ path: filePath, message: `frontmatter-veld "${key}" ontbreekt` });
+    return "";
+  };
+
+  const metaId = text("id");
+  const naam = text("naam");
+  const versie = text("versie");
+  const status = text("status");
+
+  if (metaId && metaId !== id) {
+    issues.push({
+      path: filePath,
+      message: `frontmatter-id "${metaId}" verschilt van de mapnaam "${id}"`,
+    });
+  }
+  if (status && !ROLE_STATUSES.includes(status as RoleStatus)) {
+    issues.push({
+      path: filePath,
+      message: `ongeldige status "${status}" (toegelaten: ${ROLE_STATUSES.join(", ")})`,
+    });
+  }
+  if (issues.length > before) return null;
+  return { id, naam, versie, status: status as RoleStatus };
+}
+
+function parseSchema(
+  source: string,
+  filePath: string,
+  issues: StaffIssue[],
+): Record<string, unknown> | null {
+  let schema: unknown;
+  try {
+    schema = JSON.parse(source);
+  } catch (error) {
+    issues.push({ path: filePath, message: `geen geldige JSON: ${(error as Error).message}` });
+    return null;
+  }
+  if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
+    issues.push({ path: filePath, message: "schema moet een JSON-object zijn" });
+    return null;
+  }
+  try {
+    new Ajv2020({ strict: true }).compile(schema);
+  } catch (error) {
+    issues.push({ path: filePath, message: `geen geldig JSON Schema: ${(error as Error).message}` });
+    return null;
+  }
+  return schema as Record<string, unknown>;
+}
+
+async function readText(
+  root: string,
+  relativePath: string,
+  issues: StaffIssue[],
+): Promise<string | null> {
+  try {
+    return await readFile(path.join(root, relativePath), "utf8");
+  } catch {
+    issues.push({ path: relativePath, message: "bestand ontbreekt" });
+    return null;
+  }
+}
+
+/** Reads all non-hidden files under a directory; returns [] if it does not exist. */
+async function readFilesRecursive(root: string, relativeDir: string): Promise<StaffFile[]> {
+  const absolute = path.join(root, relativeDir);
+  if (!(await isDirectory(absolute))) return [];
+
+  const files: StaffFile[] = [];
+  for (const entry of await readdir(absolute, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
+    const relativePath = `${relativeDir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      files.push(...(await readFilesRecursive(root, relativePath)));
+    } else if (entry.isFile()) {
+      files.push({
+        path: relativePath,
+        content: await readFile(path.join(root, relativePath), "utf8"),
+      });
+    }
+  }
+  return files.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+async function isDirectory(absolutePath: string): Promise<boolean> {
+  try {
+    return (await stat(absolutePath)).isDirectory();
+  } catch {
+    return false;
+  }
+}
