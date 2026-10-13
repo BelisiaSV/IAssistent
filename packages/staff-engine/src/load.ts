@@ -13,6 +13,7 @@ import {
 import { parseMarkdown, sectionHeadings } from "./markdown";
 import { parseFormations } from "./shared/formations";
 import { parsePositions } from "./shared/positions";
+import { parseVisionQuestionnaire } from "./shared/vision";
 import {
   ROLE_STATUSES,
   type RoleMeta,
@@ -86,8 +87,13 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
     issues,
   );
 
-  if (!positions || !formations) return { staff: null, issues };
-  return { staff: { rootDir: root, shared, roles, positions, formations }, issues };
+  const vision = collect(
+    parseVisionQuestionnaire(readSharedJson(shared, SHARED_FILES.vision, issues)),
+    issues,
+  );
+
+  if (!positions || !formations || !vision) return { staff: null, issues };
+  return { staff: { rootDir: root, shared, roles, positions, formations, vision }, issues };
 }
 
 function collect<T>(result: { value: T | null; issues: StaffIssue[] }, issues: StaffIssue[]) {

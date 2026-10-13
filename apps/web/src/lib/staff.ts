@@ -2,12 +2,15 @@ import "server-only";
 
 import formationsJson from "@staff/_gedeeld/formaties.json";
 import positionsJson from "@staff/_gedeeld/posities.json";
+import visionJson from "@staff/_gedeeld/visieprofiel.json";
 import {
   type FormationCatalog,
   type ParseResult,
   parseFormations,
   parsePositions,
   type PositionCatalog,
+  parseVisionQuestionnaire,
+  type VisionQuestionnaire,
 } from "@iassistent/staff-engine/content";
 
 // Content from /staff is bundled at build time and validated by the staff-engine.
@@ -26,3 +29,4 @@ export const positionCatalog: PositionCatalog = unwrap(parsePositions(positionsJ
 export const formationCatalog: FormationCatalog = unwrap(
   parseFormations(formationsJson, positionCatalog),
 );
+export const visionQuestionnaire: VisionQuestionnaire = unwrap(parseVisionQuestionnaire(visionJson));

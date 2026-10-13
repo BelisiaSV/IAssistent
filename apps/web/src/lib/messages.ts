@@ -8,7 +8,28 @@ export const messages = {
   },
   nav: {
     teams: "Mijn teams",
+    vision: "Mijn visie",
     signOut: "Afmelden",
+  },
+  vision: {
+    title: "Mijn visie",
+    intro:
+      "Je visie hoort bij jou, niet bij een team: ze verhuist mee als je van club verandert. Alle AI-rollen volgen deze visie. Je kunt alles stap voor stap invullen; niets is verplicht.",
+    private: "Je visie is privé. Niemand anders ziet ze, tenzij je ze later zelf deelt.",
+    summary: "Mijn visie in een paar zinnen",
+    summaryHint: "Dit krijgt elke rol van je staf als eerste mee. Maximaal 2000 tekens.",
+    progress: (answered: number, total: number) => `${answered} van ${total} vragen ingevuld`,
+    notDecided: "Nog niet bepaald",
+    saved: "Je visie is opgeslagen.",
+    errors: {
+      too_long: "Dit antwoord is te lang.",
+      invalid_option: "Kies een van de opties.",
+      out_of_range: "Kies een waarde op de schaal.",
+      invalid: "Dit antwoord is ongeldig.",
+      summaryTooLong: "De samenvatting mag maximaal 2000 tekens zijn.",
+      fixErrors: "Niet opgeslagen: kijk de gemarkeerde antwoorden na.",
+      saveFailed: "Je visie kon niet opgeslagen worden.",
+    },
   },
   common: {
     save: "Opslaan",

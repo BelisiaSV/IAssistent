@@ -4,5 +4,6 @@
  */
 export * from "./shared/formations";
 export * from "./shared/positions";
+export * from "./shared/vision";
 export type { ParseResult } from "./shared/parse";
 export type { StaffIssue } from "./types";

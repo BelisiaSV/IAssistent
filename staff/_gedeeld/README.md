@@ -10,3 +10,4 @@ Afspraken die voor álle rollen gelden. Elke rol krijgt deze bestanden mee.
   elke rol; `pnpm staff:validate` controleert dat.
 - `posities.json` — de posities (code, naam, linie) die spelers en formaties gebruiken.
 - `formaties.json` — formaties met hun posten op het veld (x/y in procent) voor de wedstrijdselectie.
+- `visieprofiel.json` — de vragenlijst van het visieprofiel van de hoofdcoach (skill `visie-bijwerken`).

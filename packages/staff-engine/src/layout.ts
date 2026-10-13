@@ -24,4 +24,5 @@ export const ROLE_ID_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 export const SHARED_FILES = {
   positions: "posities.json",
   formations: "formaties.json",
+  vision: "visieprofiel.json",
 } as const;

@@ -53,6 +53,17 @@ const FORMATIONS = {
   ],
 };
 
+const VISION = {
+  versie: "0.1.0",
+  themas: [
+    {
+      id: "spel",
+      titel: "Spel",
+      vragen: [{ id: "zin", vraag: "In één zin?", type: "kort_antwoord" }],
+    },
+  ],
+};
+
 let root: string;
 
 async function write(relativePath: string, content: string) {
@@ -80,6 +91,7 @@ beforeEach(async () => {
   await write("_gedeeld/afspraken.md", "# Afspraken\n");
   await write("_gedeeld/posities.json", JSON.stringify(POSITIONS));
   await write("_gedeeld/formaties.json", JSON.stringify(FORMATIONS));
+  await write("_gedeeld/visieprofiel.json", JSON.stringify(VISION));
 });
 
 afterEach(async () => {
@@ -100,6 +112,7 @@ describe("loadStaff", () => {
       "_gedeeld/formaties.json",
       "_gedeeld/posities.json",
       "_gedeeld/rol-sjabloon.md",
+      "_gedeeld/visieprofiel.json",
     ]);
     expect(staff.positions.posities.map((p) => p.code)).toEqual(["GK", "ST"]);
     expect(staff.formations.formaties[0]?.posten).toHaveLength(2);
@@ -251,5 +264,6 @@ describe("repository /staff", () => {
       "video-analyst",
     ]);
     expect(staff.formations.formaties.length).toBeGreaterThan(0);
+    expect(staff.vision.themas.length).toBeGreaterThan(0);
   });
 });

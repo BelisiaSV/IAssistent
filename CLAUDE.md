@@ -63,7 +63,8 @@ packages/staff-engine/    laadt en valideert /staff (geen voetbalinhoud, nog gee
 packages/db/              databasetypes + gedeelde constants (bucket, feature flag keys)
 services/video/           aparte videodienst — later
 staff/                    ALLE rolinhoud (markdown + JSON)
-  _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json
+  _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json,
+                          visieprofiel.json (vragenlijst visie van de coach)
   assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
 supabase/
@@ -72,7 +73,7 @@ supabase/
   tests/database/         pgTAP-tests (RLS en bedrijfsregels)
   tests/support/          stub om tests zonder Docker te draaien
 scripts/test-db.sh        draait migraties + seed + pgTAP op een tijdelijke Postgres
-.claude/skills/           nieuwe-rol, rol-bijwerken, feature-flag, release
+.claude/skills/           nieuwe-rol, rol-bijwerken, visie-bijwerken, feature-flag, release
 ```
 
 ## Harde regel: geen voetbalinhoud in code
@@ -169,6 +170,8 @@ Regels:
 - **Fase 1 (fundering)** — structuur, schema + RLS, login, team aanmaken, staff-engine die
   `/staff` inleest. **Geen AI-rollen en geen stafmeeting.**
 - **Fase 2a** — spelersbeheer (kern, status, posities, voorkeursvoet, seizoenen bij de club,
-  uit de kern halen) en wedstrijdselecties (formatie op het veld, basis en bank).
-- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, visieprofiel; CSV-import; AI-calls;
+  uit de kern halen), wedstrijdselecties (formatie op het veld, basis en bank) en het
+  visieprofiel (`/profile/vision`, vragenlijst uit `staff/_gedeeld/visieprofiel.json`, opgeslagen
+  in `coach_profiles.vision` als `{ versie, antwoorden: { "<thema>.<vraag>": ... } }`).
+- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, visie delen; CSV-import; AI-calls;
   stafmeeting; videodienst.
