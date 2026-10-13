@@ -58,6 +58,7 @@ export async function createTeam(_prev: TeamFormState, formData: FormData): Prom
     .single();
 
   if (error || !team) {
+    console.error("createTeam: insert failed", error);
     return {
       error: error?.hint === LICENSE_HINT ? messages.teams.errors.noLicenseSeats : messages.teamForm.errors.saveFailed,
     };
@@ -73,6 +74,7 @@ export async function createTeam(_prev: TeamFormState, formData: FormData): Prom
       ? null
       : await supabase.from("teams").update({ logo_path: path }).eq("id", team.id);
     logoFailed = Boolean(upload.error || update?.error);
+    if (logoFailed) console.error("createTeam: logo upload failed", upload.error ?? update?.error);
   }
 
   revalidatePath("/teams");
@@ -90,6 +92,7 @@ async function setArchived(teamId: string, archived: boolean) {
 
   revalidatePath("/teams");
   if (error || !data?.length) {
+    console.error("setArchived failed", error);
     const reason = error?.hint === LICENSE_HINT ? "license" : archived ? "archive" : "restore";
     redirect(`/teams?error=${reason}`);
   }

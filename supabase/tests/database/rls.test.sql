@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(48);
+select plan(50);
 
 -- -----------------------------------------------------------------------------
 -- Helpers (exist only inside this transaction)
@@ -112,6 +112,13 @@ select lives_ok(
   $$insert into public.players (team_id, first_name, last_name)
     select id, 'Nieuwe', 'Speler' from ids where name = 'team_a'$$,
   'head coach adds a player to own team');
+select lives_ok(
+  $$insert into public.teams (head_coach_id, name, club_name)
+    values (tests.id('a@test.local'), 'Tweede ploeg', 'Club A') returning id$$,
+  'coach creates a team and reads it back in the same statement (insert ... returning)');
+select lives_ok(
+  $$insert into public.clubs (name) values ('Eigen club') returning id$$,
+  'coach creates a club and reads it back in the same statement (insert ... returning)');
 select throws_ok(
   $$insert into public.players (team_id, first_name, last_name)
     select id, 'X', 'Y' from ids where name = 'team_b'$$,

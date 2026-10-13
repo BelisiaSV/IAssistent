@@ -97,6 +97,11 @@ voorstelt, staat in `/staff` (markdown/JSON) of in de database (bv. de visie van
 - **Nieuwe teamgebonden data** (trainingen, oefenstof, weekplanningen, …) krijgt een `team_id`
   en gebruikt `can_read_team` voor lezen en `can_write_team` voor schrijven. Zo blijft
   oefenstof van een gearchiveerd team leesbaar.
+- **Valkuil `insert ... returning`**: de SELECT-policy wordt ook op de nieuwe rij gecontroleerd.
+  Een helper die de rij opnieuw opzoekt (bv. `can_read_team(id)` op de eigen tabel) ziet een rij
+  uit hetzelfde statement niet → "new row violates row-level security policy". Laat de
+  SELECT-policy daarom eerst de eigen kolommen van de rij controleren (bv. `head_coach_id = auth.uid()`)
+  en test elke insert die de app doet mét `returning` in pgTAP.
 - `teams.head_coach_id` en `teams.club_id` zijn onveranderlijk (trigger).
 - `anon` heeft geen toegang tot `public`. Nieuwe functies: `revoke execute ... from anon, public`.
 - Migraties: nieuwe file in `supabase/migrations/` (`YYYYMMDDHHMMSS_beschrijving.sql`),
