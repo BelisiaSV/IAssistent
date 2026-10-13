@@ -35,8 +35,9 @@ Video Analist**.
 ## Stack
 
 - **Next.js** (App Router, TypeScript) in `apps/web`, gehost op **Vercel**.
-- **Supabase** (Postgres, Auth, Storage) in de **EU-regio**. Twee projecten: **staging**
-  (testdata) en **productie**.
+- **Supabase** (Postgres, Auth, Storage) in de **EU-regio**. Doel: twee projecten, **staging**
+  (testdata) en **productie**. **Voorlopig is er één project** (met seed-testdata) tot de tool
+  klaar is voor echte coaches; het productieproject en een eigen SMTP komen later.
 - **Claude API** voor de AI-staf — **alleen server-side**, nooit in client components en
   nooit met een `NEXT_PUBLIC_`-key. (Nog niet gebouwd in fase 1.)
 - pnpm workspaces, Node 22, TypeScript 6 (TS 7 wordt nog niet ondersteund door typescript-eslint).
@@ -62,7 +63,8 @@ packages/staff-engine/    laadt en valideert /staff (geen voetbalinhoud, nog gee
 packages/db/              databasetypes + gedeelde constants (bucket, feature flag keys)
 services/video/           aparte videodienst — later
 staff/                    ALLE rolinhoud (markdown + JSON)
-  _gedeeld/               gedeelde afspraken + rol-sjabloon.md
+  _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json,
+                          visieprofiel.json (vragenlijst visie van de coach)
   assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
 supabase/
@@ -71,7 +73,7 @@ supabase/
   tests/database/         pgTAP-tests (RLS en bedrijfsregels)
   tests/support/          stub om tests zonder Docker te draaien
 scripts/test-db.sh        draait migraties + seed + pgTAP op een tijdelijke Postgres
-.claude/skills/           nieuwe-rol, rol-bijwerken, feature-flag, release
+.claude/skills/           nieuwe-rol, rol-bijwerken, visie-bijwerken, feature-flag, release
 ```
 
 ## Harde regel: geen voetbalinhoud in code
@@ -84,6 +86,10 @@ voorstelt, staat in `/staff` (markdown/JSON) of in de database (bv. de visie van
 - Wél in code: structuur (bestands- en mapnamen van `/staff`, JSON-schema-validatie),
   datamodellen, UI-teksten van het platform zelf (`messages.ts`).
 - Twijfel? Zet het in `/staff` en laat de engine het inlezen.
+- Gestructureerde gedeelde inhoud (JSON in `_gedeeld`, bv. posities en formaties) wordt door de
+  staff-engine gevalideerd (`@iassistent/staff-engine/content`). De web-app importeert die JSON
+  bij de build via de alias `@staff/*` in `apps/web/src/lib/staff.ts`; ongeldige inhoud laat de
+  build falen. De database bewaart enkel codes (positie, formatie), nooit de inhoud zelf.
 - De staff-engine leest `/staff` in en valideert het: `pnpm staff:validate`. De verplichte
   secties van `rol.md` komen uit `staff/_gedeeld/rol-sjabloon.md`, niet uit de code.
 
@@ -123,6 +129,8 @@ Gebruik de skill `feature-flag`.
 - `develop` = testomgeving (Vercel preview/staging + Supabase-staging).
 - `feature/<korte-naam>` per feature, vertakt van `develop`, PR naar `develop`.
 - Release: PR `develop` → `main` (skill `release`). Migraties eerst op staging, dan productie.
+  Zolang er één Supabase-project is, voer je een nieuwe migratie daarop uit zodra ze op
+  `develop` staat (SQL Editor of `supabase db push`).
 - Nooit rechtstreeks op `main` pushen. Nooit de seed op productie draaien.
 
 ## Lokaal ontwikkelen
@@ -161,5 +169,9 @@ Regels:
 
 - **Fase 1 (fundering)** — structuur, schema + RLS, login, team aanmaken, staff-engine die
   `/staff` inleest. **Geen AI-rollen en geen stafmeeting.**
-- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, spelersbeheer en visieprofiel; AI-calls;
+- **Fase 2a** — spelersbeheer (kern, status, posities, voorkeursvoet, seizoenen bij de club,
+  uit de kern halen), wedstrijdselecties (formatie op het veld, basis en bank) en het
+  visieprofiel (`/profile/vision`, vragenlijst uit `staff/_gedeeld/visieprofiel.json`, opgeslagen
+  in `coach_profiles.vision` als `{ versie, antwoorden: { "<thema>.<vraag>": ... } }`).
+- Nog niet gebouwd: UI voor T2-toegang, clubbeheer, visie delen; CSV-import; AI-calls;
   stafmeeting; videodienst.

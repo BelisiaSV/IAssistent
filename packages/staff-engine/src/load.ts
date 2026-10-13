@@ -8,8 +8,12 @@ import {
   ROLE_ID_PATTERN,
   ROLE_TEMPLATE_FILE,
   SHARED_DIR,
+  SHARED_FILES,
 } from "./layout";
 import { parseMarkdown, sectionHeadings } from "./markdown";
+import { parseFormations } from "./shared/formations";
+import { parsePositions } from "./shared/positions";
+import { parseVisionQuestionnaire } from "./shared/vision";
 import {
   ROLE_STATUSES,
   type RoleMeta,
@@ -22,14 +26,14 @@ import {
 } from "./types";
 
 interface LoadResult {
-  staff: Staff;
+  staff: Staff | null;
   issues: StaffIssue[];
 }
 
 /** Loads /staff and throws a StaffValidationError if anything is wrong. */
 export async function loadStaff(rootDir: string): Promise<Staff> {
   const { staff, issues } = await readStaff(rootDir);
-  if (issues.length > 0) throw new StaffValidationError(issues);
+  if (issues.length > 0 || !staff) throw new StaffValidationError(issues);
   return staff;
 }
 
@@ -44,7 +48,7 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
 
   if (!(await isDirectory(root))) {
     issues.push({ path: ".", message: `map bestaat niet: ${root}` });
-    return { staff: { rootDir: root, shared: [], roles: [] }, issues };
+    return { staff: null, issues };
   }
 
   const shared = await readFilesRecursive(root, SHARED_DIR);
@@ -74,7 +78,43 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
   }
   roles.sort((a, b) => a.id.localeCompare(b.id));
 
-  return { staff: { rootDir: root, shared, roles }, issues };
+  const positions = collect(
+    parsePositions(readSharedJson(shared, SHARED_FILES.positions, issues)),
+    issues,
+  );
+  const formations = collect(
+    parseFormations(readSharedJson(shared, SHARED_FILES.formations, issues), positions),
+    issues,
+  );
+
+  const vision = collect(
+    parseVisionQuestionnaire(readSharedJson(shared, SHARED_FILES.vision, issues)),
+    issues,
+  );
+
+  if (!positions || !formations || !vision) return { staff: null, issues };
+  return { staff: { rootDir: root, shared, roles, positions, formations, vision }, issues };
+}
+
+function collect<T>(result: { value: T | null; issues: StaffIssue[] }, issues: StaffIssue[]) {
+  issues.push(...result.issues);
+  return result.value;
+}
+
+/** Parses a JSON file from _gedeeld; returns undefined (and records an issue) if missing/invalid. */
+function readSharedJson(shared: StaffFile[], fileName: string, issues: StaffIssue[]): unknown {
+  const filePath = `${SHARED_DIR}/${fileName}`;
+  const file = shared.find((f) => f.path === filePath);
+  if (!file) {
+    issues.push({ path: filePath, message: "bestand ontbreekt" });
+    return undefined;
+  }
+  try {
+    return JSON.parse(file.content);
+  } catch (error) {
+    issues.push({ path: filePath, message: `geen geldige JSON: ${(error as Error).message}` });
+    return undefined;
+  }
 }
 
 async function readRole(

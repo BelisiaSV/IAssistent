@@ -13,6 +13,9 @@ importers:
       '@iassistent/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@iassistent/staff-engine':
+        specifier: workspace:*
+        version: link:../../packages/staff-engine
       '@supabase/ssr':
         specifier: ^0.12.7
         version: 0.12.7(@supabase/supabase-js@2.117.3)
@@ -77,6 +80,9 @@ importers:
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^22.20.5

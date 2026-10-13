@@ -1,0 +1,25 @@
+{
+  "versie": "0.1.0",
+  "linies": [
+    { "id": "doel", "naam": "Doel" },
+    { "id": "verdediging", "naam": "Verdediging" },
+    { "id": "middenveld", "naam": "Middenveld" },
+    { "id": "aanval", "naam": "Aanval" }
+  ],
+  "posities": [
+    { "code": "GK", "naam": "Doelman", "linie": "doel" },
+    { "code": "CB", "naam": "Centrale verdediger", "linie": "verdediging" },
+    { "code": "LB", "naam": "Linksachter", "linie": "verdediging" },
+    { "code": "RB", "naam": "Rechtsachter", "linie": "verdediging" },
+    { "code": "LWB", "naam": "Linker wingback", "linie": "verdediging" },
+    { "code": "RWB", "naam": "Rechter wingback", "linie": "verdediging" },
+    { "code": "CDM", "naam": "Verdedigende middenvelder", "linie": "middenveld" },
+    { "code": "CM", "naam": "Centrale middenvelder", "linie": "middenveld" },
+    { "code": "CAM", "naam": "Aanvallende middenvelder", "linie": "middenveld" },
+    { "code": "LM", "naam": "Linkermiddenvelder", "linie": "middenveld" },
+    { "code": "RM", "naam": "Rechtermiddenvelder", "linie": "middenveld" },
+    { "code": "LW", "naam": "Linksbuiten", "linie": "aanval" },
+    { "code": "RW", "naam": "Rechtsbuiten", "linie": "aanval" },
+    { "code": "ST", "naam": "Spits", "linie": "aanval" }
+  ]
+}

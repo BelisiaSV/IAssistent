@@ -17,6 +17,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/teams" className="text-slate-700 hover:text-brand">
               {messages.nav.teams}
             </Link>
+            <Link href="/profile/vision" className="text-slate-700 hover:text-brand">
+              {messages.nav.vision}
+            </Link>
             <span className="hidden text-slate-400 sm:inline">{user.email}</span>
             <form action="/auth/signout" method="post">
               <button type="submit" className="text-slate-700 hover:text-brand">

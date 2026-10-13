@@ -48,8 +48,24 @@ values (
   '#F2C200'
 );
 
-insert into public.players (team_id, first_name, last_name, shirt_number, position, birth_year, status) values
-  ('22222222-2222-4222-8222-222222222222', 'Test', 'Doelman',    1, 'Doelman',       1995, 'available'),
-  ('22222222-2222-4222-8222-222222222222', 'Test', 'Verdediger', 4, 'Verdediger',    1998, 'available'),
-  ('22222222-2222-4222-8222-222222222222', 'Test', 'Middenvelder', 8, 'Middenvelder', 2000, 'injured'),
-  ('22222222-2222-4222-8222-222222222222', 'Test', 'Spits',      9, 'Aanvaller',     2001, 'available');
+-- Fictieve kern (namen verzonnen).
+insert into public.players
+  (team_id, first_name, last_name, shirt_number, primary_position, secondary_positions,
+   preferred_foot, birth_year, joined_club_year, status, expected_return_date)
+values
+  ('22222222-2222-4222-8222-222222222222', 'Thomas', 'Claes', 1, 'GK', '{}', 'right', 1996, 2019, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Robbe', 'Wouters', 12, 'GK', '{}', 'right', 2002, 2024, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Jonas', 'Peeters', 2, 'RB', '{RWB}', 'right', 1999, 2021, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Arne', 'Maes', 3, 'LB', '{LWB}', 'left', 2000, 2022, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Wout', 'Jacobs', 4, 'CB', '{}', 'right', 1995, 2018, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Bram', 'Mertens', 5, 'CB', '{CDM}', 'left', 1998, 2020, 'injured', current_date + 21),
+  ('22222222-2222-4222-8222-222222222222', 'Senne', 'Willems', 15, 'CB', '{RB}', 'right', 2003, 2025, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Lars', 'Goossens', 6, 'CDM', '{CM}', 'right', 1997, 2019, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Kobe', 'Janssens', 8, 'CM', '{CDM,CAM}', 'right', 2001, 2023, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Milan', 'Hermans', 10, 'CAM', '{CM,ST}', 'left', 2000, 2021, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Stijn', 'Vermeulen', 14, 'CM', '{}', 'both', 2002, 2024, 'suspended', null),
+  ('22222222-2222-4222-8222-222222222222', 'Ruben', 'Dubois', 7, 'RM', '{RW}', 'right', 2001, 2022, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Thibo', 'Lambert', 11, 'LM', '{LW}', 'left', 1999, 2020, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Noah', 'Desmet', 17, 'LW', '{LM,ST}', 'left', 2004, 2025, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Jens', 'De Smet', 9, 'ST', '{}', 'right', 1996, 2017, 'available', null),
+  ('22222222-2222-4222-8222-222222222222', 'Yentl', 'Martens', 19, 'ST', '{RW}', 'right', 2003, 2024, 'unavailable', null);

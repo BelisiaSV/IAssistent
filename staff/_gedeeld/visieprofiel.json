@@ -1,0 +1,204 @@
+{
+  "versie": "0.1.0",
+  "uitleg": "Vragenlijst voor het visieprofiel van de hoofdcoach. Alle AI-rollen volgen deze visie. Types: kort_antwoord, tekst, keuze, meerkeuze, schaal, formatie. Een thema-id en vraag-id blijven best stabiel: antwoorden worden bewaard onder '<thema-id>.<vraag-id>'.",
+  "themas": [
+    {
+      "id": "speelwijze",
+      "titel": "Speelwijze en organisatie",
+      "vragen": [
+        {
+          "id": "basisformatie",
+          "vraag": "Wat is je basisformatie?",
+          "type": "formatie"
+        },
+        {
+          "id": "alternatieve_formaties",
+          "vraag": "Welke formaties gebruik je daarnaast?",
+          "type": "formatie",
+          "meerdere": true
+        },
+        {
+          "id": "in_een_zin",
+          "vraag": "Hoe omschrijf je je speelwijze in één zin?",
+          "type": "kort_antwoord"
+        },
+        {
+          "id": "blokhoogte",
+          "vraag": "Waar wil je standaard verdedigen?",
+          "type": "keuze",
+          "opties": ["Hoog: druk zetten op de opbouw", "Middenblok", "Laag blok"]
+        },
+        {
+          "id": "principes",
+          "vraag": "Welke principes moet elke speler kennen?",
+          "type": "tekst"
+        }
+      ]
+    },
+    {
+      "id": "balbezit",
+      "titel": "Balbezit",
+      "vragen": [
+        {
+          "id": "opbouw",
+          "vraag": "Hoe bouw je op?",
+          "type": "schaal",
+          "min": 1,
+          "max": 5,
+          "label_min": "Snel en lang",
+          "label_max": "Verzorgd en kort van achteruit"
+        },
+        {
+          "id": "kansen_creeren",
+          "vraag": "Hoe wil je vooral kansen creëren?",
+          "type": "meerkeuze",
+          "opties": [
+            "Combinaties door het centrum",
+            "Over de flanken met voorzetten",
+            "Diepe ballen in de rug van de verdediging",
+            "Individuele acties",
+            "Standaardsituaties"
+          ]
+        },
+        {
+          "id": "doelman_aan_de_bal",
+          "vraag": "Wat verwacht je van je doelman aan de bal?",
+          "type": "tekst"
+        }
+      ]
+    },
+    {
+      "id": "balverlies",
+      "titel": "Balverlies",
+      "vragen": [
+        {
+          "id": "reactie",
+          "vraag": "Wat doen we direct na balverlies?",
+          "type": "keuze",
+          "opties": [
+            "Onmiddellijk tegendruk zetten",
+            "Eerst hergroeperen achter de bal",
+            "Afhankelijk van zone en situatie"
+          ]
+        },
+        {
+          "id": "drukintensiteit",
+          "vraag": "Hoe agressief zetten we druk?",
+          "type": "schaal",
+          "min": 1,
+          "max": 5,
+          "label_min": "Afwachtend",
+          "label_max": "Zeer agressief"
+        },
+        {
+          "id": "afspraken",
+          "vraag": "Welke vaste afspraken gelden bij balverlies?",
+          "type": "tekst"
+        }
+      ]
+    },
+    {
+      "id": "omschakelingen",
+      "titel": "Omschakelingen",
+      "vragen": [
+        {
+          "id": "naar_aanvallen",
+          "vraag": "Wat doen we na balverovering?",
+          "type": "keuze",
+          "opties": [
+            "Zo snel mogelijk verticaal",
+            "Eerst balbezit veiligstellen",
+            "Afhankelijk van de situatie"
+          ]
+        },
+        {
+          "id": "naar_verdedigen",
+          "vraag": "Welke afspraken gelden bij omschakeling naar verdedigen?",
+          "type": "tekst"
+        }
+      ]
+    },
+    {
+      "id": "standaardsituaties",
+      "titel": "Standaardsituaties",
+      "vragen": [
+        {
+          "id": "belang",
+          "vraag": "Hoeveel aandacht krijgen standaardsituaties?",
+          "type": "schaal",
+          "min": 1,
+          "max": 5,
+          "label_min": "Bijzaak",
+          "label_max": "Zeer belangrijk"
+        },
+        {
+          "id": "hoekschoppen_verdedigend",
+          "vraag": "Hoe verdedig je hoekschoppen?",
+          "type": "keuze",
+          "opties": ["Zonedekking", "Mandekking", "Gemengd"]
+        },
+        {
+          "id": "afspraken",
+          "vraag": "Welke afspraken heb je rond standaardsituaties?",
+          "type": "tekst"
+        }
+      ]
+    },
+    {
+      "id": "training",
+      "titel": "Trainingsvisie en belasting",
+      "vragen": [
+        {
+          "id": "trainingen_per_week",
+          "vraag": "Hoeveel trainingen per week?",
+          "type": "keuze",
+          "opties": ["1", "2", "3", "4"]
+        },
+        {
+          "id": "trainingsvormen",
+          "vraag": "Welke trainingsvormen gebruik je graag?",
+          "type": "meerkeuze",
+          "opties": [
+            "Wedstrijdvormen",
+            "Positiespelen",
+            "Analytische oefeningen (techniek)",
+            "Aparte fysieke blokken",
+            "Fysiek geïntegreerd in voetbalvormen"
+          ]
+        },
+        {
+          "id": "belasting",
+          "vraag": "Hoe bouw je de belasting op richting de wedstrijd?",
+          "type": "tekst"
+        },
+        {
+          "id": "niet_onderhandelbaar",
+          "vraag": "Wat is voor jou niet onderhandelbaar op training?",
+          "type": "tekst"
+        }
+      ]
+    },
+    {
+      "id": "groep",
+      "titel": "Groep en communicatie",
+      "vragen": [
+        {
+          "id": "stijl",
+          "vraag": "Hoe zou je je leiderschapsstijl omschrijven?",
+          "type": "keuze",
+          "opties": ["Sturend", "Coachend", "Participatief: spelers denken mee"]
+        },
+        {
+          "id": "selectie_communiceren",
+          "vraag": "Hoe communiceer je selectie en opstelling?",
+          "type": "tekst"
+        },
+        {
+          "id": "groepswaarden",
+          "vraag": "Welke groepswaarden vind je belangrijk?",
+          "type": "tekst"
+        }
+      ]
+    }
+  ]
+}

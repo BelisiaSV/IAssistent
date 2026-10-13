@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export function TeamBadge({
@@ -50,6 +51,7 @@ export function TeamCard({
   secondaryColor,
   badge,
   actions,
+  href,
 }: {
   name: string;
   season: string | null;
@@ -59,7 +61,23 @@ export function TeamCard({
   secondaryColor: string;
   badge?: string;
   actions?: ReactNode;
+  href?: string;
 }) {
+  const text = (
+    <>
+      <p className="truncate font-semibold">{clubName}</p>
+      <p className="truncate text-sm text-slate-600">
+        {name}
+        {season ? ` · ${season}` : ""}
+      </p>
+      {badge && (
+        <span className="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+          {badge}
+        </span>
+      )}
+    </>
+  );
+
   return (
     <li
       className="flex items-center gap-4 rounded-xl border-l-8 bg-white p-4 shadow-sm ring-1 ring-slate-200"
@@ -71,18 +89,13 @@ export function TeamCard({
         primaryColor={primaryColor}
         secondaryColor={secondaryColor}
       />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold">{clubName}</p>
-        <p className="truncate text-sm text-slate-600">
-          {name}
-          {season ? ` · ${season}` : ""}
-        </p>
-        {badge && (
-          <span className="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-            {badge}
-          </span>
-        )}
-      </div>
+      {href ? (
+        <Link href={href} className="min-w-0 flex-1 hover:text-brand">
+          {text}
+        </Link>
+      ) : (
+        <div className="min-w-0 flex-1">{text}</div>
+      )}
       {actions}
     </li>
   );

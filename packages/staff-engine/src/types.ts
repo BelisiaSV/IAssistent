@@ -1,3 +1,7 @@
+import type { FormationCatalog } from "./shared/formations";
+import type { PositionCatalog } from "./shared/positions";
+import type { VisionQuestionnaire } from "./shared/vision";
+
 export const ROLE_STATUSES = ["placeholder", "concept", "actief"] as const;
 export type RoleStatus = (typeof ROLE_STATUSES)[number];
 
@@ -37,6 +41,12 @@ export interface Staff {
   /** All files in _gedeeld/ (including the role template). */
   shared: StaffFile[];
   roles: StaffRole[];
+  /** _gedeeld/posities.json */
+  positions: PositionCatalog;
+  /** _gedeeld/formaties.json */
+  formations: FormationCatalog;
+  /** _gedeeld/visieprofiel.json */
+  vision: VisionQuestionnaire;
 }
 
 export interface StaffIssue {
