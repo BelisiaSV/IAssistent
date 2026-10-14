@@ -12,6 +12,7 @@ export function TeamTabs({ teamId }: { teamId: string }) {
     { href: `/teams/${teamId}/lineups`, label: messages.teamNav.lineups },
     { href: `/teams/${teamId}/weeks`, label: messages.teamNav.weeks },
     { href: `/teams/${teamId}/opponents`, label: messages.teamNav.opponents },
+    { href: `/teams/${teamId}/settings`, label: messages.teamNav.settings },
     { href: `/teams/${teamId}/tests`, label: messages.teamNav.tests },
   ];
   return (

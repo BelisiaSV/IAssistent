@@ -7,6 +7,7 @@ import {
   type OpponentContext,
   type PeriodizationCatalog,
   type RoleContext,
+  type SeasonPlan,
   type TestCatalog,
   testDue,
   weekPeriodization,
@@ -54,7 +55,7 @@ export function buildRoleContext(input: {
   questionnaire: VisionQuestionnaire;
   matchDays: MatchDayCatalog;
   periodization: PeriodizationCatalog;
-  season: { competitionStartDate: string | null; periodizationWeeks: number };
+  season: SeasonPlan;
   tests: TestCatalog;
   /** Latest result per player and test code. */
   testResults: { player_id: string; test_code: string; test_date: string; result: number }[];
@@ -126,12 +127,7 @@ export function buildRoleContext(input: {
   return {
     weekinput: {
       week_van: input.weekStart,
-      periodisering: weekPeriodization(
-        input.weekStart,
-        input.season.competitionStartDate,
-        input.season.periodizationWeeks,
-        input.periodization,
-      ),
+      periodisering: weekPeriodization(input.weekStart, input.season, input.periodization),
       vorige_wedstrijd: input.previousMatchDate,
       notitie: input.notes,
       dagen,

@@ -11,6 +11,7 @@ import {
   type RoleContext,
   roleExample,
   runRole,
+  type SeasonPlan,
   type Staff,
   StaffGenerationError,
   type StaffModelProvider,
@@ -26,6 +27,14 @@ beforeAll(async () => {
   staff = await loadStaff(STAFF_DIR);
 });
 
+const season = (over: Partial<SeasonPlan> = {}): SeasonPlan => ({
+  preparationStart: null,
+  preparationWeeks: 4,
+  competitionStart: "2026-09-06",
+  competitionWeeks: 4,
+  ...over,
+});
+
 const day = (datum: string, weekdag: string, md: string | null, extra: Partial<RoleContext["weekinput"]["dagen"][number]> = {}) => ({
   datum,
   weekdag,
@@ -39,7 +48,7 @@ function context(): RoleContext {
   return {
     weekinput: {
       week_van: "2026-10-19",
-      periodisering: weekPeriodization("2026-10-19", "2026-09-06", 4, staff.periodization),
+      periodisering: weekPeriodization("2026-10-19", season(), staff.periodization),
       vorige_wedstrijd: "2026-10-18",
       notitie: "Focus op omschakeling.",
       dagen: [
@@ -93,7 +102,7 @@ describe("match days", () => {
 describe("periodization", () => {
   it("counts cycle weeks from the week of the first competition match", () => {
     const type = (week: string, cycle = 4) =>
-      weekPeriodization(week, "2026-09-06", cycle, staff.periodization).weektype?.code;
+      weekPeriodization(week, season({ competitionWeeks: cycle }), staff.periodization).weektype?.code;
     // 2026-09-06 is a Sunday: its week starts on Monday 2026-08-31.
     expect(type("2026-08-24")).toBe("voorbereiding");
     expect(type("2026-08-31")).toBe("normaal");
@@ -101,12 +110,25 @@ describe("periodization", () => {
     expect(type("2026-09-14")).toBe("intensief");
     expect(type("2026-09-21")).toBe("deload");
     expect(type("2026-09-28")).toBe("normaal");
-    expect(weekPeriodization("2026-10-05", "2026-09-06", 6, staff.periodization)).toMatchObject({
+    expect(weekPeriodization("2026-10-05", season({ competitionWeeks: 6 }), staff.periodization)).toMatchObject({
       fase: "competitie",
+      week_van_fase: 6,
       cyclus_weken: 6,
       week_in_cyclus: 6,
     });
-    expect(weekPeriodization("2026-10-05", null, 4, staff.periodization).fase).toBeNull();
+    expect(weekPeriodization("2026-10-05", season({ competitionStart: null }), staff.periodization).fase).toBeNull();
+  });
+
+  it("runs its own cycle in the preparation", () => {
+    // Preparation from Monday 2026-07-06, cycle of 6 weeks; competition from 2026-09-06.
+    const plan = season({ preparationStart: "2026-07-06", preparationWeeks: 6 });
+    const at = (week: string) => weekPeriodization(week, plan, staff.periodization);
+    expect(at("2026-06-29")).toMatchObject({ fase: null, weektype: null });
+    expect(at("2026-07-06")).toMatchObject({ fase: "voorbereiding", week_van_fase: 1, cyclus_weken: 6, week_in_cyclus: 1 });
+    expect(at("2026-08-17")).toMatchObject({ fase: "voorbereiding", week_van_fase: 7, week_in_cyclus: 1 });
+    expect(at("2026-08-31")).toMatchObject({ fase: "competitie", week_van_fase: 1, cyclus_weken: 4 });
+    // Preparation only, competition not yet planned.
+    expect(weekPeriodization("2026-07-13", season({ preparationStart: "2026-07-06", competitionStart: null }), staff.periodization).fase).toBe("voorbereiding");
   });
 
   it("knows when a test is due", () => {

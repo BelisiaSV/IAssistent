@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { Tables } from "@iassistent/db";
 import { type VisionAnswers, weekPeriodization } from "@iassistent/staff-engine/content";
 
 import { matchEvaluations, opponentContext, opponentKey } from "@/lib/opponents/context";
@@ -9,10 +8,10 @@ import type { createClient } from "@/lib/supabase/server";
 
 import { buildRoleContext, loadHistory } from "./context";
 import { addDays } from "./dates";
+import { type SeasonTeam, seasonPlan } from "./season";
 import { type WeekMatch, weekPlanSchema } from "./validation";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
-type Team = Pick<Tables<"teams">, "id" | "competition_start_date" | "periodization_weeks">;
 
 const HISTORY_WEEKS = 8;
 const EVALUATIONS = 10;
@@ -29,7 +28,7 @@ export function plannedAu(output: unknown): number | null {
 }
 
 /** Everything about a week that the week page and the staff roles need. */
-export async function loadWeek(supabase: Supabase, team: Team, weekStart: string) {
+export async function loadWeek(supabase: Supabase, team: SeasonTeam, weekStart: string) {
   const historyStart = addDays(weekStart, -7 * HISTORY_WEEKS);
   const [{ data: week }, { data: players }, { data: sessions }, { data: tests }, { data: pastWeeks }] =
     await Promise.all([
@@ -68,11 +67,8 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
       ])
     : [[], []];
 
-  const season = {
-    competitionStartDate: team.competition_start_date,
-    periodizationWeeks: team.periodization_weeks,
-  };
-  const periodization = weekPeriodization(weekStart, season.competitionStartDate, season.periodizationWeeks, periodizationCatalog);
+  const season = seasonPlan(team);
+  const periodization = weekPeriodization(weekStart, season, periodizationCatalog);
 
   const history = loadHistory(
     Array.from({ length: HISTORY_WEEKS }, (_, i) => {
@@ -83,7 +79,7 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
         .sort((a, b) => Number(b.status === "approved") - Number(a.status === "approved") || b.version - a.version)[0];
       return {
         week_start: start,
-        weektype: weekPeriodization(start, season.competitionStartDate, season.periodizationWeeks, periodizationCatalog).weektype?.code ?? null,
+        weektype: weekPeriodization(start, season, periodizationCatalog).weektype?.code ?? null,
         planned_au: plannedAu(loadPlan?.output),
       };
     }),

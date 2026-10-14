@@ -85,7 +85,7 @@ describe("buildRoleContext", () => {
       questionnaire: staff.vision,
       matchDays: staff.matchDays,
       periodization: staff.periodization,
-      season: { competitionStartDate: "2026-09-06", periodizationWeeks: 4 },
+      season: { preparationStart: null, preparationWeeks: 4, competitionStart: "2026-09-06", competitionWeeks: 4 },
       tests: staff.tests,
       testResults: [
         { player_id: "p9", test_code: "vameval", test_date: "2026-08-20", result: 15.5 },
