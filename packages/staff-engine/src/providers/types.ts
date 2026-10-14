@@ -4,6 +4,9 @@ import type { Staff, StaffRole } from "../types";
 export interface GenerateRequest {
   staff: Staff;
   role: StaffRole;
+  /** Task id ("default" or one of taken/<id>). */
+  task: string;
+  outputSchema: Record<string, unknown>;
   system: string;
   user: string;
   context: RoleContext;

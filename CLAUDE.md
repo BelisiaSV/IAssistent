@@ -74,6 +74,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI)
   assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
+    taken/<taak-id>/      extra taak van een rol (eigen instructies.md, output-schema.json,
+                          voorbeelden/), bv. tactical-coach/taken/oefenstof
 supabase/
   migrations/             schema, RLS, storage-policies (enige bron van waarheid)
   seed.sql                fictieve testcoach + testteam (alleen lokaal/staging)
@@ -196,5 +198,19 @@ Regels:
   grafiek gepland/werkelijk. Volgorde: eerst Physical Coach; zijn **goedgekeurde** plan gaat via
   `staf` mee naar de Assistent Coach (rolvolgorde in `apps/web/src/lib/roles.ts`). Feature flag
   `staff.physical_coach`.
-- Nog niet gebouwd: Tactical Coach, Video Analist, volledige stafmeeting; UI voor T2-toegang,
+- **Fase 3c** — Tactical Coach, twee taken: **wedstrijdplan** (taak `default`: tegenstander,
+  lessen, speelplan, opstelling, standaardsituaties met tekening, scenario's, tactische accenten
+  per trainingsdag, wedstrijdbespreking — vaste structuur in `referentie/wedstrijdvoorbereiding.md`)
+  en **oefenstof uittekenen** (taak `oefenstof`: een tekening per onderdeel van de goedgekeurde
+  weekplanning). Tekeningen zijn JSON (`$defs.tekening`), de app tekent ze als SVG.
+  Werkvolgorde (`WEEK_STEPS` in `apps/web/src/lib/roles.ts`): Physical Coach en Tactical Coach
+  naast elkaar → Assistent Coach met beide goedgekeurde plannen → Tactical Coach tekent de
+  oefenstof. `staff_proposals.task` scheidt de taken; `staf` bevat enkel goedgekeurde
+  `default`-voorstellen. Tabblad Tegenstanders (`opponents`, gekoppeld op naam aan de wedstrijd
+  in de weekinput; `opponent_lineups` met rugnummer + naam per post en bank, `source` `coach` of
+  later `video`), wedstrijdevaluaties na de wedstrijd (`match_reports`, ook "zelfde formatie als
+  de volgende tegenstander"), "Zet in Selecties" (`lineups.source = 'tactical-coach'`) en
+  afdrukken: wedstrijdbespreking en standaardsituaties (één per A4 voor de kleedkamer).
+  Namen van tegenstanders gaan nooit naar de AI. Feature flag `staff.tactical_coach`.
+- Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

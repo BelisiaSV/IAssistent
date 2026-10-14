@@ -3,17 +3,24 @@ import "server-only";
 import type { Tables } from "@iassistent/db";
 import { type VisionAnswers, weekPeriodization } from "@iassistent/staff-engine/content";
 
+import { matchEvaluations, opponentContext, opponentKey } from "@/lib/opponents/context";
 import { matchDayCatalog, periodizationCatalog, testCatalog, visionQuestionnaire } from "@/lib/staff";
 import type { createClient } from "@/lib/supabase/server";
 
 import { buildRoleContext, loadHistory } from "./context";
 import { addDays } from "./dates";
-import { weekPlanSchema } from "./validation";
+import { type WeekMatch, weekPlanSchema } from "./validation";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 type Team = Pick<Tables<"teams">, "id" | "competition_start_date" | "periodization_weeks">;
 
 const HISTORY_WEEKS = 8;
+const EVALUATIONS = 10;
+
+/** Approved default-task proposal of a role (what other roles build on). */
+export function approvedOutput(proposals: { role: string; task: string; status: string; output: unknown }[], roleId: string) {
+  return proposals.find((p) => p.role === roleId && p.task === "default" && p.status === "approved")?.output ?? null;
+}
 
 /** Planned AU of a load plan (Physical Coach output), if present. */
 export function plannedAu(output: unknown): number | null {
@@ -37,7 +44,7 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
       supabase.from("fitness_tests").select("player_id, test_code, test_date, result").eq("team_id", team.id),
       supabase
         .from("week_plans")
-        .select("week_start, staff_proposals(role, status, version, output)")
+        .select("week_start, staff_proposals(role, task, status, version, output)")
         .eq("team_id", team.id)
         .gte("week_start", historyStart)
         .lt("week_start", weekStart)
@@ -65,7 +72,7 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
       const start = addDays(historyStart, i * 7);
       const plan = (pastWeeks ?? []).find((w) => w.week_start === start);
       const loadPlan = (plan?.staff_proposals ?? [])
-        .filter((p) => p.role === "physical-coach" && p.output)
+        .filter((p) => p.role === "physical-coach" && p.task === "default" && p.output)
         .sort((a, b) => Number(b.status === "approved") - Number(a.status === "approved") || b.version - a.version)[0];
       return {
         week_start: start,
@@ -76,8 +83,40 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
     (sessions ?? []).filter((s) => s.session_date < weekStart),
   ).filter((w) => w.gepland_au !== null || w.werkelijk_au !== null);
 
+  // Next opponent: the first match of the week, linked to the fiche by name.
+  const nextMatch = ((week?.matches ?? []) as WeekMatch[]).toSorted((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+  const [{ data: opponents }, { data: reports }] = await Promise.all([
+    supabase.from("opponents").select("*").eq("team_id", team.id),
+    supabase
+      .from("match_reports")
+      .select("*")
+      .eq("team_id", team.id)
+      .lt("match_date", addDays(weekStart, 7))
+      .order("match_date", { ascending: false })
+      .limit(EVALUATIONS + 3),
+  ]);
+  const opponent = nextMatch
+    ? ((opponents ?? []).find((o) => opponentKey(o.name) === opponentKey(nextMatch.opponent)) ?? null)
+    : null;
+  const opponentLineup = opponent
+    ? ((
+        await supabase
+          .from("opponent_lineups")
+          .select("*")
+          .eq("opponent_id", opponent.id)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      ).data ?? null)
+    : null;
+
   return {
     week,
+    nextMatch,
+    opponent,
+    opponentLineup,
+    opponents: opponents ?? [],
+    reports: reports ?? [],
     players: players ?? [],
     proposals,
     sessionsThisWeek: (sessions ?? []).filter((s) => s.session_date >= weekStart),
@@ -109,9 +148,21 @@ export function contextForRole(
   });
   const staff = Object.fromEntries(
     options.uses.flatMap((roleId) => {
-      const approved = data.proposals.find((p) => p.role === roleId && p.status === "approved");
-      return approved?.output ? [[roleId, approved.output]] : [];
+      const output = approvedOutput(data.proposals, roleId);
+      return output ? [[roleId, output]] : [];
     }),
+  );
+  const opponent = data.nextMatch
+    ? opponentContext({
+        name: data.nextMatch.opponent,
+        home: data.nextMatch.home,
+        opponent: data.opponent,
+        lineup: data.opponentLineup,
+      })
+    : null;
+  const evaluations = matchEvaluations(
+    data.reports.filter((r) => r.match_date < weekStart).slice(0, EVALUATIONS),
+    opponent?.formatie ?? null,
   );
 
   return buildRoleContext({
@@ -130,6 +181,8 @@ export function contextForRole(
     tests: testCatalog,
     testResults: data.testResults,
     history: data.history,
+    opponent,
+    evaluations,
     staff,
     feedback: options.feedback,
   });

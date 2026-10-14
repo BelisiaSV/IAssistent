@@ -19,6 +19,22 @@ namen gedeeld.
 
 {{kern}}
 
+# Tegenstander
+
+De volgende tegenstander: fiche (formatie, speelstijl, sterktes, zwaktes, standaardsituaties,
+notities) en de laatst gekende opstelling (rugnummer per post en bank, geen namen). null als er
+deze week geen wedstrijd of geen fiche is.
+
+{{tegenstander}}
+
+# Wedstrijdevaluaties
+
+Bevindingen van de hoofdcoach na vorige wedstrijden (uitslag, formaties, wat goed en slecht
+ging, lessen). `zelfde_formatie_als_tegenstander` = true als de tegenstander toen dezelfde
+formatie speelde als de volgende tegenstander.
+
+{{evaluaties}}
+
 # Belastingshistoriek
 
 De vorige weken: weektype, geplande belasting en werkelijke belasting (gemiddelde RPE van de

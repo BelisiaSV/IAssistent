@@ -5,6 +5,7 @@ import {
   ROLE_DIRS,
   ROLE_FILES,
   ROLE_ID_PATTERN,
+  ROLE_TASKS_DIR,
   ROLE_TEMPLATE_FILE,
   SHARED_DIR,
   SHARED_FILES,
@@ -27,6 +28,7 @@ import {
   type StaffFile,
   type StaffIssue,
   type StaffRole,
+  type StaffTask,
   StaffValidationError,
 } from "./types";
 
@@ -212,6 +214,8 @@ async function readRole(
     }
   }
 
+  const tasks = await readTasks(root, id, issues);
+
   if (issues.length > before || !meta || instructions === null || !outputSchema) {
     return null;
   }
@@ -225,7 +229,34 @@ async function readRole(
     references: await readFilesRecursive(root, `${id}/${ROLE_DIRS.references}`),
     examples: await readFilesRecursive(root, `${id}/${ROLE_DIRS.examples}`),
     tests: await readFilesRecursive(root, `${id}/${ROLE_DIRS.tests}`),
+    tasks,
   };
+}
+
+async function readTasks(root: string, roleId: string, issues: StaffIssue[]): Promise<StaffTask[]> {
+  const dir = path.join(root, roleId, ROLE_TASKS_DIR);
+  if (!(await isDirectory(dir))) return [];
+  const tasks: StaffTask[] = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+    const base = `${roleId}/${ROLE_TASKS_DIR}/${entry.name}`;
+    if (!ROLE_ID_PATTERN.test(entry.name)) {
+      issues.push({ path: base, message: "taak-id moet kebab-case zijn" });
+      continue;
+    }
+    const instructions = await readText(root, `${base}/${ROLE_FILES.instructions}`, issues);
+    const schemaSource = await readText(root, `${base}/${ROLE_FILES.outputSchema}`, issues);
+    const outputSchema =
+      schemaSource === null ? null : parseSchema(schemaSource, `${base}/${ROLE_FILES.outputSchema}`, issues);
+    if (instructions === null || !outputSchema) continue;
+    tasks.push({
+      id: entry.name,
+      instructions,
+      outputSchema,
+      examples: await readFilesRecursive(root, `${base}/${ROLE_DIRS.examples}`),
+    });
+  }
+  return tasks.sort((a, b) => a.id.localeCompare(b.id));
 }
 
 function parseRoleMeta(

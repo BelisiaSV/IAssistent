@@ -2,25 +2,29 @@ import type { Tables } from "@iassistent/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { DrawingsView } from "@/components/proposals/drawings-view";
 import { LoadChart } from "@/components/proposals/load-chart";
 import { LoadPlanView, type MasPlayer } from "@/components/proposals/load-plan-view";
+import { MatchPlanView } from "@/components/proposals/match-plan-view";
 import { WeekPlanningView } from "@/components/proposals/week-planning-view";
 import { Alert, Button } from "@/components/ui";
 import { getStaffProvider } from "@/lib/ai";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { messages } from "@/lib/messages";
 import { shirtNames } from "@/lib/proposals/names";
-import type { LoadPlanOutput, WeekPlanningOutput } from "@/lib/proposals/types";
-import { WEEK_ROLES, type WeekRoleId } from "@/lib/roles";
-import { matchDayCatalog } from "@/lib/staff";
+import { opponentNames } from "@/lib/opponents/context";
+import type { DrawingsOutput, LoadPlanOutput, MatchPlanOutput, WeekPlanningOutput } from "@/lib/proposals/types";
+import { WEEK_STEPS, type WeekStep } from "@/lib/roles";
+import { formationCatalog, matchDayCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/teams/queries";
 import { sessionAu } from "@/lib/weeks/context";
 import { isIsoDate, isoWeekday, longDate, shortDate, todayInBelgium, weekdayName, weekDates } from "@/lib/weeks/dates";
-import { loadWeek, type WeekData } from "@/lib/weeks/load";
+import { approvedOutput, loadWeek, type WeekData } from "@/lib/weeks/load";
 import { weekPlanSchema } from "@/lib/weeks/validation";
 
-import { decideProposal } from "../actions";
+import { decideProposal, lineupFromProposal } from "../actions";
+import { MatchReportForm } from "./match-report-form";
 import { AdjustProposalForm, RefreshWhileGenerating, RequestProposalButton } from "./proposal-controls";
 import { SessionLoadForm } from "./session-load-form";
 import { WeekInputForm } from "./week-input-form";
@@ -50,9 +54,9 @@ export default async function WeekPage({
   if (!data.week) notFound();
   const week = data.week;
 
-  const flags = Object.fromEntries(
-    await Promise.all(WEEK_ROLES.map(async (r) => [r.id, await isFeatureEnabled(r.flag)] as const)),
-  ) as Record<WeekRoleId, boolean>;
+  const flags = new Map(
+    await Promise.all([...new Set(WEEK_STEPS.map((s) => s.flag))].map(async (f) => [f, await isFeatureEnabled(f)] as const)),
+  );
 
   const parsed = weekPlanSchema(weekStart).safeParse({
     trainings: week.trainings,
@@ -69,13 +73,12 @@ export default async function WeekPage({
   const busy = data.proposals.some((x) => x.status === "generating");
   const basePath = `/teams/${team.id}/weeks/${weekStart}`;
 
-  const selectedFor = (roleId: WeekRoleId, param: string) => {
-    const list = data.proposals.filter((x) => x.role === roleId);
-    return { list, selected: list.find((x) => String(x.version) === query[param]) ?? list[0] ?? null };
+  const selectedFor = (step: WeekStep) => {
+    const list = data.proposals.filter((x) => x.role === step.role && x.task === step.task);
+    return { list, selected: list.find((x) => String(x.version) === query[step.key]) ?? list[0] ?? null };
   };
-  const pc = selectedFor("physical-coach", "pc");
-  const ac = selectedFor("assistant-coach", "ac");
-  const approvedLoadPlan = data.proposals.find((x) => x.role === "physical-coach" && x.status === "approved");
+  const pc = selectedFor(WEEK_STEPS[0]);
+  const theirNames = opponentNames(data.opponentLineup);
 
   // Sessions of this week that already took place, for logging the actual RPE.
   const today = todayInBelgium();
@@ -99,7 +102,11 @@ export default async function WeekPage({
       ];
     });
 
-  const loadPlanForChart = (approvedLoadPlan?.output ?? pc.selected?.output ?? null) as LoadPlanOutput | null;
+  const loadPlanForChart = (approvedOutput(data.proposals, "physical-coach") ?? pc.selected?.output ?? null) as LoadPlanOutput | null;
+
+  // Matches of this week that were played: the head coach adds his findings.
+  const playedMatches = input.matches.filter((x) => x.date <= today);
+  const formationOptions = formationCatalog.formaties.map((f) => ({ code: f.code, name: f.naam }));
   const chartDays = weekDates(weekStart).map((date) => {
     const logged = data.sessionsThisWeek.find((s) => s.session_date === date && s.kind === "training");
     return {
@@ -149,6 +156,7 @@ export default async function WeekPage({
         days={weekDates(weekStart).map((date) => ({ date, weekday: weekdayName(date), label: shortDate(date) }))}
         initial={input}
         matchDays={matchDayCatalog}
+        opponents={data.opponents.map((o) => o.name).sort((a, b) => a.localeCompare(b, "nl"))}
         canEdit={canEdit}
       />
 
@@ -168,35 +176,106 @@ export default async function WeekPage({
 
       <LoadChart days={chartDays} />
 
-      <RoleSection
-        roleId="physical-coach"
-        param="pc"
-        {...pc}
-        teamId={team.id}
-        weekStart={weekStart}
-        basePath={basePath}
-        canEdit={canEdit}
-        flagEnabled={flags["physical-coach"]}
-        testMode={testMode}
-        busy={busy}
-        render={(output) => <LoadPlanView output={output as LoadPlanOutput} names={names} masPlayers={masPlayers} />}
-      />
+      {playedMatches.length > 0 && (
+        <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 className="font-semibold">{messages.matchReport.title}</h2>
+          <p className="text-sm text-slate-600">{messages.matchReport.hint}</p>
+          {playedMatches.map((match) => {
+            const report = data.reports.find((r) => r.match_date === match.date);
+            return (
+              <MatchReportForm
+                key={match.date}
+                teamId={team.id}
+                weekStart={weekStart}
+                match={{
+                  date: match.date,
+                  label: `${weekdayName(match.date)} ${shortDate(match.date)} · ${match.opponent} (${match.home ? messages.weeks.input.home : messages.weeks.input.away})`,
+                }}
+                initial={
+                  report
+                    ? {
+                        goalsFor: report.goals_for,
+                        goalsAgainst: report.goals_against,
+                        ownFormation: report.own_formation,
+                        opponentFormation: report.opponent_formation,
+                        wentWell: report.went_well,
+                        wentBadly: report.went_badly,
+                        lessons: report.lessons,
+                      }
+                    : null
+                }
+                formations={formationOptions}
+                canEdit={canEdit}
+              />
+            );
+          })}
+        </section>
+      )}
 
-      <RoleSection
-        roleId="assistant-coach"
-        param="ac"
-        {...ac}
-        teamId={team.id}
-        weekStart={weekStart}
-        basePath={basePath}
-        canEdit={canEdit}
-        flagEnabled={flags["assistant-coach"]}
-        testMode={testMode}
-        busy={busy}
-        note={approvedLoadPlan ? messages.roles["assistant-coach"].usesLoadPlan : messages.roles["assistant-coach"].noLoadPlan}
-        printable
-        render={(output) => <WeekPlanningView output={output as WeekPlanningOutput} names={names} />}
-      />
+      <StepOverview steps={WEEK_STEPS.map((step) => ({ step, ...selectedFor(step) }))} basePath={basePath} />
+
+      {WEEK_STEPS.map((step) => {
+        const { list, selected } = selectedFor(step);
+        const used = step.uses.filter((roleId) => approvedOutput(data.proposals, roleId));
+        const missing = step.requires.filter((roleId) => !approvedOutput(data.proposals, roleId));
+        const note = missing.length
+          ? messages.steps.requires(missing.map(roleName).join(", "))
+          : step.uses.length
+            ? used.length
+              ? messages.steps.uses(used.map(roleName).join(", "))
+              : messages.steps.usesNone
+            : undefined;
+        return (
+          <StepSection
+            key={step.key}
+            step={step}
+            list={list}
+            selected={selected}
+            teamId={team.id}
+            weekStart={weekStart}
+            basePath={basePath}
+            canEdit={canEdit}
+            flagEnabled={flags.get(step.flag) ?? false}
+            blocked={missing.length > 0}
+            testMode={testMode}
+            busy={busy}
+            note={note}
+            links={(proposal) => stepLinks(step, proposal, basePath)}
+            render={(proposal) => {
+              const output = proposal.output;
+              switch (step.key) {
+                case "pc":
+                  return <LoadPlanView output={output as unknown as LoadPlanOutput} names={names} masPlayers={masPlayers} />;
+                case "tc":
+                  return (
+                    <MatchPlanView
+                      output={output as unknown as MatchPlanOutput}
+                      names={names}
+                      opponentNames={theirNames}
+                      formations={formationCatalog}
+                      actions={
+                        canEdit && (
+                          <form action={lineupFromProposal}>
+                            <input type="hidden" name="teamId" value={team.id} />
+                            <input type="hidden" name="weekStart" value={weekStart} />
+                            <input type="hidden" name="proposalId" value={proposal.id} />
+                            <Button type="submit" variant="secondary">
+                              {messages.matchPlan.toLineup}
+                            </Button>
+                          </form>
+                        )
+                      }
+                    />
+                  );
+                case "ac":
+                  return <WeekPlanningView output={output as unknown as WeekPlanningOutput} names={names} />;
+                case "tco":
+                  return <DrawingsView output={output as unknown as DrawingsOutput} names={names} />;
+              }
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -211,9 +290,61 @@ function latestMas(data: WeekData) {
   return [...latest.entries()].map(([playerId, v]) => ({ playerId, mas: v.mas }));
 }
 
-function RoleSection({
-  roleId,
-  param,
+const roleName = (roleId: string) =>
+  messages.steps[WEEK_STEPS.find((s) => s.role === roleId && s.task === "default")?.key ?? "ac"].name;
+
+/** Print / share links per step. */
+function stepLinks(step: WeekStep, proposal: Proposal, basePath: string) {
+  const link = (href: string, label: string) => ({ href, label });
+  switch (step.key) {
+    case "tc":
+      return [
+        link(`${basePath}/print/match?v=${proposal.version}&part=talk`, messages.matchPlan.printTalk),
+        link(`${basePath}/print/match?v=${proposal.version}&part=set-pieces`, messages.matchPlan.printSetPieces),
+      ];
+    case "ac":
+      return [link(`${basePath}/print?v=${proposal.version}`, m.print)];
+    case "tco":
+      return [link(`${basePath}/print?drawings=${proposal.version}`, m.print)];
+    default:
+      return [];
+  }
+}
+
+/** Where each step stands, with a link to its section. */
+function StepOverview({
+  steps,
+  basePath,
+}: {
+  steps: { step: WeekStep; list: Proposal[]; selected: Proposal | null }[];
+  basePath: string;
+}) {
+  return (
+    <nav className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      {steps.map(({ step, list }) => {
+        const approved = list.find((x) => x.status === "approved");
+        const latest = list[0];
+        const status = approved ? m.status.approved : latest ? m.status[latest.status] : m.noProposals;
+        return (
+          <Link
+            key={step.key}
+            href={`${basePath}#${step.key}`}
+            className={`rounded-xl px-3 py-2 text-sm ring-1 ${
+              approved ? "bg-green-50 ring-green-200" : "bg-white ring-slate-200"
+            } hover:ring-brand`}
+          >
+            <span className="block text-xs text-slate-500">{messages.steps.order[step.key]}</span>
+            <span className="block font-medium">{messages.steps[step.key].name}</span>
+            <span className="block text-xs text-slate-600">{status}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function StepSection({
+  step,
   list,
   selected,
   teamId,
@@ -221,14 +352,14 @@ function RoleSection({
   basePath,
   canEdit,
   flagEnabled,
+  blocked,
   testMode,
   busy,
   note,
-  printable = false,
+  links,
   render,
 }: {
-  roleId: WeekRoleId;
-  param: string;
+  step: WeekStep;
   list: Proposal[];
   selected: Proposal | null;
   teamId: string;
@@ -236,19 +367,20 @@ function RoleSection({
   basePath: string;
   canEdit: boolean;
   flagEnabled: boolean;
+  blocked: boolean;
   testMode: boolean;
   busy: boolean;
   note?: string;
-  printable?: boolean;
-  render: (output: unknown) => React.ReactNode;
+  links: (proposal: Proposal) => { href: string; label: string }[];
+  render: (proposal: Proposal) => React.ReactNode;
 }) {
-  const r = messages.roles[roleId];
-  const canRequest = canEdit && flagEnabled;
+  const r = messages.steps[step.key];
+  const canRequest = canEdit && flagEnabled && !blocked;
   return (
-    <section className="space-y-4">
+    <section id={step.key} className="scroll-mt-4 space-y-4 border-t border-slate-200 pt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">{r.name}</h2>
-        {canRequest && !busy && <RequestProposalButton teamId={teamId} weekStart={weekStart} roleId={roleId} />}
+        {canRequest && !busy && <RequestProposalButton teamId={teamId} weekStart={weekStart} step={step.key} />}
       </div>
       {note && flagEnabled && <p className="text-xs text-slate-600">{note}</p>}
       {canEdit && !flagEnabled && <Alert tone="error">{r.flagOff}</Alert>}
@@ -258,7 +390,7 @@ function RoleSection({
           {list.map((x) => (
             <Link
               key={x.id}
-              href={`${basePath}?${param}=${x.version}`}
+              href={`${basePath}?${step.key}=${x.version}#${step.key}`}
               scroll={false}
               className={`rounded-full px-3 py-1 text-xs ring-1 ${
                 x.id === selected?.id ? "bg-brand text-white ring-brand" : "bg-white text-slate-700 ring-slate-200"
@@ -291,17 +423,18 @@ function RoleSection({
             {canEdit && selected.status !== "rejected" && (
               <DecisionButton teamId={teamId} weekStart={weekStart} proposalId={selected.id} decision="rejected" />
             )}
-            {printable && (
+            {links(selected).map((l) => (
               <Link
-                href={`${basePath}/print?v=${selected.version}`}
+                key={l.href}
+                href={l.href}
                 className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                {m.print}
+                {l.label}
               </Link>
-            )}
-            {canRequest && !busy && <AdjustProposalForm teamId={teamId} weekStart={weekStart} roleId={roleId} />}
+            ))}
+            {canRequest && !busy && <AdjustProposalForm teamId={teamId} weekStart={weekStart} step={step.key} />}
           </div>
-          {render(selected.output)}
+          {render(selected)}
         </>
       )}
     </section>

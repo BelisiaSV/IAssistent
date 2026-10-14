@@ -1,9 +1,522 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://iassistent.app/staff/tactical-coach/output-schema.json",
-  "title": "Tactical Coach — output",
-  "description": "Placeholder — structuur van de output van deze rol, nog in te vullen.",
+  "title": "Tactical Coach — wedstrijdplan",
+  "description": "Wedstrijdplan volgens de vaste structuur van de wedstrijdvoorbereiding.",
   "type": "object",
-  "properties": {},
-  "additionalProperties": true
+  "additionalProperties": false,
+  "required": [
+    "tegenstander",
+    "lessen",
+    "speelplan",
+    "opstelling",
+    "standaardsituaties",
+    "scenarios",
+    "trainingsaccenten",
+    "wedstrijdbespreking",
+    "aandachtspunten",
+    "vragen_aan_coach"
+  ],
+  "properties": {
+    "tegenstander": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "naam",
+        "formatie",
+        "samenvatting",
+        "sterktes",
+        "zwaktes",
+        "sleutelspelers"
+      ],
+      "properties": {
+        "naam": {
+          "type": "string"
+        },
+        "formatie": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "samenvatting": {
+          "type": "string"
+        },
+        "sterktes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "zwaktes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sleutelspelers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "rugnummer",
+              "post",
+              "aandacht"
+            ],
+            "properties": {
+              "rugnummer": {
+                "type": "integer"
+              },
+              "post": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "aandacht": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "lessen": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "speelplan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formatie",
+        "kernboodschap",
+        "balbezit",
+        "balverlies",
+        "omschakeling_aanval",
+        "omschakeling_verdediging",
+        "pressing"
+      ],
+      "properties": {
+        "formatie": {
+          "type": "string",
+          "description": "Formatiecode uit formaties.json."
+        },
+        "kernboodschap": {
+          "type": "string"
+        },
+        "balbezit": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "balverlies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "omschakeling_aanval": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "omschakeling_verdediging": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pressing": {
+          "type": "string"
+        }
+      }
+    },
+    "opstelling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "formatie",
+        "basis",
+        "bank",
+        "toelichting"
+      ],
+      "properties": {
+        "formatie": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "post",
+              "rugnummer",
+              "taak"
+            ],
+            "properties": {
+              "post": {
+                "type": "string",
+                "description": "Post-id uit de formatie (bv. LCB)."
+              },
+              "rugnummer": {
+                "type": "integer"
+              },
+              "taak": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "bank": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "toelichting": {
+          "type": "string"
+        }
+      }
+    },
+    "standaardsituaties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "titel",
+          "soort",
+          "afspraken",
+          "taken",
+          "tekening"
+        ],
+        "properties": {
+          "titel": {
+            "type": "string"
+          },
+          "soort": {
+            "type": "string",
+            "enum": [
+              "hoekschop_aanvallend",
+              "hoekschop_verdedigend",
+              "vrije_trap_aanvallend",
+              "vrije_trap_verdedigend",
+              "inworp",
+              "aftrap",
+              "strafschop"
+            ]
+          },
+          "afspraken": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "taken": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "rugnummer",
+                "taak"
+              ],
+              "properties": {
+                "rugnummer": {
+                  "type": "integer"
+                },
+                "taak": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "tekening": {
+            "$ref": "#/$defs/tekening"
+          }
+        }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "situatie",
+          "aanpassing"
+        ],
+        "properties": {
+          "situatie": {
+            "type": "string"
+          },
+          "aanpassing": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "trainingsaccenten": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "datum",
+          "md",
+          "thema",
+          "doel",
+          "aandachtspunten"
+        ],
+        "properties": {
+          "datum": {
+            "type": "string",
+            "format": "date"
+          },
+          "md": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "thema": {
+            "type": "string"
+          },
+          "doel": {
+            "type": "string"
+          },
+          "aandachtspunten": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "wedstrijdbespreking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "titel",
+        "kernpunten",
+        "afsluiter"
+      ],
+      "properties": {
+        "titel": {
+          "type": "string"
+        },
+        "kernpunten": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "afsluiter": {
+          "type": "string"
+        }
+      }
+    },
+    "aandachtspunten": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vragen_aan_coach": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "tekening": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "titel",
+        "veld",
+        "elementen",
+        "pijlen",
+        "zones",
+        "uitleg"
+      ],
+      "description": "Veldtekening; coördinaten x/y in procent van het getekende veld (x 0 = links, y 0 = boven).",
+      "properties": {
+        "titel": {
+          "type": "string"
+        },
+        "veld": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "breedte_m",
+            "lengte_m"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "volledig",
+                "half",
+                "zone"
+              ]
+            },
+            "breedte_m": {
+              "type": "integer"
+            },
+            "lengte_m": {
+              "type": "integer"
+            }
+          }
+        },
+        "elementen": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "soort",
+              "team",
+              "label",
+              "x",
+              "y"
+            ],
+            "properties": {
+              "soort": {
+                "type": "string",
+                "enum": [
+                  "speler",
+                  "doelman",
+                  "kegel",
+                  "bal",
+                  "doel",
+                  "minidoel",
+                  "paal"
+                ]
+              },
+              "team": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "eigen",
+                  "tegenstander",
+                  "neutraal",
+                  null
+                ]
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Rugnummer of korte letter."
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "pijlen": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "soort",
+              "van_x",
+              "van_y",
+              "naar_x",
+              "naar_y",
+              "label"
+            ],
+            "properties": {
+              "soort": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "loop",
+                  "dribbel",
+                  "schot"
+                ]
+              },
+              "van_x": {
+                "type": "number"
+              },
+              "van_y": {
+                "type": "number"
+              },
+              "naar_x": {
+                "type": "number"
+              },
+              "naar_y": {
+                "type": "number"
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "zones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "breedte",
+              "hoogte",
+              "label"
+            ],
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "breedte": {
+                "type": "number"
+              },
+              "hoogte": {
+                "type": "number"
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "uitleg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
 }

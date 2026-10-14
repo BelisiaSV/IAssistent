@@ -16,7 +16,7 @@ export default async function LineupsPage({ params }: { params: Promise<{ teamId
   const supabase = await createClient();
   const { data } = await supabase
     .from("lineups")
-    .select("id, title, match_date, opponent, formation, starters, bench, created_at")
+    .select("id, title, match_date, opponent, formation, starters, bench, source, created_at")
     .eq("team_id", team.id)
     .order("match_date", { ascending: false, nullsFirst: true })
     .order("created_at", { ascending: false });
@@ -41,7 +41,12 @@ export default async function LineupsPage({ params }: { params: Promise<{ teamId
                 >
                   <span className="rounded bg-slate-100 px-2 py-1 font-mono text-xs">{lineup.formation}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{lineup.title}</span>
+                    <span className="block truncate font-medium">
+                      {lineup.title}
+                      {lineup.source === "tactical-coach" && (
+                        <span className="ml-2 rounded bg-brand/10 px-1.5 py-0.5 text-xs font-normal text-brand">{m.fromTacticalCoach}</span>
+                      )}
+                    </span>
                     <span className="block truncate text-xs text-slate-500">
                       {[
                         lineup.match_date ? dateFormat.format(new Date(lineup.match_date)) : null,
