@@ -2,7 +2,7 @@ import { messages } from "@/lib/messages";
 import { longDate, weekdayName } from "@/lib/weeks/dates";
 
 import { withShirtNames } from "./names";
-import type { WeekPlanningOutput } from "./types";
+import type { MatchPlanOutput, WeekPlanningOutput } from "./types";
 
 const o = messages.proposals.output;
 
@@ -46,4 +46,28 @@ export function weekPlanningToText(
     for (const item of output.individueel) lines.push(`- ${n(`#${item.rugnummer}`)}: ${n(item.advies)}`);
   }
   return lines.join("\n").trim() + "\n";
+}
+
+/** Plain-text match talk (key message, lineup, key points), ready to paste in a message. */
+export function matchTalkToText(
+  output: MatchPlanOutput,
+  options: { title: string; names: Map<number, string> },
+): string {
+  const n = (text: string) => withShirtNames(text, options.names);
+  const t = messages.matchPlan;
+  const lines = [
+    `*${options.title}*`,
+    "",
+    `${t.keyMessage}: ${n(output.speelplan.kernboodschap)}`,
+    "",
+    `*${t.lineup} (${output.opstelling.formatie})*`,
+    ...output.opstelling.basis.map((b) => `${b.post}: ${n(`#${b.rugnummer}`)}`),
+  ];
+  if (output.opstelling.bank.length) {
+    lines.push(`${t.bench}: ${output.opstelling.bank.map((nr) => n(`#${nr}`)).join(", ")}`);
+  }
+  lines.push("", `*${output.wedstrijdbespreking.titel}*`);
+  output.wedstrijdbespreking.kernpunten.forEach((k, i) => lines.push(`${i + 1}. ${n(k)}`));
+  lines.push("", n(output.wedstrijdbespreking.afsluiter));
+  return lines.join("\n");
 }

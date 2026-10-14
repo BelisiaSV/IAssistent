@@ -11,5 +11,7 @@ export const FEATURE_FLAGS = {
   assistantCoach: "staff.assistant_coach",
   /** Physical Coach: belastingsplan volgens de periodisering. */
   physicalCoach: "staff.physical_coach",
+  /** Tactical Coach: wedstrijdplan, standaardsituaties en uitgetekende oefenstof. */
+  tacticalCoach: "staff.tactical_coach",
 } as const satisfies Record<string, string>;
 export type FeatureFlagKey = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];

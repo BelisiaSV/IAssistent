@@ -59,12 +59,47 @@ export interface RoleFeedback {
   feedback: string;
 }
 
+/** Next opponent: fiche and last known lineup (shirt numbers per slot, no names). */
+export interface OpponentContext {
+  naam: string;
+  thuis: boolean | null;
+  formatie: string | null;
+  speelstijl: string | null;
+  sterktes: string | null;
+  zwaktes: string | null;
+  standaardsituaties: string | null;
+  notities: string | null;
+  opstelling: {
+    bron: "coach" | "video";
+    datum: string | null;
+    formatie: string;
+    basis: { post: string; rugnummer: number | null }[];
+    bank: (number | null)[];
+  } | null;
+}
+
+/** Findings of the head coach after a match. */
+export interface MatchEvaluation {
+  datum: string;
+  tegenstander: string;
+  thuis: boolean | null;
+  uitslag: string | null;
+  eigen_formatie: string | null;
+  formatie_tegenstander: string | null;
+  zelfde_formatie_als_tegenstander: boolean;
+  wat_ging_goed: string | null;
+  wat_ging_slecht: string | null;
+  lessen: string | null;
+}
+
 export interface RoleContext {
   weekinput: WeekInput;
   kern: SquadPlayer[];
   visie: VisionContext;
   belastingshistoriek: LoadHistoryWeek[];
   testen: TestStatus[];
+  tegenstander: OpponentContext | null;
+  evaluaties: MatchEvaluation[];
   /** Approved proposals of other roles for this week, by role id. */
   staf: Record<string, unknown>;
   feedback: RoleFeedback | null;

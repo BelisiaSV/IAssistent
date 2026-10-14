@@ -5,7 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 
 import { Alert, Button } from "@/components/ui";
 import { messages } from "@/lib/messages";
-import type { WeekRoleId } from "@/lib/roles";
+import type { WeekStepKey } from "@/lib/roles";
 
 import { type FormState, requestProposal } from "../actions";
 
@@ -14,21 +14,21 @@ const m = messages.proposals;
 export function RequestProposalButton({
   teamId,
   weekStart,
-  roleId,
+  step,
 }: {
   teamId: string;
   weekStart: string;
-  roleId: WeekRoleId;
+  step: WeekStepKey;
 }) {
   const [state, action, pending] = useActionState<FormState, FormData>(
-    requestProposal.bind(null, teamId, weekStart, roleId),
+    requestProposal.bind(null, teamId, weekStart, step),
     {},
   );
   return (
     <form action={action} className="space-y-2">
       {state.error && <Alert tone="error">{state.error}</Alert>}
       <Button type="submit" disabled={pending}>
-        {pending ? m.requesting : messages.roles[roleId].request}
+        {pending ? m.requesting : messages.steps[step].request}
       </Button>
     </form>
   );
@@ -37,18 +37,18 @@ export function RequestProposalButton({
 export function AdjustProposalForm({
   teamId,
   weekStart,
-  roleId,
+  step,
 }: {
   teamId: string;
   weekStart: string;
-  roleId: WeekRoleId;
+  step: WeekStepKey;
 }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState<FormState, FormData>(
-    requestProposal.bind(null, teamId, weekStart, roleId),
+    requestProposal.bind(null, teamId, weekStart, step),
     {},
   );
-  const r = messages.roles[roleId];
+  const r = messages.steps[step];
   if (!open) {
     return (
       <Button type="button" variant="secondary" onClick={() => setOpen(true)}>

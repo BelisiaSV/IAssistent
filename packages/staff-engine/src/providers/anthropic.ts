@@ -28,7 +28,7 @@ export function anthropicProvider(options: {
 
   return {
     id: "anthropic",
-    async generate({ role, system, user }) {
+    async generate({ outputSchema, system, user }) {
       let message: Anthropic.Beta.BetaMessage;
       try {
         const stream = client.beta.messages.stream({
@@ -38,7 +38,7 @@ export function anthropicProvider(options: {
           fallbacks: "default",
           output_config: {
             effort: options.effort ?? "high",
-            format: { type: "json_schema", schema: forStructuredOutput(role.outputSchema) },
+            format: { type: "json_schema", schema: forStructuredOutput(outputSchema) },
           },
           system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
           messages: [{ role: "user", content: user }],

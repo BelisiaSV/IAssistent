@@ -1,0 +1,872 @@
+{
+  "oefeningen": [
+    {
+      "datum": "2026-10-13",
+      "onderdeel": "Loopscholing met bal",
+      "fase": "opwarming",
+      "tekening": {
+        "titel": "Loopscholing met bal",
+        "veld": {
+          "type": "zone",
+          "breedte_m": 30,
+          "lengte_m": 20
+        },
+        "elementen": [
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 10,
+            "y": 20
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 10,
+            "y": 50
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 10,
+            "y": 80
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 90,
+            "y": 20
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 90,
+            "y": 50
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 90,
+            "y": 80
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "A",
+            "x": 5,
+            "y": 50
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "B",
+            "x": 95,
+            "y": 50
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 8,
+            "y": 52
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "loop",
+            "van_x": 10,
+            "van_y": 50,
+            "naar_x": 90,
+            "naar_y": 50,
+            "label": "loopscholing"
+          },
+          {
+            "soort": "pass",
+            "van_x": 8,
+            "van_y": 52,
+            "naar_x": 92,
+            "naar_y": 50,
+            "label": null
+          }
+        ],
+        "zones": [],
+        "uitleg": [
+          "Duo's tegenover elkaar.",
+          "Loopscholing heen, pass terug.",
+          "Wisselen na 4 herhalingen."
+        ]
+      },
+      "organisatie": "Halve breedte, 4 kegellijnen, 1 bal per 2 spelers.",
+      "verloop": [
+        "Heen loopscholing",
+        "Terug pass in de voeten"
+      ],
+      "variaties": [
+        "Kaats na de loopscholing"
+      ],
+      "coachingspunten": [
+        "Rechtop lopen"
+      ]
+    },
+    {
+      "datum": "2026-10-13",
+      "onderdeel": "Rondo 5v2",
+      "fase": "kern",
+      "tekening": {
+        "titel": "Rondo 5v2",
+        "veld": {
+          "type": "zone",
+          "breedte_m": 12,
+          "lengte_m": 12
+        },
+        "elementen": [
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "A",
+            "x": 50,
+            "y": 2
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "B",
+            "x": 98,
+            "y": 50
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "C",
+            "x": 50,
+            "y": 98
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "D",
+            "x": 2,
+            "y": 50
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "E",
+            "x": 80,
+            "y": 15
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": "1",
+            "x": 45,
+            "y": 45
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": "2",
+            "x": 58,
+            "y": 55
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 52,
+            "y": 6
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 0,
+            "y": 0
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 100,
+            "y": 0
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 0,
+            "y": 100
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 100,
+            "y": 100
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "pass",
+            "van_x": 50,
+            "van_y": 2,
+            "naar_x": 98,
+            "naar_y": 50,
+            "label": null
+          },
+          {
+            "soort": "pass",
+            "van_x": 98,
+            "van_y": 50,
+            "naar_x": 50,
+            "naar_y": 98,
+            "label": null
+          },
+          {
+            "soort": "loop",
+            "van_x": 45,
+            "van_y": 45,
+            "naar_x": 70,
+            "naar_y": 60,
+            "label": "jagen"
+          }
+        ],
+        "zones": [
+          {
+            "x": 0,
+            "y": 0,
+            "breedte": 100,
+            "hoogte": 100,
+            "label": null
+          }
+        ],
+        "uitleg": [
+          "5 spelers rond het vak, 2 in het midden.",
+          "Max. 2 balcontacten.",
+          "Wie de bal verliest, gaat in het midden."
+        ]
+      },
+      "organisatie": "Vak van 12 × 12 m.",
+      "verloop": [
+        "5 rond het vak, 2 in het midden",
+        "Max. 2 balcontacten"
+      ],
+      "variaties": [
+        "1 balcontact",
+        "Groter vak voor meer succes"
+      ],
+      "coachingspunten": [
+        "Lichaam open",
+        "Na balverlies jagen met twee"
+      ]
+    },
+    {
+      "datum": "2026-10-13",
+      "onderdeel": "Positiespel 6v6 + 3 kaatsers",
+      "fase": "kern",
+      "tekening": {
+        "titel": "Positiespel 6v6 + 3 kaatsers",
+        "veld": {
+          "type": "zone",
+          "breedte_m": 40,
+          "lengte_m": 35
+        },
+        "elementen": [
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "1",
+            "x": 30,
+            "y": 25
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "2",
+            "x": 70,
+            "y": 25
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "3",
+            "x": 50,
+            "y": 45
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "4",
+            "x": 25,
+            "y": 70
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "5",
+            "x": 75,
+            "y": 70
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "6",
+            "x": 50,
+            "y": 85
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 40,
+            "y": 35
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 60,
+            "y": 35
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 60
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 35,
+            "y": 75
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 65,
+            "y": 75
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 20
+          },
+          {
+            "soort": "speler",
+            "team": "neutraal",
+            "label": "K",
+            "x": 2,
+            "y": 50
+          },
+          {
+            "soort": "speler",
+            "team": "neutraal",
+            "label": "K",
+            "x": 98,
+            "y": 50
+          },
+          {
+            "soort": "speler",
+            "team": "neutraal",
+            "label": "K",
+            "x": 50,
+            "y": 2
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 52,
+            "y": 47
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "pass",
+            "van_x": 50,
+            "van_y": 45,
+            "naar_x": 75,
+            "naar_y": 70,
+            "label": null
+          },
+          {
+            "soort": "pass",
+            "van_x": 75,
+            "van_y": 70,
+            "naar_x": 98,
+            "naar_y": 50,
+            "label": null
+          },
+          {
+            "soort": "pass",
+            "van_x": 98,
+            "van_y": 50,
+            "naar_x": 50,
+            "naar_y": 2,
+            "label": null
+          }
+        ],
+        "zones": [
+          {
+            "x": 0,
+            "y": 0,
+            "breedte": 100,
+            "hoogte": 100,
+            "label": null
+          }
+        ],
+        "uitleg": [
+          "Ploeg in balbezit + kaatsers houden de bal.",
+          "Punt na 8 passes of een pass van kaatser naar kaatser.",
+          "Bij balverlies wisselen de rollen."
+        ]
+      },
+      "organisatie": "40 × 35 m, kaatsers op de flanken en centraal.",
+      "verloop": [
+        "Ploeg in balbezit + kaatsers houden de bal",
+        "Punt na 8 passes"
+      ],
+      "variaties": [
+        "Kaatsers 1 balcontact"
+      ],
+      "coachingspunten": [
+        "Driehoeken maken",
+        "Spelen in de voeten van de vrije man"
+      ]
+    },
+    {
+      "datum": "2026-10-15",
+      "onderdeel": "4v4 + doelmannen, kleine ruimte",
+      "fase": "kern",
+      "tekening": {
+        "titel": "4v4 + doelmannen, kleine ruimte",
+        "veld": {
+          "type": "zone",
+          "breedte_m": 25,
+          "lengte_m": 30
+        },
+        "elementen": [
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 1
+          },
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 99
+          },
+          {
+            "soort": "doelman",
+            "team": "eigen",
+            "label": null,
+            "x": 50,
+            "y": 4
+          },
+          {
+            "soort": "doelman",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 96
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "1",
+            "x": 30,
+            "y": 35
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "2",
+            "x": 70,
+            "y": 35
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "3",
+            "x": 40,
+            "y": 60
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "4",
+            "x": 60,
+            "y": 70
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 35,
+            "y": 45
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 65,
+            "y": 45
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 45,
+            "y": 70
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 55,
+            "y": 25
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 42,
+            "y": 58
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "pass",
+            "van_x": 40,
+            "van_y": 60,
+            "naar_x": 70,
+            "naar_y": 35,
+            "label": null
+          },
+          {
+            "soort": "schot",
+            "van_x": 70,
+            "van_y": 35,
+            "naar_x": 52,
+            "naar_y": 4,
+            "label": null
+          },
+          {
+            "soort": "loop",
+            "van_x": 45,
+            "van_y": 70,
+            "naar_x": 40,
+            "naar_y": 60,
+            "label": "tegendruk"
+          }
+        ],
+        "zones": [
+          {
+            "x": 0,
+            "y": 0,
+            "breedte": 100,
+            "hoogte": 100,
+            "label": null
+          }
+        ],
+        "uitleg": [
+          "4v4 met twee doelen en doelmannen.",
+          "Na balverlies binnen 5 seconden terugwinnen.",
+          "Wissels klaar naast het veld."
+        ]
+      },
+      "organisatie": "30 × 25 m met 2 doelen.",
+      "verloop": [
+        "4v4",
+        "Wissels na elke reeks"
+      ],
+      "variaties": [
+        "Doelpunt na tegendruk telt dubbel"
+      ],
+      "coachingspunten": [
+        "Binnen 5 seconden terugwinnen"
+      ]
+    },
+    {
+      "datum": "2026-10-15",
+      "onderdeel": "Partijvorm 8v8 met omschakelzones",
+      "fase": "kern",
+      "tekening": {
+        "titel": "Partijvorm 8v8 met omschakelzones",
+        "veld": {
+          "type": "volledig",
+          "breedte_m": 55,
+          "lengte_m": 70
+        },
+        "elementen": [
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 1
+          },
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 99
+          },
+          {
+            "soort": "doelman",
+            "team": "eigen",
+            "label": null,
+            "x": 50,
+            "y": 4
+          },
+          {
+            "soort": "doelman",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 96
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "4",
+            "x": 35,
+            "y": 25
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "5",
+            "x": 65,
+            "y": 25
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "6",
+            "x": 50,
+            "y": 40
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "8",
+            "x": 30,
+            "y": 55
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "10",
+            "x": 70,
+            "y": 55
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "9",
+            "x": 50,
+            "y": 72
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 40,
+            "y": 60
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 60,
+            "y": 60
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 45
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 52,
+            "y": 42
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "pass",
+            "van_x": 50,
+            "van_y": 40,
+            "naar_x": 70,
+            "naar_y": 55,
+            "label": null
+          },
+          {
+            "soort": "loop",
+            "van_x": 50,
+            "van_y": 72,
+            "naar_x": 62,
+            "naar_y": 85,
+            "label": "diepte"
+          }
+        ],
+        "zones": [
+          {
+            "x": 0,
+            "y": 33,
+            "breedte": 100,
+            "hoogte": 34,
+            "label": "omschakelzone"
+          }
+        ],
+        "uitleg": [
+          "8v8 op twee derde terrein.",
+          "Balverovering in de omschakelzone = binnen 8 seconden afronden.",
+          "Blokken van 8 minuten."
+        ]
+      },
+      "organisatie": "Twee derde terrein, 2 doelen.",
+      "verloop": [
+        "8v8",
+        "Omschakelzone in het midden"
+      ],
+      "variaties": [
+        "Max. 3 balcontacten"
+      ],
+      "coachingspunten": [
+        "Compact blijven",
+        "Diepte na balverovering"
+      ]
+    },
+    {
+      "datum": "2026-10-16",
+      "onderdeel": "Sprints met afwerking",
+      "fase": "kern",
+      "tekening": {
+        "titel": "Sprints met afwerking",
+        "veld": {
+          "type": "half",
+          "breedte_m": 68,
+          "lengte_m": 52
+        },
+        "elementen": [
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 1
+          },
+          {
+            "soort": "doelman",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 4
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 35,
+            "y": 60
+          },
+          {
+            "soort": "kegel",
+            "team": null,
+            "label": null,
+            "x": 65,
+            "y": 60
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "A",
+            "x": 35,
+            "y": 62
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "B",
+            "x": 65,
+            "y": 62
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 40
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "loop",
+            "van_x": 35,
+            "van_y": 62,
+            "naar_x": 45,
+            "naar_y": 25,
+            "label": "sprint"
+          },
+          {
+            "soort": "loop",
+            "van_x": 65,
+            "van_y": 62,
+            "naar_x": 55,
+            "naar_y": 25,
+            "label": "sprint"
+          },
+          {
+            "soort": "schot",
+            "van_x": 48,
+            "van_y": 24,
+            "naar_x": 50,
+            "naar_y": 3,
+            "label": null
+          }
+        ],
+        "zones": [],
+        "uitleg": [
+          "Start op signaal, sprint 20 m.",
+          "Eerste aan de bal werkt af.",
+          "Volledige rust tussen de sprints."
+        ]
+      },
+      "organisatie": "Vanaf 20 m van de zestien.",
+      "verloop": [
+        "Start op signaal",
+        "Eerste aan de bal werkt af"
+      ],
+      "variaties": [
+        "Start vanuit zit"
+      ],
+      "coachingspunten": [
+        "Explosief vertrekken"
+      ]
+    }
+  ],
+  "opmerkingen": [
+    "Tekeningen volgen de organisatie en belasting uit de weekplanning."
+  ]
+}

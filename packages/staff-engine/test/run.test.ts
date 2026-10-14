@@ -61,6 +61,18 @@ function context(): RoleContext {
     visie: { samenvatting: "Dominant voetbal.", antwoorden: [] },
     belastingshistoriek: [],
     testen: [],
+    tegenstander: {
+      naam: "KFC Voorbeeld",
+      thuis: true,
+      formatie: "4-4-2",
+      speelstijl: "Direct",
+      sterktes: null,
+      zwaktes: null,
+      standaardsituaties: null,
+      notities: null,
+      opstelling: { bron: "coach", datum: "2026-09-20", formatie: "4-4-2", basis: [{ post: "ST", rugnummer: 9 }], bank: [14] },
+    },
+    evaluaties: [],
     staf: {},
     feedback: null,
   };
@@ -125,6 +137,64 @@ describe("physical coach", () => {
   });
 });
 
+describe("tactical coach", () => {
+  const squad = () => [
+    { rugnummer: 1, posities: ["GK"], voet: "rechts", beschikbaar: true, status: "beschikbaar", terug_verwacht: null, mas_kmh: null, mas_test_datum: null },
+    { rugnummer: 4, posities: ["CB"], voet: "rechts", beschikbaar: true, status: "beschikbaar", terug_verwacht: null, mas_kmh: null, mas_test_datum: null },
+    { rugnummer: 9, posities: ["ST"], voet: "rechts", beschikbaar: true, status: "beschikbaar", terug_verwacht: null, mas_kmh: null, mas_test_datum: null },
+    { rugnummer: 5, posities: ["CB"], voet: "links", beschikbaar: false, status: "geblesseerd", terug_verwacht: null, mas_kmh: null, mas_test_datum: null },
+  ];
+
+  it("has valid examples for both tasks", () => {
+    const role = staff.roles.find((r) => r.id === "tactical-coach")!;
+    expect(role.tasks.map((t) => t.id)).toEqual(["oefenstof"]);
+    expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
+    expect(validateOutput(role.tasks[0]!.outputSchema, roleExample(role, "oefenstof"))).toEqual({ ok: true });
+  });
+
+  it("builds a match plan with a lineup from available players only", async () => {
+    const result = await runRole(staff, "tactical-coach", { ...context(), kern: squad() }, exampleProvider);
+    const output = result.output as {
+      tegenstander: { naam: string };
+      opstelling: { basis: { post: string; rugnummer: number }[] };
+      trainingsaccenten: { datum: string }[];
+    };
+    expect(output.tegenstander.naam).toBe("KFC Voorbeeld");
+    expect(output.opstelling.basis.find((b) => b.post === "GK")?.rugnummer).toBe(1);
+    expect(output.opstelling.basis.map((b) => b.rugnummer)).not.toContain(5);
+    expect(output.trainingsaccenten.map((a) => a.datum)).toEqual(["2026-10-20", "2026-10-22"]);
+  });
+
+  it("draws every part of the approved week planning", async () => {
+    const planning = (await runRole(staff, "assistant-coach", context(), exampleProvider)).output as {
+      dagen: { onderdelen: { naam: string }[] }[];
+    };
+    const parts = planning.dagen.flatMap((d) => d.onderdelen.map((o) => o.naam));
+    const result = await runRole(
+      staff,
+      "tactical-coach",
+      { ...context(), staf: { "assistant-coach": planning } },
+      exampleProvider,
+      "oefenstof",
+    );
+    const output = result.output as { oefeningen: { onderdeel: string }[] };
+    expect(output.oefeningen.map((o) => o.onderdeel)).toEqual(parts);
+  });
+
+  it("needs an approved week planning to draw", async () => {
+    await expect(runRole(staff, "tactical-coach", context(), exampleProvider, "oefenstof")).rejects.toMatchObject({
+      code: "provider_error",
+    });
+  });
+
+  it("uses the task instructions in the prompt", () => {
+    const role = staff.roles.find((r) => r.id === "tactical-coach")!;
+    const { system, user } = buildRolePrompt(staff, role, context(), "oefenstof");
+    expect(system).toContain("taak 2: oefenstof uittekenen");
+    expect(user).toContain('"naam": "KFC Voorbeeld"');
+  });
+});
+
 describe("buildRolePrompt", () => {
   it("fills every placeholder from /staff and the context", () => {
     const role = staff.roles.find((r) => r.id === "assistant-coach")!;
@@ -161,7 +231,7 @@ describe("runRole with the example provider", () => {
   });
 
   it("refuses placeholder roles", async () => {
-    await expect(runRole(staff, "tactical-coach", context(), exampleProvider)).rejects.toMatchObject({
+    await expect(runRole(staff, "video-analyst", context(), exampleProvider)).rejects.toMatchObject({
       code: "role_not_ready",
     });
   });

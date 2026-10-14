@@ -1,8 +1,10 @@
 import type { Tables } from "@iassistent/db";
 import {
   type LoadHistoryWeek,
+  type MatchEvaluation,
   matchDayFor,
   type MatchDayCatalog,
+  type OpponentContext,
   type PeriodizationCatalog,
   type RoleContext,
   type TestCatalog,
@@ -57,6 +59,8 @@ export function buildRoleContext(input: {
   /** Latest result per player and test code. */
   testResults: { player_id: string; test_code: string; test_date: string; result: number }[];
   history: LoadHistoryWeek[];
+  opponent: OpponentContext | null;
+  evaluations: MatchEvaluation[];
   staff: Record<string, unknown>;
   feedback: { previousOutput: unknown; comment: string } | null;
 }): RoleContext {
@@ -136,6 +140,8 @@ export function buildRoleContext(input: {
     visie: { samenvatting: input.visionSummary, antwoorden },
     belastingshistoriek: input.history,
     testen,
+    tegenstander: input.opponent,
+    evaluaties: input.evaluations,
     staf: input.staff,
     feedback: input.feedback
       ? { vorige_versie: input.feedback.previousOutput, feedback: input.feedback.comment }

@@ -17,6 +17,10 @@ export const ROLE_DIRS = {
   tests: "tests",
 } as const;
 
+/** Optional extra tasks of a role: <rol>/taken/<taak-id>/{instructies.md, output-schema.json, voorbeelden/}. */
+export const ROLE_TASKS_DIR = "taken";
+export const DEFAULT_TASK = "default";
+
 /** Role ids are English kebab-case and equal to the folder name. */
 export const ROLE_ID_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
