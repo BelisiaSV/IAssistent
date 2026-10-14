@@ -88,3 +88,94 @@ export interface LoadPlanOutput {
   aandachtspunten: string[];
   vragen_aan_coach: string[];
 }
+
+/**
+ * Drawing of an exercise or set piece ($defs.tekening in
+ * staff/tactical-coach/output-schema.json). Coordinates are percentages of the
+ * field: x 0 = left, y 0 = top.
+ */
+export interface Drawing {
+  titel: string;
+  veld: { type: "volledig" | "half" | "zone"; breedte_m: number; lengte_m: number };
+  elementen: {
+    soort: "speler" | "doelman" | "kegel" | "bal" | "doel" | "minidoel" | "paal";
+    team: "eigen" | "tegenstander" | "neutraal" | null;
+    label: string | null;
+    x: number;
+    y: number;
+  }[];
+  pijlen: {
+    soort: "pass" | "loop" | "dribbel" | "schot";
+    van_x: number;
+    van_y: number;
+    naar_x: number;
+    naar_y: number;
+    label: string | null;
+  }[];
+  zones: { x: number; y: number; breedte: number; hoogte: number; label: string | null }[];
+  uitleg: string[];
+}
+
+export type SetPieceKind =
+  | "hoekschop_aanvallend"
+  | "hoekschop_verdedigend"
+  | "vrije_trap_aanvallend"
+  | "vrije_trap_verdedigend"
+  | "inworp"
+  | "aftrap"
+  | "strafschop";
+
+/** Shape of the Tactical Coach match plan (staff/tactical-coach/output-schema.json). */
+export interface MatchPlanOutput {
+  tegenstander: {
+    naam: string;
+    formatie: string | null;
+    samenvatting: string;
+    sterktes: string[];
+    zwaktes: string[];
+    sleutelspelers: { rugnummer: number; post: string | null; aandacht: string }[];
+  };
+  lessen: string[];
+  speelplan: {
+    formatie: string;
+    kernboodschap: string;
+    balbezit: string[];
+    balverlies: string[];
+    omschakeling_aanval: string[];
+    omschakeling_verdediging: string[];
+    pressing: string;
+  };
+  opstelling: {
+    formatie: string;
+    basis: { post: string; rugnummer: number; taak: string }[];
+    bank: number[];
+    toelichting: string;
+  };
+  standaardsituaties: {
+    titel: string;
+    soort: SetPieceKind;
+    afspraken: string[];
+    taken: { rugnummer: number; taak: string }[];
+    tekening: Drawing;
+  }[];
+  scenarios: { situatie: string; aanpassing: string }[];
+  trainingsaccenten: { datum: string; md: string | null; thema: string; doel: string; aandachtspunten: string[] }[];
+  wedstrijdbespreking: { titel: string; kernpunten: string[]; afsluiter: string };
+  aandachtspunten: string[];
+  vragen_aan_coach: string[];
+}
+
+/** Shape of the Tactical Coach drawings (staff/tactical-coach/taken/oefenstof/output-schema.json). */
+export interface DrawingsOutput {
+  oefeningen: {
+    datum: string;
+    onderdeel: string;
+    fase: WeekPlanningPart["fase"];
+    tekening: Drawing;
+    organisatie: string;
+    verloop: string[];
+    variaties: string[];
+    coachingspunten: string[];
+  }[];
+  opmerkingen: string[];
+}

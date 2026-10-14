@@ -215,6 +215,7 @@ export type Database = {
           team_id: string;
           week_plan_id: string;
           role: string;
+          task: string;
           version: number;
           status: Database["public"]["Enums"]["proposal_status"];
           feedback: string | null;
@@ -233,6 +234,7 @@ export type Database = {
           team_id: string;
           week_plan_id: string;
           role: string;
+          task?: string;
           version?: number;
           status?: Database["public"]["Enums"]["proposal_status"];
           feedback?: string | null;
@@ -251,6 +253,7 @@ export type Database = {
           team_id?: string;
           week_plan_id?: string;
           role?: string;
+          task?: string;
           version?: number;
           status?: Database["public"]["Enums"]["proposal_status"];
           feedback?: string | null;
@@ -476,6 +479,7 @@ export type Database = {
           formation: string;
           starters: Json;
           bench: string[];
+          source: "coach" | "tactical-coach";
           created_at: string;
           updated_at: string;
         };
@@ -488,6 +492,7 @@ export type Database = {
           formation: string;
           starters?: Json;
           bench?: string[];
+          source?: "coach" | "tactical-coach";
           created_at?: string;
           updated_at?: string;
         };
@@ -500,6 +505,7 @@ export type Database = {
           formation?: string;
           starters?: Json;
           bench?: string[];
+          source?: "coach" | "tactical-coach";
           created_at?: string;
           updated_at?: string;
         };
@@ -509,6 +515,85 @@ export type Database = {
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      match_reports: {
+        Row: {
+          id: string;
+          team_id: string;
+          match_date: string;
+          opponent_id: string | null;
+          opponent_name: string;
+          home: boolean | null;
+          goals_for: number | null;
+          goals_against: number | null;
+          own_formation: string | null;
+          opponent_formation: string | null;
+          went_well: string | null;
+          went_badly: string | null;
+          lessons: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          match_date: string;
+          opponent_id?: string | null;
+          opponent_name: string;
+          home?: boolean | null;
+          goals_for?: number | null;
+          goals_against?: number | null;
+          own_formation?: string | null;
+          opponent_formation?: string | null;
+          went_well?: string | null;
+          went_badly?: string | null;
+          lessons?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          match_date?: string;
+          opponent_id?: string | null;
+          opponent_name?: string;
+          home?: boolean | null;
+          goals_for?: number | null;
+          goals_against?: number | null;
+          own_formation?: string | null;
+          opponent_formation?: string | null;
+          went_well?: string | null;
+          went_badly?: string | null;
+          lessons?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_reports_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "match_reports_opponent_id_fkey";
+            columns: ["opponent_id"];
+            isOneToOne: false;
+            referencedRelation: "opponents";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "match_reports_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
             referencedColumns: ["id"];
           },
         ];
@@ -572,6 +657,127 @@ export type Database = {
           {
             foreignKeyName: "memberships_granted_by_fkey";
             columns: ["granted_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      opponent_lineups: {
+        Row: {
+          id: string;
+          team_id: string;
+          opponent_id: string;
+          match_date: string | null;
+          source: "coach" | "video";
+          formation: string;
+          starters: Json;
+          bench: Json;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          opponent_id: string;
+          match_date?: string | null;
+          source?: "coach" | "video";
+          formation: string;
+          starters?: Json;
+          bench?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          opponent_id?: string;
+          match_date?: string | null;
+          source?: "coach" | "video";
+          formation?: string;
+          starters?: Json;
+          bench?: Json;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "opponent_lineups_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "opponent_lineups_opponent_id_fkey";
+            columns: ["opponent_id"];
+            isOneToOne: false;
+            referencedRelation: "opponents";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "opponent_lineups_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      opponents: {
+        Row: {
+          id: string;
+          team_id: string;
+          name: string;
+          play_style: string | null;
+          strengths: string | null;
+          weaknesses: string | null;
+          set_pieces: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          name: string;
+          play_style?: string | null;
+          strengths?: string | null;
+          weaknesses?: string | null;
+          set_pieces?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          name?: string;
+          play_style?: string | null;
+          strengths?: string | null;
+          weaknesses?: string | null;
+          set_pieces?: string | null;
+          notes?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "opponents_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "opponents_created_by_fkey";
+            columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "coaches";
             referencedColumns: ["id"];

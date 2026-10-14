@@ -37,6 +37,16 @@ export interface StaffRole {
   examples: StaffFile[];
   /** tests/ */
   tests: StaffFile[];
+  /** taken/<id>/ — extra tasks besides the default one. */
+  tasks: StaffTask[];
+}
+
+/** An extra task of a role, with its own instructions, output schema and examples. */
+export interface StaffTask {
+  id: string;
+  instructions: string;
+  outputSchema: Record<string, unknown>;
+  examples: StaffFile[];
 }
 
 export interface Staff {

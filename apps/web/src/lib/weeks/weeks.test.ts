@@ -92,6 +92,8 @@ describe("buildRoleContext", () => {
         { player_id: "p9", test_code: "vameval", test_date: "2026-09-01", result: 16 },
       ],
       history: [],
+      opponent: null,
+      evaluations: [],
       staff: { "physical-coach": { weektype: "deload" } },
       feedback: null,
     });

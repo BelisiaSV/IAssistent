@@ -1,6 +1,7 @@
 import type { RoleContext } from "./context";
 import { validateOutput } from "./output";
-import { buildRolePrompt } from "./prompt";
+import { DEFAULT_TASK } from "./layout";
+import { buildRolePrompt, roleTask } from "./prompt";
 import { StaffGenerationError, type GenerateResult, type StaffModelProvider } from "./providers/types";
 import type { Staff } from "./types";
 
@@ -15,15 +16,25 @@ export async function runRole(
   roleId: string,
   context: RoleContext,
   provider: StaffModelProvider,
+  taskId: string = DEFAULT_TASK,
 ): Promise<RoleRunResult> {
   const role = staff.roles.find((r) => r.id === roleId);
-  if (!role || role.meta.status === "placeholder") {
-    throw new StaffGenerationError("role_not_ready", `role ${roleId} is not available`);
+  const task = role ? roleTask(role, taskId) : null;
+  if (!role || !task || role.meta.status === "placeholder") {
+    throw new StaffGenerationError("role_not_ready", `role ${roleId} (${taskId}) is not available`);
   }
-  const { system, user } = buildRolePrompt(staff, role, context);
-  const result = await provider.generate({ staff, role, system, user, context });
+  const { system, user } = buildRolePrompt(staff, role, context, taskId);
+  const result = await provider.generate({
+    staff,
+    role,
+    task: task.id,
+    outputSchema: task.outputSchema,
+    system,
+    user,
+    context,
+  });
 
-  const validation = validateOutput(role.outputSchema, result.output);
+  const validation = validateOutput(task.outputSchema, result.output);
   if (!validation.ok) {
     throw new StaffGenerationError("invalid_output", "output does not match output-schema.json", validation.errors);
   }

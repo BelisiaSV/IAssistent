@@ -26,6 +26,7 @@ export function WeekInputForm({
   days,
   initial,
   matchDays,
+  opponents,
   canEdit,
 }: {
   teamId: string;
@@ -33,6 +34,8 @@ export function WeekInputForm({
   days: { date: string; weekday: string; label: string }[];
   initial: { trainings: WeekTraining[]; matches: WeekMatch[]; previousMatchDate: string | null; notes: string | null };
   matchDays: MatchDayCatalog;
+  /** Names of known opponents, suggested while typing. */
+  opponents: string[];
   canEdit: boolean;
 }) {
   const [state, action, pending] = useActionState<FormState, FormData>(
@@ -164,6 +167,7 @@ export function WeekInputForm({
                     disabled={!canEdit}
                     value={d.opponent}
                     maxLength={120}
+                    list="opponent-names"
                     onChange={(e) => update(day.date, { opponent: e.target.value })}
                     className={`min-w-40 flex-1 ${inputClass}`}
                   />
@@ -223,6 +227,11 @@ export function WeekInputForm({
           </Button>
         </div>
       )}
+      <datalist id="opponent-names">
+        {opponents.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
     </form>
   );
 }

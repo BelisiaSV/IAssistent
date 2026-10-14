@@ -26,7 +26,7 @@ Weektypes en cycli die de staf gebruikt (JSON):
 
 {{rol}}
 
-# Je instructies
+# Je instructies voor deze opdracht
 
 {{instructies}}
 

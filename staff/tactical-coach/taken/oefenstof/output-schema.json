@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/tactical-coach/taken/oefenstof/output-schema.json",
+  "title": "Tactical Coach — oefenstof uitgetekend",
+  "description": "Tekening per oefenvorm uit de goedgekeurde weekplanning.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "oefeningen",
+    "opmerkingen"
+  ],
+  "properties": {
+    "oefeningen": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "datum",
+          "onderdeel",
+          "fase",
+          "tekening",
+          "organisatie",
+          "verloop",
+          "variaties",
+          "coachingspunten"
+        ],
+        "properties": {
+          "datum": {
+            "type": "string",
+            "format": "date"
+          },
+          "onderdeel": {
+            "type": "string",
+            "description": "Naam van het onderdeel zoals in de weekplanning."
+          },
+          "fase": {
+            "type": "string",
+            "enum": [
+              "opwarming",
+              "kern",
+              "afsluiting"
+            ]
+          },
+          "tekening": {
+            "$ref": "#/$defs/tekening"
+          },
+          "organisatie": {
+            "type": "string"
+          },
+          "verloop": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "variaties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "coachingspunten": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "opmerkingen": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "tekening": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "titel",
+        "veld",
+        "elementen",
+        "pijlen",
+        "zones",
+        "uitleg"
+      ],
+      "description": "Veldtekening; coördinaten x/y in procent van het getekende veld (x 0 = links, y 0 = boven).",
+      "properties": {
+        "titel": {
+          "type": "string"
+        },
+        "veld": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "breedte_m",
+            "lengte_m"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "volledig",
+                "half",
+                "zone"
+              ]
+            },
+            "breedte_m": {
+              "type": "integer"
+            },
+            "lengte_m": {
+              "type": "integer"
+            }
+          }
+        },
+        "elementen": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "soort",
+              "team",
+              "label",
+              "x",
+              "y"
+            ],
+            "properties": {
+              "soort": {
+                "type": "string",
+                "enum": [
+                  "speler",
+                  "doelman",
+                  "kegel",
+                  "bal",
+                  "doel",
+                  "minidoel",
+                  "paal"
+                ]
+              },
+              "team": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "eigen",
+                  "tegenstander",
+                  "neutraal",
+                  null
+                ]
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Rugnummer of korte letter."
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "pijlen": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "soort",
+              "van_x",
+              "van_y",
+              "naar_x",
+              "naar_y",
+              "label"
+            ],
+            "properties": {
+              "soort": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "loop",
+                  "dribbel",
+                  "schot"
+                ]
+              },
+              "van_x": {
+                "type": "number"
+              },
+              "van_y": {
+                "type": "number"
+              },
+              "naar_x": {
+                "type": "number"
+              },
+              "naar_y": {
+                "type": "number"
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "zones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "breedte",
+              "hoogte",
+              "label"
+            ],
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "breedte": {
+                "type": "number"
+              },
+              "hoogte": {
+                "type": "number"
+              },
+              "label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "uitleg": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
