@@ -100,7 +100,10 @@ export function WeekInputForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-      <h2 className="font-semibold">{m.title}</h2>
+      <div>
+        <h2 className="font-semibold">{m.title}</h2>
+        <p className="text-sm text-slate-600">{m.hint}</p>
+      </div>
       {state.error && <Alert tone="error">{state.error}</Alert>}
       {state.success && !dirty && <Alert tone="success">{state.success}</Alert>}
       {dirty && canEdit && <p className="text-xs text-amber-700">{m.unsaved}</p>}

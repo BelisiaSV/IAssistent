@@ -9,9 +9,10 @@ import { activeSteps, MATCH_USES_WEEK_STEPS, nextSteps, RUN_STEPS, type RunKind,
 import { staff } from "@/lib/staff";
 import type { createClient } from "@/lib/supabase/server";
 import { contextForRole, loadWeek } from "@/lib/weeks/load";
+import type { SeasonTeam } from "@/lib/weeks/season";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
-type Team = Pick<Tables<"teams">, "id" | "competition_start_date" | "periodization_weeks">;
+type Team = SeasonTeam;
 type Proposal = Tables<"staff_proposals">;
 
 /** A step still generating this long after the run started is considered lost. */

@@ -220,5 +220,11 @@ Regels:
   wordt gekopieerd via `based_on`). De wedstrijdvoorbereiding (run `match`) kan pas na het
   goedgekeurde weekdocument en vanaf de dag van de laatste training. Weekdocument en
   wedstrijdvoorbereiding zijn afdrukbaar. De daglimiet (`staff_daily_limit()`) telt runs.
+- **Teaminstellingen** (`/teams/[id]/settings`) — vaste trainingsdagen (`teams.training_schedule`,
+  elke nieuwe week neemt ze over; optioneel ook toepassen op open weken zonder weekdocument) en
+  seizoensplanning: voorbereiding (`preparation_start_date` + `preparation_weeks`) en competitie
+  (`competition_start_date` + `periodization_weeks`), elk met een eigen cyclus van 4/6/8 weken
+  (`weekPeriodization(weekStart, SeasonPlan, catalog)` in de staff-engine). Afwijkende weken pas je
+  enkel in de weekinput aan.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

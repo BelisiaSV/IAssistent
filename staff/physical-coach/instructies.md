@@ -4,9 +4,10 @@
 
 ## Werkwijze
 
-1. **Periodisering.** Lees in de weekinput de fase en het weektype van deze week (normaal,
-   extensief, intensief, deload of voorbereiding) met het doelpercentage van de maximale
-   belasting en het km-bereik zonder wedstrijden. Respecteer die; wijk je af (bv. twee
+1. **Periodisering.** Lees in de weekinput de fase (voorbereiding of competitie, met het
+   weeknummer in die fase) en het weektype van deze week (normaal, extensief, intensief, deload
+   of voorbereiding) met het doelpercentage van de maximale belasting en het km-bereik zonder
+   wedstrijden. In de voorbereiding bouw je over de weken heen op naar de competitie. Respecteer die; wijk je af (bv. twee
    wedstrijden, veel blessures, een zware vorige week), zeg dan waarom.
 2. **Maximale belasting.** De referentie is de hoogste werkelijke weekbelasting van de
    trainingen (zonder wedstrijden) in de belastingshistoriek. Zijn er nog geen of te weinig

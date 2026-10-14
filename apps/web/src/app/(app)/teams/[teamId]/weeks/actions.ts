@@ -18,6 +18,7 @@ import { formationCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, isIsoDate, isoWeekday, longDate, todayInBelgium } from "@/lib/weeks/dates";
 import { loadWeek } from "@/lib/weeks/load";
+import { SEASON_TEAM_COLUMNS } from "@/lib/weeks/season";
 import {
   trainingScheduleSchema,
   type WeekMatch,
@@ -44,31 +45,6 @@ function parseJson(value: FormDataEntryValue | null): unknown {
 
 function firstIssue(error: z.ZodError) {
   return error.issues[0]?.message ?? e.saveFailed;
-}
-
-export async function saveTrainingSchedule(
-  teamId: string,
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
-  const parsed = trainingScheduleSchema.safeParse(parseJson(formData.get("schedule")));
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
-
-  await requireUser();
-  const supabase = await createClient();
-  const schedule = [...parsed.data].sort((a, b) => a.weekday - b.weekday);
-  const { data, error } = await supabase
-    .from("teams")
-    .update({ training_schedule: schedule })
-    .eq("id", teamId)
-    .select("id");
-  if (error || !data?.length) {
-    console.error("saveTrainingSchedule failed", error);
-    return { error: e.saveFailed };
-  }
-  revalidatePath(`/teams/${teamId}/weeks`);
-  return { success: messages.weeks.schedule.saved };
 }
 
 /** Opens (or creates) the week, prefilled from the standard training schedule. */
@@ -194,7 +170,7 @@ export async function requestRun(
   const supabase = await createClient();
   const { data: team } = await supabase
     .from("teams")
-    .select("id, competition_start_date, periodization_weeks")
+    .select(SEASON_TEAM_COLUMNS)
     .eq("id", teamId)
     .maybeSingle();
   if (!team) return { error: pe.requestFailed };
@@ -250,47 +226,12 @@ export async function continueRun(teamId: string, weekStart: string, runId: stri
   const supabase = await createClient();
   const { data: team } = await supabase
     .from("teams")
-    .select("id, competition_start_date, periodization_weeks")
+    .select(SEASON_TEAM_COLUMNS)
     .eq("id", teamId)
     .maybeSingle();
   if (!team) return;
   const work = await advanceRun(supabase, { team, weekStart, runId, coachId: user.id });
   if (work) after(work);
-}
-
-const seasonSchema = z.object({
-  competitionStartDate: z.union([z.literal("").transform(() => null), z.string().refine(isIsoDate, e.date)]),
-  periodizationWeeks: z.coerce.number().refine((n) => [4, 6, 8].includes(n), e.cycle),
-});
-
-export async function saveSeasonSettings(
-  teamId: string,
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
-  const parsed = seasonSchema.safeParse({
-    competitionStartDate: String(formData.get("competitionStartDate") ?? ""),
-    periodizationWeeks: formData.get("periodizationWeeks"),
-  });
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
-
-  await requireUser();
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("teams")
-    .update({
-      competition_start_date: parsed.data.competitionStartDate,
-      periodization_weeks: parsed.data.periodizationWeeks,
-    })
-    .eq("id", teamId)
-    .select("id");
-  if (error || !data?.length) {
-    console.error("saveSeasonSettings failed", error);
-    return { error: e.saveFailed };
-  }
-  revalidatePath(`/teams/${teamId}/weeks`, "layout");
-  return { success: messages.weeks.season.saved };
 }
 
 const sessionLoadSchema = z.object({

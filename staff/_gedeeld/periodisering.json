@@ -1,6 +1,6 @@
 {
-  "versie": "0.1.0",
-  "uitleg": "Periodisering vanaf de eerste competitiewedstrijd. De app telt de weken sinds de week van die wedstrijd en kiest het weektype uit de volgorde van de cyclus die het team gebruikt. Percentages zijn ten opzichte van de maximale weekbelasting; kilometers zijn de totale loopafstand van de trainingen in een week, zonder wedstrijden. Concept v0.1: de 4-wekencyclus komt van de hoofdcoach, de 6- en 8-wekencycli zijn een voorstel om na te kijken.",
+  "versie": "0.2.0",
+  "uitleg": "Periodisering per seizoen in twee fasen. De voorbereiding start op de datum die de hoofdcoach kiest en loopt tot de eerste competitiewedstrijd; de competitie start in de week van de eerste competitiewedstrijd. Elke fase heeft zijn eigen cyclus (4, 6 of 8 weken): de app telt de weken sinds de start van de fase en kiest het weektype uit de volgorde van die cyclus. Percentages zijn ten opzichte van de maximale weekbelasting; kilometers zijn de totale loopafstand van de trainingen in een week, zonder wedstrijden. Concept v0.2: de 4-wekencyclus komt van de hoofdcoach, de 6- en 8-wekencycli zijn een voorstel om na te kijken.",
   "standaard_cyclus": 4,
   "weektypes": [
     {
@@ -40,6 +40,6 @@
   "voor_start": {
     "code": "voorbereiding",
     "naam": "Voorbereiding",
-    "uitleg": "Vóór de eerste competitiewedstrijd: geleidelijke opbouw van volume naar intensiteit, met de VAMEVAL als nulmeting voor de eerste training."
+    "uitleg": "Vóór de eerste competitiewedstrijd, als er geen startdatum van de voorbereiding is ingesteld: geleidelijke opbouw van volume naar intensiteit, met de VAMEVAL als nulmeting voor de eerste training."
   }
 }

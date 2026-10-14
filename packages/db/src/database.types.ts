@@ -441,6 +441,8 @@ export type Database = {
           secondary_color: string;
           training_schedule: Json;
           competition_start_date: string | null;
+          preparation_start_date: string | null;
+          preparation_weeks: number;
           periodization_weeks: number;
           archived_at: string | null;
           created_at: string;
@@ -458,6 +460,8 @@ export type Database = {
           secondary_color?: string;
           training_schedule?: Json;
           competition_start_date?: string | null;
+          preparation_start_date?: string | null;
+          preparation_weeks?: number;
           periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
@@ -475,6 +479,8 @@ export type Database = {
           secondary_color?: string;
           training_schedule?: Json;
           competition_start_date?: string | null;
+          preparation_start_date?: string | null;
+          preparation_weeks?: number;
           periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;

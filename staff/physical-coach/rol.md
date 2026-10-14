@@ -1,7 +1,7 @@
 ---
 id: physical-coach
 naam: Physical Coach
-versie: 0.1.1
+versie: 0.1.2
 status: concept
 ---
 

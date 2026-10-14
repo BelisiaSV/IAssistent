@@ -142,6 +142,9 @@ export default async function WeekPage({
         {!type
           ? p.notSet
           : [
+              data.periodization.fase
+                ? `${p.phase[data.periodization.fase]}${data.periodization.week_van_fase ? ` ${p.phaseWeek(data.periodization.week_van_fase)}` : ""}`
+                : null,
               type.naam,
               data.periodization.week_in_cyclus && data.periodization.cyclus_weken
                 ? p.week(data.periodization.week_in_cyclus, data.periodization.cyclus_weken)
