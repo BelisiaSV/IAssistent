@@ -125,8 +125,16 @@ export type SetPieceKind =
   | "aftrap"
   | "strafschop";
 
-/** Shape of the Tactical Coach match plan (staff/tactical-coach/output-schema.json). */
-export interface MatchPlanOutput {
+export interface SetPiece {
+  titel: string;
+  soort: SetPieceKind;
+  afspraken: string[];
+  taken: { rugnummer: number; taak: string }[];
+  tekening: Drawing;
+}
+
+/** Shape of the Tactical Coach week plan (staff/tactical-coach/output-schema.json). */
+export interface TacticalWeekOutput {
   tegenstander: {
     naam: string;
     formatie: string | null;
@@ -145,21 +153,22 @@ export interface MatchPlanOutput {
     omschakeling_verdediging: string[];
     pressing: string;
   };
+  standaardsituaties: SetPiece[];
+  trainingsaccenten: { datum: string; md: string | null; thema: string; doel: string; aandachtspunten: string[] }[];
+  aandachtspunten: string[];
+  vragen_aan_coach: string[];
+}
+
+/** Shape of the Tactical Coach match preparation (taken/wedstrijdvoorbereiding/output-schema.json). */
+export interface MatchPrepOutput {
   opstelling: {
     formatie: string;
     basis: { post: string; rugnummer: number; taak: string }[];
     bank: number[];
     toelichting: string;
   };
-  standaardsituaties: {
-    titel: string;
-    soort: SetPieceKind;
-    afspraken: string[];
-    taken: { rugnummer: number; taak: string }[];
-    tekening: Drawing;
-  }[];
+  standaardsituaties: SetPiece[];
   scenarios: { situatie: string; aanpassing: string }[];
-  trainingsaccenten: { datum: string; md: string | null; thema: string; doel: string; aandachtspunten: string[] }[];
   wedstrijdbespreking: { titel: string; kernpunten: string[]; afsluiter: string };
   aandachtspunten: string[];
   vragen_aan_coach: string[];

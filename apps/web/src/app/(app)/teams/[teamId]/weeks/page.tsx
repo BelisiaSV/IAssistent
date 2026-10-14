@@ -20,7 +20,7 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
   const supabase = await createClient();
   const { data } = await supabase
     .from("week_plans")
-    .select("id, week_start, matches, staff_proposals(role, task, version, status)")
+    .select("id, week_start, matches, staff_runs(kind, version, status)")
     .eq("team_id", team.id)
     .order("week_start", { ascending: false })
     .limit(30);
@@ -62,11 +62,9 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
       ) : (
         <ul className="divide-y divide-slate-100 rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
           {weeks.map((week) => {
-            const proposals = week.staff_proposals ?? [];
-            const latest = [...proposals]
-              .filter((p) => p.role === "assistant-coach" && p.task === "default")
-              .sort((a, b) => b.version - a.version)[0];
-            const approved = proposals.some((p) => p.role === "assistant-coach" && p.task === "default" && p.status === "approved");
+            const runs = (week.staff_runs ?? []).filter((x) => x.kind === "week");
+            const latest = [...runs].sort((a, b) => b.version - a.version)[0];
+            const approved = runs.some((x) => x.status === "approved");
             const opponents = ((week.matches ?? []) as WeekMatch[]).map((match) => match.opponent);
             return (
               <li key={week.id}>

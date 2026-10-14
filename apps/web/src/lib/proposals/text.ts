@@ -2,7 +2,7 @@ import { messages } from "@/lib/messages";
 import { longDate, weekdayName } from "@/lib/weeks/dates";
 
 import { withShirtNames } from "./names";
-import type { MatchPlanOutput, WeekPlanningOutput } from "./types";
+import type { MatchPrepOutput, WeekPlanningOutput } from "./types";
 
 const o = messages.proposals.output;
 
@@ -50,16 +50,15 @@ export function weekPlanningToText(
 
 /** Plain-text match talk (key message, lineup, key points), ready to paste in a message. */
 export function matchTalkToText(
-  output: MatchPlanOutput,
-  options: { title: string; names: Map<number, string> },
+  output: MatchPrepOutput,
+  options: { title: string; names: Map<number, string>; keyMessage: string | null },
 ): string {
   const n = (text: string) => withShirtNames(text, options.names);
   const t = messages.matchPlan;
   const lines = [
     `*${options.title}*`,
     "",
-    `${t.keyMessage}: ${n(output.speelplan.kernboodschap)}`,
-    "",
+    ...(options.keyMessage ? [`${t.keyMessage}: ${n(options.keyMessage)}`, ""] : []),
     `*${t.lineup} (${output.opstelling.formatie})*`,
     ...output.opstelling.basis.map((b) => `${b.post}: ${n(`#${b.rugnummer}`)}`),
   ];

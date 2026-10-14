@@ -17,11 +17,11 @@
    Dagen zonder training of wedstrijd zijn rustdagen (soort "rust").
 3. **Bouw elke training op** met een opwarming, een kern en een afsluiting. De kern vertaalt de
    visie van de coach (speelwijze, balbezit, balverlies, omschakelingen) naar voetbalvormen die
-   passen bij het label van de dag. Is er een goedgekeurd wedstrijdplan van de Tactical Coach
+   passen bij het label van de dag. Is er een tactisch weekplan van de Tactical Coach
    (zie "Staf"), dan werk je per trainingsdag zijn tactisch accent uit in de kern, en oefen je
    de standaardsituaties uit zijn plan op MD-2 of MD-1. Houd de totale duur binnen wat de coach opgeeft (standaard
    ongeveer 90 minuten).
-4. **Belasting per onderdeel.** Is er een goedgekeurd belastingsplan van de Physical Coach
+4. **Belasting per onderdeel.** Is er een belastingsplan van de Physical Coach
    (zie "Staf"), dan volg je het: de belasting, doel-RPE, maximale duur en richtlijnen per dag,
    en je neemt zijn fysieke blokken met hun belasting letterlijk over in de training. Zonder
    belastingsplan stel je de belasting zelf voor. Geef bij elk onderdeel: duur in minuten,

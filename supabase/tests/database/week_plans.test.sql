@@ -1,4 +1,4 @@
--- Week plans and staff proposals: RLS, versions and the daily AI limit.
+-- Week plans and staff proposals: RLS and versions.
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
@@ -93,14 +93,14 @@ select throws_ok(
     select (select id from ids where name = 'team_b'), (select id from ids where name = 'week_a'), 'assistant-coach', 'example'$$,
   '23514', 'week plan does not belong to the team', 'cannot attach a proposal to a week of another team');
 
--- Daily AI limit: 5 per coach per day; test mode does not count.
+-- The daily AI limit counts staff runs (see staff_runs.test.sql), not single proposals.
 insert into public.staff_proposals (team_id, week_plan_id, role, provider)
 select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'assistant-coach', 'anthropic'
 from generate_series(1, 5);
-select throws_ok(
+select lives_ok(
   $$insert into public.staff_proposals (team_id, week_plan_id, role, provider)
     select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'assistant-coach', 'anthropic'$$,
-  '23514', 'daily limit of staff proposals reached', 'the sixth AI proposal of the day is refused');
+  'single proposals are not limited (a run is)');
 select lives_ok(
   $$insert into public.staff_proposals (team_id, week_plan_id, role, provider)
     select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'assistant-coach', 'example'$$,

@@ -1,31 +1,31 @@
 import type { Tables } from "@iassistent/db";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { DrawingsView } from "@/components/proposals/drawings-view";
 import { LoadChart } from "@/components/proposals/load-chart";
-import { LoadPlanView, type MasPlayer } from "@/components/proposals/load-plan-view";
-import { MatchPlanView } from "@/components/proposals/match-plan-view";
-import { WeekPlanningView } from "@/components/proposals/week-planning-view";
+import { MatchPrepView } from "@/components/proposals/tactical-views";
+import { type WeekDocument, WeekDocumentView } from "@/components/proposals/week-document-view";
 import { Alert, Button } from "@/components/ui";
 import { getStaffProvider } from "@/lib/ai";
-import { isFeatureEnabled } from "@/lib/feature-flags";
 import { messages } from "@/lib/messages";
-import { shirtNames } from "@/lib/proposals/names";
 import { opponentNames } from "@/lib/opponents/context";
-import type { DrawingsOutput, LoadPlanOutput, MatchPlanOutput, WeekPlanningOutput } from "@/lib/proposals/types";
-import { WEEK_STEPS, type WeekStep } from "@/lib/roles";
+import { shirtNames } from "@/lib/proposals/names";
+import type { LoadPlanOutput, MatchPrepOutput } from "@/lib/proposals/types";
+import { RUN_STEPS, type RunKind } from "@/lib/roles";
+import { matchPrepFrom } from "@/lib/staff-runs/gate";
+import { enabledSteps } from "@/lib/staff-runs/server";
 import { formationCatalog, matchDayCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/teams/queries";
 import { sessionAu } from "@/lib/weeks/context";
 import { isIsoDate, isoWeekday, longDate, shortDate, todayInBelgium, weekdayName, weekDates } from "@/lib/weeks/dates";
-import { approvedOutput, loadWeek, type WeekData } from "@/lib/weeks/load";
+import { loadWeek, squadMas } from "@/lib/weeks/load";
 import { weekPlanSchema } from "@/lib/weeks/validation";
 
-import { decideProposal, lineupFromProposal } from "../actions";
+import { decideRunAction, lineupFromProposal } from "../actions";
 import { MatchReportForm } from "./match-report-form";
-import { AdjustProposalForm, RefreshWhileGenerating, RequestProposalButton } from "./proposal-controls";
+import { AdjustRunForm, RequestRunButton, RetryRunButton, RunProgress, StepList } from "./run-controls";
 import { SessionLoadForm } from "./session-load-form";
 import { WeekInputForm } from "./week-input-form";
 
@@ -36,6 +36,8 @@ const m = messages.proposals;
 const p = messages.weeks.periodization;
 
 type Proposal = Tables<"staff_proposals">;
+type Run = Tables<"staff_runs">;
+const r = messages.staffRun;
 
 export default async function WeekPage({
   params,
@@ -54,9 +56,7 @@ export default async function WeekPage({
   if (!data.week) notFound();
   const week = data.week;
 
-  const flags = new Map(
-    await Promise.all([...new Set(WEEK_STEPS.map((s) => s.flag))].map(async (f) => [f, await isFeatureEnabled(f)] as const)),
-  );
+  const [weekSteps, matchSteps] = await Promise.all([enabledSteps("week"), enabledSteps("match")]);
 
   const parsed = weekPlanSchema(weekStart).safeParse({
     trainings: week.trainings,
@@ -70,14 +70,21 @@ export default async function WeekPage({
 
   const names = shirtNames(data.players);
   const testMode = getStaffProvider().id === "example";
-  const busy = data.proposals.some((x) => x.status === "generating");
   const basePath = `/teams/${team.id}/weeks/${weekStart}`;
 
-  const selectedFor = (step: WeekStep) => {
-    const list = data.proposals.filter((x) => x.role === step.role && x.task === step.task);
-    return { list, selected: list.find((x) => String(x.version) === query[step.key]) ?? list[0] ?? null };
+  const selectedRun = (kind: RunKind) => {
+    const list = data.runs.filter((x) => x.kind === kind);
+    return { list, selected: list.find((x) => String(x.version) === query[kind]) ?? list[0] ?? null };
   };
-  const pc = selectedFor(WEEK_STEPS[0]);
+  const weekRun = selectedRun("week");
+  const matchRun = selectedRun("match");
+  const outputsOf = (run: Run | null) =>
+    Object.fromEntries(
+      data.proposals.filter((x) => run && x.run_id === run.id && x.output).map((x) => [x.step ?? "", x.output]),
+    ) as Record<string, unknown>;
+  const weekOutputs = outputsOf(weekRun.selected);
+  const approvedWeekRun = data.runs.find((x) => x.kind === "week" && x.status === "approved") ?? null;
+  const approvedWeek = outputsOf(approvedWeekRun);
   const theirNames = opponentNames(data.opponentLineup);
 
   // Sessions of this week that already took place, for logging the actual RPE.
@@ -102,7 +109,8 @@ export default async function WeekPage({
       ];
     });
 
-  const loadPlanForChart = (approvedOutput(data.proposals, "physical-coach") ?? pc.selected?.output ?? null) as LoadPlanOutput | null;
+  const loadPlanForChart = (approvedWeek.pc ?? weekOutputs.pc ?? null) as LoadPlanOutput | null;
+  const matchFrom = matchPrepFrom(input.trainings, input.matches, weekStart);
 
   // Matches of this week that were played: the head coach adds his findings.
   const playedMatches = input.matches.filter((x) => x.date <= today);
@@ -117,12 +125,7 @@ export default async function WeekPage({
     };
   });
 
-  const masPlayers: MasPlayer[] = latestMas(data)
-    .flatMap(({ playerId, mas }) => {
-      const player = data.players.find((x) => x.id === playerId && !x.archived_at);
-      return player?.shirt_number ? [{ shirtNumber: player.shirt_number, name: names.get(player.shirt_number) ?? "", mas }] : [];
-    })
-    .sort((a, b) => a.shirtNumber - b.shirtNumber);
+  const masPlayers = squadMas(data, names);
 
   const type = data.periodization.weektype;
 
@@ -212,185 +215,149 @@ export default async function WeekPage({
         </section>
       )}
 
-      <StepOverview steps={WEEK_STEPS.map((step) => ({ step, ...selectedFor(step) }))} basePath={basePath} />
+      <RunSection
+        kind="week"
+        title={r.week.title}
+        intro={r.week.intro}
+        requestLabel={r.week.request}
+        generatingLabel={r.week.generating}
+        {...weekRun}
+        proposals={data.proposals}
+        stepKeys={weekSteps.map((x) => x.key)}
+        teamId={team.id}
+        weekStart={weekStart}
+        basePath={basePath}
+        canEdit={canEdit}
+        testMode={testMode}
+        blockedReason={null}
+        links={(run) => [{ href: `${basePath}/print?week=${run.version}`, label: r.week.print }]}
+        render={(run) => {
+          const out = outputsOf(run);
+          return (
+            <WeekDocumentView
+              doc={{ pc: out.pc ?? null, tc: out.tc ?? null, ac: out.ac ?? null, tco: out.tco ?? null } as WeekDocument}
+              names={names}
+              opponentNames={theirNames}
+              masPlayers={masPlayers}
+            />
+          );
+        }}
+      />
 
-      {WEEK_STEPS.map((step) => {
-        const { list, selected } = selectedFor(step);
-        const used = step.uses.filter((roleId) => approvedOutput(data.proposals, roleId));
-        const missing = step.requires.filter((roleId) => !approvedOutput(data.proposals, roleId));
-        const note = missing.length
-          ? messages.steps.requires(missing.map(roleName).join(", "))
-          : step.uses.length
-            ? used.length
-              ? messages.steps.uses(used.map(roleName).join(", "))
-              : messages.steps.usesNone
-            : undefined;
-        return (
-          <StepSection
-            key={step.key}
-            step={step}
-            list={list}
-            selected={selected}
-            teamId={team.id}
-            weekStart={weekStart}
-            basePath={basePath}
-            canEdit={canEdit}
-            flagEnabled={flags.get(step.flag) ?? false}
-            blocked={missing.length > 0}
-            testMode={testMode}
-            busy={busy}
-            note={note}
-            links={(proposal) => stepLinks(step, proposal, basePath)}
-            render={(proposal) => {
-              const output = proposal.output;
-              switch (step.key) {
-                case "pc":
-                  return <LoadPlanView output={output as unknown as LoadPlanOutput} names={names} masPlayers={masPlayers} />;
-                case "tc":
-                  return (
-                    <MatchPlanView
-                      output={output as unknown as MatchPlanOutput}
-                      names={names}
-                      opponentNames={theirNames}
-                      formations={formationCatalog}
-                      actions={
-                        canEdit && (
-                          <form action={lineupFromProposal}>
-                            <input type="hidden" name="teamId" value={team.id} />
-                            <input type="hidden" name="weekStart" value={weekStart} />
-                            <input type="hidden" name="proposalId" value={proposal.id} />
-                            <Button type="submit" variant="secondary">
-                              {messages.matchPlan.toLineup}
-                            </Button>
-                          </form>
-                        )
-                      }
-                    />
-                  );
-                case "ac":
-                  return <WeekPlanningView output={output as unknown as WeekPlanningOutput} names={names} />;
-                case "tco":
-                  return <DrawingsView output={output as unknown as DrawingsOutput} names={names} />;
-              }
-            }}
-          />
-        );
-      })}
+      {matchFrom && (
+        <RunSection
+          kind="match"
+          title={r.match.title}
+          intro={r.match.intro}
+          requestLabel={r.match.request}
+          generatingLabel={r.match.generating}
+          {...matchRun}
+          proposals={data.proposals}
+          stepKeys={matchSteps.map((x) => x.key)}
+          teamId={team.id}
+          weekStart={weekStart}
+          basePath={basePath}
+          canEdit={canEdit}
+          testMode={testMode}
+          blockedReason={!approvedWeekRun ? r.match.needsWeek : today < matchFrom ? r.match.from(longDate(matchFrom)) : null}
+          links={(run) => [
+            { href: `${basePath}/print/match?v=${run.version}&part=talk`, label: messages.matchPlan.printTalk },
+            { href: `${basePath}/print/match?v=${run.version}&part=set-pieces`, label: messages.matchPlan.printSetPieces },
+          ]}
+          render={(run) => {
+            const proposal = data.proposals.find((x) => x.run_id === run.id && x.step === "match");
+            if (!proposal?.output) return null;
+            return (
+              <MatchPrepView
+                output={proposal.output as unknown as MatchPrepOutput}
+                names={names}
+                formations={formationCatalog}
+                actions={
+                  canEdit && (
+                    <form action={lineupFromProposal}>
+                      <input type="hidden" name="teamId" value={team.id} />
+                      <input type="hidden" name="weekStart" value={weekStart} />
+                      <input type="hidden" name="proposalId" value={proposal.id} />
+                      <Button type="submit" variant="secondary">
+                        {messages.matchPlan.toLineup}
+                      </Button>
+                    </form>
+                  )
+                }
+              />
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function latestMas(data: WeekData) {
-  const latest = new Map<string, { date: string; mas: number }>();
-  for (const t of data.testResults) {
-    if (t.test_code !== "vameval") continue;
-    const current = latest.get(t.player_id);
-    if (!current || current.date < t.test_date) latest.set(t.player_id, { date: t.test_date, mas: t.result });
-  }
-  return [...latest.entries()].map(([playerId, v]) => ({ playerId, mas: v.mas }));
-}
-
-const roleName = (roleId: string) =>
-  messages.steps[WEEK_STEPS.find((s) => s.role === roleId && s.task === "default")?.key ?? "ac"].name;
-
-/** Print / share links per step. */
-function stepLinks(step: WeekStep, proposal: Proposal, basePath: string) {
-  const link = (href: string, label: string) => ({ href, label });
-  switch (step.key) {
-    case "tc":
-      return [
-        link(`${basePath}/print/match?v=${proposal.version}&part=talk`, messages.matchPlan.printTalk),
-        link(`${basePath}/print/match?v=${proposal.version}&part=set-pieces`, messages.matchPlan.printSetPieces),
-      ];
-    case "ac":
-      return [link(`${basePath}/print?v=${proposal.version}`, m.print)];
-    case "tco":
-      return [link(`${basePath}/print?drawings=${proposal.version}`, m.print)];
-    default:
-      return [];
-  }
-}
-
-/** Where each step stands, with a link to its section. */
-function StepOverview({
-  steps,
-  basePath,
-}: {
-  steps: { step: WeekStep; list: Proposal[]; selected: Proposal | null }[];
-  basePath: string;
-}) {
-  return (
-    <nav className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      {steps.map(({ step, list }) => {
-        const approved = list.find((x) => x.status === "approved");
-        const latest = list[0];
-        const status = approved ? m.status.approved : latest ? m.status[latest.status] : m.noProposals;
-        return (
-          <Link
-            key={step.key}
-            href={`${basePath}#${step.key}`}
-            className={`rounded-xl px-3 py-2 text-sm ring-1 ${
-              approved ? "bg-green-50 ring-green-200" : "bg-white ring-slate-200"
-            } hover:ring-brand`}
-          >
-            <span className="block text-xs text-slate-500">{messages.steps.order[step.key]}</span>
-            <span className="block font-medium">{messages.steps[step.key].name}</span>
-            <span className="block text-xs text-slate-600">{status}</span>
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
-
-function StepSection({
-  step,
+/** A request to the staff (week document or match preparation) with its versions. */
+function RunSection({
+  kind,
+  title,
+  intro,
+  requestLabel,
+  generatingLabel,
   list,
   selected,
+  proposals,
+  stepKeys,
   teamId,
   weekStart,
   basePath,
   canEdit,
-  flagEnabled,
-  blocked,
   testMode,
-  busy,
-  note,
+  blockedReason,
   links,
   render,
 }: {
-  step: WeekStep;
-  list: Proposal[];
-  selected: Proposal | null;
+  kind: RunKind;
+  title: string;
+  intro: string;
+  requestLabel: string;
+  generatingLabel: string;
+  list: Run[];
+  selected: Run | null;
+  proposals: Proposal[];
+  stepKeys: string[];
   teamId: string;
   weekStart: string;
   basePath: string;
   canEdit: boolean;
-  flagEnabled: boolean;
-  blocked: boolean;
   testMode: boolean;
-  busy: boolean;
-  note?: string;
-  links: (proposal: Proposal) => { href: string; label: string }[];
-  render: (proposal: Proposal) => React.ReactNode;
+  blockedReason: string | null;
+  links: (run: Run) => { href: string; label: string }[];
+  render: (run: Run) => ReactNode;
 }) {
-  const r = messages.steps[step.key];
-  const canRequest = canEdit && flagEnabled && !blocked;
+  const busy = list.some((x) => x.status === "generating");
+  const canRequest = canEdit && stepKeys.length > 0 && !blockedReason && !busy;
+  const stepsOf = (run: Run) =>
+    RUN_STEPS[kind]
+      .map((step) => ({ step, proposal: proposals.find((x) => x.run_id === run.id && x.step === step.key) }))
+      .filter((x) => x.proposal)
+      .map(({ step, proposal }) => ({ key: step.key, name: r.stepNames[step.key] ?? step.key, status: proposal!.status }));
+  const adjustable = RUN_STEPS[kind].filter((x) => stepKeys.includes(x.key)).map((x) => ({ key: x.key, name: r.stepNames[x.key] ?? x.key }));
+
   return (
-    <section id={step.key} className="scroll-mt-4 space-y-4 border-t border-slate-200 pt-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">{r.name}</h2>
-        {canRequest && !busy && <RequestProposalButton teamId={teamId} weekStart={weekStart} step={step.key} />}
+    <section id={kind} className="scroll-mt-4 space-y-4 border-t border-slate-200 pt-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-2xl">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <p className="text-sm text-slate-600">{intro}</p>
+        </div>
+        {canRequest && <RequestRunButton teamId={teamId} weekStart={weekStart} kind={kind} label={requestLabel} />}
       </div>
-      {note && flagEnabled && <p className="text-xs text-slate-600">{note}</p>}
-      {canEdit && !flagEnabled && <Alert tone="error">{r.flagOff}</Alert>}
+      {blockedReason && <p className="text-sm text-slate-600">{blockedReason}</p>}
+      {canEdit && stepKeys.length === 0 && <Alert tone="error">{r.flagOff}</Alert>}
 
       {list.length > 0 && (
         <nav className="flex flex-wrap gap-2">
           {list.map((x) => (
             <Link
               key={x.id}
-              href={`${basePath}?${step.key}=${x.version}#${step.key}`}
+              href={`${basePath}?${kind}=${x.version}#${kind}`}
               scroll={false}
               className={`rounded-full px-3 py-1 text-xs ring-1 ${
                 x.id === selected?.id ? "bg-brand text-white ring-brand" : "bg-white text-slate-700 ring-slate-200"
@@ -402,26 +369,36 @@ function StepSection({
         </nav>
       )}
 
-      {!selected && <p className="text-sm text-slate-600">{m.noProposals}</p>}
+      {!selected && <p className="text-sm text-slate-600">{r.none}</p>}
       {selected?.feedback && (
         <p className="rounded-md bg-slate-100 px-3 py-2 text-sm">
-          <span className="font-medium">{m.feedbackGiven}:</span> {selected.feedback}
+          <span className="font-medium">
+            {m.feedbackGiven}
+            {selected.feedback_step ? ` (${r.stepNames[selected.feedback_step] ?? selected.feedback_step})` : ""}:
+          </span>{" "}
+          {selected.feedback}
         </p>
       )}
-      {selected?.status === "generating" && <RefreshWhileGenerating label={r.generating} />}
-      {selected?.status === "failed" && <Alert tone="error">{m.errors.generationFailed}</Alert>}
+      {selected?.status === "generating" && (
+        <RunProgress teamId={teamId} weekStart={weekStart} runId={selected.id} label={generatingLabel} steps={stepsOf(selected)} />
+      )}
+      {selected?.status === "failed" && (
+        <div className="space-y-3">
+          <Alert tone="error">{r.failed}</Alert>
+          <StepList steps={stepsOf(selected)} />
+          {canEdit && !busy && <RetryRunButton teamId={teamId} weekStart={weekStart} kind={kind} runId={selected.id} />}
+        </div>
+      )}
 
-      {selected?.output && selected.status !== "generating" && (
+      {selected && ["ready", "approved", "rejected"].includes(selected.status) && (
         <>
-          {(selected.provider === "example" || (testMode && !selected.provider)) && (
-            <p className="text-xs text-slate-500">{m.testMode}</p>
-          )}
-          <div className="flex flex-wrap items-start gap-2">
+          {(selected.provider === "example" || testMode) && <p className="text-xs text-slate-500">{m.testMode}</p>}
+          <div className="flex flex-wrap items-start gap-2 print:hidden">
             {canEdit && selected.status !== "approved" && (
-              <DecisionButton teamId={teamId} weekStart={weekStart} proposalId={selected.id} decision="approved" />
+              <DecisionButton teamId={teamId} weekStart={weekStart} runId={selected.id} decision="approved" />
             )}
             {canEdit && selected.status !== "rejected" && (
-              <DecisionButton teamId={teamId} weekStart={weekStart} proposalId={selected.id} decision="rejected" />
+              <DecisionButton teamId={teamId} weekStart={weekStart} runId={selected.id} decision="rejected" />
             )}
             {links(selected).map((l) => (
               <Link
@@ -432,7 +409,9 @@ function StepSection({
                 {l.label}
               </Link>
             ))}
-            {canRequest && !busy && <AdjustProposalForm teamId={teamId} weekStart={weekStart} step={step.key} />}
+            {canEdit && !busy && (
+              <AdjustRunForm teamId={teamId} weekStart={weekStart} kind={kind} runId={selected.id} steps={adjustable} />
+            )}
           </div>
           {render(selected)}
         </>
@@ -444,22 +423,22 @@ function StepSection({
 function DecisionButton({
   teamId,
   weekStart,
-  proposalId,
+  runId,
   decision,
 }: {
   teamId: string;
   weekStart: string;
-  proposalId: string;
+  runId: string;
   decision: "approved" | "rejected";
 }) {
   return (
-    <form action={decideProposal}>
+    <form action={decideRunAction}>
       <input type="hidden" name="teamId" value={teamId} />
       <input type="hidden" name="weekStart" value={weekStart} />
-      <input type="hidden" name="proposalId" value={proposalId} />
+      <input type="hidden" name="runId" value={runId} />
       <input type="hidden" name="decision" value={decision} />
       <Button type="submit" variant={decision === "approved" ? "primary" : "secondary"}>
-        {decision === "approved" ? m.approve : m.reject}
+        {decision === "approved" ? r.approveAll : m.reject}
       </Button>
     </form>
   );

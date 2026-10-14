@@ -20,7 +20,8 @@ export const exampleProvider: StaffModelProvider = {
     }
     let output: Example;
     if (Array.isArray(example.dagen)) output = fitWeek(example, context);
-    else if (example.speelplan && example.opstelling) output = fitMatchPlan(example, context, staff);
+    else if (example.speelplan && example.trainingsaccenten) output = fitTacticalWeek(example, context);
+    else if (example.opstelling && example.wedstrijdbespreking) output = fitMatchPrep(example, context, staff);
     else if (Array.isArray(example.oefeningen)) output = fitDrawings(example, context);
     else output = example;
     return { output, provider: "example", model: null, usage: null };
@@ -70,10 +71,40 @@ function fitIndividual(example: Example, context: RoleContext) {
     .map((p, i) => ({ rugnummer: p.rugnummer!, advies: advice.length ? advice[i % advice.length]!.advies : "" }));
 }
 
-/** Tactical Coach match plan: lineup from the available squad, accents on training days. */
-function fitMatchPlan(example: Example, context: RoleContext, staff: Staff): Example {
+/** Tactical Coach week plan: opponent from the context, accents on the training days. */
+function fitTacticalWeek(example: Example, context: RoleContext): Example {
+  const accents = example.trainingsaccenten as { md: string | null }[];
+  const trainingDays = context.weekinput.dagen.filter((d) => d.training);
+  const trainingsaccenten = trainingDays.map((day, i) => ({
+    ...(accents.find((a) => a.md === day.md) ?? accents[i % accents.length]!),
+    datum: day.datum,
+    md: day.md,
+  }));
+
+  const opponent = example.tegenstander as Example;
+  return {
+    ...example,
+    tegenstander: {
+      ...opponent,
+      naam: context.tegenstander?.naam ?? opponent.naam,
+      formatie: context.tegenstander?.formatie ?? context.tegenstander?.opstelling?.formatie ?? opponent.formatie,
+    },
+    trainingsaccenten,
+  };
+}
+
+type SetPiece = { taken: { rugnummer: number; taak: string }[] } & Example;
+
+/**
+ * Tactical Coach match preparation: lineup from the available squad; set pieces
+ * from the week plan (staf), with tasks only for players in the lineup.
+ */
+function fitMatchPrep(example: Example, context: RoleContext, staff: Staff): Example {
   const lineup = example.opstelling as { formatie: string; basis: { post: string; taak: string }[]; bank: number[]; toelichting: string };
-  const formation = staff.formations.formaties.find((f) => f.code === lineup.formatie);
+  const weekPlan = context.staf["tactical-coach"] as { speelplan?: { formatie?: string }; standaardsituaties?: SetPiece[] } | undefined;
+  const formation =
+    staff.formations.formaties.find((f) => f.code === weekPlan?.speelplan?.formatie) ??
+    staff.formations.formaties.find((f) => f.code === lineup.formatie);
   const available = context.kern.filter((p) => p.beschikbaar && p.rugnummer !== null);
   const used = new Set<number>();
   const pick = (position: string, secondary: boolean) =>
@@ -93,24 +124,16 @@ function fitMatchPlan(example: Example, context: RoleContext, staff: Staff): Exa
     .slice(0, lineup.bank.length)
     .map((p) => p.rugnummer!);
 
-  const accents = example.trainingsaccenten as { md: string | null }[];
-  const trainingDays = context.weekinput.dagen.filter((d) => d.training);
-  const trainingsaccenten = trainingDays.map((day, i) => ({
-    ...(accents.find((a) => a.md === day.md) ?? accents[i % accents.length]!),
-    datum: day.datum,
-    md: day.md,
+  const starters = basis.map((b) => b.rugnummer);
+  const setPieces = (weekPlan?.standaardsituaties ?? (example.standaardsituaties as SetPiece[])).map((sp) => ({
+    ...sp,
+    taken: sp.taken.map((t, i) => ({ ...t, rugnummer: starters.includes(t.rugnummer) ? t.rugnummer : starters[i % Math.max(1, starters.length)]! })),
   }));
 
-  const opponent = example.tegenstander as Example;
   return {
     ...example,
-    tegenstander: {
-      ...opponent,
-      naam: context.tegenstander?.naam ?? opponent.naam,
-      formatie: context.tegenstander?.formatie ?? context.tegenstander?.opstelling?.formatie ?? opponent.formatie,
-    },
-    opstelling: { ...lineup, basis, bank },
-    trainingsaccenten,
+    opstelling: { ...lineup, formatie: formation?.code ?? lineup.formatie, basis, bank },
+    standaardsituaties: setPieces,
   };
 }
 
@@ -120,7 +143,7 @@ function fitDrawings(example: Example, context: RoleContext): Example {
     | { dagen?: { datum: string; onderdelen?: { naam: string; fase: string; organisatie: string; coachingspunten: string[] }[] }[] }
     | undefined;
   if (!planning?.dagen) {
-    throw new StaffGenerationError("provider_error", "no approved week planning of the Assistant Coach");
+    throw new StaffGenerationError("provider_error", "no week planning of the Assistant Coach");
   }
   const drawings = example.oefeningen as (Example & { onderdeel: string; fase: string; tekening: Example })[];
   const counters = new Map<string, number>();
