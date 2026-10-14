@@ -57,34 +57,55 @@ export function parsePeriodization(data: unknown): ParseResult<PeriodizationCata
 
 export interface WeekPeriodization {
   fase: "voorbereiding" | "competitie" | null;
+  /** Week number within the phase (1 = first week of the preparation or competition). */
+  week_van_fase: number | null;
   cyclus_weken: number | null;
   week_in_cyclus: number | null;
   weektype: { code: string; naam: string; uitleg: string; belasting_pct: { min: number; max: number } | null; km_zonder_wedstrijd: { min: number; max: number } | null } | null;
 }
 
-/**
- * Week type for the week starting on `weekStart` (a Monday). Week 1 of the cycle is the
- * week of the first competition match; weeks before it are preparation.
- */
-export function weekPeriodization(
-  weekStart: string,
-  competitionStart: string | null,
-  cycleWeeks: number,
-  catalog: PeriodizationCatalog,
-): WeekPeriodization {
-  if (!competitionStart) return { fase: null, cyclus_weken: null, week_in_cyclus: null, weektype: null };
-  const offsetToMonday = (new Date(`${competitionStart}T00:00:00Z`).getUTCDay() + 6) % 7;
-  const weeks = Math.floor((daysBetween(competitionStart, weekStart) + offsetToMonday) / 7);
-  if (weeks < 0) {
-    return {
-      fase: "voorbereiding",
-      cyclus_weken: null,
-      week_in_cyclus: null,
-      weektype: { ...catalog.voor_start, belasting_pct: null, km_zonder_wedstrijd: null },
-    };
-  }
+/** Season planning of a team: preparation and competition, each with its own cycle. */
+export interface SeasonPlan {
+  preparationStart: string | null;
+  preparationWeeks: number;
+  competitionStart: string | null;
+  competitionWeeks: number;
+}
+
+const NONE: WeekPeriodization = { fase: null, week_van_fase: null, cyclus_weken: null, week_in_cyclus: null, weektype: null };
+
+/** Whole weeks from the week (Monday) of `start` to the week starting on `weekStart`. */
+function weeksSince(start: string, weekStart: string) {
+  const offsetToMonday = (new Date(`${start}T00:00:00Z`).getUTCDay() + 6) % 7;
+  return Math.floor((daysBetween(start, weekStart) + offsetToMonday) / 7);
+}
+
+function inCycle(weeks: number, cycleWeeks: number, catalog: PeriodizationCatalog) {
   const cycle = catalog.cycli.find((c) => c.weken === cycleWeeks) ?? catalog.cycli.find((c) => c.weken === catalog.standaard_cyclus)!;
   const index = weeks % cycle.weken;
   const type = catalog.weektypes.find((w) => w.code === cycle.volgorde[index])!;
-  return { fase: "competitie", cyclus_weken: cycle.weken, week_in_cyclus: index + 1, weektype: type };
+  return { week_van_fase: weeks + 1, cyclus_weken: cycle.weken, week_in_cyclus: index + 1, weektype: type };
+}
+
+/**
+ * Week type for the week starting on `weekStart` (a Monday). The competition
+ * cycle starts in the week of the first competition match; the preparation
+ * cycle in the week of the start of the preparation. Without a preparation
+ * start, every week before the competition is "voor_start".
+ */
+export function weekPeriodization(weekStart: string, season: SeasonPlan, catalog: PeriodizationCatalog): WeekPeriodization {
+  if (season.competitionStart) {
+    const weeks = weeksSince(season.competitionStart, weekStart);
+    if (weeks >= 0) return { fase: "competitie", ...inCycle(weeks, season.competitionWeeks, catalog) };
+  }
+  if (season.preparationStart) {
+    const weeks = weeksSince(season.preparationStart, weekStart);
+    return weeks >= 0 ? { fase: "voorbereiding", ...inCycle(weeks, season.preparationWeeks, catalog) } : NONE;
+  }
+  if (!season.competitionStart) return NONE;
+  return {
+    ...NONE,
+    fase: "voorbereiding",
+    weektype: { ...catalog.voor_start, belasting_pct: null, km_zonder_wedstrijd: null },
+  };
 }

@@ -198,19 +198,33 @@ Regels:
   grafiek gepland/werkelijk. Volgorde: eerst Physical Coach; zijn **goedgekeurde** plan gaat via
   `staf` mee naar de Assistent Coach (rolvolgorde in `apps/web/src/lib/roles.ts`). Feature flag
   `staff.physical_coach`.
-- **Fase 3c** — Tactical Coach, twee taken: **wedstrijdplan** (taak `default`: tegenstander,
-  lessen, speelplan, opstelling, standaardsituaties met tekening, scenario's, tactische accenten
-  per trainingsdag, wedstrijdbespreking — vaste structuur in `referentie/wedstrijdvoorbereiding.md`)
-  en **oefenstof uittekenen** (taak `oefenstof`: een tekening per onderdeel van de goedgekeurde
-  weekplanning). Tekeningen zijn JSON (`$defs.tekening`), de app tekent ze als SVG.
-  Werkvolgorde (`WEEK_STEPS` in `apps/web/src/lib/roles.ts`): Physical Coach en Tactical Coach
-  naast elkaar → Assistent Coach met beide goedgekeurde plannen → Tactical Coach tekent de
-  oefenstof. `staff_proposals.task` scheidt de taken; `staf` bevat enkel goedgekeurde
-  `default`-voorstellen. Tabblad Tegenstanders (`opponents`, gekoppeld op naam aan de wedstrijd
-  in de weekinput; `opponent_lineups` met rugnummer + naam per post en bank, `source` `coach` of
-  later `video`), wedstrijdevaluaties na de wedstrijd (`match_reports`, ook "zelfde formatie als
-  de volgende tegenstander"), "Zet in Selecties" (`lineups.source = 'tactical-coach'`) en
-  afdrukken: wedstrijdbespreking en standaardsituaties (één per A4 voor de kleedkamer).
-  Namen van tegenstanders gaan nooit naar de AI. Feature flag `staff.tactical_coach`.
+- **Fase 3c** — Tactical Coach, drie taken: **tactisch weekplan** (taak `default`: tegenstander,
+  lessen, speelplan, standaardsituaties met tekening, tactische accenten per trainingsdag),
+  **oefenstof uittekenen** (taak `oefenstof`: een tekening per onderdeel van de weekplanning) en
+  **wedstrijdvoorbereiding** (taak `wedstrijdvoorbereiding`: opstelling, standaardsituaties voor
+  de kleedkamer, scenario's, wedstrijdbespreking). Vaste structuur in
+  `referentie/wedstrijdvoorbereiding.md`. Tekeningen zijn JSON (`$defs.tekening`), de app tekent
+  ze als SVG. Tabblad Tegenstanders (`opponents`, gekoppeld op naam aan de wedstrijd in de
+  weekinput; `opponent_lineups` met rugnummer + naam per post en bank, `source` `coach` of later
+  `video`), wedstrijdevaluaties (`match_reports`, ook "zelfde formatie als de volgende
+  tegenstander"), "Zet in Selecties" (`lineups.source = 'tactical-coach'`). Namen van
+  tegenstanders gaan nooit naar de AI. Feature flag `staff.tactical_coach`.
+- **Fase 3d — stafmeeting** — de hoofdcoach vraagt één keer; een **run** (`staff_runs`, `kind`
+  `week` of `match`) groepeert de voorstellen (`staff_proposals.run_id` + `step`). Volgorde in
+  `RUN_STEPS` (`apps/web/src/lib/roles.ts`): weekdocument = Physical Coach + Tactical Coach
+  (weekplan) samen → Assistent Coach → Tactical Coach tekent de oefenstof; elke stap krijgt het
+  werk van de eerdere stappen van dezelfde run als `staf`. Elke stap draait in een eigen request
+  (`advanceRun`, de pagina vraagt de volgende stappen aan zolang de run bezig is; stappen worden
+  geclaimd met een voorwaardelijke update). De coach keurt een run als geheel goed; aanpassen kan
+  voor de hele staf of voor één stap (die stap en wat erop verder bouwt werken opnieuw, de rest
+  wordt gekopieerd via `based_on`). De wedstrijdvoorbereiding (run `match`) kan pas na het
+  goedgekeurde weekdocument en vanaf de dag van de laatste training. Weekdocument en
+  wedstrijdvoorbereiding zijn afdrukbaar. De daglimiet (`staff_daily_limit()`) telt runs.
+- **Teaminstellingen** (`/teams/[id]/settings`) — vaste trainingsdagen (`teams.training_schedule`,
+  elke nieuwe week neemt ze over; optioneel ook toepassen op open weken zonder weekdocument) en
+  seizoensplanning: voorbereiding (`preparation_start_date` + `preparation_weeks`) en competitie
+  (`competition_start_date` + `periodization_weeks`), elk met een eigen cyclus van 4/6/8 weken
+  (`weekPeriodization(weekStart, SeasonPlan, catalog)` in de staff-engine). Afwijkende weken pas je
+  enkel in de weekinput aan.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

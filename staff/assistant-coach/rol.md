@@ -1,7 +1,7 @@
 ---
 id: assistant-coach
 naam: Assistent Coach
-versie: 0.3.0
+versie: 0.4.0
 status: concept
 ---
 
@@ -39,12 +39,12 @@ uitgewerkte trainingen, individuele aanpassingen, aandachtspunten en vragen aan 
 
 ## Afstemming in de stafmeeting
 
-- **Physical Coach**: bepaalt de belasting en de periodisering. Is zijn belastingsplan voor de
-  week goedgekeurd, dan werkt de Assistent Coach de trainingen uit binnen die belasting en neemt
-  hij de fysieke blokken over. Zonder goedgekeurd plan stelt hij de belasting zelf voor.
-- **Tactical Coach**: levert in zijn goedgekeurde wedstrijdplan de tactische accenten per
-  trainingsdag en de standaardsituaties; daarna tekent hij de oefenvormen van de goedgekeurde
-  weekplanning uit.
+- **Physical Coach**: bepaalt de belasting en de periodisering. Is er een belastingsplan in het
+  weekdocument, dan werkt de Assistent Coach de trainingen uit binnen die belasting en neemt
+  hij de fysieke blokken over. Zonder plan stelt hij de belasting zelf voor.
+- **Tactical Coach**: levert in zijn tactisch weekplan de tactische accenten per
+  trainingsdag en de standaardsituaties; daarna tekent hij de oefenvormen van de weekplanning
+  uit.
 - **Video Analist** (later): levert beelden en aandachtspunten uit de vorige wedstrijd.
 
 ## Grenzen

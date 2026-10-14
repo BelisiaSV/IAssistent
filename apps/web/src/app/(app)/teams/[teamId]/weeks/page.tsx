@@ -2,15 +2,12 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui";
 import { messages } from "@/lib/messages";
-import { periodizationCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/teams/queries";
 import { addDays, longDate, mondayOf, shortDate, todayInBelgium } from "@/lib/weeks/dates";
 import { trainingScheduleSchema, type WeekMatch } from "@/lib/weeks/validation";
 
 import { openWeek } from "./actions";
-import { ScheduleForm } from "./schedule-form";
-import { SeasonForm } from "./season-form";
 
 const m = messages.weeks;
 
@@ -20,7 +17,7 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
   const supabase = await createClient();
   const { data } = await supabase
     .from("week_plans")
-    .select("id, week_start, matches, staff_proposals(role, task, version, status)")
+    .select("id, week_start, matches, staff_runs(kind, version, status)")
     .eq("team_id", team.id)
     .order("week_start", { ascending: false })
     .limit(30);
@@ -33,6 +30,14 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-600">{m.intro}</p>
+      {canEdit && (!schedule.success || schedule.data.length === 0 || (!team.competition_start_date && !team.preparation_start_date)) && (
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+          {messages.settings.missing}{" "}
+          <Link href={`/teams/${team.id}/settings`} className="font-medium underline">
+            {messages.settings.open}
+          </Link>
+        </p>
+      )}
 
       {canEdit && (
         <form
@@ -62,11 +67,9 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
       ) : (
         <ul className="divide-y divide-slate-100 rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
           {weeks.map((week) => {
-            const proposals = week.staff_proposals ?? [];
-            const latest = [...proposals]
-              .filter((p) => p.role === "assistant-coach" && p.task === "default")
-              .sort((a, b) => b.version - a.version)[0];
-            const approved = proposals.some((p) => p.role === "assistant-coach" && p.task === "default" && p.status === "approved");
+            const runs = (week.staff_runs ?? []).filter((x) => x.kind === "week");
+            const latest = [...runs].sort((a, b) => b.version - a.version)[0];
+            const approved = runs.some((x) => x.status === "approved");
             const opponents = ((week.matches ?? []) as WeekMatch[]).map((match) => match.opponent);
             return (
               <li key={week.id}>
@@ -91,15 +94,6 @@ export default async function WeeksPage({ params }: { params: Promise<{ teamId: 
         </ul>
       )}
 
-      {canEdit && (
-        <SeasonForm
-          teamId={team.id}
-          competitionStartDate={team.competition_start_date}
-          periodizationWeeks={team.periodization_weeks}
-          cycles={periodizationCatalog.cycli.map((c) => c.weken)}
-        />
-      )}
-      {canEdit && <ScheduleForm teamId={team.id} initial={schedule.success ? schedule.data : []} />}
     </div>
   );
 }

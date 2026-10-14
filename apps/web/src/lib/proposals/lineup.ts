@@ -1,11 +1,11 @@
-import type { MatchPlanOutput } from "./types";
+import type { MatchPrepOutput } from "./types";
 
 /**
  * Turns the lineup of a Tactical Coach match plan (shirt numbers) into a lineup
  * of the team (player ids). Unknown shirt numbers are skipped.
  */
 export function lineupFromMatchPlan(
-  lineup: MatchPlanOutput["opstelling"],
+  lineup: MatchPrepOutput["opstelling"],
   players: { id: string; shirt_number: number | null; archived_at: string | null }[],
   slotIds: ReadonlySet<string>,
 ): { starters: Record<string, string>; bench: string[] } {

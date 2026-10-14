@@ -228,6 +228,8 @@ export type Database = {
           created_by: string;
           created_at: string;
           decided_at: string | null;
+          run_id: string | null;
+          step: string | null;
         };
         Insert: {
           id?: string;
@@ -247,6 +249,8 @@ export type Database = {
           created_by?: string;
           created_at?: string;
           decided_at?: string | null;
+          run_id?: string | null;
+          step?: string | null;
         };
         Update: {
           id?: string;
@@ -266,8 +270,17 @@ export type Database = {
           created_by?: string;
           created_at?: string;
           decided_at?: string | null;
+          run_id?: string | null;
+          step?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "staff_proposals_run_id_fkey";
+            columns: ["run_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_runs";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "staff_proposals_team_id_fkey";
             columns: ["team_id"];
@@ -284,6 +297,76 @@ export type Database = {
           },
           {
             foreignKeyName: "staff_proposals_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_runs: {
+        Row: {
+          id: string;
+          team_id: string;
+          week_plan_id: string;
+          kind: "week" | "match";
+          version: number;
+          status: "generating" | "ready" | "failed" | "approved" | "rejected";
+          feedback: string | null;
+          feedback_step: string | null;
+          based_on: string | null;
+          provider: string;
+          created_by: string;
+          created_at: string;
+          decided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          week_plan_id: string;
+          kind: "week" | "match";
+          version?: number;
+          status?: "generating" | "ready" | "failed" | "approved" | "rejected";
+          feedback?: string | null;
+          feedback_step?: string | null;
+          based_on?: string | null;
+          provider: string;
+          created_by?: string;
+          created_at?: string;
+          decided_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          week_plan_id?: string;
+          kind?: "week" | "match";
+          version?: number;
+          status?: "generating" | "ready" | "failed" | "approved" | "rejected";
+          feedback?: string | null;
+          feedback_step?: string | null;
+          based_on?: string | null;
+          provider?: string;
+          created_by?: string;
+          created_at?: string;
+          decided_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_runs_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_runs_week_plan_id_fkey";
+            columns: ["week_plan_id"];
+            isOneToOne: false;
+            referencedRelation: "week_plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_runs_created_by_fkey";
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "coaches";
@@ -358,6 +441,8 @@ export type Database = {
           secondary_color: string;
           training_schedule: Json;
           competition_start_date: string | null;
+          preparation_start_date: string | null;
+          preparation_weeks: number;
           periodization_weeks: number;
           archived_at: string | null;
           created_at: string;
@@ -375,6 +460,8 @@ export type Database = {
           secondary_color?: string;
           training_schedule?: Json;
           competition_start_date?: string | null;
+          preparation_start_date?: string | null;
+          preparation_weeks?: number;
           periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
@@ -392,6 +479,8 @@ export type Database = {
           secondary_color?: string;
           training_schedule?: Json;
           competition_start_date?: string | null;
+          preparation_start_date?: string | null;
+          preparation_weeks?: number;
           periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
@@ -918,7 +1007,7 @@ export type Database = {
       membership_role: "club_owner" | "assistant_coach";
       player_status: "available" | "injured" | "suspended" | "unavailable";
       preferred_foot: "left" | "right" | "both";
-      proposal_status: "generating" | "ready" | "failed" | "approved" | "rejected";
+      proposal_status: "pending" | "generating" | "ready" | "failed" | "approved" | "rejected";
     };
     CompositeTypes: {
       [_ in never]: never;

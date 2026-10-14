@@ -1,7 +1,7 @@
 ---
 id: physical-coach
 naam: Physical Coach
-versie: 0.1.0
+versie: 0.1.2
 status: concept
 ---
 
@@ -42,7 +42,7 @@ Een belastingsplan volgens `output-schema.json`.
 
 ## Afstemming in de stafmeeting
 
-- **Assistent Coach**: krijgt het goedgekeurde belastingsplan en werkt de trainingen uit binnen
+- **Assistent Coach**: krijgt het belastingsplan en werkt de trainingen uit binnen
   die belasting; neemt de fysieke blokken en hun belasting over.
 - **Tactical Coach** (later): stemt de ruimtes en vormen af op de gevraagde belasting.
 

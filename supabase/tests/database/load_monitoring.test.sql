@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(14);
+select plan(17);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -55,6 +55,15 @@ select lives_ok(
 select throws_ok(
   $$update public.teams set periodization_weeks = 5 where name = 'A'$$,
   '23514', null, 'cycle must be 4, 6 or 8 weeks');
+select lives_ok(
+  $$update public.teams set preparation_start_date = '2026-07-06', preparation_weeks = 8 where name = 'A'$$,
+  'head coach plans the preparation with its own cycle');
+select throws_ok(
+  $$update public.teams set preparation_start_date = '2026-09-20' where name = 'A'$$,
+  '23514', null, 'preparation starts before the competition');
+select throws_ok(
+  $$update public.teams set preparation_weeks = 3 where name = 'A'$$,
+  '23514', null, 'preparation cycle must be 4, 6 or 8 weeks');
 
 select lives_ok(
   $$insert into public.session_loads (team_id, session_date, kind, rpe, duration_min, attendance)

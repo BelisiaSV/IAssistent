@@ -50,8 +50,9 @@ Laatste fysieke testen van de groep en of een nieuwe test nodig is.
 
 # Staf
 
-Goedgekeurde voorstellen van andere rollen voor deze week (bv. het belastingsplan van de
-Physical Coach). null betekent: nog niets goedgekeurd.
+Het werk van de andere rollen voor deze week, per rol-id: in het weekdocument wat de rollen
+vóór jou in deze stafmeeting maakten (bv. het belastingsplan van de Physical Coach); bij de
+wedstrijdvoorbereiding het goedgekeurde weekdocument. Leeg betekent: nog niets beschikbaar.
 
 {{staf}}
 

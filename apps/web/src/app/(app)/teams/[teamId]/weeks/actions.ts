@@ -1,25 +1,24 @@
 "use server";
 
-import type { Json } from "@iassistent/db";
-import { runRole, StaffGenerationError } from "@iassistent/staff-engine";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { z } from "zod";
 
-import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
-import { isFeatureEnabled } from "@/lib/feature-flags";
 import { messages } from "@/lib/messages";
 import { opponentKey } from "@/lib/opponents/context";
 import { matchReportSchema } from "@/lib/opponents/validation";
 import { lineupFromMatchPlan } from "@/lib/proposals/lineup";
-import type { MatchPlanOutput } from "@/lib/proposals/types";
-import { WEEK_STEPS, weekStep } from "@/lib/roles";
-import { formationCatalog, staff } from "@/lib/staff";
+import type { MatchPrepOutput } from "@/lib/proposals/types";
+import { RUN_STEPS } from "@/lib/roles";
+import { matchPrepFrom } from "@/lib/staff-runs/gate";
+import { advanceRun, decideRun, RunRequestError, startRun } from "@/lib/staff-runs/server";
+import { formationCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
-import { addDays, isIsoDate, isoWeekday } from "@/lib/weeks/dates";
-import { approvedOutput, contextForRole, loadWeek } from "@/lib/weeks/load";
+import { addDays, isIsoDate, isoWeekday, longDate, todayInBelgium } from "@/lib/weeks/dates";
+import { loadWeek } from "@/lib/weeks/load";
+import { SEASON_TEAM_COLUMNS } from "@/lib/weeks/season";
 import {
   trainingScheduleSchema,
   type WeekMatch,
@@ -32,9 +31,6 @@ export type FormState = { error?: string; success?: string };
 const e = messages.weeks.errors;
 const pe = messages.proposals.errors;
 const uuid = z.uuid();
-
-const roleName = (roleId: string) =>
-  messages.steps[WEEK_STEPS.find((s) => s.role === roleId && s.task === "default")?.key ?? "ac"].name;
 
 const weekPath = (teamId: string, weekStart: string) => `/teams/${teamId}/weeks/${weekStart}`;
 const isMonday = (value: string) => isIsoDate(value) && isoWeekday(value) === 1;
@@ -49,31 +45,6 @@ function parseJson(value: FormDataEntryValue | null): unknown {
 
 function firstIssue(error: z.ZodError) {
   return error.issues[0]?.message ?? e.saveFailed;
-}
-
-export async function saveTrainingSchedule(
-  teamId: string,
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
-  const parsed = trainingScheduleSchema.safeParse(parseJson(formData.get("schedule")));
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
-
-  await requireUser();
-  const supabase = await createClient();
-  const schedule = [...parsed.data].sort((a, b) => a.weekday - b.weekday);
-  const { data, error } = await supabase
-    .from("teams")
-    .update({ training_schedule: schedule })
-    .eq("id", teamId)
-    .select("id");
-  if (error || !data?.length) {
-    console.error("saveTrainingSchedule failed", error);
-    return { error: e.saveFailed };
-  }
-  revalidatePath(`/teams/${teamId}/weeks`);
-  return { success: messages.weeks.schedule.saved };
 }
 
 /** Opens (or creates) the week, prefilled from the standard training schedule. */
@@ -170,140 +141,97 @@ export async function saveWeekPlan(
   return { success: messages.weeks.input.saved };
 }
 
+const runKind = z.enum(["week", "match"]);
+
 /**
- * Asks a staff role for a (new version of its) proposal for the week. The
- * proposal row is created right away; the role runs after the response.
+ * The head coach asks the staff once: a week document or a match preparation.
+ * With "adjust" a new version is made from the shown one: the whole staff or
+ * one step (and the steps that build on it) work again with the feedback.
  */
-export async function requestProposal(
+export async function requestRun(
   teamId: string,
   weekStart: string,
-  stepKey: string,
+  kind: string,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const step = weekStep(stepKey);
-  if (!step || !uuid.safeParse(teamId).success || !isMonday(weekStart)) return { error: e.invalidWeek };
+  const parsedKind = runKind.safeParse(kind);
+  if (!parsedKind.success || !uuid.safeParse(teamId).success || !isMonday(weekStart)) return { error: e.invalidWeek };
   const feedback = String(formData.get("feedback") ?? "").trim();
-  const isAdjustment = formData.get("adjust") === "1";
+  const basedOnId = String(formData.get("basedOn") ?? "");
+  const retry = formData.get("retry") === "1";
+  const feedbackStep = String(formData.get("step") ?? "") || null;
+  const isAdjustment = !!basedOnId && !retry;
   if (isAdjustment && !feedback) return { error: pe.feedbackRequired };
   if (feedback.length > 2000) return { error: pe.feedbackTooLong };
+  if (feedbackStep && !RUN_STEPS[parsedKind.data].some((s) => s.key === feedbackStep)) return { error: pe.requestFailed };
 
   const user = await requireUser();
-  if (!(await isFeatureEnabled(step.flag))) return { error: messages.steps[step.key].flagOff };
-
   const supabase = await createClient();
   const { data: team } = await supabase
     .from("teams")
-    .select("id, competition_start_date, periodization_weeks")
+    .select(SEASON_TEAM_COLUMNS)
     .eq("id", teamId)
     .maybeSingle();
   if (!team) return { error: pe.requestFailed };
-
-  const [data, { data: profile }] = await Promise.all([
-    loadWeek(supabase, team, weekStart),
-    supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", user.id).maybeSingle(),
-  ]);
+  const data = await loadWeek(supabase, team, weekStart);
   if (!data.week) return { error: pe.noWeek };
-  const missing = step.requires.filter((roleId) => !approvedOutput(data.proposals, roleId));
-  if (missing.length) return { error: messages.steps.requires(missing.map(roleName).join(", ")) };
 
-  const previous = data.proposals.find(
-    (p) => p.role === step.role && p.task === step.task && (p.status === "ready" || p.status === "approved") && p.output,
-  );
-  let context;
+  if (parsedKind.data === "match") {
+    const week = weekPlanSchema(weekStart).safeParse({
+      trainings: data.week.trainings,
+      matches: data.week.matches,
+      previousMatchDate: data.week.previous_match_date,
+      notes: data.week.notes ?? "",
+    });
+    const from = week.success ? matchPrepFrom(week.data.trainings, week.data.matches, weekStart) : null;
+    if (!from) return { error: messages.staffRun.match.noMatch };
+    if (!data.runs.some((r) => r.kind === "week" && r.status === "approved")) return { error: messages.staffRun.match.needsWeek };
+    if (todayInBelgium() < from) return { error: messages.staffRun.match.from(longDate(from)) };
+  }
+
+  const basedOn = basedOnId ? (data.runs.find((r) => r.id === basedOnId && r.kind === parsedKind.data) ?? null) : null;
+  if (basedOnId && !basedOn) return { error: pe.requestFailed };
+
+  let run;
   try {
-    context = contextForRole(data, weekStart, {
-      uses: step.uses,
-      vision: profile ? { summary: profile.vision_summary, vision: profile.vision } : null,
-      feedback: feedback && previous?.output ? { previousOutput: previous.output, comment: feedback } : null,
+    run = await startRun(supabase, {
+      teamId,
+      weekPlanId: data.week.id,
+      kind: parsedKind.data,
+      feedback: isAdjustment ? feedback : null,
+      feedbackStep: isAdjustment ? feedbackStep : null,
+      basedOn,
+      retry,
     });
   } catch (cause) {
-    console.error("requestProposal: invalid week", cause);
-    return { error: pe.noWeek };
-  }
-
-  const provider = getStaffProvider();
-  const { data: proposal, error } = await supabase
-    .from("staff_proposals")
-    .insert({
-      team_id: teamId,
-      week_plan_id: data.week.id,
-      role: step.role,
-      task: step.task,
-      provider: provider.id,
-      feedback: feedback || null,
-    })
-    .select("id, version")
-    .single();
-
-  if (error || !proposal) {
-    console.error("requestProposal failed", error);
-    return { error: error?.hint === "daily_limit_reached" ? pe.dailyLimit : pe.requestFailed };
-  }
-
-  // Run the role after the response is sent; the page polls until it is done.
-  after(async () => {
-    try {
-      const result = await runRole(staff, step.role, context, provider, step.task);
-      const { error: updateError } = await supabase
-        .from("staff_proposals")
-        .update({
-          status: "ready",
-          output: result.output as Json,
-          model: result.model,
-          usage: result.usage as Json,
-          content_version: result.contentVersion,
-        })
-        .eq("id", proposal.id);
-      if (updateError) throw updateError;
-    } catch (cause) {
-      console.error("staff proposal generation failed", cause);
-      const detail =
-        cause instanceof StaffGenerationError ? `${cause.code}: ${cause.message}` : String(cause);
-      await supabase
-        .from("staff_proposals")
-        .update({ status: "failed", error: detail.slice(0, 2000) })
-        .eq("id", proposal.id);
+    if (cause instanceof RunRequestError) {
+      if (cause.code === "daily_limit") return { error: pe.dailyLimit };
+      if (cause.code === "no_steps") return { error: messages.staffRun.flagOff };
     }
-  });
+    return { error: pe.requestFailed };
+  }
+
+  const work = await advanceRun(supabase, { team, weekStart, runId: run.id, coachId: user.id });
+  if (work) after(work);
 
   revalidatePath(weekPath(teamId, weekStart));
-  redirect(`${weekPath(teamId, weekStart)}?${step.key}=${proposal.version}#${step.key}`);
+  redirect(`${weekPath(teamId, weekStart)}?${run.kind}=${run.version}#${run.kind}`);
 }
 
-const seasonSchema = z.object({
-  competitionStartDate: z.union([z.literal("").transform(() => null), z.string().refine(isIsoDate, e.date)]),
-  periodizationWeeks: z.coerce.number().refine((n) => [4, 6, 8].includes(n), e.cycle),
-});
-
-export async function saveSeasonSettings(
-  teamId: string,
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
-  const parsed = seasonSchema.safeParse({
-    competitionStartDate: String(formData.get("competitionStartDate") ?? ""),
-    periodizationWeeks: formData.get("periodizationWeeks"),
-  });
-  if (!parsed.success) return { error: firstIssue(parsed.error) };
-
-  await requireUser();
+/** Called by the page while a run is busy: starts the steps that can go next. */
+export async function continueRun(teamId: string, weekStart: string, runId: string) {
+  if (!uuid.safeParse(teamId).success || !uuid.safeParse(runId).success || !isMonday(weekStart)) return;
+  const user = await requireUser();
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data: team } = await supabase
     .from("teams")
-    .update({
-      competition_start_date: parsed.data.competitionStartDate,
-      periodization_weeks: parsed.data.periodizationWeeks,
-    })
+    .select(SEASON_TEAM_COLUMNS)
     .eq("id", teamId)
-    .select("id");
-  if (error || !data?.length) {
-    console.error("saveSeasonSettings failed", error);
-    return { error: e.saveFailed };
-  }
-  revalidatePath(`/teams/${teamId}/weeks`, "layout");
-  return { success: messages.weeks.season.saved };
+    .maybeSingle();
+  if (!team) return;
+  const work = await advanceRun(supabase, { team, weekStart, runId, coachId: user.id });
+  if (work) after(work);
 }
 
 const sessionLoadSchema = z.object({
@@ -350,38 +278,18 @@ export async function saveSessionLoad(
   return { success: messages.weeks.load.saved };
 }
 
-export async function decideProposal(formData: FormData) {
+export async function decideRunAction(formData: FormData) {
   const teamId = String(formData.get("teamId"));
   const weekStart = String(formData.get("weekStart"));
-  const proposalId = String(formData.get("proposalId"));
+  const runId = String(formData.get("runId"));
   const decision = formData.get("decision") === "approved" ? "approved" : "rejected";
-  if (!uuid.safeParse(teamId).success || !uuid.safeParse(proposalId).success || !isMonday(weekStart)) return;
+  if (!uuid.safeParse(teamId).success || !uuid.safeParse(runId).success || !isMonday(weekStart)) return;
 
   await requireUser();
   const supabase = await createClient();
-  const { data: proposal } = await supabase
-    .from("staff_proposals")
-    .select("id, week_plan_id, role, task, status")
-    .eq("id", proposalId)
-    .eq("team_id", teamId)
-    .maybeSingle();
-  if (!proposal || !["ready", "approved", "rejected"].includes(proposal.status)) return;
-
-  if (decision === "approved") {
-    // Only one approved version per week, role and task.
-    await supabase
-      .from("staff_proposals")
-      .update({ status: "ready", decided_at: null })
-      .eq("week_plan_id", proposal.week_plan_id)
-      .eq("role", proposal.role)
-      .eq("task", proposal.task)
-      .eq("status", "approved");
-  }
-  const { error } = await supabase
-    .from("staff_proposals")
-    .update({ status: decision, decided_at: new Date().toISOString() })
-    .eq("id", proposal.id);
-  if (error) console.error("decideProposal failed", error);
+  const { data: run } = await supabase.from("staff_runs").select("*").eq("id", runId).eq("team_id", teamId).maybeSingle();
+  if (!run || !["ready", "approved", "rejected"].includes(run.status)) return;
+  await decideRun(supabase, run, decision);
   revalidatePath(weekPath(teamId, weekStart));
 }
 
@@ -457,12 +365,12 @@ export async function lineupFromProposal(formData: FormData) {
       .eq("id", proposalId)
       .eq("team_id", teamId)
       .eq("role", "tactical-coach")
-      .eq("task", "default")
+      .eq("task", "wedstrijdvoorbereiding")
       .maybeSingle(),
     supabase.from("players").select("id, shirt_number, archived_at").eq("team_id", teamId),
     supabase.from("week_plans").select("matches").eq("team_id", teamId).eq("week_start", weekStart).maybeSingle(),
   ]);
-  const plan = proposal?.output as MatchPlanOutput | null | undefined;
+  const plan = proposal?.output as MatchPrepOutput | null | undefined;
   const formation = formationCatalog.formaties.find((f) => f.code === plan?.opstelling.formatie);
   if (!plan || !formation) return;
 
@@ -476,9 +384,9 @@ export async function lineupFromProposal(formData: FormData) {
     .from("lineups")
     .insert({
       team_id: teamId,
-      title: messages.matchPlan.lineupTitle(match?.opponent ?? plan.tegenstander.naam),
+      title: messages.matchPlan.lineupTitle(match?.opponent ?? ""),
       match_date: match?.date ?? null,
-      opponent: match?.opponent ?? plan.tegenstander.naam,
+      opponent: match?.opponent ?? null,
       formation: formation.code,
       starters,
       bench,

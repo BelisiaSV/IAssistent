@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { Tables } from "@iassistent/db";
 import { type VisionAnswers, weekPeriodization } from "@iassistent/staff-engine/content";
 
 import { matchEvaluations, opponentContext, opponentKey } from "@/lib/opponents/context";
@@ -9,10 +8,10 @@ import type { createClient } from "@/lib/supabase/server";
 
 import { buildRoleContext, loadHistory } from "./context";
 import { addDays } from "./dates";
+import { type SeasonTeam, seasonPlan } from "./season";
 import { type WeekMatch, weekPlanSchema } from "./validation";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
-type Team = Pick<Tables<"teams">, "id" | "competition_start_date" | "periodization_weeks">;
 
 const HISTORY_WEEKS = 8;
 const EVALUATIONS = 10;
@@ -29,7 +28,7 @@ export function plannedAu(output: unknown): number | null {
 }
 
 /** Everything about a week that the week page and the staff roles need. */
-export async function loadWeek(supabase: Supabase, team: Team, weekStart: string) {
+export async function loadWeek(supabase: Supabase, team: SeasonTeam, weekStart: string) {
   const historyStart = addDays(weekStart, -7 * HISTORY_WEEKS);
   const [{ data: week }, { data: players }, { data: sessions }, { data: tests }, { data: pastWeeks }] =
     await Promise.all([
@@ -51,21 +50,25 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
         .order("week_start", { ascending: true }),
     ]);
 
-  const proposals = week
-    ? ((
-        await supabase
+  const [proposals, runs] = week
+    ? await Promise.all([
+        supabase
           .from("staff_proposals")
           .select("*")
           .eq("week_plan_id", week.id)
           .order("version", { ascending: false })
-      ).data ?? [])
-    : [];
+          .then((r) => r.data ?? []),
+        supabase
+          .from("staff_runs")
+          .select("*")
+          .eq("week_plan_id", week.id)
+          .order("version", { ascending: false })
+          .then((r) => r.data ?? []),
+      ])
+    : [[], []];
 
-  const season = {
-    competitionStartDate: team.competition_start_date,
-    periodizationWeeks: team.periodization_weeks,
-  };
-  const periodization = weekPeriodization(weekStart, season.competitionStartDate, season.periodizationWeeks, periodizationCatalog);
+  const season = seasonPlan(team);
+  const periodization = weekPeriodization(weekStart, season, periodizationCatalog);
 
   const history = loadHistory(
     Array.from({ length: HISTORY_WEEKS }, (_, i) => {
@@ -76,7 +79,7 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
         .sort((a, b) => Number(b.status === "approved") - Number(a.status === "approved") || b.version - a.version)[0];
       return {
         week_start: start,
-        weektype: weekPeriodization(start, season.competitionStartDate, season.periodizationWeeks, periodizationCatalog).weektype?.code ?? null,
+        weektype: weekPeriodization(start, season, periodizationCatalog).weektype?.code ?? null,
         planned_au: plannedAu(loadPlan?.output),
       };
     }),
@@ -119,6 +122,7 @@ export async function loadWeek(supabase: Supabase, team: Team, weekStart: string
     reports: reports ?? [],
     players: players ?? [],
     proposals,
+    runs,
     sessionsThisWeek: (sessions ?? []).filter((s) => s.session_date >= weekStart),
     testResults: (tests ?? []).map((t) => ({ ...t, result: Number(t.result) })),
     history,
@@ -134,7 +138,8 @@ export function contextForRole(
   data: WeekData,
   weekStart: string,
   options: {
-    uses: readonly string[];
+    /** Output of other roles by role id ("staf"). */
+    staff: Record<string, unknown>;
     vision: { summary: string | null; vision: unknown } | null;
     feedback: { previousOutput: unknown; comment: string } | null;
   },
@@ -146,12 +151,6 @@ export function contextForRole(
     previousMatchDate: data.week.previous_match_date,
     notes: data.week.notes ?? "",
   });
-  const staff = Object.fromEntries(
-    options.uses.flatMap((roleId) => {
-      const output = approvedOutput(data.proposals, roleId);
-      return output ? [[roleId, output]] : [];
-    }),
-  );
   const opponent = data.nextMatch
     ? opponentContext({
         name: data.nextMatch.opponent,
@@ -183,7 +182,23 @@ export function contextForRole(
     history: data.history,
     opponent,
     evaluations,
-    staff,
+    staff: options.staff,
     feedback: options.feedback,
   });
+}
+
+/** Latest MAS (VAMEVAL) per active player with a shirt number, for MAS runs. */
+export function squadMas(data: WeekData, names: Map<number, string>) {
+  const latest = new Map<string, { date: string; mas: number }>();
+  for (const t of data.testResults) {
+    if (t.test_code !== "vameval") continue;
+    const current = latest.get(t.player_id);
+    if (!current || current.date < t.test_date) latest.set(t.player_id, { date: t.test_date, mas: t.result });
+  }
+  return [...latest.entries()]
+    .flatMap(([playerId, { mas }]) => {
+      const player = data.players.find((x) => x.id === playerId && !x.archived_at);
+      return player?.shirt_number ? [{ shirtNumber: player.shirt_number, name: names.get(player.shirt_number) ?? "", mas }] : [];
+    })
+    .sort((a, b) => a.shirtNumber - b.shirtNumber);
 }

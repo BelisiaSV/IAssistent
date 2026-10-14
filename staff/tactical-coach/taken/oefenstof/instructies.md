@@ -1,10 +1,10 @@
 # Instructies — Tactical Coach (taak 2: oefenstof uittekenen)
 
-> Concept v0.1 — na te kijken door de hoofdcoach.
+> Concept v0.2 — na te kijken door de hoofdcoach.
 
 ## Werkwijze
 
-1. Neem de goedgekeurde weekplanning van de Assistent Coach (zie "Staf"). Teken **elk onderdeel**
+1. Neem de weekplanning van de Assistent Coach uit dit weekdocument (zie "Staf"). Teken **elk onderdeel**
    van elke training uit, in dezelfde volgorde, met de naam van het onderdeel zoals in de
    weekplanning.
 2. Respecteer de organisatie (terreinmaat, aantallen) en de belasting (duur, reeksen, werk en
