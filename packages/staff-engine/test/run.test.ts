@@ -145,27 +145,48 @@ describe("tactical coach", () => {
     { rugnummer: 5, posities: ["CB"], voet: "links", beschikbaar: false, status: "geblesseerd", terug_verwacht: null, mas_kmh: null, mas_test_datum: null },
   ];
 
-  it("has valid examples for both tasks", () => {
+  it("has valid examples for all tasks", () => {
     const role = staff.roles.find((r) => r.id === "tactical-coach")!;
-    expect(role.tasks.map((t) => t.id)).toEqual(["oefenstof"]);
+    expect(role.tasks.map((t) => t.id).sort()).toEqual(["oefenstof", "wedstrijdvoorbereiding"]);
     expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
-    expect(validateOutput(role.tasks[0]!.outputSchema, roleExample(role, "oefenstof"))).toEqual({ ok: true });
+    for (const task of role.tasks) {
+      expect(validateOutput(task.outputSchema, roleExample(role, task.id))).toEqual({ ok: true });
+    }
   });
 
-  it("builds a match plan with a lineup from available players only", async () => {
+  it("builds a tactical week plan with accents on the training days", async () => {
     const result = await runRole(staff, "tactical-coach", { ...context(), kern: squad() }, exampleProvider);
-    const output = result.output as {
-      tegenstander: { naam: string };
-      opstelling: { basis: { post: string; rugnummer: number }[] };
-      trainingsaccenten: { datum: string }[];
-    };
+    const output = result.output as { tegenstander: { naam: string }; trainingsaccenten: { datum: string }[] };
     expect(output.tegenstander.naam).toBe("KFC Voorbeeld");
-    expect(output.opstelling.basis.find((b) => b.post === "GK")?.rugnummer).toBe(1);
-    expect(output.opstelling.basis.map((b) => b.rugnummer)).not.toContain(5);
     expect(output.trainingsaccenten.map((a) => a.datum)).toEqual(["2026-10-20", "2026-10-22"]);
+    expect(result.output).not.toHaveProperty("opstelling");
   });
 
-  it("draws every part of the approved week planning", async () => {
+  it("prepares the match with a lineup from available players and the set pieces of the week", async () => {
+    const weekPlan = (await runRole(staff, "tactical-coach", context(), exampleProvider)).output as {
+      standaardsituaties: { titel: string }[];
+    };
+    const result = await runRole(
+      staff,
+      "tactical-coach",
+      { ...context(), kern: squad(), staf: { "tactical-coach": weekPlan } },
+      exampleProvider,
+      "wedstrijdvoorbereiding",
+    );
+    const output = result.output as {
+      opstelling: { basis: { post: string; rugnummer: number }[] };
+      standaardsituaties: { titel: string; taken: { rugnummer: number }[] }[];
+    };
+    const starters = output.opstelling.basis.map((b) => b.rugnummer);
+    expect(output.opstelling.basis.find((b) => b.post === "GK")?.rugnummer).toBe(1);
+    expect(starters).not.toContain(5);
+    expect(output.standaardsituaties.map((s) => s.titel)).toEqual(weekPlan.standaardsituaties.map((s) => s.titel));
+    for (const sp of output.standaardsituaties) {
+      for (const t of sp.taken) expect(starters).toContain(t.rugnummer);
+    }
+  });
+
+  it("draws every part of the week planning", async () => {
     const planning = (await runRole(staff, "assistant-coach", context(), exampleProvider)).output as {
       dagen: { onderdelen: { naam: string }[] }[];
     };
@@ -181,7 +202,7 @@ describe("tactical coach", () => {
     expect(output.oefeningen.map((o) => o.onderdeel)).toEqual(parts);
   });
 
-  it("needs an approved week planning to draw", async () => {
+  it("needs a week planning to draw", async () => {
     await expect(runRole(staff, "tactical-coach", context(), exampleProvider, "oefenstof")).rejects.toMatchObject({
       code: "provider_error",
     });

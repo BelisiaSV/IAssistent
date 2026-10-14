@@ -4,8 +4,7 @@ import type { ReactNode } from "react";
 import { Pitch } from "@/components/pitch";
 import { messages } from "@/lib/messages";
 import { withShirtNames } from "@/lib/proposals/names";
-import type { MatchPlanOutput } from "@/lib/proposals/types";
-import { longDate, weekdayName } from "@/lib/weeks/dates";
+import type { MatchPrepOutput, SetPiece, TacticalWeekOutput } from "@/lib/proposals/types";
 
 import { DrawingView } from "./drawing";
 
@@ -13,27 +12,22 @@ const t = messages.matchPlan;
 const o = messages.proposals.output;
 
 /**
- * Read-only rendering of the Tactical Coach match plan. Shirt numbers of our
- * squad get their names (`names`); those of the opponent get the names from
- * their lineup (`opponentNames`).
+ * The tactical part of the week document: opponent, lessons and game plan.
+ * Shirt numbers of our squad get their names (`names`); those of the opponent
+ * get the names from their lineup (`opponentNames`).
  */
-export function MatchPlanView({
+export function TacticalWeekView({
   output,
   names,
   opponentNames,
-  formations,
-  actions,
 }: {
-  output: MatchPlanOutput;
+  output: TacticalWeekOutput;
   names: Map<number, string>;
   opponentNames: Map<number, string>;
-  formations: FormationCatalog;
-  actions?: ReactNode;
 }) {
   const n = (text: string) => withShirtNames(text, names);
   const them = (text: string) => withShirtNames(text, opponentNames);
   const opp = output.tegenstander;
-  const formation = formations.formaties.find((f) => f.code === output.opstelling.formatie);
   const plan = output.speelplan;
 
   return (
@@ -76,29 +70,42 @@ export function MatchPlanView({
           <span className="font-medium">{t.pressing}:</span> {n(plan.pressing)}
         </p>
       </Card>
+    </div>
+  );
+}
 
+/** Set pieces in a grid (week document and match preparation). */
+export function SetPieces({ setPieces, names }: { setPieces: SetPiece[]; names: Map<number, string> }) {
+  return (
+    <section className="space-y-3">
+      <h3 className="font-semibold">{t.setPieces}</h3>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {setPieces.map((sp, i) => (
+          <SetPieceCard key={i} setPiece={sp} names={names} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** The match preparation: lineup, set pieces with final tasks, scenarios and the match talk. */
+export function MatchPrepView({
+  output,
+  names,
+  formations,
+  actions,
+}: {
+  output: MatchPrepOutput;
+  names: Map<number, string>;
+  formations: FormationCatalog;
+  actions?: ReactNode;
+}) {
+  const n = (text: string) => withShirtNames(text, names);
+  return (
+    <div className="space-y-5">
       <Card title={`${t.lineup} · ${output.opstelling.formatie}`} actions={actions}>
         <div className="grid gap-5 lg:grid-cols-[minmax(0,22rem)_1fr]">
-          <Pitch>
-            {output.opstelling.basis.map((b) => {
-              const slot = formation?.posten.find((s) => s.id === b.post);
-              if (!slot) return null;
-              return (
-                <div
-                  key={b.post}
-                  className="absolute flex w-20 -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-                  style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow">
-                    {b.rugnummer}
-                  </span>
-                  <span className="mt-0.5 max-w-full truncate rounded bg-black/50 px-1 text-[10px] text-white">
-                    {names.get(b.rugnummer) ?? b.post}
-                  </span>
-                </div>
-              );
-            })}
-          </Pitch>
+          <LineupPitch lineup={output.opstelling} names={names} formations={formations} />
           <div className="space-y-3 text-sm">
             <ul className="space-y-1">
               {output.opstelling.basis.map((b) => (
@@ -120,14 +127,7 @@ export function MatchPlanView({
         </div>
       </Card>
 
-      <section className="space-y-3">
-        <h3 className="font-semibold">{t.setPieces}</h3>
-        <div className="grid gap-4 lg:grid-cols-2">
-          {output.standaardsituaties.map((sp, i) => (
-            <SetPieceCard key={i} setPiece={sp} names={names} />
-          ))}
-        </div>
-      </section>
+      <SetPieces setPieces={output.standaardsituaties} names={names} />
 
       {output.scenarios.length > 0 && (
         <Card title={t.scenarios}>
@@ -135,29 +135,6 @@ export function MatchPlanView({
             {output.scenarios.map((s, i) => (
               <li key={i}>
                 <span className="font-medium">{n(s.situatie)}</span> → {n(s.aanpassing)}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {output.trainingsaccenten.length > 0 && (
-        <Card title={t.accents}>
-          <ul className="space-y-3 text-sm">
-            {output.trainingsaccenten.map((a, i) => (
-              <li key={i}>
-                <span className="font-medium capitalize">{weekdayName(a.datum)}</span>{" "}
-                <span className="text-slate-500">{longDate(a.datum)}</span>
-                {a.md && <span className="ml-2 rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-white">{a.md}</span>}
-                <span className="block font-medium">{n(a.thema)}</span>
-                <span className="block text-slate-600">{n(a.doel)}</span>
-                {a.aandachtspunten.length > 0 && (
-                  <ul className="list-disc pl-5 text-slate-600">
-                    {a.aandachtspunten.map((p, j) => (
-                      <li key={j}>{n(p)}</li>
-                    ))}
-                  </ul>
-                )}
               </li>
             ))}
           </ul>
@@ -187,13 +164,48 @@ export function MatchPlanView({
   );
 }
 
+/** Lineup on a pitch: shirt number and name per slot. */
+export function LineupPitch({
+  lineup,
+  names,
+  formations,
+}: {
+  lineup: MatchPrepOutput["opstelling"];
+  names: Map<number, string>;
+  formations: FormationCatalog;
+}) {
+  const formation = formations.formaties.find((f) => f.code === lineup.formatie);
+  return (
+    <Pitch>
+      {lineup.basis.map((b) => {
+        const slot = formation?.posten.find((s) => s.id === b.post);
+        if (!slot) return null;
+        return (
+          <div
+            key={b.post}
+            className="absolute flex w-20 -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+            style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow">
+              {b.rugnummer}
+            </span>
+            <span className="mt-0.5 max-w-full truncate rounded bg-black/50 px-1 text-[10px] text-white">
+              {names.get(b.rugnummer) ?? b.post}
+            </span>
+          </div>
+        );
+      })}
+    </Pitch>
+  );
+}
+
 /** One set piece: drawing, agreements and tasks per shirt number. Also used on the dressing-room print. */
 export function SetPieceCard({
   setPiece,
   names,
   large = false,
 }: {
-  setPiece: MatchPlanOutput["standaardsituaties"][number];
+  setPiece: SetPiece;
   names: Map<number, string>;
   large?: boolean;
 }) {
@@ -236,7 +248,7 @@ export function SetPieceCard({
   );
 }
 
-function Card({ title, actions, children }: { title: string; actions?: ReactNode; children: ReactNode }) {
+export function Card({ title, actions, children }: { title: string; actions?: ReactNode; children: ReactNode }) {
   return (
     <section className="break-inside-avoid rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:shadow-none">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -248,7 +260,7 @@ function Card({ title, actions, children }: { title: string; actions?: ReactNode
   );
 }
 
-function List({ title, items, className = "" }: { title?: string; items: string[]; className?: string }) {
+export function List({ title, items, className = "" }: { title?: string; items: string[]; className?: string }) {
   if (!items.length) return null;
   return (
     <div className={className}>

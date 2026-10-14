@@ -1,0 +1,558 @@
+{
+  "opstelling": {
+    "formatie": "4-3-3",
+    "basis": [
+      {
+        "post": "GK",
+        "rugnummer": 1,
+        "taak": "Lange ballen onderscheppen, snel uitgooien."
+      },
+      {
+        "post": "LB",
+        "rugnummer": 3,
+        "taak": "Hoog opschuiven in balbezit."
+      },
+      {
+        "post": "LCB",
+        "rugnummer": 4,
+        "taak": "Duel met hun #9."
+      },
+      {
+        "post": "RCB",
+        "rugnummer": 5,
+        "taak": "Afdekken achter #4."
+      },
+      {
+        "post": "RB",
+        "rugnummer": 2,
+        "taak": "Overlappen op rechts."
+      },
+      {
+        "post": "CDM",
+        "rugnummer": 6,
+        "taak": "Zakken in de opbouw."
+      },
+      {
+        "post": "LCM",
+        "rugnummer": 8,
+        "taak": "Tussen de linies aanspeelbaar."
+      },
+      {
+        "post": "RCM",
+        "rugnummer": 10,
+        "taak": "Diepe loopacties."
+      },
+      {
+        "post": "LW",
+        "rugnummer": 11,
+        "taak": "Breed blijven."
+      },
+      {
+        "post": "ST",
+        "rugnummer": 9,
+        "taak": "Vastzetten en diepte."
+      },
+      {
+        "post": "RW",
+        "rugnummer": 7,
+        "taak": "1v1 tegen hun linksachter."
+      }
+    ],
+    "bank": [
+      12,
+      15,
+      17,
+      19,
+      14
+    ],
+    "toelichting": "Formatie volgens de visie; #7 rechts om hun zwakke linksachter op te zoeken."
+  },
+  "standaardsituaties": [
+    {
+      "titel": "Hoekschop aanvallend links",
+      "soort": "hoekschop_aanvallend",
+      "afspraken": [
+        "Inswinger naar de eerste paal.",
+        "Lopers starten laat."
+      ],
+      "taken": [
+        {
+          "rugnummer": 7,
+          "taak": "Trapt de hoekschop."
+        },
+        {
+          "rugnummer": 4,
+          "taak": "Eerste paal."
+        },
+        {
+          "rugnummer": 9,
+          "taak": "Tweede paal."
+        }
+      ],
+      "tekening": {
+        "titel": "Hoekschop aanvallend — links",
+        "veld": {
+          "type": "half",
+          "breedte_m": 68,
+          "lengte_m": 30
+        },
+        "elementen": [
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 1
+          },
+          {
+            "soort": "doelman",
+            "team": "tegenstander",
+            "label": null,
+            "x": 50,
+            "y": 6
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 3,
+            "y": 4
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "7",
+            "x": 1,
+            "y": 1
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 43,
+            "y": 10
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 55,
+            "y": 11
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 64,
+            "y": 14
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "4",
+            "x": 36,
+            "y": 52
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "5",
+            "x": 50,
+            "y": 55
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "9",
+            "x": 64,
+            "y": 50
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "8",
+            "x": 82,
+            "y": 58
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "10",
+            "x": 50,
+            "y": 88
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "pass",
+            "van_x": 3,
+            "van_y": 4,
+            "naar_x": 40,
+            "naar_y": 20,
+            "label": "inswinger"
+          },
+          {
+            "soort": "loop",
+            "van_x": 36,
+            "van_y": 52,
+            "naar_x": 40,
+            "naar_y": 24,
+            "label": "1e paal"
+          },
+          {
+            "soort": "loop",
+            "van_x": 50,
+            "van_y": 55,
+            "naar_x": 51,
+            "naar_y": 27,
+            "label": "centraal"
+          },
+          {
+            "soort": "loop",
+            "van_x": 64,
+            "van_y": 50,
+            "naar_x": 62,
+            "naar_y": 24,
+            "label": "2e paal"
+          },
+          {
+            "soort": "loop",
+            "van_x": 82,
+            "van_y": 58,
+            "naar_x": 70,
+            "naar_y": 38,
+            "label": "rebound"
+          }
+        ],
+        "zones": [
+          {
+            "x": 34,
+            "y": 16,
+            "breedte": 34,
+            "hoogte": 16,
+            "label": "aanvalszone"
+          }
+        ],
+        "uitleg": [
+          "#7 trapt een inswinger naar de eerste paal.",
+          "#4, #5 en #9 starten laat en lopen elk naar hun zone.",
+          "#8 pakt de rebound, #10 blijft aan de rand van de zestien."
+        ]
+      }
+    },
+    {
+      "titel": "Hoekschop verdedigend",
+      "soort": "hoekschop_verdedigend",
+      "afspraken": [
+        "Gemengd: drie in zone, twee in mandekking.",
+        "#10 blijft vooraan."
+      ],
+      "taken": [
+        {
+          "rugnummer": 6,
+          "taak": "Dekt hun sterkste kopper."
+        },
+        {
+          "rugnummer": 3,
+          "taak": "Eerste paal."
+        }
+      ],
+      "tekening": {
+        "titel": "Hoekschop verdedigend — gemengd",
+        "veld": {
+          "type": "half",
+          "breedte_m": 68,
+          "lengte_m": 30
+        },
+        "elementen": [
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 1
+          },
+          {
+            "soort": "doelman",
+            "team": "eigen",
+            "label": "1",
+            "x": 50,
+            "y": 6
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 98,
+            "y": 3
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "3",
+            "x": 43,
+            "y": 6
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "9",
+            "x": 44,
+            "y": 20
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "4",
+            "x": 50,
+            "y": 22
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "5",
+            "x": 56,
+            "y": 20
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 36,
+            "y": 64
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 64,
+            "y": 64
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "6",
+            "x": 38,
+            "y": 56
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "8",
+            "x": 62,
+            "y": 56
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "10",
+            "x": 50,
+            "y": 90
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "loop",
+            "van_x": 38,
+            "van_y": 56,
+            "naar_x": 42,
+            "naar_y": 34,
+            "label": "mandekking"
+          },
+          {
+            "soort": "loop",
+            "van_x": 62,
+            "van_y": 56,
+            "naar_x": 58,
+            "naar_y": 34,
+            "label": null
+          }
+        ],
+        "zones": [
+          {
+            "x": 38,
+            "y": 13,
+            "breedte": 24,
+            "hoogte": 16,
+            "label": "zone"
+          }
+        ],
+        "uitleg": [
+          "Zone: #9, #4 en #5 in het doelgebied.",
+          "Mandekking: #6 en #8 op de twee gevaarlijkste koppers.",
+          "#3 aan de eerste paal, #10 blijft vooraan voor de counter."
+        ]
+      }
+    },
+    {
+      "titel": "Vrije trap verdedigend",
+      "soort": "vrije_trap_verdedigend",
+      "afspraken": [
+        "Muur van drie.",
+        "Laatste lijn op de strafschopstip."
+      ],
+      "taken": [
+        {
+          "rugnummer": 7,
+          "taak": "Zet de muur."
+        }
+      ],
+      "tekening": {
+        "titel": "Vrije trap verdedigend — muur",
+        "veld": {
+          "type": "half",
+          "breedte_m": 68,
+          "lengte_m": 30
+        },
+        "elementen": [
+          {
+            "soort": "doel",
+            "team": null,
+            "label": null,
+            "x": 50,
+            "y": 1
+          },
+          {
+            "soort": "doelman",
+            "team": "eigen",
+            "label": "1",
+            "x": 47,
+            "y": 6
+          },
+          {
+            "soort": "bal",
+            "team": null,
+            "label": null,
+            "x": 65,
+            "y": 70
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 69,
+            "y": 77
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "7",
+            "x": 55,
+            "y": 47
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "11",
+            "x": 59,
+            "y": 43
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "10",
+            "x": 63,
+            "y": 38
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "3",
+            "x": 26,
+            "y": 37
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "4",
+            "x": 37,
+            "y": 37
+          },
+          {
+            "soort": "speler",
+            "team": "eigen",
+            "label": "5",
+            "x": 48,
+            "y": 37
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 31.5,
+            "y": 37
+          },
+          {
+            "soort": "speler",
+            "team": "tegenstander",
+            "label": null,
+            "x": 42.5,
+            "y": 37
+          }
+        ],
+        "pijlen": [
+          {
+            "soort": "loop",
+            "van_x": 26,
+            "van_y": 39,
+            "naar_x": 26,
+            "naar_y": 56,
+            "label": null
+          },
+          {
+            "soort": "loop",
+            "van_x": 37,
+            "van_y": 39,
+            "naar_x": 37,
+            "naar_y": 56,
+            "label": "uitstappen"
+          },
+          {
+            "soort": "loop",
+            "van_x": 48,
+            "van_y": 39,
+            "naar_x": 48,
+            "naar_y": 56,
+            "label": null
+          }
+        ],
+        "zones": [],
+        "uitleg": [
+          "Muur van drie (#7, #11, #10) op 9,15 m.",
+          "Laatste lijn op de hoogte van de strafschopstip, uitstappen na de trap."
+        ]
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "situatie": "Wij staan achter na 60 minuten",
+      "aanpassing": "Naar 4-4-2 met twee spitsen, hoger druk zetten."
+    },
+    {
+      "situatie": "Wij staan voor na 75 minuten",
+      "aanpassing": "Middenblok, #6 extra tussen de centrale verdedigers."
+    },
+    {
+      "situatie": "Rode kaart voor ons",
+      "aanpassing": "4-4-1, compact en op de counter."
+    }
+  ],
+  "wedstrijdbespreking": {
+    "titel": "Wij hebben de bal",
+    "kernpunten": [
+      "Opbouw met drie, rustig blijven.",
+      "Zoek de #8 tussen de linies.",
+      "Rechts: 1v1 tegen hun linksachter.",
+      "Na balverlies: 5 seconden jagen.",
+      "Hoekschoppen: tweede paal bezetten."
+    ],
+    "afsluiter": "Samen, compact en met durf."
+  },
+  "aandachtspunten": [
+    "#6 trainde donderdag niet volledig mee; #14 staat klaar als eerste wissel op het middenveld."
+  ],
+  "vragen_aan_coach": [
+    "Start #11 of #17 links? #17 trainde deze week sterker."
+  ]
+}

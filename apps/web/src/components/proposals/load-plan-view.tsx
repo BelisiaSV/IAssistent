@@ -142,7 +142,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MasTable({ pct, seconds, players }: { pct: number; seconds: number; players: MasPlayer[] }) {
+export function MasTable({ pct, seconds, players }: { pct: number; seconds: number; players: MasPlayer[] }) {
   return (
     <details className="mt-2 text-xs">
       <summary className="cursor-pointer text-brand">{l.masDistances(pct, seconds)}</summary>

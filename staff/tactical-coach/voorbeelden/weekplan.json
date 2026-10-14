@@ -50,74 +50,6 @@
     ],
     "pressing": "Middenblok, druk zetten wanneer hun centrale middenvelder de bal krijgt."
   },
-  "opstelling": {
-    "formatie": "4-3-3",
-    "basis": [
-      {
-        "post": "GK",
-        "rugnummer": 1,
-        "taak": "Lange ballen onderscheppen, snel uitgooien."
-      },
-      {
-        "post": "LB",
-        "rugnummer": 3,
-        "taak": "Hoog opschuiven in balbezit."
-      },
-      {
-        "post": "LCB",
-        "rugnummer": 4,
-        "taak": "Duel met hun #9."
-      },
-      {
-        "post": "RCB",
-        "rugnummer": 5,
-        "taak": "Afdekken achter #4."
-      },
-      {
-        "post": "RB",
-        "rugnummer": 2,
-        "taak": "Overlappen op rechts."
-      },
-      {
-        "post": "CDM",
-        "rugnummer": 6,
-        "taak": "Zakken in de opbouw."
-      },
-      {
-        "post": "LCM",
-        "rugnummer": 8,
-        "taak": "Tussen de linies aanspeelbaar."
-      },
-      {
-        "post": "RCM",
-        "rugnummer": 10,
-        "taak": "Diepe loopacties."
-      },
-      {
-        "post": "LW",
-        "rugnummer": 11,
-        "taak": "Breed blijven."
-      },
-      {
-        "post": "ST",
-        "rugnummer": 9,
-        "taak": "Vastzetten en diepte."
-      },
-      {
-        "post": "RW",
-        "rugnummer": 7,
-        "taak": "1v1 tegen hun linksachter."
-      }
-    ],
-    "bank": [
-      12,
-      15,
-      17,
-      19,
-      14
-    ],
-    "toelichting": "Formatie volgens de visie; #7 rechts om hun zwakke linksachter op te zoeken."
-  },
   "standaardsituaties": [
     {
       "titel": "Hoekschop aanvallend links",
@@ -575,20 +507,6 @@
       }
     }
   ],
-  "scenarios": [
-    {
-      "situatie": "Wij staan achter na 60 minuten",
-      "aanpassing": "Naar 4-4-2 met twee spitsen, hoger druk zetten."
-    },
-    {
-      "situatie": "Wij staan voor na 75 minuten",
-      "aanpassing": "Middenblok, #6 extra tussen de centrale verdedigers."
-    },
-    {
-      "situatie": "Rode kaart voor ons",
-      "aanpassing": "4-4-1, compact en op de counter."
-    }
-  ],
   "trainingsaccenten": [
     {
       "datum": "2026-10-13",
@@ -619,17 +537,6 @@
       ]
     }
   ],
-  "wedstrijdbespreking": {
-    "titel": "Wij hebben de bal",
-    "kernpunten": [
-      "Opbouw met drie, rustig blijven.",
-      "Zoek de #8 tussen de linies.",
-      "Rechts: 1v1 tegen hun linksachter.",
-      "Na balverlies: 5 seconden jagen.",
-      "Hoekschoppen: tweede paal bezetten."
-    ],
-    "afsluiter": "Samen, compact en met durf."
-  },
   "aandachtspunten": [
     "Bevestig of #5 fit is voor zondag."
   ],
