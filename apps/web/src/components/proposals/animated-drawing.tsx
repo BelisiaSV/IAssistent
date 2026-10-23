@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
+import { arc, type Projection, projection, quad } from "@/lib/animation/projection";
 import { type AnimationTheme, DEFAULT_THEME, type TeamKey } from "@/lib/animation/theme";
 
 /** Keyframe: [seconds, x %, y %] (x 0 = left, y 0 = top = goal we attack). */
@@ -39,7 +40,9 @@ type Overlay = Timed &
     | { soort: "doel" | "minidoel" | "ballen" | "kegel"; x: number; y: number }
   );
 
+
 const SPEEDS = [0.5, 1, 2];
+type M = [number, number];
 
 function position(pad: Key[], t: number): Point {
   if (t <= pad[0]![0]) return [pad[0]![1], pad[0]![2]];
@@ -70,9 +73,21 @@ function isLight(hex: string) {
   return 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255) > 160;
 }
 
+interface Ctx {
+  /** % of the field → metres. */
+  m: (x: number, y: number) => M;
+  /** Metres → drawing coordinates (with perspective). */
+  pr: Projection;
+  path: (pts: M[], close?: boolean) => string;
+  u: number;
+  W: number;
+  uid: string;
+  theme: AnimationTheme;
+}
+
 /**
- * Animated exercise: players as 3D tokens, the ball, areas, arrows and labels
- * over time on a chequered pitch. Colours come from the theme (club colours).
+ * Animated exercise: glossy 3D tokens, the ball, areas, arrows and labels over
+ * time on a (optionally tilted) chequered pitch. Colours come from the theme.
  */
 export function AnimatedDrawing({
   animation,
@@ -118,65 +133,103 @@ export function AnimatedDrawing({
 
   const W = animation.veld.breedte_m;
   const L = animation.veld.lengte_m;
-  const at = (x: number, y: number) => ({ x: (x / 100) * W, y: (y / 100) * L });
-  const crop = animation.uitsnede
-    ? { ...at(animation.uitsnede.x, animation.uitsnede.y), w: (animation.uitsnede.breedte / 100) * W, h: (animation.uitsnede.hoogte / 100) * L }
-    : { x: -2, y: -2, w: W + 4, h: L + 4 };
-  // Sizes follow the visible part, so a zoomed-in exercise gets bigger tokens.
-  const u = Math.max(crop.w, crop.h) / 42;
+  const pr = useMemo(() => projection(W, L, theme.kanteling), [W, L, theme.kanteling]);
+  const m = (x: number, y: number): M => [(x / 100) * W, (y / 100) * L];
+  const path = (pts: M[], close = false) =>
+    pts.map((q, i) => {
+      const r = pr.p(q[0], q[1]);
+      return `${i ? "L" : "M"} ${r.x.toFixed(3)} ${r.y.toFixed(3)}`;
+    }).join(" ") + (close ? " Z" : "");
+
+  // Visible part (zoom) in drawing coordinates.
+  const area = animation.uitsnede
+    ? { x0: m(animation.uitsnede.x, 0)[0], y0: m(0, animation.uitsnede.y)[1], x1: m(animation.uitsnede.x + animation.uitsnede.breedte, 0)[0], y1: m(0, animation.uitsnede.y + animation.uitsnede.hoogte)[1] }
+    : { x0: -3, y0: -3, x1: W + 3, y1: L + 3 };
+  const corners = [pr.p(area.x0, area.y0), pr.p(area.x1, area.y0), pr.p(area.x0, area.y1), pr.p(area.x1, area.y1)];
+  const vb = {
+    x: Math.min(...corners.map((c) => c.x)),
+    y: Math.min(...corners.map((c) => c.y)),
+    w: Math.max(...corners.map((c) => c.x)) - Math.min(...corners.map((c) => c.x)),
+    h: Math.max(...corners.map((c) => c.y)) - Math.min(...corners.map((c) => c.y)),
+  };
+  const u = Math.max(vb.w, vb.h) / 42;
+  const ctx: Ctx = { m, pr, path, u, W, uid, theme };
+
   const visible = (o: Timed) => (o.van ?? 0) <= t && t < (o.tot ?? Infinity);
-  const ball = at(...position(animation.bal, t));
-  const ctx = { at, u, W, uid, theme };
+  const tokens = animation.spelers
+    .map((p) => {
+      const q = m(...position(p.pad, t));
+      const color = p.kleur ?? (p.soort === "doelman" ? theme.doelman[p.team] : undefined) ?? theme.teams[p.team];
+      return { id: p.id, q, color, label: p.label };
+    })
+    // Far tokens first, so near ones overlap them.
+    .sort((a, b) => a.q[1] - b.q[1]);
+  const ballM = m(...position(animation.bal, t));
+
+  // Chequered grass in 5 m squares, projected.
+  const squares = useMemo(() => {
+    const out: string[] = [];
+    for (let x = -10; x < W + 10; x += 5) {
+      for (let y = -10; y < L + 10; y += 5) {
+        if ((Math.round(x / 5) + Math.round(y / 5)) % 2 === 0) continue;
+        out.push(path([[x, y], [x + 5, y], [x + 5, y + 5], [x, y + 5]], true));
+      }
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pr, W, L]);
 
   return (
     <figure className="space-y-2">
-      <div className="relative overflow-hidden rounded-xl shadow-sm ring-1 ring-black/10" style={{ background: theme.gras[0] }}>
-        <svg viewBox={`${crop.x} ${crop.y} ${crop.w} ${crop.h}`} className="mx-auto block max-h-[80vh] w-full" role="img" aria-label={animation.titel}>
+      <div className="relative overflow-hidden rounded-xl shadow-sm ring-1 ring-black/10" style={{ background: theme.rand }}>
+        <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} className="mx-auto block max-h-[80vh] w-full" role="img" aria-label={animation.titel}>
           <defs>
-            <pattern id={`grass-${uid}`} width={10} height={10} patternUnits="userSpaceOnUse">
-              <rect width={10} height={10} fill={theme.gras[0]} />
-              <rect width={5} height={5} fill={theme.gras[1]} />
-              <rect x={5} y={5} width={5} height={5} fill={theme.gras[1]} />
-            </pattern>
             <pattern id={`hatch-${uid}`} width={u * 0.9} height={u * 0.9} patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
-              <rect width={u * 0.9} height={u * 0.9} fill="#ffffff" fillOpacity={0.12} />
-              <line x1={0} y1={0} x2={0} y2={u * 0.9} stroke="#ffffff" strokeWidth={u * 0.22} strokeOpacity={0.45} />
+              <rect width={u * 0.9} height={u * 0.9} fill="#ffffff" fillOpacity={0.08} />
+              <line x1={0} y1={0} x2={0} y2={u * 0.9} stroke="#ffffff" strokeWidth={u * 0.2} strokeOpacity={0.35} />
             </pattern>
-            <pattern id={`net-${uid}`} width={u * 0.3} height={u * 0.3} patternUnits="userSpaceOnUse">
-              <path d={`M 0 0 L ${u * 0.3} ${u * 0.3} M ${u * 0.3} 0 L 0 ${u * 0.3}`} stroke="#ffffff" strokeOpacity={0.7} strokeWidth={u * 0.035} />
+            <pattern id={`net-${uid}`} width={u * 0.28} height={u * 0.28} patternUnits="userSpaceOnUse">
+              <path d={`M 0 0 L ${u * 0.28} ${u * 0.28} M ${u * 0.28} 0 L 0 ${u * 0.28}`} stroke="#d4d4d8" strokeOpacity={0.75} strokeWidth={u * 0.03} />
             </pattern>
-            <filter id={`shadow-${uid}`} x="-60%" y="-60%" width="220%" height="220%">
-              <feDropShadow dx={u * 0.12} dy={u * 0.22} stdDeviation={u * 0.18} floodColor="#000" floodOpacity={0.35} />
+            <filter id={`shadow-${uid}`} x="-60%" y="-60%" width="220%" height="240%">
+              <feDropShadow dx={u * 0.05} dy={u * 0.3} stdDeviation={u * 0.22} floodColor="#000" floodOpacity={0.6} />
             </filter>
-            <radialGradient id={`shine-${uid}`} cx="35%" cy="30%" r="75%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity={0.55} />
-              <stop offset="45%" stopColor="#ffffff" stopOpacity={0.08} />
-              <stop offset="100%" stopColor="#000000" stopOpacity={0.12} />
+            <linearGradient id={`metal-${uid}`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity={0.85 * theme.glans} />
+              <stop offset="35%" stopColor="#ffffff" stopOpacity={0.1 * theme.glans} />
+              <stop offset="55%" stopColor="#000000" stopOpacity={0.12 * theme.glans} />
+              <stop offset="75%" stopColor="#ffffff" stopOpacity={0.35 * theme.glans} />
+              <stop offset="100%" stopColor="#000000" stopOpacity={0.3 * theme.glans} />
+            </linearGradient>
+            <radialGradient id={`vignette-${uid}`} cx="50%" cy="48%" r="70%">
+              <stop offset="55%" stopColor="#000000" stopOpacity={0} />
+              <stop offset="100%" stopColor="#000000" stopOpacity={theme.vignet} />
             </radialGradient>
           </defs>
 
-          <rect x={crop.x - 10} y={crop.y - 10} width={crop.w + 20} height={crop.h + 20} fill={`url(#grass-${uid})`} />
+          <rect x={vb.x - 5} y={vb.y - 5} width={vb.w + 10} height={vb.h + 10} fill={theme.gras[0]} />
+          <path d={squares.join(" ")} fill={theme.gras[1]} />
 
           {animation.raster && (
-            <g stroke={theme.lijnen} strokeOpacity={0.22} strokeWidth={u * 0.07}>
-              {animation.raster.x_m.map((x) => <line key={`x${x}`} x1={x} y1={0} x2={x} y2={L} />)}
-              {animation.raster.y_m.map((y) => <line key={`y${y}`} x1={0} y1={y} x2={W} y2={y} />)}
+            <g stroke={theme.lijnen} strokeOpacity={0.16} strokeWidth={u * 0.06} fill="none">
+              {animation.raster.x_m.map((x) => <path key={`x${x}`} d={path([[x, 0], [x, L]])} />)}
+              {animation.raster.y_m.map((y) => <path key={`y${y}`} d={path([[0, y], [W, y]])} />)}
             </g>
           )}
 
-          <PitchLines W={W} L={L} u={u} color={theme.lijnen} />
+          <PitchLines L={L} ctx={ctx} />
 
           {[...animation.vast, ...animation.overlays].filter(visible).map((o, i) => (
-            <OverlayView key={i} overlay={o} {...ctx} />
+            <OverlayView key={i} overlay={o} ctx={ctx} />
           ))}
 
-          {animation.spelers.map((p) => {
-            const q = at(...position(p.pad, t));
-            const color = p.kleur ?? (p.soort === "doelman" ? theme.doelman[p.team] : undefined) ?? theme.teams[p.team];
-            return <Token key={p.id} x={q.x} y={q.y} color={color} label={p.label} u={u} uid={uid} />;
-          })}
+          {tokens.map((tk) => (
+            <Token key={tk.id} at={pr.p(...tk.q)} s={pr.scale(...tk.q)} color={tk.color} label={tk.label} ctx={ctx} />
+          ))}
 
-          <Ball x={ball.x} y={ball.y} r={u * 0.55} uid={uid} />
+          <Ball at={pr.p(...ballM)} r={u * 0.55 * pr.scale(...ballM)} uid={uid} />
+
+          {theme.vignet > 0 && <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} fill={`url(#vignette-${uid})`} pointerEvents="none" />}
         </svg>
         {logoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -226,22 +279,26 @@ export function AnimatedDrawing({
   );
 }
 
-/** A player as a round token with some thickness, a soft shadow and a light shine. */
-function Token({ x, y, color, label, u, uid }: { x: number; y: number; color: string; label: string | null; u: number; uid: string }) {
-  const r = u * 1.05;
-  const depth = u * 0.22;
+/** A player as an upright glossy token with thickness; smaller further away. */
+function Token({ at, s, color, label, ctx }: { at: { x: number; y: number }; s: number; color: string; label: string | null; ctx: Ctx }) {
+  const { u, uid } = ctx;
+  const r = u * 1.05 * s;
+  const depth = r * 0.28;
   return (
     <g filter={`url(#shadow-${uid})`}>
-      <circle cx={x} cy={y + depth} r={r} fill={shade(color, -0.35)} />
-      <circle cx={x} cy={y} r={r} fill={color} stroke={shade(color, -0.2)} strokeWidth={u * 0.06} />
-      <circle cx={x} cy={y} r={r} fill={`url(#shine-${uid})`} />
+      <ellipse cx={at.x} cy={at.y + depth} rx={r} ry={r * 0.92} fill={shade(color, -0.45)} />
+      <rect x={at.x - r} y={at.y} width={r * 2} height={depth} fill={shade(color, -0.45)} />
+      <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={color} />
+      <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={`url(#metal-${uid})`} />
+      <ellipse cx={at.x} cy={at.y} rx={r * 0.78} ry={r * 0.7} fill="none" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={r * 0.06} />
+      <ellipse cx={at.x - r * 0.25} cy={at.y - r * 0.38} rx={r * 0.45} ry={r * 0.2} fill="#ffffff" fillOpacity={0.45} />
       {label && (
         <text
-          x={x}
-          y={y}
-          fontSize={u * (label.length > 2 ? 0.75 : 0.95)}
+          x={at.x}
+          y={at.y + r * 0.04}
+          fontSize={r * (label.length > 2 ? 0.7 : 0.9)}
           fontWeight={800}
-          fill={isLight(color) ? "#1f2937" : "#ffffff"}
+          fill={isLight(color) ? "#18181b" : "#ffffff"}
           textAnchor="middle"
           dominantBaseline="central"
         >
@@ -252,66 +309,61 @@ function Token({ x, y, color, label, u, uid }: { x: number; y: number; color: st
   );
 }
 
-function PitchLines({ W, L, u, color }: { W: number; L: number; u: number; color: string }) {
-  const s = { fill: "none", stroke: color, strokeWidth: u * 0.17, strokeOpacity: 0.95 };
+function PitchLines({ L, ctx }: { L: number; ctx: Ctx }) {
+  const { W, u, theme, path } = ctx;
+  const s = { fill: "none", stroke: theme.lijnen, strokeWidth: u * theme.lijnDikte * 1.4, strokeOpacity: 0.9, strokeLinejoin: "round" as const };
+  const rect = (x: number, y: number, w: number, h: number) => path([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], true);
+  const spot = (x: number, y: number) => {
+    const q = ctx.pr.p(x, y);
+    return <circle cx={q.x} cy={q.y} r={u * 0.16 * ctx.pr.scale(x, y)} fill={theme.lijnen} />;
+  };
   const box = (y: number, down: boolean) => {
     const d = down ? 1 : -1;
+    const top = down ? y : y - 16.5;
+    const ang = Math.asin(5.5 / 9.15);
     return (
       <g>
-        <rect x={(W - 40.32) / 2} y={down ? y : y - 16.5} width={40.32} height={16.5} {...s} />
-        <rect x={(W - 18.32) / 2} y={down ? y : y - 5.5} width={18.32} height={5.5} {...s} />
-        <circle cx={W / 2} cy={y + d * 11} r={u * 0.18} fill={color} />
-        <path d={`M ${W / 2 - 7.3} ${y + d * 16.5} A 9.15 9.15 0 0 ${down ? 0 : 1} ${W / 2 + 7.3} ${y + d * 16.5}`} {...s} />
+        <path d={rect((W - 40.32) / 2, top, 40.32, 16.5)} {...s} />
+        <path d={rect((W - 18.32) / 2, down ? y : y - 5.5, 18.32, 5.5)} {...s} />
+        <path d={path(down ? arc(W / 2, y + 11, 9.15, ang, Math.PI - ang) : arc(W / 2, y - 11, 9.15, -Math.PI + ang, -ang))} {...s} />
+        {spot(W / 2, y + d * 11)}
       </g>
     );
   };
   return (
     <g>
-      <rect x={0} y={0} width={W} height={L} {...s} />
-      <line x1={0} y1={L / 2} x2={W} y2={L / 2} {...s} />
-      <circle cx={W / 2} cy={L / 2} r={9.15} {...s} />
-      <circle cx={W / 2} cy={L / 2} r={u * 0.18} fill={color} />
+      <path d={rect(0, 0, W, L)} {...s} />
+      <path d={path([[0, L / 2], [W, L / 2]])} {...s} />
+      <path d={path(arc(W / 2, L / 2, 9.15), true)} {...s} />
+      {spot(W / 2, L / 2)}
       {box(0, true)}
       {box(L, false)}
     </g>
   );
 }
 
-function OverlayView({
-  overlay: o,
-  at,
-  u,
-  W,
-  uid,
-  theme,
-}: {
-  overlay: Overlay;
-  at: (x: number, y: number) => { x: number; y: number };
-  u: number;
-  W: number;
-  uid: string;
-  theme: AnimationTheme;
-}) {
+function OverlayView({ overlay: o, ctx }: { overlay: Overlay; ctx: Ctx }) {
+  const { m, pr, path, u, W, uid, theme } = ctx;
   switch (o.soort) {
     case "zone":
     case "vlak": {
-      const pts =
+      const pts: M[] =
         o.soort === "zone"
-          ? [at(o.x, o.y), at(o.x + o.breedte, o.y), at(o.x + o.breedte, o.y + o.hoogte), at(o.x, o.y + o.hoogte)]
-          : o.punten.map((p) => at(p[0], p[1]));
-      const d = pts.map((p, i) => `${i ? "L" : "M"} ${p.x} ${p.y}`).join(" ") + " Z";
-      const minX = Math.min(...pts.map((p) => p.x));
-      const maxY = Math.max(...pts.map((p) => p.y));
+          ? [m(o.x, o.y), m(o.x + o.breedte, o.y), m(o.x + o.breedte, o.y + o.hoogte), m(o.x, o.y + o.hoogte)]
+          : o.punten.map((p) => m(p[0], p[1]));
+      const proj = pts.map((q) => pr.p(q[0], q[1]));
+      const minX = Math.min(...proj.map((p) => p.x));
+      const maxY = Math.max(...proj.map((p) => p.y));
       return (
         <g>
           <path
-            d={d}
+            d={path(pts, true)}
             fill={o.stijl === "gearceerd" ? `url(#hatch-${uid})` : "#ffffff"}
-            fillOpacity={o.stijl === "licht" ? 0.28 : o.stijl === "omlijnd" ? 0.1 : 1}
+            fillOpacity={o.stijl === "licht" ? 0.18 : o.stijl === "omlijnd" ? 0.06 : 1}
             stroke={theme.accent}
-            strokeWidth={u * 0.16}
-            strokeOpacity={o.stijl === "gearceerd" ? 0.5 : 0.95}
-            strokeDasharray={o.stijl === "omlijnd" ? `${u * 0.7} ${u * 0.45}` : undefined}
+            strokeWidth={u * 0.13}
+            strokeOpacity={o.stijl === "gearceerd" ? 0.45 : 0.85}
+            strokeDasharray={o.stijl === "omlijnd" ? `${u * 0.6} ${u * 0.4}` : undefined}
             strokeLinejoin="round"
           />
           {o.label && <Label x={minX + u * 0.6} y={maxY - u * 0.9} text={o.label} u={u} anchor="start" W={W} />}
@@ -319,35 +371,32 @@ function OverlayView({
       );
     }
     case "tekst": {
-      const p = at(o.x, o.y);
+      const p = pr.p(...m(o.x, o.y));
       return <Label x={p.x} y={p.y} text={o.tekst} u={u} anchor="middle" W={W} />;
     }
     case "pijl": {
-      const a = at(o.van_x, o.van_y);
-      const b = at(o.naar_x, o.naar_y);
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
+      const a = m(o.van_x, o.van_y);
+      const b = m(o.naar_x, o.naar_y);
+      const dx = b[0] - a[0];
+      const dy = b[1] - a[1];
       const len = Math.hypot(dx, dy) || 1;
       const bend = (o.buiging ?? 0) * len;
-      const c = { x: (a.x + b.x) / 2 - (dy / len) * bend, y: (a.y + b.y) / 2 + (dx / len) * bend };
-      const cl = Math.hypot(b.x - c.x, b.y - c.y) || 1;
-      const end = { x: b.x - ((b.x - c.x) / cl) * u * 1.4, y: b.y - ((b.y - c.y) / cl) * u * 1.4 };
-      const el = Math.hypot(end.x - c.x, end.y - c.y) || 1;
-      const ux = (end.x - c.x) / el;
-      const uy = (end.y - c.y) / el;
-      const h = u * 0.85;
+      const c: M = [(a[0] + b[0]) / 2 - (dy / len) * bend, (a[1] + b[1]) / 2 + (dx / len) * bend];
+      // Stop before the receiver; the head follows the end of the curve on screen.
+      const pts = quad(a, c, b);
+      const stop = 1.4 / len;
+      const cut = pts.slice(0, Math.max(2, Math.round(pts.length * (1 - stop))));
+      const end = pr.p(...cut[cut.length - 1]!);
+      const prev = pr.p(...cut[cut.length - 2]!);
+      const el = Math.hypot(end.x - prev.x, end.y - prev.y) || 1;
+      const ux = (end.x - prev.x) / el;
+      const uy = (end.y - prev.y) / el;
+      const h = u * 0.85 * pr.scale(...b);
       return (
         <g filter={`url(#shadow-${uid})`}>
-          <path
-            d={`M ${a.x} ${a.y} Q ${c.x} ${c.y} ${end.x} ${end.y}`}
-            fill="none"
-            stroke={theme.accent}
-            strokeWidth={u * 0.22}
-            strokeLinecap="round"
-            strokeDasharray={o.pijl === "loop" ? `${u * 0.6} ${u * 0.45}` : undefined}
-          />
+          <path d={path(cut)} fill="none" stroke={theme.accent} strokeWidth={u * 0.2} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={o.pijl === "loop" ? `${u * 0.6} ${u * 0.45}` : undefined} />
           <polygon
-            points={`${end.x + ux * h * 0.4},${end.y + uy * h * 0.4} ${end.x - ux * h - uy * h * 0.55},${end.y - uy * h + ux * h * 0.55} ${end.x - ux * h + uy * h * 0.55},${end.y - uy * h - ux * h * 0.55}`}
+            points={`${end.x + ux * h * 0.5},${end.y + uy * h * 0.5} ${end.x - ux * h - uy * h * 0.55},${end.y - uy * h + ux * h * 0.55} ${end.x - ux * h + uy * h * 0.55},${end.y - uy * h - ux * h * 0.55}`}
             fill={theme.accent}
           />
         </g>
@@ -355,29 +404,33 @@ function OverlayView({
     }
     case "doel":
     case "minidoel": {
-      const p = at(o.x, o.y);
-      const w = o.soort === "doel" ? Math.min(7.32, W * 0.12) : u * 2.4;
-      const d = o.soort === "doel" ? u * 1.5 : u * 1.2;
+      const [cx, cy] = m(o.x, o.y);
+      const w = o.soort === "doel" ? 7.32 : 2.5;
+      const d = o.soort === "doel" ? 2 : 1.2;
+      const frame = path([[cx - w / 2, cy - d / 2], [cx + w / 2, cy - d / 2], [cx + w / 2, cy + d / 2], [cx - w / 2, cy + d / 2]], true);
       return (
         <g filter={`url(#shadow-${uid})`}>
-          <rect x={p.x - w / 2} y={p.y - d / 2} width={w} height={d} fill="#1f2937" fillOpacity={0.25} />
-          <rect x={p.x - w / 2} y={p.y - d / 2} width={w} height={d} fill={`url(#net-${uid})`} stroke="#ffffff" strokeWidth={u * 0.16} rx={u * 0.08} />
+          <path d={frame} fill="#0a0a0a" fillOpacity={0.35} />
+          <path d={frame} fill={`url(#net-${uid})`} stroke="#fafafa" strokeWidth={u * 0.14} strokeLinejoin="round" />
         </g>
       );
     }
     case "ballen": {
-      const p = at(o.x, o.y);
+      const [cx, cy] = m(o.x, o.y);
+      const s = pr.scale(cx, cy);
       return (
         <g>
           {[-1, 0, 1].map((i) => (
-            <Ball key={i} x={p.x + i * u * 0.75} y={p.y + i * u * 0.45} r={u * 0.5} uid={uid} />
+            <Ball key={i} at={pr.p(cx + i * 0.9, cy + i * 0.6)} r={u * 0.5 * s} uid={uid} />
           ))}
         </g>
       );
     }
     case "kegel": {
-      const p = at(o.x, o.y);
-      return <polygon points={`${p.x},${p.y - u * 0.6} ${p.x - u * 0.5},${p.y + u * 0.4} ${p.x + u * 0.5},${p.y + u * 0.4}`} fill="#f59e0b" stroke="#b45309" strokeWidth={u * 0.08} />;
+      const q = m(o.x, o.y);
+      const p = pr.p(...q);
+      const k = u * pr.scale(...q);
+      return <polygon points={`${p.x},${p.y - k * 0.6} ${p.x - k * 0.5},${p.y + k * 0.4} ${p.x + k * 0.5},${p.y + k * 0.4}`} fill="#f59e0b" stroke="#b45309" strokeWidth={k * 0.08} />;
     }
   }
 }
@@ -400,7 +453,7 @@ function Label({ x, y, text, u, anchor, W }: { x: number; y: number; text: strin
       style={{ fontFamily: "Oswald, 'Arial Narrow', Impact, sans-serif", letterSpacing: "0.02em" }}
       paintOrder="stroke"
       stroke="#000000"
-      strokeOpacity={0.35}
+      strokeOpacity={0.45}
       strokeWidth={u * 0.25}
     >
       {text}
@@ -408,7 +461,8 @@ function Label({ x, y, text, u, anchor, W }: { x: number; y: number; text: strin
   );
 }
 
-function Ball({ x, y, r, uid }: { x: number; y: number; r: number; uid: string }) {
+function Ball({ at, r, uid }: { at: { x: number; y: number }; r: number; uid: string }) {
+  const { x, y } = at;
   return (
     <g filter={`url(#shadow-${uid})`}>
       <circle cx={x} cy={y} r={r} fill="#ffffff" stroke="#111827" strokeWidth={r * 0.18} />
