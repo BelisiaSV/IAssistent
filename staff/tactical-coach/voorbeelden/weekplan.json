@@ -52,6 +52,7 @@
   },
   "standaardsituaties": [
     {
+      "standaardsituatie_id": null,
       "titel": "Hoekschop aanvallend links",
       "soort": "hoekschop_aanvallend",
       "afspraken": [
@@ -224,6 +225,7 @@
       }
     },
     {
+      "standaardsituatie_id": null,
       "titel": "Hoekschop verdedigend",
       "soort": "hoekschop_verdedigend",
       "afspraken": [
@@ -368,6 +370,7 @@
       }
     },
     {
+      "standaardsituatie_id": null,
       "titel": "Vrije trap verdedigend",
       "soort": "vrije_trap_verdedigend",
       "afspraken": [

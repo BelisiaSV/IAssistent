@@ -128,6 +128,8 @@ export type SetPieceKind =
   | "strafschop";
 
 export interface SetPiece {
+  /** Set piece from the coach's library, or null/absent for a new one. */
+  standaardsituatie_id?: string | null;
   titel: string;
   soort: SetPieceKind;
   afspraken: string[];

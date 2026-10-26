@@ -243,5 +243,11 @@ Regels:
   `reeksen_factor` van het weektype (`periodisering.json`) en de wedstrijddag
   (`wedstrijddagen.json`); de Tactical Coach tekent die onderdelen niet. Het weekdocument toont de
   eigen animatie en een link naar de oefening (`lib/exercises/week.ts`).
+- **Stilstaande fases in de oefenstof** — een oefening is `kind` `exercise` of `set_piece`. Een
+  standaardsituatie heeft een type (`set_piece_type`, code uit het Tactical Coach-schema), een
+  teken (`signal`) en rollen met vereisten (`roles`, `[{ rol, vereiste }]`), zonder spelers. De
+  Tactical Coach kiest eerst uit de eigen standaardsituaties (`standaardsituaties[].standaardsituatie_id`)
+  en vult de rollen elke week in; hoogstens één nieuw voorstel (id null), dat de coach met
+  "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

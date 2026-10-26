@@ -1,15 +1,26 @@
 import type { FormationCatalog } from "@iassistent/staff-engine/content";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { saveSetPieceToLibrary } from "@/app/(app)/exercises/actions";
 import { Pitch } from "@/components/pitch";
+import type { WeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
 import { withShirtNames } from "@/lib/proposals/names";
 import type { MatchPrepOutput, SetPiece, TacticalWeekOutput } from "@/lib/proposals/types";
 
+import { AnimatedDrawing } from "./animated-drawing";
 import { DrawingView } from "./drawing";
 
 const t = messages.matchPlan;
 const o = messages.proposals.output;
+const x = messages.exercises;
+
+/** Where a set piece comes from, to save a new one in the coach's library. */
+export interface SetPieceSource {
+  runId: string;
+  step: "tc" | "match";
+}
 
 /**
  * The tactical part of the week document: opponent, lessons and game plan.
@@ -75,13 +86,24 @@ export function TacticalWeekView({
 }
 
 /** Set pieces in a grid (week document and match preparation). */
-export function SetPieces({ setPieces, names }: { setPieces: SetPiece[]; names: Map<number, string> }) {
+export function SetPieces({
+  setPieces,
+  names,
+  library,
+  source,
+}: {
+  setPieces: SetPiece[];
+  names: Map<number, string>;
+  library?: WeekExercises;
+  /** Set when the coach may save new set pieces in the library. */
+  source?: SetPieceSource;
+}) {
   return (
     <section className="space-y-3">
       <h3 className="font-semibold">{t.setPieces}</h3>
       <div className="grid gap-4 lg:grid-cols-2">
         {setPieces.map((sp, i) => (
-          <SetPieceCard key={i} setPiece={sp} names={names} />
+          <SetPieceCard key={i} setPiece={sp} names={names} library={library} save={source ? { ...source, index: i } : undefined} />
         ))}
       </div>
     </section>
@@ -94,11 +116,15 @@ export function MatchPrepView({
   names,
   formations,
   actions,
+  library,
+  source,
 }: {
   output: MatchPrepOutput;
   names: Map<number, string>;
   formations: FormationCatalog;
   actions?: ReactNode;
+  library?: WeekExercises;
+  source?: SetPieceSource;
 }) {
   const n = (text: string) => withShirtNames(text, names);
   return (
@@ -127,7 +153,7 @@ export function MatchPrepView({
         </div>
       </Card>
 
-      <SetPieces setPieces={output.standaardsituaties} names={names} />
+      <SetPieces setPieces={output.standaardsituaties} names={names} library={library} source={source} />
 
       {output.scenarios.length > 0 && (
         <Card title={t.scenarios}>
@@ -204,19 +230,49 @@ export function SetPieceCard({
   setPiece,
   names,
   large = false,
+  library,
+  save,
 }: {
   setPiece: SetPiece;
   names: Map<number, string>;
   large?: boolean;
+  /** The coach's library: own set pieces show their animation and signal. */
+  library?: WeekExercises;
+  save?: SetPieceSource & { index: number };
 }) {
   const n = (text: string) => withShirtNames(text, names);
+  const own = setPiece.standaardsituatie_id ? library?.items.get(setPiece.standaardsituatie_id) : undefined;
   return (
     <article className={`break-inside-avoid rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:shadow-none print:ring-0 ${large ? "space-y-4" : "space-y-3"}`}>
       <header>
-        <p className="text-xs font-semibold tracking-wide text-brand uppercase">{t.setPieceKind[setPiece.soort]}</p>
+        <p className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-semibold tracking-wide text-brand uppercase">{t.setPieceKind[setPiece.soort]}</span>
+          {setPiece.standaardsituatie_id && (
+            <span className="rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand print:hidden">{x.fromLibrary}</span>
+          )}
+          {own && (
+            <Link href={`/exercises/${own.id}`} className="text-slate-500 underline hover:text-brand print:hidden">
+              {x.openExercise}
+            </Link>
+          )}
+          {library && setPiece.standaardsituatie_id === null && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800 print:hidden">{x.newProposal}</span>
+          )}
+        </p>
         <h4 className={large ? "text-3xl font-bold" : "font-semibold"}>{setPiece.titel}</h4>
+        {own?.signal && <p className={large ? "text-xl font-semibold" : "text-sm font-medium"}>{x.signal(own.signal)}</p>}
       </header>
-      <DrawingView drawing={setPiece.tekening} />
+      {own?.animation ? (
+        <AnimatedDrawing
+          animation={own.animation}
+          theme={library!.display.theme}
+          logoUrl={library!.logoUrl}
+          logoOn={library!.display.logoOn}
+          labels={x.player}
+        />
+      ) : (
+        <DrawingView drawing={setPiece.tekening} />
+      )}
       {setPiece.tekening.uitleg.length > 0 && (
         <ol className={`list-decimal space-y-0.5 pl-5 ${large ? "text-lg" : "text-sm"}`}>
           {setPiece.tekening.uitleg.map((step, i) => (
@@ -244,6 +300,16 @@ export function SetPieceCard({
           </ul>
         </div>
       </div>
+      {save && !setPiece.standaardsituatie_id && (
+        <form action={saveSetPieceToLibrary} className="text-right print:hidden">
+          <input type="hidden" name="runId" value={save.runId} />
+          <input type="hidden" name="step" value={save.step} />
+          <input type="hidden" name="index" value={save.index} />
+          <button type="submit" className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            {x.saveToLibrary}
+          </button>
+        </form>
+      )}
     </article>
   );
 }

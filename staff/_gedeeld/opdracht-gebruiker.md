@@ -52,8 +52,10 @@ Laatste fysieke testen van de groep en of een nieuwe test nodig is.
 
 De eigen oefeningen van de hoofdcoach (id, titel, fase, labels, aantal spelers, organisatie,
 verloop, coachingspunten, variaties en standaardbelasting: duur, reeksen, werk en rust per reeks
-in minuten, intensiteit, RPE). `animatie` = true als de coach er een animatie van heeft. Leeg als
-de coach nog geen oefeningen heeft.
+in minuten, intensiteit, RPE). `animatie` = true als de coach er een animatie van heeft.
+`soort` is "oefening" of "standaardsituatie"; een standaardsituatie heeft een type (bv.
+hoekschop_aanvallend), een teken (signaal) en rollen met vereisten, maar nog geen spelers. Leeg
+als de coach nog geen oefenstof heeft.
 
 {{bibliotheek}}
 

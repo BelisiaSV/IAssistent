@@ -7,16 +7,23 @@ import { requireUser } from "@/lib/auth";
 const m = messages.exercises;
 const PHASES = ["opwarming", "kern", "afsluiting"] as const;
 
-export default async function ExercisesPage({ searchParams }: { searchParams: Promise<{ q?: string; fase?: string }> }) {
-  const { q = "", fase = "" } = await searchParams;
+const KINDS = ["exercise", "set_piece"] as const;
+
+export default async function ExercisesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; fase?: string; soort?: string }>;
+}) {
+  const { q = "", fase = "", soort = "" } = await searchParams;
   await requireUser();
   const supabase = await createClient();
   let query = supabase
     .from("exercises")
-    .select("id, title, phase, labels, min_players, max_players, duration_min, animation, video_path, updated_at")
+    .select("id, kind, set_piece_type, title, phase, labels, min_players, max_players, duration_min, animation, video_path, updated_at")
     .order("updated_at", { ascending: false })
     .limit(200);
   if (PHASES.includes(fase as (typeof PHASES)[number])) query = query.eq("phase", fase as (typeof PHASES)[number]);
+  if (KINDS.includes(soort as (typeof KINDS)[number])) query = query.eq("kind", soort as (typeof KINDS)[number]);
   const { data } = await query;
   const needle = q.trim().toLowerCase();
   const exercises = (data ?? []).filter(
@@ -43,6 +50,14 @@ export default async function ExercisesPage({ searchParams }: { searchParams: Pr
           aria-label={m.search}
           className="min-w-56 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
         />
+        <select name="soort" defaultValue={soort} className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+          <option value="">{m.allKinds}</option>
+          {KINDS.map((k) => (
+            <option key={k} value={k}>
+              {m.kind[k]}
+            </option>
+          ))}
+        </select>
         <select name="fase" defaultValue={fase} className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
           <option value="">{m.allPhases}</option>
           {PHASES.map((p) => (
@@ -65,7 +80,14 @@ export default async function ExercisesPage({ searchParams }: { searchParams: Pr
               <Link href={`/exercises/${x.id}`} className="block h-full space-y-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 hover:ring-brand">
                 <p className="font-semibold">{x.title}</p>
                 <p className="text-xs text-slate-500">
-                  {[x.phase ? m.phase[x.phase] : null, m.players(x.min_players, x.max_players), x.duration_min ? m.minutes(x.duration_min) : null]
+                  {[
+                    x.kind === "set_piece"
+                      ? ((messages.matchPlan.setPieceKind as Record<string, string>)[x.set_piece_type ?? ""] ?? m.kind.set_piece)
+                      : null,
+                    x.phase ? m.phase[x.phase] : null,
+                    m.players(x.min_players, x.max_players),
+                    x.duration_min ? m.minutes(x.duration_min) : null,
+                  ]
                     .filter(Boolean)
                     .join(" · ")}
                 </p>

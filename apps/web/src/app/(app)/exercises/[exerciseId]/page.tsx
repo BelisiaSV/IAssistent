@@ -5,6 +5,7 @@ import { AnimatedDrawing } from "@/components/proposals/animated-drawing";
 import { requireUser } from "@/lib/auth";
 import { parseAnimation } from "@/lib/animation/schema";
 import { themeForTeam } from "@/lib/animation/team-theme";
+import { setPieceRoles } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
 
 import { deleteExercise, removeAnimation, removeVideo } from "../actions";
@@ -39,6 +40,9 @@ export default async function ExercisePage({
     exercise.video_path ? supabase.storage.from(EXERCISE_VIDEOS_BUCKET).createSignedUrl(exercise.video_path, 3600) : null,
   ]);
   const animation = exercise.animation ? parseAnimation(exercise.animation) : null;
+  const setPiece = exercise.kind === "set_piece";
+  const kindLabel = (messages.matchPlan.setPieceKind as Record<string, string>)[exercise.set_piece_type ?? ""];
+  const roles = setPieceRoles(exercise.roles);
 
   const list = (title: string, items: string[], ordered = false) =>
     items.length > 0 && (
@@ -67,6 +71,8 @@ export default async function ExercisePage({
         <h1 className="text-2xl font-semibold">{exercise.title}</h1>
         <p className="text-sm text-slate-600">
           {[
+            setPiece ? (kindLabel ?? m.kind.set_piece) : null,
+            exercise.signal ? m.signal(exercise.signal) : null,
             exercise.phase ? m.phase[exercise.phase] : null,
             m.players(exercise.min_players, exercise.max_players),
             exercise.duration_min ? m.minutes(exercise.duration_min) : null,
@@ -123,7 +129,8 @@ export default async function ExercisePage({
               <span className="font-medium">{m.form.organisation}:</span> {exercise.organisation}
             </p>
           )}
-          {list(m.form.course, exercise.course, true)}
+          {list(m.roles, roles.map((r) => (r.vereiste ? `${r.rol} – ${r.vereiste}` : r.rol)))}
+          {list(setPiece ? m.form.agreements : m.form.course, exercise.course, true)}
           {list(m.form.coaching, exercise.coaching_points)}
           {list(m.form.variations, exercise.variations)}
         </div>

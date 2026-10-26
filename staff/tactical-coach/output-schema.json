@@ -140,6 +140,7 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "standaardsituatie_id",
           "titel",
           "soort",
           "afspraken",
@@ -147,6 +148,13 @@
           "tekening"
         ],
         "properties": {
+          "standaardsituatie_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "id van de standaardsituatie uit de oefenstof van de coach, of null voor een nieuw voorstel."
+          },
           "titel": {
             "type": "string"
           },

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { setPieceRoles } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
 
 import { updateExercise } from "../../actions";
@@ -18,6 +19,12 @@ export default async function EditExercisePage({ params }: { params: Promise<{ e
       <ExerciseForm
         action={updateExercise.bind(null, exercise.id)}
         initial={{
+          kind: exercise.kind,
+          setPieceType: exercise.set_piece_type ?? "",
+          signal: exercise.signal ?? "",
+          roles: setPieceRoles(exercise.roles)
+            .map((r) => (r.vereiste ? `${r.rol} – ${r.vereiste}` : r.rol))
+            .join("\n"),
           title: exercise.title,
           phase: exercise.phase ?? "",
           labels: exercise.labels.join(", "),
