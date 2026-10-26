@@ -41,7 +41,8 @@
    - intensiteit en doel-RPE van de oefening, maar nooit boven de doel-RPE van de dag uit het
      belastingsplan van de Physical Coach.
    Past de som niet binnen de duur van de training, haal dan eerst reeksen weg bij de langste
-   kernoefening. Gebruik dezelfde oefening niet twee keer in één week, tenzij de lijst te kort is.
+   kernoefening. Gebruik dezelfde oefening niet twee keer in één week, tenzij de lijst te kort is, en nooit
+   twee keer in dezelfde training.
    Past er geen oefening uit de lijst, stel dan zelf een onderdeel voor met `oefening_id` null en
    vermeld dat bij de aandachtspunten.
 6. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief
