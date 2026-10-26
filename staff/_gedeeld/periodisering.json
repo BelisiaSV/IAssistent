@@ -1,6 +1,6 @@
 {
-  "versie": "0.2.0",
-  "uitleg": "Periodisering per seizoen in twee fasen. De voorbereiding start op de datum die de hoofdcoach kiest en loopt tot de eerste competitiewedstrijd; de competitie start in de week van de eerste competitiewedstrijd. Elke fase heeft zijn eigen cyclus (4, 6 of 8 weken): de app telt de weken sinds de start van de fase en kiest het weektype uit de volgorde van die cyclus. Percentages zijn ten opzichte van de maximale weekbelasting; kilometers zijn de totale loopafstand van de trainingen in een week, zonder wedstrijden. Concept v0.2: de 4-wekencyclus komt van de hoofdcoach, de 6- en 8-wekencycli zijn een voorstel om na te kijken.",
+  "versie": "0.3.0",
+  "uitleg": "Periodisering per seizoen in twee fasen. De voorbereiding start op de datum die de hoofdcoach kiest en loopt tot de eerste competitiewedstrijd; de competitie start in de week van de eerste competitiewedstrijd. Elke fase heeft zijn eigen cyclus (4, 6 of 8 weken): de app telt de weken sinds de start van de fase en kiest het weektype uit de volgorde van die cyclus. Percentages zijn ten opzichte van de maximale weekbelasting; kilometers zijn de totale loopafstand van de trainingen in een week, zonder wedstrijden. reeksen_factor: hoeveel keer het standaard aantal reeksen van een oefening uit de oefenstof van de coach in dit weektype (samen met de reeksen_factor van de wedstrijddag). Concept v0.2: de 4-wekencyclus komt van de hoofdcoach, de 6- en 8-wekencycli zijn een voorstel om na te kijken. De reeksen_factor is een voorstel om na te kijken.",
   "standaard_cyclus": 4,
   "weektypes": [
     {
@@ -8,6 +8,7 @@
       "naam": "Normale week",
       "belasting_pct": { "min": 70, "max": 75 },
       "km_zonder_wedstrijd": { "min": 13, "max": 20 },
+      "reeksen_factor": 1,
       "uitleg": "Onderhoud: gewone trainingsweek met evenwicht tussen volume en intensiteit."
     },
     {
@@ -15,6 +16,7 @@
       "naam": "Extensieve week",
       "belasting_pct": { "min": 80, "max": 85 },
       "km_zonder_wedstrijd": { "min": 18, "max": 25 },
+      "reeksen_factor": 1.25,
       "uitleg": "Meer volume: langere vormen, grotere ruimtes, meer loopafstand aan matige intensiteit."
     },
     {
@@ -22,6 +24,7 @@
       "naam": "Intensieve week",
       "belasting_pct": { "min": 100, "max": 100 },
       "km_zonder_wedstrijd": { "min": 10, "max": 14 },
+      "reeksen_factor": 0.75,
       "uitleg": "Maximale intensiteit, minder volume: kleine ruimtes, sprints, duels, korte intensieve intervallen."
     },
     {
@@ -29,6 +32,7 @@
       "naam": "Deload",
       "belasting_pct": { "min": 50, "max": 60 },
       "km_zonder_wedstrijd": { "min": 8, "max": 11 },
+      "reeksen_factor": 0.5,
       "uitleg": "Herstel en supercompensatie: korter, frisser, weinig volume, intensiteit enkel in korte prikkels."
     }
   ],
@@ -40,6 +44,7 @@
   "voor_start": {
     "code": "voorbereiding",
     "naam": "Voorbereiding",
+    "reeksen_factor": 0.75,
     "uitleg": "Vóór de eerste competitiewedstrijd, als er geen startdatum van de voorbereiding is ingesteld: geleidelijke opbouw van volume naar intensiteit, met de VAMEVAL als nulmeting voor de eerste training."
   }
 }

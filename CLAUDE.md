@@ -236,5 +236,12 @@ Regels:
   (Instellingen → Weergave van animaties, `lib/animation/team-theme.ts`). Video's omzetten naar een
   animatie gebeurt nog buiten de app (importeren als .json); automatisch omzetten komt in de
   videodienst.
+- **Oefenstof in de weekplanning** — elke oefening heeft een standaardbelasting (`sets`, `work_min`,
+  `rest_min`, `intensity`, `rpe`) en `use_in_planning`. De staf krijgt de bibliotheek als
+  `bibliotheek` in de context (`lib/exercises/library.ts`, max. 80, geen video's). De Assistent
+  Coach kiest eerst uit de bibliotheek (`onderdelen[].oefening_id`) en schaalt de reeksen met de
+  `reeksen_factor` van het weektype (`periodisering.json`) en de wedstrijddag
+  (`wedstrijddagen.json`); de Tactical Coach tekent die onderdelen niet. Het weekdocument toont de
+  eigen animatie en een link naar de oefening (`lib/exercises/week.ts`).
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

@@ -4,6 +4,7 @@ import type { Json, Tables } from "@iassistent/db";
 import { runRole, StaffGenerationError } from "@iassistent/staff-engine";
 
 import { getStaffProvider } from "@/lib/ai";
+import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { activeSteps, MATCH_USES_WEEK_STEPS, nextSteps, RUN_STEPS, type RunKind, type RunStep, runStatus, stepsToRerun } from "@/lib/roles";
 import { staff } from "@/lib/staff";
@@ -164,9 +165,16 @@ export async function advanceRun(
   if (!claimed.length) return null;
 
   return async () => {
-    const [data, { data: profile }, previousRun] = await Promise.all([
+    const [data, { data: profile }, { data: exercises }, previousRun] = await Promise.all([
       loadWeek(supabase, input.team, input.weekStart),
       supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", input.coachId).maybeSingle(),
+      // The coach's own library (RLS: own exercises only).
+      supabase
+        .from("exercises")
+        .select(LIBRARY_COLUMNS)
+        .eq("use_in_planning", true)
+        .order("updated_at", { ascending: false })
+        .limit(LIBRARY_LIMIT),
       run.based_on
         ? supabase.from("staff_proposals").select("step, output").eq("run_id", run.based_on).then((r) => r.data ?? [])
         : Promise.resolve([]),
@@ -182,6 +190,7 @@ export async function advanceRun(
             staff: staffOutputs,
             vision: profile ? { summary: profile.vision_summary, vision: profile.vision } : null,
             feedback: proposal.feedback && previousOutput ? { previousOutput, comment: proposal.feedback } : null,
+            library: (exercises ?? []).map(libraryExercise),
           });
           const result = await runRole(staff, step.role, context, provider, step.task);
           const { error } = await supabase

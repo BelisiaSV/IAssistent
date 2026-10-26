@@ -60,7 +60,17 @@ export const messages = {
     phase: { opwarming: "Opwarming", kern: "Kern", afsluiting: "Afsluiting" },
     players: (min: number | null, max: number | null) =>
       min && max ? (min === max ? `${min} spelers` : `${min}–${max} spelers`) : min ? `vanaf ${min} spelers` : max ? `tot ${max} spelers` : null,
-    minutes: (n: number) => `${n} min`,
+    minutes: (n: number) => `${String(n).replace(".", ",")} min`,
+    intensity: { laag: "Laag", matig: "Matig", hoog: "Hoog", maximaal: "Maximaal" },
+    load: (sets: number | null, work: number | null, rest: number | null) =>
+      sets && work
+        ? `${sets} × ${String(work).replace(".", ",")} min${rest ? `, ${String(rest).replace(".", ",")} min rust` : ""}`
+        : null,
+    rpe: (n: number) => `RPE ${n}`,
+    notInPlanning: "Niet in de weekplanning",
+    fromLibrary: "Uit je oefenstof",
+    openExercise: "Open oefening",
+    withVideo: "met video",
     hasAnimation: "Animatie",
     hasVideo: "Video",
     edit: "Bewerken",
@@ -81,6 +91,16 @@ export const messages = {
       coaching: "Coachingspunten",
       variations: "Variaties",
       linesHint: "Eén punt per regel.",
+      load: "Standaardbelasting",
+      loadHint:
+        "De staf gebruikt dit als vertrekpunt en past het aantal reeksen aan volgens het weektype en de wedstrijddag. De duur wordt dan reeksen × werk + rust.",
+      sets: "Reeksen",
+      workMin: "Werk per reeks (min)",
+      restMin: "Rust tussen reeksen (min)",
+      intensity: "Intensiteit",
+      noIntensity: "— niet opgegeven —",
+      rpe: "RPE (1–10)",
+      useInPlanning: "De staf mag deze oefening gebruiken in de weekplanning",
       save: "Oefening opslaan",
       saved: "Oefening opgeslagen.",
     },
@@ -107,6 +127,7 @@ export const messages = {
       title: "Geef de oefening een naam (max. 120 tekens).",
       players: "Aantal spelers tussen 1 en 40; min. niet groter dan max.",
       duration: "Duur tussen 1 en 120 minuten.",
+      load: "Reeksen 1–20, werk per reeks 0,5–60 min, rust 0–30 min, RPE 1–10.",
       tooLong: "Een tekst is te lang.",
       tooMany: "Te veel regels of labels.",
       saveFailed: "Opslaan mislukt.",

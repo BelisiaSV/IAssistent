@@ -957,6 +957,12 @@ export type Database = {
           variations: string[];
           animation: Json | null;
           video_path: string | null;
+          sets: number | null;
+          work_min: number | null;
+          rest_min: number | null;
+          intensity: "laag" | "matig" | "hoog" | "maximaal" | null;
+          rpe: number | null;
+          use_in_planning: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -975,6 +981,12 @@ export type Database = {
           variations?: string[];
           animation?: Json | null;
           video_path?: string | null;
+          sets?: number | null;
+          work_min?: number | null;
+          rest_min?: number | null;
+          intensity?: "laag" | "matig" | "hoog" | "maximaal" | null;
+          rpe?: number | null;
+          use_in_planning?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -993,6 +1005,12 @@ export type Database = {
           variations?: string[];
           animation?: Json | null;
           video_path?: string | null;
+          sets?: number | null;
+          work_min?: number | null;
+          rest_min?: number | null;
+          intensity?: "laag" | "matig" | "hoog" | "maximaal" | null;
+          rpe?: number | null;
+          use_in_planning?: boolean;
           created_at?: string;
           updated_at?: string;
         };

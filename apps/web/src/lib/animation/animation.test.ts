@@ -66,6 +66,7 @@ describe("exercise form", () => {
       minPlayers: "7",
       maxPlayers: "",
       duration: "15",
+      sets: "", workMin: "", restMin: "", intensity: "", rpe: "", useInPlanning: true,
       organisation: "",
       course: "Max. 2 balcontacten\n\nWie verliest, gaat in het midden",
       coaching: "",
@@ -74,7 +75,7 @@ describe("exercise form", () => {
     expect(parsed).toMatchObject({ title: "Rondo 5v2", labels: ["rondo", "balbezit"], minPlayers: 7, maxPlayers: null, organisation: null });
     expect(parsed.course).toHaveLength(2);
     expect(
-      exerciseFormSchema.safeParse({ title: "x", phase: "", labels: "", minPlayers: "10", maxPlayers: "4", duration: "", organisation: "", course: "", coaching: "", variations: "" }).success,
+      exerciseFormSchema.safeParse({ title: "x", phase: "", labels: "", minPlayers: "10", maxPlayers: "4", duration: "", sets: "", workMin: "", restMin: "", intensity: "", rpe: "", useInPlanning: true, organisation: "", course: "", coaching: "", variations: "" }).success,
     ).toBe(false);
     expect(videoExtension("video/quicktime")).toBe("mov");
     expect(videoExtension("image/png")).toBeNull();
