@@ -1,7 +1,9 @@
+import type { Json } from "@iassistent/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { type WeekDocument, WeekDocumentView } from "@/components/proposals/week-document-view";
+import { loadWeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
 import { opponentNames } from "@/lib/opponents/context";
 import { shirtNames } from "@/lib/proposals/names";
@@ -27,7 +29,7 @@ export default async function PrintWeekPage({
   const { teamId, weekStart } = await params;
   const { week: version } = await searchParams;
   if (!isIsoDate(weekStart) || isoWeekday(weekStart) !== 1) notFound();
-  const { team } = await getTeamContext(teamId);
+  const { team, logoUrl } = await getTeamContext(teamId);
 
   const supabase = await createClient();
   const data = await loadWeek(supabase, team, weekStart);
@@ -40,6 +42,7 @@ export default async function PrintWeekPage({
   ) as Record<string, unknown>;
   const doc = { pc: outputs.pc ?? null, tc: outputs.tc ?? null, ac: outputs.ac ?? null, tco: outputs.tco ?? null } as WeekDocument;
   const names = shirtNames(data.players);
+  const exercises = await loadWeekExercises(supabase, [outputs.ac as Json | undefined], team, logoUrl);
   const title = `${team.club_name} – ${team.name} · ${messages.weeks.weekOf(longDate(weekStart))}`;
 
   return (
@@ -59,6 +62,7 @@ export default async function PrintWeekPage({
         names={names}
         opponentNames={opponentNames(data.opponentLineup)}
         masPlayers={squadMas(data, names)}
+        exercises={exercises}
       />
     </div>
   );

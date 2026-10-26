@@ -8,6 +8,7 @@ import { MatchPrepView } from "@/components/proposals/tactical-views";
 import { type WeekDocument, WeekDocumentView } from "@/components/proposals/week-document-view";
 import { Alert, Button } from "@/components/ui";
 import { getStaffProvider } from "@/lib/ai";
+import { loadWeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
 import { opponentNames } from "@/lib/opponents/context";
 import { shirtNames } from "@/lib/proposals/names";
@@ -49,7 +50,7 @@ export default async function WeekPage({
   const { teamId, weekStart } = await params;
   const query = await searchParams;
   if (!isIsoDate(weekStart) || isoWeekday(weekStart) !== 1) notFound();
-  const { team, canEdit } = await getTeamContext(teamId);
+  const { team, canEdit, logoUrl } = await getTeamContext(teamId);
 
   const supabase = await createClient();
   const data = await loadWeek(supabase, team, weekStart);
@@ -86,6 +87,12 @@ export default async function WeekPage({
   const approvedWeekRun = data.runs.find((x) => x.kind === "week" && x.status === "approved") ?? null;
   const approvedWeek = outputsOf(approvedWeekRun);
   const theirNames = opponentNames(data.opponentLineup);
+  const exercises = await loadWeekExercises(
+    supabase,
+    data.proposals.filter((x) => x.step === "ac").map((x) => x.output),
+    team,
+    logoUrl,
+  );
 
   // Sessions of this week that already took place, for logging the actual RPE.
   const today = todayInBelgium();
@@ -242,6 +249,7 @@ export default async function WeekPage({
               names={names}
               opponentNames={theirNames}
               masPlayers={masPlayers}
+              exercises={exercises}
             />
           );
         }}

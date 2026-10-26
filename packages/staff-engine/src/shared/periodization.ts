@@ -20,12 +20,13 @@ const schema = z.object({
         naam: z.string().min(1),
         belasting_pct: range,
         km_zonder_wedstrijd: range,
+        reeksen_factor: z.number().positive().max(3).optional(),
         uitleg: z.string().min(1),
       }),
     )
     .min(1),
   cycli: z.array(z.object({ weken: z.int().min(1).max(26), volgorde: z.array(code).min(1) })).min(1),
-  voor_start: z.object({ code, naam: z.string().min(1), uitleg: z.string().min(1) }),
+  voor_start: z.object({ code, naam: z.string().min(1), reeksen_factor: z.number().positive().max(3).optional(), uitleg: z.string().min(1) }),
 });
 
 export type PeriodizationCatalog = z.infer<typeof schema>;
@@ -61,7 +62,15 @@ export interface WeekPeriodization {
   week_van_fase: number | null;
   cyclus_weken: number | null;
   week_in_cyclus: number | null;
-  weektype: { code: string; naam: string; uitleg: string; belasting_pct: { min: number; max: number } | null; km_zonder_wedstrijd: { min: number; max: number } | null } | null;
+  weektype: {
+    code: string;
+    naam: string;
+    uitleg: string;
+    belasting_pct: { min: number; max: number } | null;
+    km_zonder_wedstrijd: { min: number; max: number } | null;
+    /** Multiplier for the number of sets of a library exercise in this week type. */
+    reeksen_factor?: number;
+  } | null;
 }
 
 /** Season planning of a team: preparation and competition, each with its own cycle. */

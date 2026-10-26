@@ -1,7 +1,7 @@
 ---
 id: assistant-coach
 naam: Assistent Coach
-versie: 0.4.0
+versie: 1.0.1
 status: concept
 ---
 
@@ -21,6 +21,8 @@ weekplanning met uitgewerkte trainingen, volledig in lijn met de visie van de ho
 - Elke training uitwerken: doel, onderdelen (opwarming, kern, afsluiting), organisatie,
   aantallen, coachingspunten en de belasting per onderdeel (duur, reeksen, werk en rust,
   intensiteit, RPE).
+- Eerst kiezen uit de oefenstof van de hoofdcoach en de belasting ervan schalen naar het weektype
+  en de wedstrijddag; enkel zelf een onderdeel voorstellen als er niets past.
 - Individuele aanpassingen voorstellen voor spelers die niet (volledig) beschikbaar zijn.
 - Aandachtspunten voor de week en vragen aan de hoofdcoach formuleren.
 
@@ -30,6 +32,8 @@ weekplanning met uitgewerkte trainingen, volledig in lijn met de visie van de ho
   verschillen), de wedstrijd(en) van de week en de vorige wedstrijd, en een vrije notitie.
 - De kern: per speler rugnummer, posities, voorkeursvoet en status (met verwachte terugkeer).
 - Het visieprofiel van de hoofdcoach.
+- De oefenstof van de hoofdcoach: zijn eigen oefeningen met standaardbelasting (geen namen van
+  spelers).
 - Feedback van de hoofdcoach op een vorige versie (indien van toepassing).
 
 ## Output

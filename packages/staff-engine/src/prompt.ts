@@ -6,7 +6,7 @@ import type { Staff, StaffFile, StaffRole } from "./types";
 /** Placeholders the prompt templates in _gedeeld may use. */
 export const TEMPLATE_PLACEHOLDERS = {
   system: ["afspraken", "visie_afspraken", "wedstrijddagen", "periodisering", "rol", "instructies", "referentie", "voorbeeld"],
-  user: ["visie", "weekinput", "kern", "tegenstander", "evaluaties", "belastingshistoriek", "testen", "staf", "feedback"],
+  user: ["visie", "weekinput", "kern", "tegenstander", "evaluaties", "belastingshistoriek", "testen", "bibliotheek", "staf", "feedback"],
 } as const;
 
 const PLACEHOLDER = /\{\{\s*([a-z_]+)\s*\}\}/g;
@@ -77,6 +77,7 @@ export function buildRolePrompt(staff: Staff, role: StaffRole, context: RoleCont
     evaluaties: json(context.evaluaties),
     belastingshistoriek: json(context.belastingshistoriek),
     testen: json(context.testen),
+    bibliotheek: json(context.bibliotheek),
     staf: json(Object.keys(context.staf).length ? context.staf : null),
     feedback: json(context.feedback),
   });

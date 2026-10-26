@@ -142,6 +142,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "oefening_id",
         "fase",
         "naam",
         "doel",
@@ -156,6 +157,13 @@
         "rpe"
       ],
       "properties": {
+        "oefening_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "id van de oefening uit de oefenstof van de coach (zie Oefenstof), of null voor een nieuw voorstel."
+        },
         "fase": {
           "type": "string",
           "enum": [

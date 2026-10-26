@@ -66,7 +66,15 @@ export default async function ExercisePage({
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold">{exercise.title}</h1>
         <p className="text-sm text-slate-600">
-          {[exercise.phase ? m.phase[exercise.phase] : null, m.players(exercise.min_players, exercise.max_players), exercise.duration_min ? m.minutes(exercise.duration_min) : null]
+          {[
+            exercise.phase ? m.phase[exercise.phase] : null,
+            m.players(exercise.min_players, exercise.max_players),
+            exercise.duration_min ? m.minutes(exercise.duration_min) : null,
+            m.load(exercise.sets, exercise.work_min === null ? null : Number(exercise.work_min), exercise.rest_min === null ? null : Number(exercise.rest_min)),
+            exercise.intensity ? m.intensity[exercise.intensity] : null,
+            exercise.rpe ? m.rpe(exercise.rpe) : null,
+            exercise.use_in_planning ? null : m.notInPlanning,
+          ]
             .filter(Boolean)
             .join(" · ")}
         </p>

@@ -18,6 +18,12 @@ export interface ExerciseValues {
   minPlayers: string;
   maxPlayers: string;
   duration: string;
+  sets: string;
+  workMin: string;
+  restMin: string;
+  intensity: string;
+  rpe: string;
+  useInPlanning: boolean;
   organisation: string;
   course: string;
   coaching: string;
@@ -31,6 +37,12 @@ export const EMPTY_EXERCISE: ExerciseValues = {
   minPlayers: "",
   maxPlayers: "",
   duration: "",
+  sets: "",
+  workMin: "",
+  restMin: "",
+  intensity: "",
+  rpe: "",
+  useInPlanning: true,
   organisation: "",
   course: "",
   coaching: "",
@@ -45,7 +57,7 @@ export function ExerciseForm({
   initial: ExerciseValues;
 }) {
   const [state, formAction, pending] = useActionState<ExerciseFormState, FormData>(action, {});
-  const area = (name: keyof ExerciseValues, label: string, rows = 4, hint?: string) => (
+  const area = (name: "organisation" | "course" | "coaching" | "variations", label: string, rows = 4, hint?: string) => (
     <Field label={label} hint={hint}>
       <textarea name={name} defaultValue={initial[name]} rows={rows} className={textareaClass} />
     </Field>
@@ -82,6 +94,38 @@ export function ExerciseForm({
           <Input name="duration" type="number" min={1} max={120} defaultValue={initial.duration} />
         </Field>
       </div>
+      <fieldset className="space-y-3 rounded-lg border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-medium">{f.load}</legend>
+        <p className="text-xs text-slate-500">{f.loadHint}</p>
+        <div className="grid gap-4 sm:grid-cols-5">
+          <Field label={f.sets}>
+            <Input name="sets" type="number" min={1} max={20} defaultValue={initial.sets} />
+          </Field>
+          <Field label={f.workMin}>
+            <Input name="workMin" inputMode="decimal" pattern="[0-9]+([.,][0-9])?" defaultValue={initial.workMin} />
+          </Field>
+          <Field label={f.restMin}>
+            <Input name="restMin" inputMode="decimal" pattern="[0-9]+([.,][0-9])?" defaultValue={initial.restMin} />
+          </Field>
+          <Field label={f.intensity}>
+            <select name="intensity" defaultValue={initial.intensity} className={textareaClass}>
+              <option value="">{f.noIntensity}</option>
+              {(["laag", "matig", "hoog", "maximaal"] as const).map((i) => (
+                <option key={i} value={i}>
+                  {m.intensity[i]}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={f.rpe}>
+            <Input name="rpe" type="number" min={1} max={10} defaultValue={initial.rpe} />
+          </Field>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="useInPlanning" defaultChecked={initial.useInPlanning} className="h-4 w-4" />
+          {f.useInPlanning}
+        </label>
+      </fieldset>
       {area("organisation", f.organisation, 3)}
       <div className="grid gap-4 md:grid-cols-3">
         {area("course", f.course, 6, f.linesHint)}

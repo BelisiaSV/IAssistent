@@ -1,5 +1,6 @@
 import type { Tables } from "@iassistent/db";
 import {
+  type LibraryExercise,
   type LoadHistoryWeek,
   type MatchEvaluation,
   matchDayFor,
@@ -62,6 +63,8 @@ export function buildRoleContext(input: {
   history: LoadHistoryWeek[];
   opponent: OpponentContext | null;
   evaluations: MatchEvaluation[];
+  /** The coach's exercise library (already without names of players). */
+  library?: LibraryExercise[];
   staff: Record<string, unknown>;
   feedback: { previousOutput: unknown; comment: string } | null;
 }): RoleContext {
@@ -138,6 +141,7 @@ export function buildRoleContext(input: {
     testen,
     tegenstander: input.opponent,
     evaluaties: input.evaluations,
+    bibliotheek: input.library ?? [],
     staf: input.staff,
     feedback: input.feedback
       ? { vorige_versie: input.feedback.previousOutput, feedback: input.feedback.comment }

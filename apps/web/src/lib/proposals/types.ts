@@ -3,6 +3,8 @@
  * Stored output is validated against that schema by the staff-engine.
  */
 export interface WeekPlanningPart {
+  /** Exercise from the coach's library, or null/absent for a new part. */
+  oefening_id?: string | null;
   fase: "opwarming" | "kern" | "afsluiting";
   naam: string;
   doel: string;
