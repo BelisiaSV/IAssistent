@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
+import { animationSettingsSchema, compactSettings } from "@/lib/animation/team-theme";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, isIsoDate, mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 import { trainingScheduleSchema, type WeekTraining } from "@/lib/weeks/validation";
@@ -121,4 +122,41 @@ export async function saveSeasonSettings(
   }
   revalidatePath(`/teams/${teamId}`, "layout");
   return { success: s.season.saved };
+}
+
+/** Saves how animations look for this team (style, colours, logo on the tokens). */
+export async function saveAnimationSettings(
+  teamId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
+  const value = (name: string) => {
+    const v = String(formData.get(name) ?? "");
+    return v === "" ? undefined : v;
+  };
+  const parsed = animationSettingsSchema.safeParse({
+    stijl: value("stijl"),
+    eigen: value("eigen"),
+    tegenstander: value("tegenstander"),
+    neutraal: value("neutraal"),
+    doelman_eigen: value("doelman_eigen"),
+    doelman_tegenstander: value("doelman_tegenstander"),
+    logo_op_schijfjes: value("logo_op_schijfjes"),
+  });
+  if (!parsed.success) return { error: e.saveFailed };
+
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("teams")
+    .update({ animation_settings: compactSettings(parsed.data) })
+    .eq("id", teamId)
+    .select("id");
+  if (error || !data?.length) {
+    console.error("saveAnimationSettings failed", error);
+    return { error: e.saveFailed };
+  }
+  revalidatePath(`/teams/${teamId}/settings`);
+  return { success: s.display.saved };
 }

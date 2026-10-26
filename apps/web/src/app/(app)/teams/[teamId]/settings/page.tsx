@@ -1,5 +1,6 @@
 import { weekPeriodization } from "@iassistent/staff-engine/content";
 
+import { themeForTeam } from "@/lib/animation/team-theme";
 import { messages } from "@/lib/messages";
 import { periodizationCatalog } from "@/lib/staff";
 import { getTeamContext } from "@/lib/teams/queries";
@@ -8,6 +9,7 @@ import { seasonPlan } from "@/lib/weeks/season";
 import { trainingScheduleSchema } from "@/lib/weeks/validation";
 
 import { ScheduleForm } from "./schedule-form";
+import { DisplayForm } from "./display-form";
 import { SeasonForm } from "./season-form";
 
 const m = messages.settings;
@@ -27,6 +29,7 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
     return { week, p: weekPeriodization(week, season, periodizationCatalog) };
   });
   const hasSeason = !!(season.preparationStart || season.competitionStart);
+  const display = themeForTeam(team.animation_settings);
 
   return (
     <div className="space-y-6">
@@ -36,6 +39,14 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
         teamId={team.id}
         initial={season}
         cycles={periodizationCatalog.cycli.map((c) => c.weken)}
+        canEdit={canEdit}
+      />
+
+      <DisplayForm
+        teamId={team.id}
+        initial={{ stijl: display.settings.stijl, logo_op_schijfjes: display.settings.logo_op_schijfjes }}
+        theme={display.theme}
+        hasLogo={!!team.logo_path}
         canEdit={canEdit}
       />
 
