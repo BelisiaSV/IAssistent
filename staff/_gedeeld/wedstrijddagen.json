@@ -1,15 +1,15 @@
 {
-  "versie": "0.1.0",
-  "uitleg": "Labels voor dagen ten opzichte van een wedstrijd. De app berekent hoeveel dagen een dag vóór (dagen_tot_wedstrijd) of na (dagen_na_wedstrijd) een wedstrijd ligt en kiest het eerste label in deze lijst dat past. De volgorde bepaalt dus de voorrang, bv. bij twee wedstrijden in één week.",
+  "versie": "0.2.0",
+  "uitleg": "Labels voor dagen ten opzichte van een wedstrijd. De app berekent hoeveel dagen een dag vóór (dagen_tot_wedstrijd) of na (dagen_na_wedstrijd) een wedstrijd ligt en kiest het eerste label in deze lijst dat past. De volgorde bepaalt dus de voorrang, bv. bij twee wedstrijden in één week. reeksen_factor: hoeveel keer het standaard aantal reeksen van een oefening uit de oefenstof van de coach op deze dag (samen met de reeksen_factor van het weektype); voorstel om na te kijken.",
   "dagen": [
     { "code": "MD", "naam": "Wedstrijddag", "dagen_tot_wedstrijd": 0, "uitleg": "Wedstrijd." },
-    { "code": "MD+1", "naam": "Dag na de wedstrijd", "dagen_na_wedstrijd": 1, "uitleg": "Herstel: basisspelers actief herstel of rust, niet-gebruikte spelers compensatietraining." },
-    { "code": "MD-1", "naam": "Dag voor de wedstrijd", "dagen_tot_wedstrijd": 1, "uitleg": "Activatie: kort en scherp, lage belasting, snelheid in korte prikkels, standaardsituaties." },
-    { "code": "MD+2", "naam": "Tweede dag na de wedstrijd", "dagen_na_wedstrijd": 2, "uitleg": "Herstel of rustige heropbouw, lage tot matige belasting." },
-    { "code": "MD-2", "naam": "Twee dagen voor de wedstrijd", "dagen_tot_wedstrijd": 2, "uitleg": "Snelheid en reactie, korte duur, matige belasting." },
-    { "code": "MD-3", "naam": "Drie dagen voor de wedstrijd", "dagen_tot_wedstrijd": 3, "uitleg": "Uithouding in voetbalvormen: grotere ruimtes, wedstrijdgerichte tactische vormen, hoge belasting." },
-    { "code": "MD+3", "naam": "Derde dag na de wedstrijd", "dagen_na_wedstrijd": 3, "uitleg": "Heropbouw richting volle belasting." },
-    { "code": "MD-4", "naam": "Vier dagen voor de wedstrijd", "dagen_tot_wedstrijd": 4, "uitleg": "Kracht en intensiteit: kleine ruimtes, veel duels en acties, hoogste belasting van de week (indien er genoeg dagen zijn)." },
-    { "code": "MD+4", "naam": "Vierde dag na de wedstrijd", "dagen_na_wedstrijd": 4, "uitleg": "Volle trainingsdag (indien nodig)." }
+    { "code": "MD+1", "naam": "Dag na de wedstrijd", "dagen_na_wedstrijd": 1, "reeksen_factor": 0.5, "uitleg": "Herstel: basisspelers actief herstel of rust, niet-gebruikte spelers compensatietraining." },
+    { "code": "MD-1", "naam": "Dag voor de wedstrijd", "dagen_tot_wedstrijd": 1, "reeksen_factor": 0.5, "uitleg": "Activatie: kort en scherp, lage belasting, snelheid in korte prikkels, standaardsituaties." },
+    { "code": "MD+2", "naam": "Tweede dag na de wedstrijd", "dagen_na_wedstrijd": 2, "reeksen_factor": 0.75, "uitleg": "Herstel of rustige heropbouw, lage tot matige belasting." },
+    { "code": "MD-2", "naam": "Twee dagen voor de wedstrijd", "dagen_tot_wedstrijd": 2, "reeksen_factor": 0.75, "uitleg": "Snelheid en reactie, korte duur, matige belasting." },
+    { "code": "MD-3", "naam": "Drie dagen voor de wedstrijd", "dagen_tot_wedstrijd": 3, "reeksen_factor": 1, "uitleg": "Uithouding in voetbalvormen: grotere ruimtes, wedstrijdgerichte tactische vormen, hoge belasting." },
+    { "code": "MD+3", "naam": "Derde dag na de wedstrijd", "dagen_na_wedstrijd": 3, "reeksen_factor": 1, "uitleg": "Heropbouw richting volle belasting." },
+    { "code": "MD-4", "naam": "Vier dagen voor de wedstrijd", "dagen_tot_wedstrijd": 4, "reeksen_factor": 1, "uitleg": "Kracht en intensiteit: kleine ruimtes, veel duels en acties, hoogste belasting van de week (indien er genoeg dagen zijn)." },
+    { "code": "MD+4", "naam": "Vierde dag na de wedstrijd", "dagen_na_wedstrijd": 4, "reeksen_factor": 1, "uitleg": "Volle trainingsdag (indien nodig)." }
   ]
 }

@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(13);
+select plan(17);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -63,6 +63,17 @@ select throws_ok(
 select lives_ok(
   $$update public.teams set animation_settings = '{"stijl": "donker"}' where false$$,
   'teams have animation settings');
+select lives_ok(
+  $$update public.exercises set sets = 4, work_min = 4, rest_min = 1.5, intensity = 'hoog', rpe = 7, use_in_planning = false
+    where id = (select id from ids where name = 'ex_a')$$,
+  'coach sets the standard load of an exercise');
+select throws_ok(
+  $$update public.exercises set intensity = 'extreem' where id = (select id from ids where name = 'ex_a')$$,
+  '23514', null, 'intensity must be a known level');
+select throws_ok(
+  $$update public.exercises set rpe = 11 where id = (select id from ids where name = 'ex_a')$$,
+  '23514', null, 'rpe is 1 to 10');
+select is((select use_in_planning from public.exercises where id = (select id from ids where name = 'ex_a')), false, 'exercise can be kept out of the planning');
 select tests.logout();
 
 select tests.login('b@test.local');

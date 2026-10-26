@@ -1,4 +1,4 @@
-import type { RoleContext } from "../context";
+import type { LibraryExercise, RoleContext } from "../context";
 import { roleExample } from "../prompt";
 import type { Staff } from "../types";
 import { StaffGenerationError, type StaffModelProvider } from "./types";
@@ -19,7 +19,7 @@ export const exampleProvider: StaffModelProvider = {
       throw new StaffGenerationError("provider_error", `role ${role.id} (${task}) has no example`);
     }
     let output: Example;
-    if (Array.isArray(example.dagen)) output = fitWeek(example, context);
+    if (Array.isArray(example.dagen)) output = fitWeek(example, context, staff);
     else if (example.speelplan && example.trainingsaccenten) output = fitTacticalWeek(example, context);
     else if (example.opstelling && example.wedstrijdbespreking) output = fitMatchPrep(example, context, staff);
     else if (Array.isArray(example.oefeningen)) output = fitDrawings(example, context);
@@ -29,7 +29,7 @@ export const exampleProvider: StaffModelProvider = {
 };
 
 /** Week-shaped outputs (Assistant Coach, Physical Coach). */
-function fitWeek(example: Example, context: RoleContext): Example {
+function fitWeek(example: Example, context: RoleContext, staff: Staff): Example {
   const days = example.dagen as Day[];
   const byKind = (kind: string) => days.filter((d) => d.soort === kind);
   const trainings = byKind("training");
@@ -61,7 +61,93 @@ function fitWeek(example: Example, context: RoleContext): Example {
   // Keep the week type of this week when the role reports one (Physical Coach).
   const weektype = context.weekinput.periodisering.weektype?.code;
   const extra = "weektype" in example && weektype ? { weektype } : {};
-  return { ...example, ...extra, dagen, individueel: fitIndividual(example, context) };
+  return { ...example, ...extra, dagen: fromLibrary(dagen, context, staff), individueel: fitIndividual(example, context) };
+}
+
+type Part = Record<string, unknown> & { fase: string; duur_min: number; reeksen: number | null; rpe: number | null; oefening_id?: string | null };
+
+/**
+ * Assistant Coach: fills the parts of each training with exercises from the
+ * coach's library (same phase, enough players, not yet used this week) and
+ * scales their sets with the reeksen_factor of the week type and match day.
+ * Parts without a fitting exercise keep the example (oefening_id null).
+ */
+function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Example[] {
+  // Without a squad there is nothing to check the number of players against.
+  const players = context.kern.filter((p) => p.beschikbaar).length;
+  const usable = context.bibliotheek.filter((e) => !players || e.spelers.min === null || e.spelers.min <= players);
+  if (!usable.length) return days.map((d) => (Array.isArray(d.onderdelen) ? { ...d, onderdelen: (d.onderdelen as Part[]).map((o) => ({ ...o, oefening_id: null })) } : d));
+
+  const weekFactor = context.weekinput.periodisering.weektype?.reeksen_factor ?? 1;
+  const physical = context.staf["physical-coach"] as { dagen?: { datum: string; rpe_doel: number | null }[] } | undefined;
+  const used = new Map<string, number>();
+
+  return days.map((d) => {
+    if (!Array.isArray(d.onderdelen)) return d;
+    const input = context.weekinput.dagen.find((x) => x.datum === d.datum);
+    const factor = weekFactor * (staff.matchDays.dagen.find((m) => m.code === d.md)?.reeksen_factor ?? 1);
+    const maxRpe = physical?.dagen?.find((x) => x.datum === d.datum)?.rpe_doel ?? null;
+
+    const parts: (Part & { _ex?: LibraryExercise })[] = (d.onderdelen as Part[]).map((part) => {
+      const candidates = usable.filter((e) => e.fase === part.fase || e.fase === null);
+      if (!candidates.length) return { ...part, oefening_id: null };
+      const exercise = [...candidates].sort((a, b) => (used.get(a.id) ?? 0) - (used.get(b.id) ?? 0))[0]!;
+      used.set(exercise.id, (used.get(exercise.id) ?? 0) + 1);
+      return libraryPart(part, exercise, factor, maxRpe);
+    });
+
+    // Too long for the training: drop sets from the longest library part.
+    const budget = input?.training?.duur_min ?? null;
+    const total = () => parts.reduce((sum, p) => sum + p.duur_min, 0);
+    while (budget !== null && total() > budget) {
+      const longest = parts
+        .filter((p): p is Part & { _ex: LibraryExercise } => !!p._ex && p._ex.werk_min !== null && (p.reeksen ?? 0) > 1)
+        .sort((a, b) => b.duur_min - a.duur_min)[0];
+      if (!longest) break;
+      Object.assign(longest, setsAndDuration(longest._ex, longest.reeksen! - 1, factor));
+    }
+    return { ...d, onderdelen: parts.map(({ _ex, ...p }) => p) };
+  });
+}
+
+/** A part of the planning built from a library exercise, scaled to the day. */
+function libraryPart(part: Part, exercise: LibraryExercise, factor: number, maxRpe: number | null): Part & { _ex?: LibraryExercise } {
+  const sets = exercise.reeksen !== null ? Math.max(1, Math.round(exercise.reeksen * factor)) : null;
+  const rpe = exercise.rpe ?? part.rpe;
+  return {
+    ...part,
+    oefening_id: exercise.id,
+    naam: exercise.titel,
+    doel: exercise.labels.length ? exercise.labels.join(", ") : part.doel,
+    organisatie: exercise.organisatie ?? part.organisatie,
+    spelers: playerRange(exercise) ?? part.spelers,
+    coachingspunten: exercise.coachingspunten.length ? exercise.coachingspunten : part.coachingspunten,
+    intensiteit: exercise.intensiteit ?? part.intensiteit,
+    rpe: rpe !== null && maxRpe !== null ? Math.min(rpe, maxRpe) : rpe,
+    ...setsAndDuration(exercise, sets, factor, part.duur_min),
+    _ex: exercise,
+  };
+}
+
+function setsAndDuration(exercise: LibraryExercise, sets: number | null, factor: number, fallback?: number) {
+  const minutes = (n: number) => `${String(n).replace(".", ",")} min`;
+  if (sets !== null && exercise.werk_min !== null) {
+    const rest = exercise.rust_min ?? 0;
+    return {
+      reeksen: sets,
+      werk_per_reeks: minutes(exercise.werk_min),
+      rust_tussen_reeksen: sets > 1 && rest > 0 ? minutes(rest) : null,
+      duur_min: Math.ceil(sets * exercise.werk_min + (sets - 1) * rest),
+    };
+  }
+  const base = exercise.duur_min ?? fallback ?? 0;
+  return { reeksen: sets, werk_per_reeks: null, rust_tussen_reeksen: null, duur_min: Math.max(1, Math.round(base * factor)) };
+}
+
+function playerRange(exercise: LibraryExercise): string | null {
+  const { min, max } = exercise.spelers;
+  if (min === null && max === null) return null;
+  return min === max || max === null ? String(min) : min === null ? `≤ ${max}` : `${min}-${max}`;
 }
 
 function fitIndividual(example: Example, context: RoleContext) {
@@ -140,7 +226,7 @@ function fitMatchPrep(example: Example, context: RoleContext, staff: Staff): Exa
 /** Tactical Coach drawings: one drawing per part of the approved Assistant Coach planning. */
 function fitDrawings(example: Example, context: RoleContext): Example {
   const planning = context.staf["assistant-coach"] as
-    | { dagen?: { datum: string; onderdelen?: { naam: string; fase: string; organisatie: string; coachingspunten: string[] }[] }[] }
+    | { dagen?: { datum: string; onderdelen?: { oefening_id?: string | null; naam: string; fase: string; organisatie: string; coachingspunten: string[] }[] }[] }
     | undefined;
   if (!planning?.dagen) {
     throw new StaffGenerationError("provider_error", "no week planning of the Assistant Coach");
@@ -148,7 +234,7 @@ function fitDrawings(example: Example, context: RoleContext): Example {
   const drawings = example.oefeningen as (Example & { onderdeel: string; fase: string; tekening: Example })[];
   const counters = new Map<string, number>();
   const oefeningen = planning.dagen.flatMap((day) =>
-    (day.onderdelen ?? []).map((part) => {
+    (day.onderdelen ?? []).filter((part) => !part.oefening_id).map((part) => {
       const sameName = drawings.find((d) => d.onderdeel === part.naam);
       const sameFase = drawings.filter((d) => d.fase === part.fase);
       const n = counters.get(part.fase) ?? 0;

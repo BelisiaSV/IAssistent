@@ -6,6 +6,15 @@ const e = messages.exercises.errors;
 
 const optionalInt = (min: number, max: number, message: string) =>
   z.union([z.literal("").transform(() => null), z.coerce.number().int(message).min(min, message).max(max, message)]);
+const optionalDecimal = (min: number, max: number, message: string) =>
+  z.union([
+    z.literal("").transform(() => null),
+    z
+      .string()
+      .transform((v) => Number(v.replace(",", ".")))
+      .pipe(z.number(message).min(min, message).max(max, message))
+      .transform((v) => Math.round(v * 10) / 10),
+  ]);
 const lines = (max: number) =>
   z
     .string()
@@ -29,6 +38,12 @@ export const exerciseFormSchema = z
     minPlayers: optionalInt(1, 40, e.players),
     maxPlayers: optionalInt(1, 40, e.players),
     duration: optionalInt(1, 120, e.duration),
+    sets: optionalInt(1, 20, e.load),
+    workMin: optionalDecimal(0.5, 60, e.load),
+    restMin: optionalDecimal(0, 30, e.load),
+    intensity: z.union([z.literal("").transform(() => null), z.enum(["laag", "matig", "hoog", "maximaal"])]),
+    rpe: optionalInt(1, 10, e.load),
+    useInPlanning: z.boolean(),
     organisation: z
       .string()
       .trim()

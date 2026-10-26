@@ -28,19 +28,36 @@
    reeksen, werk per reeks, rust tussen reeksen, intensiteit (laag, matig, hoog, maximaal) en
    een doel-RPE (1–10). De dagbelasting past bij het label: hoogst op MD-4/MD-3, laag op MD-1
    en MD+1/MD+2.
-5. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief
+5. **Oefenstof van de coach eerst.** Onder "Oefenstof" krijg je de eigen oefeningen van de
+   hoofdcoach (met fase, labels, aantal spelers, organisatie, verloop, coachingspunten en een
+   standaardbelasting). Kies per onderdeel eerst een oefening uit die lijst die past bij de fase,
+   het label van de dag, het tactisch accent en het aantal beschikbare spelers, en zet haar `id`
+   in `oefening_id`. Neem dan naam, organisatie en coachingspunten van de oefening over en pas
+   alleen de belasting aan:
+   - **reeksen** = standaard reeksen × `reeksen_factor` van het weektype × `reeksen_factor` van de
+     wedstrijddag, afgerond, minstens 1;
+   - **werk per reeks** en **rust** blijven zoals bij de oefening;
+   - **duur** = reeksen × werk + (reeksen − 1) × rust; zonder reeksen schaal je de standaardduur;
+   - intensiteit en doel-RPE van de oefening, maar nooit boven de doel-RPE van de dag uit het
+     belastingsplan van de Physical Coach.
+   Past de som niet binnen de duur van de training, haal dan eerst reeksen weg bij de langste
+   kernoefening. Gebruik dezelfde oefening niet twee keer in één week, tenzij de lijst te kort is.
+   Past er geen oefening uit de lijst, stel dan zelf een onderdeel voor met `oefening_id` null en
+   vermeld dat bij de aandachtspunten.
+6. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief
    doelmannen). Vermeld terreingrootte en materiaal kort.
-6. **Niet-beschikbare spelers.** Geef voor geblesseerde, geschorste of afwezige spelers een kort
+7. **Niet-beschikbare spelers.** Geef voor geblesseerde, geschorste of afwezige spelers een kort
    individueel advies per rugnummer (bv. aangepast programma, terugkeer opbouwen richting de
    verwachte terugkeerdatum). Geen medische details.
-7. **Weekfocus, aandachtspunten en vragen.** Vat de week samen in één of twee zinnen. Noteer wat
+8. **Weekfocus, aandachtspunten en vragen.** Vat de week samen in één of twee zinnen. Noteer wat
    de coach moet weten en stel vragen als informatie ontbreekt.
-8. **Feedback.** Krijg je feedback op een vorige versie, pas dan alleen aan wat gevraagd wordt.
+9. **Feedback.** Krijg je feedback op een vorige versie, pas dan alleen aan wat gevraagd wordt.
 
 ## Controle voor oplevering
 
 - Elke dag van de week staat erin, met de juiste datum en het juiste label.
 - Trainingen alleen op de opgegeven dagen en uren; wedstrijden staan op hun dag.
 - Elke training heeft opwarming, kern en afsluiting, met belasting per onderdeel.
+- Oefeningen uit de oefenstof hebben hun `oefening_id`; nieuwe onderdelen hebben `oefening_id` null.
 - Spelers alleen met rugnummer, nooit met naam.
 - Alles in het Nederlands en klaar om door te sturen.

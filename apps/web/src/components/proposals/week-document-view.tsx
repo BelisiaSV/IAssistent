@@ -1,3 +1,6 @@
+import Link from "next/link";
+
+import type { WeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
 import { withShirtNames } from "@/lib/proposals/names";
 import type {
@@ -9,6 +12,7 @@ import type {
 } from "@/lib/proposals/types";
 import { longDate, weekdayName } from "@/lib/weeks/dates";
 
+import { AnimatedDrawing } from "./animated-drawing";
 import { DrawingView } from "./drawing";
 import { LoadPlanView, MasTable, type MasPlayer } from "./load-plan-view";
 import { Card, List, SetPieces, TacticalWeekView } from "./tactical-views";
@@ -17,6 +21,7 @@ const r = messages.staffRun;
 const o = messages.proposals.output;
 const l = messages.loadPlan;
 const d = messages.drawings;
+const x = messages.exercises;
 
 const LOAD_STYLES: Record<WeekPlanningDay["belasting"], string> = {
   rust: "bg-slate-100 text-slate-600",
@@ -43,11 +48,14 @@ export function WeekDocumentView({
   names,
   opponentNames,
   masPlayers,
+  exercises,
 }: {
   doc: WeekDocument;
   names: Map<number, string>;
   opponentNames: Map<number, string>;
   masPlayers: MasPlayer[];
+  /** Library exercises the planning uses (only for the coach who owns them). */
+  exercises?: WeekExercises;
 }) {
   const n = (text: string) => withShirtNames(text, names);
   const { pc, tc, ac, tco } = doc;
@@ -147,7 +155,12 @@ export function WeekDocumentView({
             )}
 
             {day.onderdelen.map((part, i) => {
-              const drawing = tco?.oefeningen.find((x) => x.datum === day.datum && x.onderdeel === part.naam);
+              const exercise = part.oefening_id ? exercises?.items.get(part.oefening_id) : undefined;
+              const drawing = part.oefening_id
+                ? undefined
+                : tco?.oefeningen.find((t) => t.datum === day.datum && t.onderdeel === part.naam);
+              const course = exercise?.course ?? drawing?.verloop ?? [];
+              const variations = exercise?.variations ?? drawing?.variaties ?? [];
               const block = load?.fysieke_blokken.find((b) => b.naam === part.naam);
               return (
                 <article
@@ -156,7 +169,20 @@ export function WeekDocumentView({
                 >
                   <div className="space-y-2 text-sm">
                     <div>
-                      <p className="text-xs text-slate-500">{o.phase[part.fase]}</p>
+                      <p className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        {o.phase[part.fase]}
+                        {part.oefening_id && (
+                          <span className="rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand">
+                            {x.fromLibrary}
+                            {exercise?.hasVideo ? ` · ${x.withVideo}` : ""}
+                          </span>
+                        )}
+                        {exercise && (
+                          <Link href={`/exercises/${exercise.id}`} className="underline hover:text-brand print:hidden">
+                            {x.openExercise}
+                          </Link>
+                        )}
+                      </p>
                       <h4 className="text-base font-semibold">{n(part.naam)}</h4>
                       <p className="text-slate-600">
                         {r.goal}: {n(part.doel)}
@@ -181,14 +207,24 @@ export function WeekDocumentView({
                         {o.players}: {n(part.spelers)}
                       </span>
                     </p>
-                    {drawing && drawing.verloop.length > 0 && <Steps title={d.course} items={drawing.verloop.map(n)} ordered />}
+                    <Steps title={d.course} items={course.map(n)} ordered />
                     <Steps title={d.coaching} items={part.coachingspunten.map(n)} />
-                    {drawing && drawing.variaties.length > 0 && <Steps title={d.variations} items={drawing.variaties.map(n)} />}
+                    <Steps title={d.variations} items={variations.map(n)} />
                     {block?.mas_pct && block.werk_sec && (
                       <MasTable pct={block.mas_pct} seconds={block.werk_sec} players={masPlayers} />
                     )}
                   </div>
-                  {drawing && <DrawingView drawing={drawing.tekening} />}
+                  {exercise?.animation ? (
+                    <AnimatedDrawing
+                      animation={exercise.animation}
+                      theme={exercises!.display.theme}
+                      logoUrl={exercises!.logoUrl}
+                      logoOn={exercises!.display.logoOn}
+                      labels={x.player}
+                    />
+                  ) : (
+                    drawing && <DrawingView drawing={drawing.tekening} />
+                  )}
                 </article>
               );
             })}

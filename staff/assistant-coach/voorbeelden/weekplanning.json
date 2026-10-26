@@ -24,6 +24,7 @@
       "belasting": "matig",
       "onderdelen": [
         {
+          "oefening_id": null,
           "fase": "opwarming",
           "naam": "Loopscholing met bal",
           "doel": "Activeren en blessurepreventie.",
@@ -41,6 +42,7 @@
           "rpe": 3
         },
         {
+          "oefening_id": null,
           "fase": "kern",
           "naam": "Rondo 5v2",
           "doel": "Snel combineren en lijnen openhouden.",
@@ -58,6 +60,7 @@
           "rpe": 5
         },
         {
+          "oefening_id": null,
           "fase": "kern",
           "naam": "Positiespel 6v6 + 3 kaatsers",
           "doel": "Opbouw van achteruit volgens de visie.",
@@ -75,6 +78,7 @@
           "rpe": 6
         },
         {
+          "oefening_id": null,
           "fase": "afsluiting",
           "naam": "Uitlopen en stretching",
           "doel": "Afbouwen.",
@@ -116,6 +120,7 @@
       "belasting": "hoog",
       "onderdelen": [
         {
+          "oefening_id": null,
           "fase": "opwarming",
           "naam": "Dynamische opwarming + passvorm",
           "doel": "Activeren en technische scherpte.",
@@ -133,6 +138,7 @@
           "rpe": 4
         },
         {
+          "oefening_id": null,
           "fase": "kern",
           "naam": "4v4 + doelmannen, kleine ruimte",
           "doel": "Duels, intensiteit en direct tegendruk na balverlies.",
@@ -150,6 +156,7 @@
           "rpe": 8
         },
         {
+          "oefening_id": null,
           "fase": "kern",
           "naam": "Partijvorm 8v8 met omschakelzones",
           "doel": "Toepassen van de visie op balverlies in grotere ruimte.",
@@ -167,6 +174,7 @@
           "rpe": 7
         },
         {
+          "oefening_id": null,
           "fase": "afsluiting",
           "naam": "Uitlopen en mobiliteit",
           "doel": "Afbouwen.",
@@ -196,6 +204,7 @@
       "belasting": "laag",
       "onderdelen": [
         {
+          "oefening_id": null,
           "fase": "opwarming",
           "naam": "Reactiespelletjes",
           "doel": "Activeren en reactiesnelheid.",
@@ -213,6 +222,7 @@
           "rpe": 4
         },
         {
+          "oefening_id": null,
           "fase": "kern",
           "naam": "Sprints met afwerking",
           "doel": "Snelheid op korte afstand.",
@@ -229,6 +239,7 @@
           "rpe": 6
         },
         {
+          "oefening_id": null,
           "fase": "kern",
           "naam": "Standaardsituaties",
           "doel": "Afspraken hoekschoppen en vrije trappen.",
@@ -246,6 +257,7 @@
           "rpe": 3
         },
         {
+          "oefening_id": null,
           "fase": "afsluiting",
           "naam": "Kort uitlopen",
           "doel": "Afbouwen.",

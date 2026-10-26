@@ -92,6 +92,30 @@ export interface MatchEvaluation {
   lessen: string | null;
 }
 
+/**
+ * An exercise from the coach's own library (oefenstof) with its standard load.
+ * The staff picks from these first and scales sets to the week and match day.
+ */
+export interface LibraryExercise {
+  id: string;
+  titel: string;
+  fase: "opwarming" | "kern" | "afsluiting" | null;
+  labels: string[];
+  spelers: { min: number | null; max: number | null };
+  duur_min: number | null;
+  reeksen: number | null;
+  werk_min: number | null;
+  rust_min: number | null;
+  intensiteit: "laag" | "matig" | "hoog" | "maximaal" | null;
+  rpe: number | null;
+  organisatie: string | null;
+  verloop: string[];
+  coachingspunten: string[];
+  variaties: string[];
+  /** Whether the exercise has its own animation (then it needs no new drawing). */
+  animatie: boolean;
+}
+
 export interface RoleContext {
   weekinput: WeekInput;
   kern: SquadPlayer[];
@@ -100,6 +124,8 @@ export interface RoleContext {
   testen: TestStatus[];
   tegenstander: OpponentContext | null;
   evaluaties: MatchEvaluation[];
+  /** The coach's exercise library (only exercises the coach allows in the planning). */
+  bibliotheek: LibraryExercise[];
   /** Approved proposals of other roles for this week, by role id. */
   staf: Record<string, unknown>;
   feedback: RoleFeedback | null;

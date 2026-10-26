@@ -82,10 +82,38 @@ function context(): RoleContext {
       opstelling: { bron: "coach", datum: "2026-09-20", formatie: "4-4-2", basis: [{ post: "ST", rugnummer: 9 }], bank: [14] },
     },
     evaluaties: [],
+    bibliotheek: [],
     staf: {},
     feedback: null,
   };
 }
+
+const exercise = (over: Partial<RoleContext["bibliotheek"][number]>): RoleContext["bibliotheek"][number] => ({
+  id: "ex",
+  titel: "Oefening",
+  fase: "kern",
+  labels: [],
+  spelers: { min: null, max: null },
+  duur_min: null,
+  reeksen: null,
+  werk_min: null,
+  rust_min: null,
+  intensiteit: null,
+  rpe: null,
+  organisatie: null,
+  verloop: [],
+  coachingspunten: [],
+  variaties: [],
+  animatie: false,
+  ...over,
+});
+
+const library = () => [
+  exercise({ id: "rondo", titel: "Rondo 5v2", fase: "opwarming", duur_min: 12, intensiteit: "matig", rpe: 4 }),
+  exercise({ id: "pos", titel: "Positiespel 6v6", reeksen: 4, werk_min: 6, rust_min: 2, intensiteit: "hoog", rpe: 8, labels: ["balbezit"], coachingspunten: ["Speel de derde man"] }),
+  exercise({ id: "ssg", titel: "4v4 kleine ruimte", reeksen: 6, werk_min: 3, rust_min: 1.5, intensiteit: "maximaal", rpe: 9 }),
+  exercise({ id: "groot", titel: "11v11", spelers: { min: 18, max: 22 } }),
+];
 
 describe("match days", () => {
   it("labels days around a match, using the catalog order for priority", () => {
@@ -224,6 +252,15 @@ describe("tactical coach", () => {
     expect(output.oefeningen.map((o) => o.onderdeel)).toEqual(parts);
   });
 
+  it("does not draw parts from the coach's library", async () => {
+    const planning = (await runRole(staff, "assistant-coach", { ...context(), bibliotheek: library() }, exampleProvider)).output as {
+      dagen: { onderdelen: { naam: string; oefening_id: string | null }[] }[];
+    };
+    const own = planning.dagen.flatMap((d) => d.onderdelen.filter((o) => !o.oefening_id).map((o) => o.naam));
+    const result = await runRole(staff, "tactical-coach", { ...context(), staf: { "assistant-coach": planning } }, exampleProvider, "oefenstof");
+    expect((result.output as { oefeningen: { onderdeel: string }[] }).oefeningen.map((o) => o.onderdeel)).toEqual(own);
+  });
+
   it("needs a week planning to draw", async () => {
     await expect(runRole(staff, "tactical-coach", context(), exampleProvider, "oefenstof")).rejects.toMatchObject({
       code: "provider_error",
@@ -249,6 +286,9 @@ describe("buildRolePrompt", () => {
     expect(user).toContain('"rugnummer": 9');
     expect(system).toContain('"code": "deload"');
 
+    const withLibrary = buildRolePrompt(staff, role, { ...context(), bibliotheek: library() });
+    expect(withLibrary.user).toContain('"titel": "Positiespel 6v6"');
+
     const withStaff = buildRolePrompt(staff, role, { ...context(), staf: { "physical-coach": { weektype: "intensief" } } });
     expect(withStaff.user).toContain('"physical-coach"');
   });
@@ -271,6 +311,46 @@ describe("runRole with the example provider", () => {
     ]);
     expect(output.dagen[1]!.tijdstip).toBe("20:00");
     expect(output.individueel.map((i) => i.rugnummer)).toEqual([9]);
+  });
+
+  it("plans exercises from the coach's library, scaled to the week type and match day", async () => {
+    // Week of 2026-10-19 is a deload week; the physical coach caps MD-3 at RPE 7.
+    const physical = { dagen: [{ datum: "2026-10-22", rpe_doel: 7 }] };
+    const result = await runRole(staff, "assistant-coach", { ...context(), bibliotheek: library(), staf: { "physical-coach": physical } }, exampleProvider);
+    type Part = { oefening_id: string | null; fase: string; naam: string; duur_min: number; reeksen: number | null; werk_per_reeks: string | null; rust_tussen_reeksen: string | null; rpe: number | null; coachingspunten: string[] };
+    const days = (result.output as { dagen: { datum: string; md: string; totale_duur_min: number | null; onderdelen: Part[] }[] }).dagen;
+    const all = days.flatMap((d) => d.onderdelen);
+    // The 11v11 needs more players than available; phases match.
+    expect(all.some((p) => p.oefening_id === "groot")).toBe(false);
+    for (const p of all.filter((x) => x.oefening_id)) {
+      expect(library().find((e) => e.id === p.oefening_id)!.fase).toBe(p.fase);
+    }
+    const factor = (md: string) => staff.periodization.weektypes.find((w) => w.code === "deload")!.reeksen_factor! * (staff.matchDays.dagen.find((m) => m.code === md)?.reeksen_factor ?? 1);
+    const md3 = days.find((d) => d.md === "MD-3")!;
+    const pos = all.find((p) => p.oefening_id === "pos")!;
+    expect(pos).toMatchObject({ naam: "Positiespel 6v6", werk_per_reeks: "6 min", coachingspunten: ["Speel de derde man"] });
+    expect(pos.duur_min).toBe(Math.ceil(pos.reeksen! * 6 + (pos.reeksen! - 1) * 2));
+    expect(pos.reeksen).toBeLessThanOrEqual(Math.max(1, Math.round(4 * factor(days.find((d) => d.onderdelen.includes(pos))!.md))));
+    for (const p of md3.onderdelen) if (p.oefening_id) expect(p.rpe).toBeLessThanOrEqual(7);
+    for (const d of days) {
+      if (d.totale_duur_min) expect(d.onderdelen.reduce((s, p) => s + p.duur_min, 0)).toBeLessThanOrEqual(d.totale_duur_min);
+    }
+    // Each exercise once before any is used twice (3 usable exercises).
+    const ids = all.flatMap((p) => (p.oefening_id ? [p.oefening_id] : []));
+    expect(new Set(ids.slice(0, 2)).size).toBe(2);
+  });
+
+  it("uses exercises for any number of players when the squad is empty", async () => {
+    const result = await runRole(staff, "assistant-coach", { ...context(), kern: [], bibliotheek: [exercise({ id: "groot", spelers: { min: 18, max: 22 } })] }, exampleProvider);
+    const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
+    expect(parts.some((p) => p.oefening_id === "groot")).toBe(true);
+  });
+
+  it("keeps the example parts without a library", async () => {
+    const result = await runRole(staff, "assistant-coach", context(), exampleProvider);
+    const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
+    expect(parts.length).toBeGreaterThan(0);
+    expect(parts.every((p) => p.oefening_id === null)).toBe(true);
   });
 
   it("refuses placeholder roles", async () => {

@@ -17,6 +17,8 @@ const schema = z.object({
           uitleg: z.string().min(1),
           dagen_tot_wedstrijd: z.int().min(0).max(14).optional(),
           dagen_na_wedstrijd: z.int().min(1).max(14).optional(),
+          /** Multiplier for the number of sets of a library exercise on this day. */
+          reeksen_factor: z.number().positive().max(3).optional(),
         })
         .refine(
           (d) => (d.dagen_tot_wedstrijd === undefined) !== (d.dagen_na_wedstrijd === undefined),

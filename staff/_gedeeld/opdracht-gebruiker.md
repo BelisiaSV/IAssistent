@@ -48,6 +48,15 @@ Laatste fysieke testen van de groep en of een nieuwe test nodig is.
 
 {{testen}}
 
+# Oefenstof
+
+De eigen oefeningen van de hoofdcoach (id, titel, fase, labels, aantal spelers, organisatie,
+verloop, coachingspunten, variaties en standaardbelasting: duur, reeksen, werk en rust per reeks
+in minuten, intensiteit, RPE). `animatie` = true als de coach er een animatie van heeft. Leeg als
+de coach nog geen oefeningen heeft.
+
+{{bibliotheek}}
+
 # Staf
 
 Het werk van de andere rollen voor deze week, per rol-id: in het weekdocument wat de rollen
