@@ -3,43 +3,15 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { arc, type Projection, projection, quad } from "@/lib/animation/projection";
+import type { Animation, AnimationOverlay } from "@/lib/animation/schema";
 import { type AnimationTheme, DEFAULT_THEME, type TeamKey } from "@/lib/animation/theme";
 
-/** Keyframe: [seconds, x %, y %] (x 0 = left, y 0 = top = goal we attack). */
-type Key = [number, number, number];
+export type { Animation };
+
 type Point = [number, number];
-
-export interface Animation {
-  titel: string;
-  duur_s: number;
-  veld: { type: "volledig" | "half" | "zone"; breedte_m: number; lengte_m: number };
-  /** Part of the field to show, in % of the field (zoom). */
-  uitsnede?: { x: number; y: number; breedte: number; hoogte: number };
-  raster?: { x_m: number[]; y_m: number[] };
-  vast: Overlay[];
-  overlays: Overlay[];
-  spelers: {
-    id: string;
-    team: TeamKey;
-    /** Own colour from the source; otherwise the team colour of the theme. */
-    kleur?: string;
-    label: string | null;
-    soort: "speler" | "doelman";
-    pad: Key[];
-  }[];
-  bal: Key[];
-}
-
+type Key = [number, number, number];
 type Timed = { van?: number; tot?: number };
-type Overlay = Timed &
-  (
-    | { soort: "zone"; stijl: "licht" | "gearceerd"; x: number; y: number; breedte: number; hoogte: number; label?: string }
-    | { soort: "vlak"; stijl: "licht" | "gearceerd" | "omlijnd"; punten: Point[]; label?: string }
-    | { soort: "tekst"; x: number; y: number; tekst: string }
-    | { soort: "pijl"; pijl: "pass" | "loop" | "dribbel" | "schot"; van_x: number; van_y: number; naar_x: number; naar_y: number; buiging?: number; label?: string | null }
-    | { soort: "doel" | "minidoel" | "ballen" | "kegel"; x: number; y: number }
-  );
-
+type Overlay = AnimationOverlay;
 
 const SPEEDS = [0.5, 1, 2];
 type M = [number, number];
@@ -93,12 +65,15 @@ export function AnimatedDrawing({
   animation,
   theme = DEFAULT_THEME,
   logoUrl,
+  logoOn = [],
   autoPlay = false,
   labels,
 }: {
   animation: Animation;
   theme?: AnimationTheme;
+  /** Team logo: shown in the corner, and on the tokens of the teams in `logoOn`. */
   logoUrl?: string | null;
+  logoOn?: TeamKey[];
   autoPlay?: boolean;
   labels: { play: string; pause: string; restart: string; speed: string };
 }) {
@@ -160,7 +135,7 @@ export function AnimatedDrawing({
     .map((p) => {
       const q = m(...position(p.pad, t));
       const color = p.kleur ?? (p.soort === "doelman" ? theme.doelman[p.team] : undefined) ?? theme.teams[p.team];
-      return { id: p.id, q, color, label: p.label };
+      return { id: p.id, q, color, label: p.label, logo: logoUrl && logoOn.includes(p.team) ? logoUrl : null };
     })
     // Far tokens first, so near ones overlap them.
     .sort((a, b) => a.q[1] - b.q[1]);
@@ -224,7 +199,7 @@ export function AnimatedDrawing({
           ))}
 
           {tokens.map((tk) => (
-            <Token key={tk.id} at={pr.p(...tk.q)} s={pr.scale(...tk.q)} color={tk.color} label={tk.label} ctx={ctx} />
+            <Token key={tk.id} id={tk.id} at={pr.p(...tk.q)} s={pr.scale(...tk.q)} color={tk.color} label={tk.label} logo={tk.logo} ctx={ctx} />
           ))}
 
           <Ball at={pr.p(...ballM)} r={u * 0.55 * pr.scale(...ballM)} uid={uid} />
@@ -280,10 +255,29 @@ export function AnimatedDrawing({
 }
 
 /** A player as an upright glossy token with thickness; smaller further away. */
-function Token({ at, s, color, label, ctx }: { at: { x: number; y: number }; s: number; color: string; label: string | null; ctx: Ctx }) {
+function Token({
+  id,
+  at,
+  s,
+  color,
+  label,
+  logo,
+  ctx,
+}: {
+  id: string;
+  at: { x: number; y: number };
+  s: number;
+  color: string;
+  label: string | null;
+  logo: string | null;
+  ctx: Ctx;
+}) {
   const { u, uid } = ctx;
   const r = u * 1.05 * s;
   const depth = r * 0.28;
+  // With a logo, the number moves to the lower half of the token.
+  const logoSize = label ? r * 0.95 : r * 1.3;
+  const logoY = label ? at.y - r * 0.32 : at.y;
   return (
     <g filter={`url(#shadow-${uid})`}>
       <ellipse cx={at.x} cy={at.y + depth} rx={r} ry={r * 0.92} fill={shade(color, -0.45)} />
@@ -292,11 +286,27 @@ function Token({ at, s, color, label, ctx }: { at: { x: number; y: number }; s: 
       <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={`url(#metal-${uid})`} />
       <ellipse cx={at.x} cy={at.y} rx={r * 0.78} ry={r * 0.7} fill="none" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={r * 0.06} />
       <ellipse cx={at.x - r * 0.25} cy={at.y - r * 0.38} rx={r * 0.45} ry={r * 0.2} fill="#ffffff" fillOpacity={0.45} />
+      {logo && (
+        <>
+          <clipPath id={`logo-${uid}-${id}`}>
+            <circle cx={at.x} cy={logoY} r={logoSize / 2} />
+          </clipPath>
+          <image
+            href={logo}
+            x={at.x - logoSize / 2}
+            y={logoY - logoSize / 2}
+            width={logoSize}
+            height={logoSize}
+            preserveAspectRatio="xMidYMid meet"
+            clipPath={`url(#logo-${uid}-${id})`}
+          />
+        </>
+      )}
       {label && (
         <text
           x={at.x}
-          y={at.y + r * 0.04}
-          fontSize={r * (label.length > 2 ? 0.7 : 0.9)}
+          y={logo ? at.y + r * 0.45 : at.y + r * 0.04}
+          fontSize={r * (logo ? 0.55 : label.length > 2 ? 0.7 : 0.9)}
           fontWeight={800}
           fill={isLight(color) ? "#18181b" : "#ffffff"}
           textAnchor="middle"

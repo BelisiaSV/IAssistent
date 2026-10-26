@@ -226,5 +226,15 @@ Regels:
   (`competition_start_date` + `periodization_weeks`), elk met een eigen cyclus van 4/6/8 weken
   (`weekPeriodization(weekStart, SeasonPlan, catalog)` in de staff-engine). Afwijkende weken pas je
   enkel in de weekinput aan.
+- **Oefenstof** (`/exercises`) — persoonlijke bibliotheek van de coach (`exercises`, RLS op
+  `coach_id`, zoals het visieprofiel): naam, fase, labels, spelers, duur, organisatie, verloop,
+  coachingspunten, variaties, een **animatie** (JSON, `apps/web/src/lib/animation/schema.ts`) en een
+  **video** (privé bucket `exercise-videos`, pad `<coach_id>/<exercise_id>/<bestand>`, max. 50 MB,
+  rechtstreeks vanuit de browser opgeladen via een signed upload URL). De animatiespeler
+  (`components/proposals/animated-drawing.tsx`) tekent in perspectief (`lib/animation/projection.ts`)
+  met 3D-schijfjes; stijl, kleuren en logo op de schijfjes per team in `teams.animation_settings`
+  (Instellingen → Weergave van animaties, `lib/animation/team-theme.ts`). Video's omzetten naar een
+  animatie gebeurt nog buiten de app (importeren als .json); automatisch omzetten komt in de
+  videodienst.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.
