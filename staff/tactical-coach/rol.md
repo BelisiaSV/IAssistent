@@ -1,7 +1,7 @@
 ---
 id: tactical-coach
 naam: Tactical Coach
-versie: 0.3.0
+versie: 0.4.0
 status: concept
 ---
 
@@ -34,6 +34,8 @@ oefenvormen die meteen bruikbaar zijn.
 - De tegenstandersfiche: formatie, speelstijl, sterktes, zwaktes, standaardsituaties, notities en
   hun laatst gekende opstelling (rugnummers per post en bank, geen namen).
 - De wedstrijdevaluaties van de vorige weken.
+- De oefenstof van de hoofdcoach, met zijn eigen standaardsituaties (type, teken, rollen met
+  vereisten).
 - Voor taak 2: de weekplanning van de Assistent Coach en het belastingsplan van de Physical Coach
   uit hetzelfde weekdocument.
 - Voor taak 3: het goedgekeurde weekdocument (tactisch weekplan en belastingsplan) en de

@@ -7,8 +7,9 @@ import { z } from "zod";
 
 import { requireUser } from "@/lib/auth";
 import { parseAnimation } from "@/lib/animation/schema";
-import { exerciseFormSchema, VIDEO_MAX_BYTES, VIDEO_TYPES, videoExtension } from "@/lib/exercises/validation";
+import { exerciseFormSchema, SET_PIECE_TYPES, VIDEO_MAX_BYTES, VIDEO_TYPES, videoExtension } from "@/lib/exercises/validation";
 import { messages } from "@/lib/messages";
+import type { SetPiece } from "@/lib/proposals/types";
 import { createClient } from "@/lib/supabase/server";
 
 export type ExerciseFormState = { error?: string; success?: string };
@@ -20,6 +21,10 @@ const path = (id?: string) => `/exercises${id ? `/${id}` : ""}`;
 
 function parseForm(formData: FormData) {
   return exerciseFormSchema.safeParse({
+    kind: String(formData.get("kind") ?? "exercise"),
+    setPieceType: String(formData.get("setPieceType") ?? ""),
+    signal: String(formData.get("signal") ?? ""),
+    roles: String(formData.get("roles") ?? ""),
     title: String(formData.get("title") ?? ""),
     phase: String(formData.get("phase") ?? ""),
     labels: String(formData.get("labels") ?? ""),
@@ -40,18 +45,23 @@ function parseForm(formData: FormData) {
 }
 
 function columns(v: NonNullable<ReturnType<typeof parseForm>["data"]>) {
+  const setPiece = v.kind === "set_piece";
   return {
+    kind: v.kind,
+    set_piece_type: setPiece ? v.setPieceType : null,
+    signal: setPiece ? v.signal : null,
+    roles: setPiece ? v.roles : [],
     title: v.title,
-    phase: v.phase,
+    phase: setPiece ? null : v.phase,
     labels: v.labels,
     min_players: v.minPlayers,
     max_players: v.maxPlayers,
     duration_min: v.duration,
-    sets: v.sets,
-    work_min: v.workMin,
-    rest_min: v.restMin,
-    intensity: v.intensity,
-    rpe: v.rpe,
+    sets: setPiece ? null : v.sets,
+    work_min: setPiece ? null : v.workMin,
+    rest_min: setPiece ? null : v.restMin,
+    intensity: setPiece ? null : v.intensity,
+    rpe: setPiece ? null : v.rpe,
     use_in_planning: v.useInPlanning,
     organisation: v.organisation,
     course: v.course,
@@ -199,4 +209,43 @@ export async function removeVideo(formData: FormData) {
   await supabase.storage.from(EXERCISE_VIDEOS_BUCKET).remove([exercise.video_path]);
   await supabase.from("exercises").update({ video_path: null }).eq("id", exerciseId);
   revalidatePath(path(exerciseId));
+}
+
+/**
+ * Saves a set piece the staff proposed (week plan or match preparation) in the
+ * coach's library, so the staff can use it again; the coach completes it after.
+ */
+export async function saveSetPieceToLibrary(formData: FormData) {
+  const input = z
+    .object({ runId: uuid, step: z.enum(["tc", "match"]), index: z.coerce.number().int().min(0).max(30) })
+    .safeParse({ runId: formData.get("runId"), step: formData.get("step"), index: formData.get("index") });
+  if (!input.success) return;
+  await requireUser();
+  const supabase = await createClient();
+  const { data: proposal } = await supabase
+    .from("staff_proposals")
+    .select("output")
+    .eq("run_id", input.data.runId)
+    .eq("step", input.data.step)
+    .maybeSingle();
+  const setPiece = (proposal?.output as { standaardsituaties?: SetPiece[] } | null)?.standaardsituaties?.[input.data.index];
+  if (!setPiece || !SET_PIECE_TYPES.includes(setPiece.soort)) return;
+
+  const { data, error } = await supabase
+    .from("exercises")
+    .insert({
+      kind: "set_piece",
+      set_piece_type: setPiece.soort,
+      title: setPiece.titel.slice(0, 120),
+      course: setPiece.afspraken.slice(0, 30).map((a) => a.slice(0, 300)),
+      roles: setPiece.taken.slice(0, 15).map((t) => ({ rol: t.taak.slice(0, 80), vereiste: null })),
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    console.error("saveSetPieceToLibrary failed", error);
+    return;
+  }
+  revalidatePath(path());
+  redirect(`${path(data.id)}/edit`);
 }

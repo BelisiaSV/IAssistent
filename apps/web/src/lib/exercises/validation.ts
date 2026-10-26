@@ -22,12 +22,35 @@ const lines = (max: number) =>
     .transform((v) => v.split("\n").map((l) => l.trim()).filter(Boolean))
     .pipe(z.array(z.string().max(300, e.tooLong)).max(max, e.tooMany));
 
+/** Set piece types: the codes the Tactical Coach uses (labels in messages). */
+export const SET_PIECE_TYPES = Object.keys(messages.matchPlan.setPieceKind) as [string, ...string[]];
+
+/** "Nemer – linksvoetig" → { rol: "Nemer", vereiste: "linksvoetig" } (also "-" or ":"). */
+export function parseRole(line: string): { rol: string; vereiste: string | null } {
+  const [rol, ...rest] = line.split(/\s+[–-]\s+|:\s*/);
+  const vereiste = rest.join(" – ").trim();
+  return { rol: rol!.trim(), vereiste: vereiste || null };
+}
+
 export const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-matroska"] as const;
 export const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 
 /** The exercise form (all fields as strings, lists as one item per line). */
 export const exerciseFormSchema = z
   .object({
+    kind: z.enum(["exercise", "set_piece"]),
+    setPieceType: z.union([z.literal("").transform(() => null), z.enum(SET_PIECE_TYPES, e.setPieceType)]),
+    signal: z
+      .string()
+      .trim()
+      .max(80, e.tooLong)
+      .transform((v) => (v === "" ? null : v)),
+    roles: z
+      .string()
+      .max(3000, e.tooLong)
+      .transform((v) => v.split("\n").map((l) => l.trim()).filter(Boolean))
+      .pipe(z.array(z.string().max(80, e.roles)).max(15, e.roles))
+      .transform((lines) => lines.map(parseRole)),
     title: z.string().trim().min(1, e.title).max(120, e.title),
     phase: z.union([z.literal("").transform(() => null), z.enum(["opwarming", "kern", "afsluiting"])]),
     labels: z
@@ -53,7 +76,8 @@ export const exerciseFormSchema = z
     coaching: lines(30),
     variations: lines(30),
   })
-  .refine((v) => v.minPlayers === null || v.maxPlayers === null || v.minPlayers <= v.maxPlayers, { message: e.players, path: ["minPlayers"] });
+  .refine((v) => v.minPlayers === null || v.maxPlayers === null || v.minPlayers <= v.maxPlayers, { message: e.players, path: ["minPlayers"] })
+  .refine((v) => v.kind === "exercise" || v.setPieceType !== null, { message: e.setPieceType, path: ["setPieceType"] });
 export type ExerciseForm = z.output<typeof exerciseFormSchema>;
 
 /** File extension for an allowed video type. */

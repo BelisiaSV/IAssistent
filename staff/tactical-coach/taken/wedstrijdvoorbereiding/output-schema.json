@@ -68,6 +68,7 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "standaardsituatie_id",
           "titel",
           "soort",
           "afspraken",
@@ -75,6 +76,13 @@
           "tekening"
         ],
         "properties": {
+          "standaardsituatie_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Overgenomen uit het weekplan: id uit de oefenstof van de coach, of null."
+          },
           "titel": {
             "type": "string"
           },

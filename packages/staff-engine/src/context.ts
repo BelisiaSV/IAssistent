@@ -98,6 +98,8 @@ export interface MatchEvaluation {
  */
 export interface LibraryExercise {
   id: string;
+  /** "oefening" for the training planning, "standaardsituatie" for the Tactical Coach. */
+  soort: "oefening" | "standaardsituatie";
   titel: string;
   fase: "opwarming" | "kern" | "afsluiting" | null;
   labels: string[];
@@ -114,6 +116,12 @@ export interface LibraryExercise {
   variaties: string[];
   /** Whether the exercise has its own animation (then it needs no new drawing). */
   animatie: boolean;
+  /** Only for a set piece: its type (code), signal and roles; players are filled in per week. */
+  standaardsituatie: {
+    type: string;
+    teken: string | null;
+    rollen: { rol: string; vereiste: string | null }[];
+  } | null;
 }
 
 export interface RoleContext {

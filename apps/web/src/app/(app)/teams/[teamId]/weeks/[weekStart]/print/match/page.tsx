@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LineupPitch, SetPieceCard } from "@/components/proposals/tactical-views";
+import { loadWeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
 import { shirtNames, withShirtNames } from "@/lib/proposals/names";
 import { matchTalkToText } from "@/lib/proposals/text";
@@ -30,7 +31,7 @@ export default async function PrintMatchPage({
   const { teamId, weekStart } = await params;
   const { v, part } = await searchParams;
   if (!isIsoDate(weekStart) || isoWeekday(weekStart) !== 1) notFound();
-  const { team } = await getTeamContext(teamId);
+  const { team, logoUrl } = await getTeamContext(teamId);
 
   const supabase = await createClient();
   const { data: week } = await supabase
@@ -64,6 +65,7 @@ export default async function PrintMatchPage({
   const opponent = ((week.matches ?? []) as WeekMatch[]).toSorted((a, b) => a.date.localeCompare(b.date))[0]?.opponent;
 
   const output = proposal.output as unknown as MatchPrepOutput;
+  const library = await loadWeekExercises(supabase, [proposal.output], team, logoUrl);
   const names = shirtNames(players ?? []);
   const n = (text: string) => withShirtNames(text, names);
   const title = [team.club_name, opponent].filter(Boolean).join(" – ");
@@ -90,7 +92,7 @@ export default async function PrintMatchPage({
         {output.standaardsituaties.map((sp, i) => (
           <div key={i} className="break-after-page print:min-h-[270mm]">
             <p className="mb-2 text-sm text-slate-500">{title}</p>
-            <SetPieceCard setPiece={sp} names={names} large />
+            <SetPieceCard setPiece={sp} names={names} large library={library} />
           </div>
         ))}
       </div>

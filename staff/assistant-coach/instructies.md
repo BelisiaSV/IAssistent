@@ -30,7 +30,8 @@
    en MD+1/MD+2.
 5. **Oefenstof van de coach eerst.** Onder "Oefenstof" krijg je de eigen oefeningen van de
    hoofdcoach (met fase, labels, aantal spelers, organisatie, verloop, coachingspunten en een
-   standaardbelasting). Kies per onderdeel eerst een oefening uit die lijst die past bij de fase,
+   standaardbelasting). Gebruik alleen items met `soort` "oefening"; de standaardsituaties zijn
+   voor de Tactical Coach. Kies per onderdeel eerst een oefening uit die lijst die past bij de fase,
    het label van de dag, het tactisch accent en het aantal beschikbare spelers, en zet haar `id`
    in `oefening_id`. Neem dan naam, organisatie en coachingspunten van de oefening over en pas
    alleen de belasting aan:
