@@ -346,6 +346,14 @@ describe("runRole with the example provider", () => {
     expect(parts.some((p) => p.oefening_id === "groot")).toBe(true);
   });
 
+  it("uses an exercise once per training", async () => {
+    const one = exercise({ id: "pos", reeksen: 4, werk_min: 3, rust_min: 1 });
+    const result = await runRole(staff, "assistant-coach", { ...context(), bibliotheek: [one] }, exampleProvider);
+    for (const day of (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen) {
+      expect(day.onderdelen.filter((p) => p.oefening_id === "pos").length).toBeLessThanOrEqual(1);
+    }
+  });
+
   it("keeps the example parts without a library", async () => {
     const result = await runRole(staff, "assistant-coach", context(), exampleProvider);
     const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);

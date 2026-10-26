@@ -88,11 +88,14 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
     const factor = weekFactor * (staff.matchDays.dagen.find((m) => m.code === d.md)?.reeksen_factor ?? 1);
     const maxRpe = physical?.dagen?.find((x) => x.datum === d.datum)?.rpe_doel ?? null;
 
+    const today = new Set<string>();
     const parts: (Part & { _ex?: LibraryExercise })[] = (d.onderdelen as Part[]).map((part) => {
-      const candidates = usable.filter((e) => e.fase === part.fase || e.fase === null);
+      // Never the same exercise twice in one training.
+      const candidates = usable.filter((e) => (e.fase === part.fase || e.fase === null) && !today.has(e.id));
       if (!candidates.length) return { ...part, oefening_id: null };
       const exercise = [...candidates].sort((a, b) => (used.get(a.id) ?? 0) - (used.get(b.id) ?? 0))[0]!;
       used.set(exercise.id, (used.get(exercise.id) ?? 0) + 1);
+      today.add(exercise.id);
       return libraryPart(part, exercise, factor, maxRpe);
     });
 
