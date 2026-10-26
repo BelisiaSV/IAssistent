@@ -73,8 +73,9 @@ type Part = Record<string, unknown> & { fase: string; duur_min: number; reeksen:
  * Parts without a fitting exercise keep the example (oefening_id null).
  */
 function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Example[] {
+  // Without a squad there is nothing to check the number of players against.
   const players = context.kern.filter((p) => p.beschikbaar).length;
-  const usable = context.bibliotheek.filter((e) => e.spelers.min === null || e.spelers.min <= players);
+  const usable = context.bibliotheek.filter((e) => !players || e.spelers.min === null || e.spelers.min <= players);
   if (!usable.length) return days.map((d) => (Array.isArray(d.onderdelen) ? { ...d, onderdelen: (d.onderdelen as Part[]).map((o) => ({ ...o, oefening_id: null })) } : d));
 
   const weekFactor = context.weekinput.periodisering.weektype?.reeksen_factor ?? 1;

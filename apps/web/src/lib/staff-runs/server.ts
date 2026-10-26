@@ -165,7 +165,7 @@ export async function advanceRun(
   if (!claimed.length) return null;
 
   return async () => {
-    const [data, { data: profile }, { data: exercises }, previousRun] = await Promise.all([
+    const [data, { data: profile }, { data: exercises, error: libraryError }, previousRun] = await Promise.all([
       loadWeek(supabase, input.team, input.weekStart),
       supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", input.coachId).maybeSingle(),
       // The coach's own library (RLS: own exercises only).
@@ -179,6 +179,8 @@ export async function advanceRun(
         ? supabase.from("staff_proposals").select("step, output").eq("run_id", run.based_on).then((r) => r.data ?? [])
         : Promise.resolve([]),
     ]);
+    // Without the library the staff still plans, but the coach should know why.
+    if (libraryError) console.error("staff run: exercise library could not be loaded", libraryError);
     const provider = getStaffProvider();
 
     await Promise.all(

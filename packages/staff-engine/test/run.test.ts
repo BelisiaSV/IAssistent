@@ -340,6 +340,12 @@ describe("runRole with the example provider", () => {
     expect(new Set(ids.slice(0, 2)).size).toBe(2);
   });
 
+  it("uses exercises for any number of players when the squad is empty", async () => {
+    const result = await runRole(staff, "assistant-coach", { ...context(), kern: [], bibliotheek: [exercise({ id: "groot", spelers: { min: 18, max: 22 } })] }, exampleProvider);
+    const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
+    expect(parts.some((p) => p.oefening_id === "groot")).toBe(true);
+  });
+
   it("keeps the example parts without a library", async () => {
     const result = await runRole(staff, "assistant-coach", context(), exampleProvider);
     const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
