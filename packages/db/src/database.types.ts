@@ -443,6 +443,7 @@ export type Database = {
           competition_start_date: string | null;
           preparation_start_date: string | null;
           preparation_weeks: number;
+          animation_settings: Json;
           periodization_weeks: number;
           archived_at: string | null;
           created_at: string;
@@ -462,6 +463,7 @@ export type Database = {
           competition_start_date?: string | null;
           preparation_start_date?: string | null;
           preparation_weeks?: number;
+          animation_settings?: Json;
           periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
@@ -481,6 +483,7 @@ export type Database = {
           competition_start_date?: string | null;
           preparation_start_date?: string | null;
           preparation_weeks?: number;
+          animation_settings?: Json;
           periodization_weeks?: number;
           archived_at?: string | null;
           created_at?: string;
@@ -934,6 +937,71 @@ export type Database = {
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      exercises: {
+        Row: {
+          id: string;
+          coach_id: string;
+          title: string;
+          phase: "opwarming" | "kern" | "afsluiting" | null;
+          labels: string[];
+          min_players: number | null;
+          max_players: number | null;
+          duration_min: number | null;
+          organisation: string | null;
+          course: string[];
+          coaching_points: string[];
+          variations: string[];
+          animation: Json | null;
+          video_path: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          coach_id?: string;
+          title: string;
+          phase?: "opwarming" | "kern" | "afsluiting" | null;
+          labels?: string[];
+          min_players?: number | null;
+          max_players?: number | null;
+          duration_min?: number | null;
+          organisation?: string | null;
+          course?: string[];
+          coaching_points?: string[];
+          variations?: string[];
+          animation?: Json | null;
+          video_path?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          coach_id?: string;
+          title?: string;
+          phase?: "opwarming" | "kern" | "afsluiting" | null;
+          labels?: string[];
+          min_players?: number | null;
+          max_players?: number | null;
+          duration_min?: number | null;
+          organisation?: string | null;
+          course?: string[];
+          coaching_points?: string[];
+          variations?: string[];
+          animation?: Json | null;
+          video_path?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "exercises_coach_id_fkey";
+            columns: ["coach_id"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
             referencedColumns: ["id"];
           },
         ];
