@@ -61,7 +61,40 @@ function fitWeek(example: Example, context: RoleContext, staff: Staff): Example 
   // Keep the week type of this week when the role reports one (Physical Coach).
   const weektype = context.weekinput.periodisering.weektype?.code;
   const extra = "weektype" in example && weektype ? { weektype } : {};
-  return { ...example, ...extra, dagen: fromLibrary(dagen, context, staff), individueel: fitIndividual(example, context) };
+  const withSetPieces = setPieceTraining(dagen, days, context);
+  return { ...example, ...extra, dagen: fromLibrary(withSetPieces, context, staff), individueel: fitIndividual(example, context) };
+}
+
+type SetPiecePart = Record<string, unknown> & { fase: string; standaardsituaties?: string[] };
+
+/**
+ * Assistant Coach: the set pieces of the Tactical Coach's week plan are trained
+ * in the example's set-piece part (a part with titles in `standaardsituaties`).
+ * When the week has no training with such a part, it replaces the last kern
+ * part of the last training before the match.
+ */
+function setPieceTraining(days: Example[], exampleDays: Day[], context: RoleContext): Example[] {
+  const plan = context.staf["tactical-coach"] as { standaardsituaties?: { titel: string }[] } | undefined;
+  const titles = plan?.standaardsituaties?.map((s) => s.titel) ?? [];
+  const parts = (d: Example) => (Array.isArray(d.onderdelen) ? (d.onderdelen as SetPiecePart[]) : null);
+  const isSetPiecePart = (p: SetPiecePart) => (p.standaardsituaties?.length ?? 0) > 0;
+  // Without a week plan there are no set pieces to train: the example's titles do not apply.
+  const result = days.map((d) => {
+    const list = parts(d);
+    return list ? { ...d, onderdelen: list.map((p) => (isSetPiecePart(p) ? { ...p, standaardsituaties: titles } : p)) } : d;
+  });
+  if (!titles.length || result.some((d) => parts(d)?.some(isSetPiecePart))) return result;
+
+  const template = exampleDays.flatMap((d) => parts(d) ?? []).find(isSetPiecePart);
+  const match = context.weekinput.dagen.find((d) => d.wedstrijd)?.datum ?? null;
+  const target = [...result]
+    .reverse()
+    .find((d) => d.soort === "training" && (!match || (d.datum as string) < match) && parts(d)?.some((p) => p.fase === "kern"));
+  if (!template || !target) return result;
+  const list = parts(target)!;
+  const last = list.map((p) => p.fase).lastIndexOf("kern");
+  target.onderdelen = list.map((p, i) => (i === last ? { ...template, standaardsituaties: titles } : p));
+  return result;
 }
 
 type Part = Record<string, unknown> & { fase: string; duur_min: number; reeksen: number | null; rpe: number | null; oefening_id?: string | null };
@@ -92,6 +125,8 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
     const maxRpe = physical?.dagen?.find((x) => x.datum === d.datum)?.rpe_doel ?? null;
 
     const parts: (Part & { _ex?: LibraryExercise })[] = (d.onderdelen as Part[]).map((part) => {
+      // The set-piece part trains the Tactical Coach's set pieces, not a library exercise.
+      if (((part.standaardsituaties as string[] | undefined)?.length ?? 0) > 0) return { ...part, oefening_id: null };
       const exercise = usable.find((e) => (e.fase === part.fase || e.fase === null) && !used.has(e.id));
       if (!exercise) return { ...part, oefening_id: null };
       used.add(exercise.id);
@@ -267,7 +302,12 @@ function fitMatchPrep(example: Example, context: RoleContext, staff: Staff): Exa
 /** Tactical Coach drawings: one drawing per part of the approved Assistant Coach planning. */
 function fitDrawings(example: Example, context: RoleContext): Example {
   const planning = context.staf["assistant-coach"] as
-    | { dagen?: { datum: string; onderdelen?: { oefening_id?: string | null; naam: string; fase: string; organisatie: string; coachingspunten: string[] }[] }[] }
+    | {
+        dagen?: {
+          datum: string;
+          onderdelen?: { oefening_id?: string | null; standaardsituaties?: string[]; naam: string; fase: string; organisatie: string; coachingspunten: string[] }[];
+        }[];
+      }
     | undefined;
   if (!planning?.dagen) {
     throw new StaffGenerationError("provider_error", "no week planning of the Assistant Coach");
@@ -275,7 +315,7 @@ function fitDrawings(example: Example, context: RoleContext): Example {
   const drawings = example.oefeningen as (Example & { onderdeel: string; fase: string; tekening: Example })[];
   const counters = new Map<string, number>();
   const oefeningen = planning.dagen.flatMap((day) =>
-    (day.onderdelen ?? []).filter((part) => !part.oefening_id).map((part) => {
+    (day.onderdelen ?? []).filter((part) => !part.oefening_id && !part.standaardsituaties?.length).map((part) => {
       const sameName = drawings.find((d) => d.onderdeel === part.naam);
       const sameFase = drawings.filter((d) => d.fase === part.fase);
       const n = counters.get(part.fase) ?? 0;

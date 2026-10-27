@@ -7,7 +7,7 @@ import { Alert, Button } from "@/components/ui";
 import { messages } from "@/lib/messages";
 import type { RunKind } from "@/lib/roles";
 
-import { continueRun, type FormState, requestRun } from "../actions";
+import { continueRun, deleteRunAction, type FormState, requestRun } from "../actions";
 
 const m = messages.proposals;
 const r = messages.staffRun;
@@ -186,5 +186,24 @@ export function StepList({ steps }: { steps: { key: string; name: string; status
         </li>
       ))}
     </ol>
+  );
+}
+
+/** Removes a version after the head coach confirms. */
+export function DeleteRunButton({ teamId, weekStart, runId }: { teamId: string; weekStart: string; runId: string }) {
+  return (
+    <form
+      action={deleteRunAction}
+      onSubmit={(event) => {
+        if (!window.confirm(r.deleteConfirm)) event.preventDefault();
+      }}
+    >
+      <input type="hidden" name="teamId" value={teamId} />
+      <input type="hidden" name="weekStart" value={weekStart} />
+      <input type="hidden" name="runId" value={runId} />
+      <Button type="submit" variant="secondary">
+        {r.deleteVersion}
+      </Button>
+    </form>
   );
 }

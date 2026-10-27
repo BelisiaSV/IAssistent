@@ -289,9 +289,9 @@ describe("tactical coach", () => {
 
   it("does not draw parts from the coach's library", async () => {
     const planning = (await runRole(staff, "assistant-coach", { ...context(), bibliotheek: library() }, exampleProvider)).output as {
-      dagen: { onderdelen: { naam: string; oefening_id: string | null }[] }[];
+      dagen: { onderdelen: { naam: string; oefening_id: string | null; standaardsituaties: string[] }[] }[];
     };
-    const own = planning.dagen.flatMap((d) => d.onderdelen.filter((o) => !o.oefening_id).map((o) => o.naam));
+    const own = planning.dagen.flatMap((d) => d.onderdelen.filter((o) => !o.oefening_id && !o.standaardsituaties.length).map((o) => o.naam));
     const result = await runRole(staff, "tactical-coach", { ...context(), staf: { "assistant-coach": planning } }, exampleProvider, "oefenstof");
     expect((result.output as { oefeningen: { onderdeel: string }[] }).oefeningen.map((o) => o.onderdeel)).toEqual(own);
   });
@@ -387,6 +387,26 @@ describe("runRole with the example provider", () => {
     const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
     expect(parts.filter((p) => p.oefening_id === "pos")).toHaveLength(1);
     expect(parts.filter((p) => p.oefening_id === null).length).toBeGreaterThan(0);
+  });
+
+  it("trains the Tactical Coach's set pieces on the last training before the match", async () => {
+    const plan = { standaardsituaties: [{ titel: "Corner kort" }, { titel: "Vrije trap verdedigend" }] };
+    const titlesOf = async (dagen: RoleContext["weekinput"]["dagen"], staf: Record<string, unknown>) => {
+      const ctx = { ...context(), weekinput: { ...context().weekinput, dagen }, staf, bibliotheek: [exercise({ id: "pos" })] };
+      const result = await runRole(staff, "assistant-coach", ctx, exampleProvider);
+      return (result.output as { dagen: { datum: string; onderdelen: { oefening_id: string | null; standaardsituaties: string[] }[] }[] }).dagen.flatMap((d) =>
+        d.onderdelen.filter((p) => p.standaardsituaties.length).map((p) => ({ datum: d.datum, titels: p.standaardsituaties, oefening_id: p.oefening_id })),
+      );
+    };
+    // The default week (MD+2 and MD-3) has no MD-2 training: the set pieces go to the last training.
+    expect(await titlesOf(context().weekinput.dagen, { "tactical-coach": plan })).toEqual([
+      { datum: "2026-10-22", titels: ["Corner kort", "Vrije trap verdedigend"], oefening_id: null },
+    ]);
+    // With an MD-2 training, its set-piece part is used.
+    const withMd2 = context().weekinput.dagen.map((d) => (d.md === "MD-2" ? { ...d, training: { aanvang: "20:00", duur_min: 75 } } : d));
+    expect((await titlesOf(withMd2, { "tactical-coach": plan })).map((x) => x.datum)).toEqual(["2026-10-23"]);
+    // Without a week plan of the Tactical Coach there are no set pieces to train.
+    expect(await titlesOf(withMd2, {})).toEqual([]);
   });
 
   it("keeps the example parts without a library", async () => {

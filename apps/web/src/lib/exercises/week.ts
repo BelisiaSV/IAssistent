@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Json, Tables } from "@iassistent/db";
+import { EXERCISE_VIDEOS_BUCKET, type Json, type Tables } from "@iassistent/db";
 
 import { type Animation, parseAnimation } from "@/lib/animation/schema";
 import { themeForTeam } from "@/lib/animation/team-theme";
@@ -15,6 +15,8 @@ export interface WeekExercise {
   variations: string[];
   animation: Animation | null;
   hasVideo: boolean;
+  /** Signed URL of the coach's video (valid for an hour), if any. */
+  videoUrl: string | null;
   signal: string | null;
 }
 
@@ -58,6 +60,11 @@ export async function loadWeekExercises(
   const { data } = ids.length
     ? await supabase.from("exercises").select("id, title, course, variations, animation, video_path, signal").in("id", ids)
     : { data: [] };
+  const paths = (data ?? []).flatMap((e) => (e.video_path ? [e.video_path] : []));
+  const { data: signed } = paths.length
+    ? await supabase.storage.from(EXERCISE_VIDEOS_BUCKET).createSignedUrls(paths, 3600)
+    : { data: [] };
+  const videoUrl = (path: string | null) => (path ? (signed ?? []).find((s) => s.path === path)?.signedUrl ?? null : null);
   const items = new Map(
     (data ?? []).map((e) => [
       e.id,
@@ -68,6 +75,7 @@ export async function loadWeekExercises(
         variations: e.variations,
         animation: e.animation ? parseAnimation(e.animation) : null,
         hasVideo: e.video_path !== null,
+        videoUrl: videoUrl(e.video_path),
         signal: e.signal,
       },
     ]),

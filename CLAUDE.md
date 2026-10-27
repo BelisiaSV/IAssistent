@@ -220,6 +220,9 @@ Regels:
   wordt gekopieerd via `based_on`). De wedstrijdvoorbereiding (run `match`) kan pas na het
   goedgekeurde weekdocument en vanaf de dag van de laatste training. Weekdocument en
   wedstrijdvoorbereiding zijn afdrukbaar. De daglimiet (`staff_daily_limit()`) telt runs.
+  De hoofdcoach kan versies verwijderen (`staff_runs.deleted_at`, soft delete: blijft meetellen
+  voor de daglimiet, nooit de goedgekeurde of een lopende versie, definitief; trigger
+  `before_staff_run_update`). De app toont verwijderde runs en hun voorstellen nergens.
 - **Teaminstellingen** (`/teams/[id]/settings`) — vaste trainingsdagen (`teams.training_schedule`,
   elke nieuwe week neemt ze over; optioneel ook toepassen op open weken zonder weekdocument) en
   seizoensplanning: voorbereiding (`preparation_start_date` + `preparation_weeks`) en competitie
@@ -249,6 +252,8 @@ Regels:
   teken (`signal`) en rollen met vereisten (`roles`, `[{ rol, vereiste }]`), zonder spelers. De
   Tactical Coach kiest eerst uit de eigen standaardsituaties (`standaardsituaties[].standaardsituatie_id`)
   en vult de rollen elke week in; hoogstens één nieuw voorstel (id null), dat de coach met
-  "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen.
+  "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen en
+  traint de standaardsituaties van het weekplan in een eigen onderdeel op de laatste training vóór
+  de wedstrijd (`onderdelen[].standaardsituaties` = titels); dat onderdeel wordt niet getekend.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

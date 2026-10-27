@@ -43,14 +43,14 @@ export async function loadWeek(supabase: Supabase, team: SeasonTeam, weekStart: 
       supabase.from("fitness_tests").select("player_id, test_code, test_date, result").eq("team_id", team.id),
       supabase
         .from("week_plans")
-        .select("week_start, staff_proposals(role, task, status, version, output)")
+        .select("week_start, staff_proposals(role, task, status, version, output, staff_runs(deleted_at))")
         .eq("team_id", team.id)
         .gte("week_start", historyStart)
         .lt("week_start", weekStart)
         .order("week_start", { ascending: true }),
     ]);
 
-  const [proposals, runs] = week
+  const [allProposals, runs] = week
     ? await Promise.all([
         supabase
           .from("staff_proposals")
@@ -62,10 +62,14 @@ export async function loadWeek(supabase: Supabase, team: SeasonTeam, weekStart: 
           .from("staff_runs")
           .select("*")
           .eq("week_plan_id", week.id)
+          // Versions the head coach removed are hidden everywhere.
+          .is("deleted_at", null)
           .order("version", { ascending: false })
           .then((r) => r.data ?? []),
       ])
     : [[], []];
+  // Proposals of removed versions are hidden too (older proposals have no run).
+  const proposals = allProposals.filter((p) => !p.run_id || runs.some((r) => r.id === p.run_id));
 
   const season = seasonPlan(team);
   const periodization = weekPeriodization(weekStart, season, periodizationCatalog);
@@ -75,7 +79,7 @@ export async function loadWeek(supabase: Supabase, team: SeasonTeam, weekStart: 
       const start = addDays(historyStart, i * 7);
       const plan = (pastWeeks ?? []).find((w) => w.week_start === start);
       const loadPlan = (plan?.staff_proposals ?? [])
-        .filter((p) => p.role === "physical-coach" && p.task === "default" && p.output)
+        .filter((p) => p.role === "physical-coach" && p.task === "default" && p.output && !p.staff_runs?.deleted_at)
         .sort((a, b) => Number(b.status === "approved") - Number(a.status === "approved") || b.version - a.version)[0];
       return {
         week_start: start,

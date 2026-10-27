@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(14);
+select plan(22);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -99,6 +99,45 @@ select lives_ok(
     select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'week', 'example'$$,
   'test mode is not limited');
 select tests.logout();
+
+-- Removing versions (soft delete).
+select tests.login('a@test.local');
+insert into public.staff_runs (team_id, week_plan_id, kind, provider)
+select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'week', 'example';
+insert into ids select 'run_del', id from public.staff_runs where kind = 'week' order by version desc limit 1;
+update public.staff_runs set status = 'ready' where id = (select id from ids where name = 'run_del');
+select lives_ok(
+  $$update public.staff_runs set deleted_at = now() where id = (select id from ids where name = 'run_del')$$,
+  'head coach removes a version');
+select throws_ok(
+  $$update public.staff_runs set status = 'approved' where id = (select id from ids where name = 'run_del')$$,
+  '23514', null, 'a removed version cannot be approved');
+select throws_ok(
+  $$update public.staff_runs set deleted_at = null where id = (select id from ids where name = 'run_del')$$,
+  '23514', null, 'removing is final');
+select throws_ok(
+  $$update public.staff_runs set deleted_at = now() where id = (select id from ids where name = 'run_1')$$,
+  '23514', null, 'the approved version cannot be removed');
+insert into public.staff_runs (team_id, week_plan_id, kind, provider)
+select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'match', 'example';
+select throws_ok(
+  $$update public.staff_runs set deleted_at = now()
+    where id = (select id from public.staff_runs where kind = 'match' order by version desc limit 1)$$,
+  '23514', null, 'a version that is still being made cannot be removed');
+-- Removed AI runs keep counting for the daily limit.
+update public.staff_runs set status = 'failed' where provider = 'anthropic';
+update public.staff_runs set deleted_at = now() where provider = 'anthropic';
+select is((select count(*)::int from public.staff_runs where provider = 'anthropic' and deleted_at is null), 0, 'AI runs removed');
+select throws_ok(
+  $$insert into public.staff_runs (team_id, week_plan_id, kind, provider)
+    select (select id from ids where name = 'team_a'), (select id from ids where name = 'week_a'), 'week', 'anthropic'$$,
+  '23514', 'daily limit of staff requests reached', 'removed runs still count for the daily limit');
+select tests.logout();
+
+select tests.login('t2@test.local');
+update public.staff_runs set deleted_at = now() where id = (select id from ids where name = 'run_1');
+select tests.logout();
+select is((select deleted_at from public.staff_runs where id = (select id from ids where name = 'run_1')), null, 'T2 cannot remove a version');
 
 select tests.login('t2@test.local');
 select ok((select count(*) from public.staff_runs) > 0, 'T2 reads runs');
