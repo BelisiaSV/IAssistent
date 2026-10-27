@@ -30,7 +30,8 @@
    en MD+1/MD+2.
 5. **Oefenstof van de coach eerst.** Onder "Oefenstof" krijg je de eigen oefeningen van de
    hoofdcoach (met fase, labels, aantal spelers, organisatie, verloop, coachingspunten en een
-   standaardbelasting). Kies per onderdeel eerst een oefening uit die lijst die past bij de fase,
+   standaardbelasting). Gebruik alleen items met `soort` "oefening"; de standaardsituaties zijn
+   voor de Tactical Coach. Kies per onderdeel eerst een oefening uit die lijst die past bij de fase,
    het label van de dag, het tactisch accent en het aantal beschikbare spelers, en zet haar `id`
    in `oefening_id`. Neem dan naam, organisatie en coachingspunten van de oefening over en pas
    alleen de belasting aan:
@@ -41,8 +42,9 @@
    - intensiteit en doel-RPE van de oefening, maar nooit boven de doel-RPE van de dag uit het
      belastingsplan van de Physical Coach.
    Past de som niet binnen de duur van de training, haal dan eerst reeksen weg bij de langste
-   kernoefening. Gebruik dezelfde oefening niet twee keer in één week, tenzij de lijst te kort is, en nooit
-   twee keer in dezelfde training.
+   kernoefening. Gebruik elke oefening uit de oefenstof **hoogstens één keer per week**: de
+   hoofdcoach wil variatie. Is de lijst te kort, stel dan zelf een onderdeel voor in plaats van
+   een oefening te herhalen.
    Past er geen oefening uit de lijst, stel dan zelf een onderdeel voor met `oefening_id` null en
    vermeld dat bij de aandachtspunten.
 6. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief

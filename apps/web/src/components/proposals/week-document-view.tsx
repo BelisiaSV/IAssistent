@@ -49,6 +49,7 @@ export function WeekDocumentView({
   opponentNames,
   masPlayers,
   exercises,
+  runId,
 }: {
   doc: WeekDocument;
   names: Map<number, string>;
@@ -56,6 +57,8 @@ export function WeekDocumentView({
   masPlayers: MasPlayer[];
   /** Library exercises the planning uses (only for the coach who owns them). */
   exercises?: WeekExercises;
+  /** The run shown, when the coach may save new set pieces in the library. */
+  runId?: string;
 }) {
   const n = (text: string) => withShirtNames(text, names);
   const { pc, tc, ac, tco } = doc;
@@ -235,7 +238,12 @@ export function WeekDocumentView({
 
       {tc && tc.standaardsituaties.length > 0 && (
         <div className="print:break-before-page">
-          <SetPieces setPieces={tc.standaardsituaties} names={names} />
+          <SetPieces
+            setPieces={tc.standaardsituaties}
+            names={names}
+            library={exercises}
+            source={runId ? { runId, step: "tc" } : undefined}
+          />
         </div>
       )}
 

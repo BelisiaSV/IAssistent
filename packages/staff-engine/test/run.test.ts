@@ -90,6 +90,7 @@ function context(): RoleContext {
 
 const exercise = (over: Partial<RoleContext["bibliotheek"][number]>): RoleContext["bibliotheek"][number] => ({
   id: "ex",
+  soort: "oefening",
   titel: "Oefening",
   fase: "kern",
   labels: [],
@@ -105,6 +106,7 @@ const exercise = (over: Partial<RoleContext["bibliotheek"][number]>): RoleContex
   coachingspunten: [],
   variaties: [],
   animatie: false,
+  standaardsituatie: null,
   ...over,
 });
 
@@ -252,6 +254,39 @@ describe("tactical coach", () => {
     expect(output.oefeningen.map((o) => o.onderdeel)).toEqual(parts);
   });
 
+  it("uses the coach's own set pieces first, with at most one new one", async () => {
+    const corner = exercise({
+      id: "corner",
+      soort: "standaardsituatie",
+      titel: "Corner kort",
+      fase: null,
+      verloop: ["Kort op de 10, voorzet op de tweede paal"],
+      standaardsituatie: { type: "hoekschop_aanvallend", teken: "Twee vingers", rollen: [{ rol: "Nemer", vereiste: "linksvoetig" }, { rol: "Eerste paal", vereiste: null }] },
+    });
+    const odd = exercise({ id: "odd", soort: "standaardsituatie", fase: null, standaardsituatie: { type: "onbekend", teken: null, rollen: [] } });
+    const ctx = { ...context(), kern: squad(), bibliotheek: [corner, odd, exercise({ id: "pos" })] };
+    const result = await runRole(staff, "tactical-coach", ctx, exampleProvider);
+    const pieces = (result.output as { standaardsituaties: { standaardsituatie_id: string | null; titel: string; soort: string; afspraken: string[]; taken: { rugnummer: number; taak: string }[] }[] }).standaardsituaties;
+    expect(pieces[0]).toMatchObject({ standaardsituatie_id: "corner", titel: "Corner kort", soort: "hoekschop_aanvallend", afspraken: ["Kort op de 10, voorzet op de tweede paal"] });
+    expect(pieces[0]!.taken.map((t) => t.taak)).toEqual(["Nemer (linksvoetig)", "Eerste paal"]);
+    const available = ctx.kern.filter((p) => p.beschikbaar && !p.posities.includes("GK")).map((p) => p.rugnummer);
+    for (const t of pieces[0]!.taken) expect(available).toContain(t.rugnummer);
+    // Unknown types and exercises are not used; one new set piece of another type.
+    expect(pieces.filter((p) => p.standaardsituatie_id === null)).toHaveLength(1);
+    expect(pieces.some((p) => p.standaardsituatie_id === "odd" || p.standaardsituatie_id === "pos")).toBe(false);
+
+    // The match preparation keeps the id.
+    const prep = await runRole(staff, "tactical-coach", { ...ctx, staf: { "tactical-coach": result.output } }, exampleProvider, "wedstrijdvoorbereiding");
+    expect((prep.output as { standaardsituaties: { standaardsituatie_id: string | null }[] }).standaardsituaties[0]!.standaardsituatie_id).toBe("corner");
+  });
+
+  it("does not plan set pieces as training exercises", async () => {
+    const corner = exercise({ id: "corner", soort: "standaardsituatie", fase: null, standaardsituatie: { type: "hoekschop_aanvallend", teken: null, rollen: [] } });
+    const result = await runRole(staff, "assistant-coach", { ...context(), bibliotheek: [corner] }, exampleProvider);
+    const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
+    expect(parts.every((p) => p.oefening_id === null)).toBe(true);
+  });
+
   it("does not draw parts from the coach's library", async () => {
     const planning = (await runRole(staff, "assistant-coach", { ...context(), bibliotheek: library() }, exampleProvider)).output as {
       dagen: { onderdelen: { naam: string; oefening_id: string | null }[] }[];
@@ -335,9 +370,9 @@ describe("runRole with the example provider", () => {
     for (const d of days) {
       if (d.totale_duur_min) expect(d.onderdelen.reduce((s, p) => s + p.duur_min, 0)).toBeLessThanOrEqual(d.totale_duur_min);
     }
-    // Each exercise once before any is used twice (3 usable exercises).
+    // Each exercise at most once in the week.
     const ids = all.flatMap((p) => (p.oefening_id ? [p.oefening_id] : []));
-    expect(new Set(ids.slice(0, 2)).size).toBe(2);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("uses exercises for any number of players when the squad is empty", async () => {
@@ -346,12 +381,12 @@ describe("runRole with the example provider", () => {
     expect(parts.some((p) => p.oefening_id === "groot")).toBe(true);
   });
 
-  it("uses an exercise once per training", async () => {
+  it("uses an exercise at most once per week", async () => {
     const one = exercise({ id: "pos", reeksen: 4, werk_min: 3, rust_min: 1 });
     const result = await runRole(staff, "assistant-coach", { ...context(), bibliotheek: [one] }, exampleProvider);
-    for (const day of (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen) {
-      expect(day.onderdelen.filter((p) => p.oefening_id === "pos").length).toBeLessThanOrEqual(1);
-    }
+    const parts = (result.output as { dagen: { onderdelen: { oefening_id: string | null }[] }[] }).dagen.flatMap((d) => d.onderdelen);
+    expect(parts.filter((p) => p.oefening_id === "pos")).toHaveLength(1);
+    expect(parts.filter((p) => p.oefening_id === null).length).toBeGreaterThan(0);
   });
 
   it("keeps the example parts without a library", async () => {

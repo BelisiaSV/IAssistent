@@ -963,6 +963,10 @@ export type Database = {
           intensity: "laag" | "matig" | "hoog" | "maximaal" | null;
           rpe: number | null;
           use_in_planning: boolean;
+          kind: "exercise" | "set_piece";
+          set_piece_type: string | null;
+          signal: string | null;
+          roles: Json;
           created_at: string;
           updated_at: string;
         };
@@ -987,6 +991,10 @@ export type Database = {
           intensity?: "laag" | "matig" | "hoog" | "maximaal" | null;
           rpe?: number | null;
           use_in_planning?: boolean;
+          kind?: "exercise" | "set_piece";
+          set_piece_type?: string | null;
+          signal?: string | null;
+          roles?: Json;
           created_at?: string;
           updated_at?: string;
         };
@@ -1011,6 +1019,10 @@ export type Database = {
           intensity?: "laag" | "matig" | "hoog" | "maximaal" | null;
           rpe?: number | null;
           use_in_planning?: boolean;
+          kind?: "exercise" | "set_piece";
+          set_piece_type?: string | null;
+          signal?: string | null;
+          roles?: Json;
           created_at?: string;
           updated_at?: string;
         };

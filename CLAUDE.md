@@ -239,9 +239,16 @@ Regels:
 - **Oefenstof in de weekplanning** — elke oefening heeft een standaardbelasting (`sets`, `work_min`,
   `rest_min`, `intensity`, `rpe`) en `use_in_planning`. De staf krijgt de bibliotheek als
   `bibliotheek` in de context (`lib/exercises/library.ts`, max. 80, geen video's). De Assistent
-  Coach kiest eerst uit de bibliotheek (`onderdelen[].oefening_id`) en schaalt de reeksen met de
+  Coach kiest eerst uit de bibliotheek (`onderdelen[].oefening_id`, elke oefening hoogstens één keer
+  per week) en schaalt de reeksen met de
   `reeksen_factor` van het weektype (`periodisering.json`) en de wedstrijddag
   (`wedstrijddagen.json`); de Tactical Coach tekent die onderdelen niet. Het weekdocument toont de
   eigen animatie en een link naar de oefening (`lib/exercises/week.ts`).
+- **Stilstaande fases in de oefenstof** — een oefening is `kind` `exercise` of `set_piece`. Een
+  standaardsituatie heeft een type (`set_piece_type`, code uit het Tactical Coach-schema), een
+  teken (`signal`) en rollen met vereisten (`roles`, `[{ rol, vereiste }]`), zonder spelers. De
+  Tactical Coach kiest eerst uit de eigen standaardsituaties (`standaardsituaties[].standaardsituatie_id`)
+  en vult de rollen elke week in; hoogstens één nieuw voorstel (id null), dat de coach met
+  "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

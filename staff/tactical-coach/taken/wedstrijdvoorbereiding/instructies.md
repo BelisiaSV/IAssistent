@@ -16,8 +16,9 @@ Volg deel 2 van de vaste structuur (referentie `wedstrijdvoorbereiding.md`).
    aansluit bij het speelplan van de week. Bank: de overige beschikbare spelers, maximaal het
    aantal dat in het voorbeeld staat.
 2. **Standaardsituaties.** Neem de standaardsituaties uit het weekplan over (titel, soort,
-   afspraken, tekening) en pas enkel de taken per rugnummer aan aan de opstelling: wie niet
-   speelt, krijgt geen taak.
+   `standaardsituatie_id`, afspraken, tekening) en pas enkel de taken per rugnummer aan aan de
+   opstelling: wie niet speelt, krijgt geen taak. Voor een standaardsituatie uit de oefenstof
+   kies je per rol een basisspeler die aan de vereiste voldoet.
 3. **Scenario's.** 2 à 4 situaties (achter, voor, rode kaart, tegenstander verandert van
    systeem) met de aanpassing, inclusief welke wissel je voorstelt.
 4. **Wedstrijdbespreking.** Een titel, maximaal 5 kernpunten en een afsluiter: kort genoeg om

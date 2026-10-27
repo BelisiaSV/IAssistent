@@ -15,6 +15,7 @@ export interface WeekExercise {
   variations: string[];
   animation: Animation | null;
   hasVideo: boolean;
+  signal: string | null;
 }
 
 /** Exercises from the coach's library used in week plannings, with the team's animation look. */
@@ -24,12 +25,20 @@ export interface WeekExercises {
   logoUrl: string | null;
 }
 
-/** Library ids used in Assistant Coach outputs (onderdelen[].oefening_id). */
+/**
+ * Library ids used in staff outputs: training parts of the Assistant Coach
+ * (onderdelen[].oefening_id) and set pieces of the Tactical Coach
+ * (standaardsituaties[].standaardsituatie_id).
+ */
 export function exerciseIds(outputs: (Json | null | undefined)[]): string[] {
   const ids = new Set<string>();
   for (const output of outputs) {
-    const days = (output as { dagen?: { onderdelen?: { oefening_id?: string | null }[] }[] } | null)?.dagen ?? [];
-    for (const day of days) for (const part of day.onderdelen ?? []) if (part.oefening_id) ids.add(part.oefening_id);
+    const o = output as {
+      dagen?: { onderdelen?: { oefening_id?: string | null }[] }[];
+      standaardsituaties?: { standaardsituatie_id?: string | null }[];
+    } | null;
+    for (const day of o?.dagen ?? []) for (const part of day.onderdelen ?? []) if (part.oefening_id) ids.add(part.oefening_id);
+    for (const sp of o?.standaardsituaties ?? []) if (sp.standaardsituatie_id) ids.add(sp.standaardsituatie_id);
   }
   return [...ids];
 }
@@ -47,7 +56,7 @@ export async function loadWeekExercises(
 ): Promise<WeekExercises> {
   const ids = exerciseIds(outputs);
   const { data } = ids.length
-    ? await supabase.from("exercises").select("id, title, course, variations, animation, video_path").in("id", ids)
+    ? await supabase.from("exercises").select("id, title, course, variations, animation, video_path, signal").in("id", ids)
     : { data: [] };
   const items = new Map(
     (data ?? []).map((e) => [
@@ -59,6 +68,7 @@ export async function loadWeekExercises(
         variations: e.variations,
         animation: e.animation ? parseAnimation(e.animation) : null,
         hasVideo: e.video_path !== null,
+        signal: e.signal,
       },
     ]),
   );

@@ -20,7 +20,7 @@ export const exampleProvider: StaffModelProvider = {
     }
     let output: Example;
     if (Array.isArray(example.dagen)) output = fitWeek(example, context, staff);
-    else if (example.speelplan && example.trainingsaccenten) output = fitTacticalWeek(example, context);
+    else if (example.speelplan && example.trainingsaccenten) output = fitTacticalWeek(example, context, staff);
     else if (example.opstelling && example.wedstrijdbespreking) output = fitMatchPrep(example, context, staff);
     else if (Array.isArray(example.oefeningen)) output = fitDrawings(example, context);
     else output = example;
@@ -75,12 +75,15 @@ type Part = Record<string, unknown> & { fase: string; duur_min: number; reeksen:
 function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Example[] {
   // Without a squad there is nothing to check the number of players against.
   const players = context.kern.filter((p) => p.beschikbaar).length;
-  const usable = context.bibliotheek.filter((e) => !players || e.spelers.min === null || e.spelers.min <= players);
+  const usable = context.bibliotheek.filter(
+    (e) => e.soort === "oefening" && (!players || e.spelers.min === null || e.spelers.min <= players),
+  );
   if (!usable.length) return days.map((d) => (Array.isArray(d.onderdelen) ? { ...d, onderdelen: (d.onderdelen as Part[]).map((o) => ({ ...o, oefening_id: null })) } : d));
 
   const weekFactor = context.weekinput.periodisering.weektype?.reeksen_factor ?? 1;
   const physical = context.staf["physical-coach"] as { dagen?: { datum: string; rpe_doel: number | null }[] } | undefined;
-  const used = new Map<string, number>();
+  // Variation: an exercise is used at most once per week.
+  const used = new Set<string>();
 
   return days.map((d) => {
     if (!Array.isArray(d.onderdelen)) return d;
@@ -88,14 +91,10 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
     const factor = weekFactor * (staff.matchDays.dagen.find((m) => m.code === d.md)?.reeksen_factor ?? 1);
     const maxRpe = physical?.dagen?.find((x) => x.datum === d.datum)?.rpe_doel ?? null;
 
-    const today = new Set<string>();
     const parts: (Part & { _ex?: LibraryExercise })[] = (d.onderdelen as Part[]).map((part) => {
-      // Never the same exercise twice in one training.
-      const candidates = usable.filter((e) => (e.fase === part.fase || e.fase === null) && !today.has(e.id));
-      if (!candidates.length) return { ...part, oefening_id: null };
-      const exercise = [...candidates].sort((a, b) => (used.get(a.id) ?? 0) - (used.get(b.id) ?? 0))[0]!;
-      used.set(exercise.id, (used.get(exercise.id) ?? 0) + 1);
-      today.add(exercise.id);
+      const exercise = usable.find((e) => (e.fase === part.fase || e.fase === null) && !used.has(e.id));
+      if (!exercise) return { ...part, oefening_id: null };
+      used.add(exercise.id);
       return libraryPart(part, exercise, factor, maxRpe);
     });
 
@@ -161,7 +160,7 @@ function fitIndividual(example: Example, context: RoleContext) {
 }
 
 /** Tactical Coach week plan: opponent from the context, accents on the training days. */
-function fitTacticalWeek(example: Example, context: RoleContext): Example {
+function fitTacticalWeek(example: Example, context: RoleContext, staff: Staff): Example {
   const accents = example.trainingsaccenten as { md: string | null }[];
   const trainingDays = context.weekinput.dagen.filter((d) => d.training);
   const trainingsaccenten = trainingDays.map((day, i) => ({
@@ -179,7 +178,46 @@ function fitTacticalWeek(example: Example, context: RoleContext): Example {
       formatie: context.tegenstander?.formatie ?? context.tegenstander?.opstelling?.formatie ?? opponent.formatie,
     },
     trainingsaccenten,
+    standaardsituaties: ownSetPieces(example.standaardsituaties as SetPiece[], context, staff),
   };
+}
+
+/**
+ * Tactical Coach: the coach's own set pieces first (roles filled in with
+ * available field players), plus at most one new one from the example for a
+ * type the coach has none of. Without own set pieces, the example stays.
+ */
+function ownSetPieces(examples: SetPiece[], context: RoleContext, staff: Staff): SetPiece[] {
+  const schema = staff.roles.find((r) => r.id === "tactical-coach")?.outputSchema as
+    | { properties?: { standaardsituaties?: { items?: { properties?: { soort?: { enum?: string[] } } } } } }
+    | undefined;
+  const types = schema?.properties?.standaardsituaties?.items?.properties?.soort?.enum ?? [];
+  const own = context.bibliotheek.filter(
+    (e): e is LibraryExercise & { standaardsituatie: NonNullable<LibraryExercise["standaardsituatie"]> } =>
+      e.soort === "standaardsituatie" && !!e.standaardsituatie && types.includes(e.standaardsituatie.type),
+  );
+  if (!own.length) return examples;
+
+  const field = context.kern.filter((p) => p.beschikbaar && p.rugnummer !== null && !p.posities.includes("GK"));
+  const chosen = own.slice(0, 8).map((e) => {
+    const template = examples.find((x) => x.soort === e.standaardsituatie.type) ?? examples[0]!;
+    const taken = e.standaardsituatie.rollen.flatMap((r, i) => {
+      const player = field[i];
+      return player ? [{ rugnummer: player.rugnummer!, taak: r.vereiste ? `${r.rol} (${r.vereiste})` : r.rol }] : [];
+    });
+    return {
+      ...template,
+      standaardsituatie_id: e.id,
+      titel: e.titel,
+      soort: e.standaardsituatie.type,
+      afspraken: e.verloop.length ? e.verloop : (template.afspraken as string[]),
+      taken: taken.length ? taken : template.taken,
+      tekening: { ...(template.tekening as Example), titel: e.titel },
+    };
+  });
+  const covered = new Set(chosen.map((s) => s.soort));
+  const extra = examples.find((x) => !covered.has(x.soort as string));
+  return extra ? [...chosen, { ...extra, standaardsituatie_id: null }] : chosen;
 }
 
 type SetPiece = { taken: { rugnummer: number; taak: string }[] } & Example;

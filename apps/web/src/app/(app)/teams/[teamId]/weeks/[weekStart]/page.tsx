@@ -89,7 +89,7 @@ export default async function WeekPage({
   const theirNames = opponentNames(data.opponentLineup);
   const exercises = await loadWeekExercises(
     supabase,
-    data.proposals.filter((x) => x.step === "ac").map((x) => x.output),
+    data.proposals.filter((x) => ["ac", "tc", "match"].includes(x.step ?? "")).map((x) => x.output),
     team,
     logoUrl,
   );
@@ -250,6 +250,7 @@ export default async function WeekPage({
               opponentNames={theirNames}
               masPlayers={masPlayers}
               exercises={exercises}
+              runId={canEdit ? run.id : undefined}
             />
           );
         }}
@@ -283,6 +284,8 @@ export default async function WeekPage({
                 output={proposal.output as unknown as MatchPrepOutput}
                 names={names}
                 formations={formationCatalog}
+                library={exercises}
+                source={canEdit ? { runId: run.id, step: "match" } : undefined}
                 actions={
                   canEdit && (
                     <form action={lineupFromProposal}>

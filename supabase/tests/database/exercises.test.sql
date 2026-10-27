@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(17);
+select plan(21);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -74,6 +74,19 @@ select throws_ok(
   $$update public.exercises set rpe = 11 where id = (select id from ids where name = 'ex_a')$$,
   '23514', null, 'rpe is 1 to 10');
 select is((select use_in_planning from public.exercises where id = (select id from ids where name = 'ex_a')), false, 'exercise can be kept out of the planning');
+select lives_ok(
+  $$insert into public.exercises (title, kind, set_piece_type, signal, roles)
+    values ('Corner kort', 'set_piece', 'hoekschop_aanvallend', 'Twee vingers', '[{"rol": "Nemer", "vereiste": "linksvoetig"}]') returning id$$,
+  'coach creates a set piece (insert ... returning)');
+select throws_ok(
+  $$insert into public.exercises (title, kind) values ('Zonder soort', 'set_piece')$$,
+  '23514', null, 'a set piece needs a type');
+select throws_ok(
+  $$insert into public.exercises (title, set_piece_type) values ('Oefening met soort', 'inworp')$$,
+  '23514', null, 'an exercise has no set piece type');
+select throws_ok(
+  $$insert into public.exercises (title, kind, set_piece_type, roles) values ('X', 'set_piece', 'inworp', '{"rol": "x"}')$$,
+  '23514', null, 'roles are a list');
 select tests.logout();
 
 select tests.login('b@test.local');

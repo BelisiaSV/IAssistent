@@ -1,7 +1,7 @@
 ---
 id: assistant-coach
 naam: Assistent Coach
-versie: 1.0.1
+versie: 1.0.3
 status: concept
 ---
 
