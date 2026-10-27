@@ -280,10 +280,13 @@ export function SetPieceCard({
           logoOn={library!.display.logoOn}
           labels={x.player}
         />
+      ) : own?.videoUrl ? (
+        <video src={own.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
       ) : (
         <DrawingView drawing={setPiece.tekening} />
       )}
-      {setPiece.tekening.uitleg.length > 0 && (
+      {/* The explanation belongs to the staff's drawing, not to the coach's own animation or video. */}
+      {!own?.animation && !own?.videoUrl && setPiece.tekening.uitleg.length > 0 && (
         <ol className={`list-decimal space-y-0.5 pl-5 ${large ? "text-lg" : "text-sm"}`}>
           {setPiece.tekening.uitleg.map((step, i) => (
             <li key={i}>{n(step)}</li>

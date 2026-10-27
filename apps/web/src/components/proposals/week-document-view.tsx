@@ -249,6 +249,8 @@ export function WeekDocumentView({
                       logoOn={exercises!.display.logoOn}
                       labels={x.player}
                     />
+                  ) : exercise?.videoUrl ? (
+                    <video src={exercise.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
                   ) : (
                     drawing && <DrawingView drawing={drawing.tekening} />
                   )}
