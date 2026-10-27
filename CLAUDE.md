@@ -261,5 +261,12 @@ Regels:
   per dag** (`print/days`, staand A4, onderdelen en de standaardsituaties van die dag in een raster
   van 2 × 2). Gedeelde loader `loadWeekDocument` (`lib/weeks/document.ts`). Video's verschijnen op
   papier als stilstaand beeld (`components/proposals/video-still.tsx`).
+- **Admin en Excel-import van spelers** — platformadmins staan in `platform_admins` (enkel via SQL
+  te zetten; geen policies, niemand leest de tabel via de API). `is_platform_admin()`, `admin_teams()`,
+  `admin_team_players(team)` en `admin_import_players(team, jsonb)` zijn `security definer` en
+  controleren eerst de admin. Pagina `/admin/players` (link "Admin" enkel voor admins): sjabloon
+  downloaden (leeg of met de huidige kern, `lib/players/template.ts`, exceljs, keuzelijsten), bestand
+  controleren (voorbeeld met fouten per rij, `parseImportRows` in `lib/players/import.ts`) en
+  importeren: zelfde rugnummer = bijwerken, anders nieuw, niemand verwijderd, max. 200 rijen.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
-  clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.
+  clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.
