@@ -159,7 +159,8 @@ export function WeekDocumentView({
 
             {day.onderdelen.map((part, i) => {
               const exercise = part.oefening_id ? exercises?.items.get(part.oefening_id) : undefined;
-              const drawing = part.oefening_id
+              const drawing =
+                part.oefening_id || part.standaardsituaties?.length
                 ? undefined
                 : tco?.oefeningen.find((t) => t.datum === day.datum && t.onderdeel === part.naam);
               const course = exercise?.course ?? drawing?.verloop ?? [];
@@ -210,6 +211,29 @@ export function WeekDocumentView({
                         {o.players}: {n(part.spelers)}
                       </span>
                     </p>
+                    {(part.standaardsituaties?.length ?? 0) > 0 && (
+                      <div>
+                        <p className="font-medium">{x.setPiecesTrained}</p>
+                        <ul className="list-disc space-y-0.5 pl-5">
+                          {part.standaardsituaties!.map((title) => {
+                            const index = tc?.standaardsituaties.findIndex((sp) => sp.titel === title) ?? -1;
+                            const sp = index >= 0 ? tc!.standaardsituaties[index] : undefined;
+                            return (
+                              <li key={title}>
+                                {sp ? (
+                                  <a href={`#standaardsituatie-${index}`} className="underline hover:text-brand">
+                                    {title}
+                                  </a>
+                                ) : (
+                                  title
+                                )}
+                                {sp?.standaardsituatie_id && <span className="ml-1 text-xs text-brand">({x.fromLibrary})</span>}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
                     <Steps title={d.course} items={course.map(n)} ordered />
                     <Steps title={d.coaching} items={part.coachingspunten.map(n)} />
                     <Steps title={d.variations} items={variations.map(n)} />

@@ -75,6 +75,7 @@ export const messages = {
     kind: { exercise: "Oefening", set_piece: "Standaardsituatie" },
     allKinds: "Oefeningen en standaardsituaties",
     roles: "Rollen",
+    setPiecesTrained: "Standaardsituaties in dit onderdeel",
     openExercise: "Open oefening",
     withVideo: "met video",
     hasAnimation: "Animatie",

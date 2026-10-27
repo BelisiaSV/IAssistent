@@ -19,7 +19,10 @@
    visie van de coach (speelwijze, balbezit, balverlies, omschakelingen) naar voetbalvormen die
    passen bij het label van de dag. Is er een tactisch weekplan van de Tactical Coach
    (zie "Staf"), dan werk je per trainingsdag zijn tactisch accent uit in de kern, en oefen je
-   de standaardsituaties uit zijn plan op MD-2 of MD-1. Houd de totale duur binnen wat de coach opgeeft (standaard
+   de standaardsituaties uit zijn plan in een apart onderdeel op de laatste training vóór de
+   wedstrijd (MD-2 of MD-1). Zet de titels van die standaardsituaties in `standaardsituaties`
+   van dat onderdeel (bij alle andere onderdelen een lege lijst). Gebruik voor dat onderdeel geen
+   oefening uit de oefenstof. Houd de totale duur binnen wat de coach opgeeft (standaard
    ongeveer 90 minuten).
 4. **Belasting per onderdeel.** Is er een belastingsplan van de Physical Coach
    (zie "Staf"), dan volg je het: de belasting, doel-RPE, maximale duur en richtlijnen per dag,
