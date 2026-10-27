@@ -40,3 +40,12 @@ const longFormat = new Intl.DateTimeFormat("nl-BE", { day: "numeric", month: "lo
 export const weekdayName = (iso: string) => weekdayFormat.format(toUtc(iso));
 export const shortDate = (iso: string) => shortFormat.format(toUtc(iso));
 export const longDate = (iso: string) => longFormat.format(toUtc(iso));
+
+/** ISO week number of a date. */
+export function isoWeek(iso: string): number {
+  const d = toUtc(iso);
+  const day = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - day + 3);
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  return 1 + Math.round(((d.getTime() - firstThursday.getTime()) / 86_400_000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+}
