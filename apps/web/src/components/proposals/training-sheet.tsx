@@ -354,7 +354,7 @@ function Visual({
   return (
     <div className="flex h-[112px] items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-200/70 [&_img]:h-[112px] [&_img]:w-auto [&_img]:object-contain [&_svg]:mx-auto [&_svg]:h-[108px]! [&_svg]:max-h-none! [&_svg]:w-auto! [&_svg~*]:hidden [&_video]:h-[112px] [&>*]:w-full">
       {animation ? (
-        <AnimatedDrawing animation={animation} theme={library.display.theme} logoUrl={library.logoUrl} logoOn={library.display.logoOn} labels={x.player} />
+        <AnimatedDrawing compact animation={animation} theme={library.display.theme} logoUrl={library.logoUrl} logoOn={library.display.logoOn} labels={x.player} />
       ) : videoUrl ? (
         <VideoStill src={videoUrl} />
       ) : drawing ? (
