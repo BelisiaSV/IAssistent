@@ -11,6 +11,7 @@ import type { MatchPrepOutput, SetPiece, TacticalWeekOutput } from "@/lib/propos
 
 import { AnimatedDrawing } from "./animated-drawing";
 import { DrawingView } from "./drawing";
+import { VideoStill } from "./video-still";
 
 const t = messages.matchPlan;
 const o = messages.proposals.output;
@@ -281,7 +282,10 @@ export function SetPieceCard({
           labels={x.player}
         />
       ) : own?.videoUrl ? (
-        <video src={own.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
+        <>
+          <video src={own.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
+          <VideoStill src={own.videoUrl} className="hidden print:block" />
+        </>
       ) : (
         <DrawingView drawing={setPiece.tekening} />
       )}

@@ -240,7 +240,11 @@ export default async function WeekPage({
         canEdit={canEdit}
         testMode={testMode}
         blockedReason={null}
-        links={(run) => [{ href: `${basePath}/print?week=${run.version}`, label: r.week.print }]}
+        links={(run) => [
+          { href: `${basePath}/print?week=${run.version}`, label: r.week.print },
+          { href: `${basePath}/print/overview?week=${run.version}`, label: messages.poster.link },
+          { href: `${basePath}/print/days?week=${run.version}`, label: messages.sheet.link },
+        ]}
         render={(run) => {
           const out = outputsOf(run);
           return (

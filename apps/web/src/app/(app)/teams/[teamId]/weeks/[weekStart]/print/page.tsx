@@ -1,18 +1,13 @@
-import type { Json } from "@iassistent/db";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
-import { type WeekDocument, WeekDocumentView } from "@/components/proposals/week-document-view";
-import { loadWeekExercises } from "@/lib/exercises/week";
+import { WeekDocumentView } from "@/components/proposals/week-document-view";
 import { messages } from "@/lib/messages";
 import { opponentNames } from "@/lib/opponents/context";
-import { shirtNames } from "@/lib/proposals/names";
 import { weekPlanningToText } from "@/lib/proposals/text";
 import type { WeekPlanningOutput } from "@/lib/proposals/types";
-import { createClient } from "@/lib/supabase/server";
-import { getTeamContext } from "@/lib/teams/queries";
-import { isIsoDate, isoWeekday, longDate } from "@/lib/weeks/dates";
-import { loadWeek, squadMas } from "@/lib/weeks/load";
+import { longDate } from "@/lib/weeks/dates";
+import { loadWeekDocument } from "@/lib/weeks/document";
+import { squadMas } from "@/lib/weeks/load";
 
 import { ShareButtons } from "./copy-button";
 
@@ -28,21 +23,7 @@ export default async function PrintWeekPage({
 }) {
   const { teamId, weekStart } = await params;
   const { week: version } = await searchParams;
-  if (!isIsoDate(weekStart) || isoWeekday(weekStart) !== 1) notFound();
-  const { team, logoUrl } = await getTeamContext(teamId);
-
-  const supabase = await createClient();
-  const data = await loadWeek(supabase, team, weekStart);
-  const runs = data.runs.filter((x) => x.kind === "week" && ["ready", "approved", "rejected"].includes(x.status));
-  const run = runs.find((x) => String(x.version) === version) ?? runs.find((x) => x.status === "approved") ?? runs[0];
-  if (!run) notFound();
-
-  const outputs = Object.fromEntries(
-    data.proposals.filter((x) => x.run_id === run.id && x.output).map((x) => [x.step ?? "", x.output]),
-  ) as Record<string, unknown>;
-  const doc = { pc: outputs.pc ?? null, tc: outputs.tc ?? null, ac: outputs.ac ?? null, tco: outputs.tco ?? null } as WeekDocument;
-  const names = shirtNames(data.players);
-  const exercises = await loadWeekExercises(supabase, [outputs.ac as Json | undefined], team, logoUrl);
+  const { team, data, run, doc, exercises, names } = await loadWeekDocument(teamId, weekStart, version);
   const title = `${team.club_name} – ${team.name} · ${messages.weeks.weekOf(longDate(weekStart))}`;
 
   return (
