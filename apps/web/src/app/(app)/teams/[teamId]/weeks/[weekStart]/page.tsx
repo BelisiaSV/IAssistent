@@ -26,7 +26,7 @@ import { weekPlanSchema } from "@/lib/weeks/validation";
 
 import { decideRunAction, lineupFromProposal } from "../actions";
 import { MatchReportForm } from "./match-report-form";
-import { AdjustRunForm, RequestRunButton, RetryRunButton, RunProgress, StepList } from "./run-controls";
+import { AdjustRunForm, DeleteRunButton, RequestRunButton, RetryRunButton, RunProgress, StepList } from "./run-controls";
 import { SessionLoadForm } from "./session-load-form";
 import { WeekInputForm } from "./week-input-form";
 
@@ -400,7 +400,12 @@ function RunSection({
         <div className="space-y-3">
           <Alert tone="error">{r.failed}</Alert>
           <StepList steps={stepsOf(selected)} />
-          {canEdit && !busy && <RetryRunButton teamId={teamId} weekStart={weekStart} kind={kind} runId={selected.id} />}
+          {canEdit && !busy && (
+            <div className="flex flex-wrap gap-2">
+              <RetryRunButton teamId={teamId} weekStart={weekStart} kind={kind} runId={selected.id} />
+              <DeleteRunButton teamId={teamId} weekStart={weekStart} runId={selected.id} />
+            </div>
+          )}
         </div>
       )}
 
@@ -423,6 +428,9 @@ function RunSection({
                 {l.label}
               </Link>
             ))}
+            {canEdit && selected.status !== "approved" && (
+              <DeleteRunButton teamId={teamId} weekStart={weekStart} runId={selected.id} />
+            )}
             {canEdit && !busy && (
               <AdjustRunForm teamId={teamId} weekStart={weekStart} kind={kind} runId={selected.id} steps={adjustable} />
             )}

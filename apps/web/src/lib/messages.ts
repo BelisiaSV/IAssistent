@@ -283,6 +283,8 @@ export const messages = {
       generating: "Je staf werkt aan het weekdocument…",
       print: "Weekdocument afdrukken",
     },
+    deleteVersion: "Deze versie verwijderen",
+    deleteConfirm: "Deze versie definitief verwijderen? Dit kan niet ongedaan gemaakt worden.",
     match: {
       title: "Wedstrijdvoorbereiding",
       intro:

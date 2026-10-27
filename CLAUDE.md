@@ -220,6 +220,9 @@ Regels:
   wordt gekopieerd via `based_on`). De wedstrijdvoorbereiding (run `match`) kan pas na het
   goedgekeurde weekdocument en vanaf de dag van de laatste training. Weekdocument en
   wedstrijdvoorbereiding zijn afdrukbaar. De daglimiet (`staff_daily_limit()`) telt runs.
+  De hoofdcoach kan versies verwijderen (`staff_runs.deleted_at`, soft delete: blijft meetellen
+  voor de daglimiet, nooit de goedgekeurde of een lopende versie, definitief; trigger
+  `before_staff_run_update`). De app toont verwijderde runs en hun voorstellen nergens.
 - **Teaminstellingen** (`/teams/[id]/settings`) — vaste trainingsdagen (`teams.training_schedule`,
   elke nieuwe week neemt ze over; optioneel ook toepassen op open weken zonder weekdocument) en
   seizoensplanning: voorbereiding (`preparation_start_date` + `preparation_weeks`) en competitie

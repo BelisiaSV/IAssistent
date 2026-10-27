@@ -43,7 +43,7 @@ export default async function PrintMatchPage({
   if (!week) notFound();
 
   const [{ data: runs }, { data: proposals }, { data: players }] = await Promise.all([
-    supabase.from("staff_runs").select("*").eq("week_plan_id", week.id).order("version", { ascending: false }),
+    supabase.from("staff_runs").select("*").eq("week_plan_id", week.id).is("deleted_at", null).order("version", { ascending: false }),
     supabase
       .from("staff_proposals")
       .select("run_id, step, output")

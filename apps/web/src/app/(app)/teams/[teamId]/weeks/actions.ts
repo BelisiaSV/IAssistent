@@ -293,6 +293,31 @@ export async function decideRunAction(formData: FormData) {
   revalidatePath(weekPath(teamId, weekStart));
 }
 
+/**
+ * Removes a version the head coach does not want to keep (soft delete: it
+ * still counts for the daily limit). Not the approved one, nor one in progress.
+ */
+export async function deleteRunAction(formData: FormData) {
+  const teamId = String(formData.get("teamId"));
+  const weekStart = String(formData.get("weekStart"));
+  const runId = String(formData.get("runId"));
+  if (!uuid.safeParse(teamId).success || !uuid.safeParse(runId).success || !isMonday(weekStart)) return;
+
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("staff_runs")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", runId)
+    .eq("team_id", teamId)
+    .is("deleted_at", null)
+    .not("status", "in", "(approved,generating)")
+    .select("kind");
+  if (error) console.error("deleteRunAction failed", error);
+  revalidatePath(weekPath(teamId, weekStart));
+  redirect(`${weekPath(teamId, weekStart)}${data?.[0] ? `#${data[0].kind}` : ""}`);
+}
+
 /** Stores the findings of the head coach after a match of this week. */
 export async function saveMatchReport(
   teamId: string,
