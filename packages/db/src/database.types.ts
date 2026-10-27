@@ -879,6 +879,12 @@ export type Database = {
           },
         ];
       };
+      platform_admins: {
+        Row: { coach_id: string; created_at: string };
+        Insert: { coach_id: string; created_at?: string };
+        Update: { coach_id?: string; created_at?: string };
+        Relationships: [];
+      };
       players: {
         Row: {
           id: string;
@@ -1092,6 +1098,12 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_import_players: { Args: { p_team_id: string; p_players: Json }; Returns: Json };
+      admin_team_players: { Args: { p_team_id: string }; Returns: Database["public"]["Tables"]["players"]["Row"][] };
+      admin_teams: {
+        Args: Record<PropertyKey, never>;
+        Returns: { id: string; name: string; club_name: string; head_coach_email: string; archived: boolean }[];
+      };
       can_read_coach_profile: { Args: { p_coach_id: string }; Returns: boolean };
       can_read_team: { Args: { p_team_id: string }; Returns: boolean };
       can_see_club: { Args: { p_club_id: string }; Returns: boolean };
@@ -1100,6 +1112,7 @@ export type Database = {
       has_assistant_access: { Args: { p_team_id: string }; Returns: boolean };
       is_club_owner: { Args: { p_club_id: string }; Returns: boolean };
       is_feature_enabled: { Args: { p_key: string }; Returns: boolean };
+      is_platform_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_team_head_coach: { Args: { p_team_id: string }; Returns: boolean };
       staff_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
