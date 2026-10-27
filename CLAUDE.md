@@ -255,5 +255,11 @@ Regels:
   "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen en
   traint de standaardsituaties van het weekplan in een eigen onderdeel op de laatste training vóór
   de wedstrijd (`onderdelen[].standaardsituaties` = titels); dat onderdeel wordt niet getekend.
+- **Afdrukken en delen** — naast het weekdocument (`print`): een **weekoverzicht voor spelers**
+  (`print/overview`, liggend A4 op één pagina in de teamkleuren, download als PNG via
+  `html-to-image`; data uit `weekOverview()` in `lib/proposals/overview.ts`) en **trainingsbladen
+  per dag** (`print/days`, staand A4, onderdelen en de standaardsituaties van die dag in een raster
+  van 2 × 2). Gedeelde loader `loadWeekDocument` (`lib/weeks/document.ts`). Video's verschijnen op
+  papier als stilstaand beeld (`components/proposals/video-still.tsx`).
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

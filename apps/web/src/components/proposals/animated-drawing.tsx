@@ -55,6 +55,8 @@ interface Ctx {
   W: number;
   uid: string;
   theme: AnimationTheme;
+  /** Degrees the drawing is turned (0 or 90); upright items turn back by this much. */
+  turn: number;
 }
 
 /**
@@ -63,10 +65,11 @@ interface Ctx {
  */
 export function AnimatedDrawing({
   animation,
-  theme = DEFAULT_THEME,
+  theme: themeProp = DEFAULT_THEME,
   logoUrl,
   logoOn = [],
   autoPlay = false,
+  compact = false,
   labels,
 }: {
   animation: Animation;
@@ -75,9 +78,15 @@ export function AnimatedDrawing({
   logoUrl?: string | null;
   logoOn?: TeamKey[];
   autoPlay?: boolean;
+  /**
+   * A still for documents: no controls, a flat field, and a portrait field
+   * turned to landscape so it fills a wide frame (tokens and texts stay upright).
+   */
+  compact?: boolean;
   labels: { play: string; pause: string; restart: string; speed: string };
 }) {
   const uid = useId().replace(/:/g, "");
+  const theme = compact ? { ...themeProp, kanteling: 1, vignet: 0 } : themeProp;
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(autoPlay);
   const [speed, setSpeed] = useState(1);
@@ -128,7 +137,8 @@ export function AnimatedDrawing({
     h: Math.max(...corners.map((c) => c.y)) - Math.min(...corners.map((c) => c.y)),
   };
   const u = Math.max(vb.w, vb.h) / 42;
-  const ctx: Ctx = { m, pr, path, u, W, uid, theme };
+  const turn = compact && vb.h > vb.w * 1.1 ? 90 : 0;
+  const ctx: Ctx = { m, pr, path, u, W, uid, theme, turn };
 
   const visible = (o: Timed) => (o.van ?? 0) <= t && t < (o.tot ?? Infinity);
   const tokens = animation.spelers
@@ -156,8 +166,16 @@ export function AnimatedDrawing({
 
   return (
     <figure className="space-y-2">
-      <div className="relative overflow-hidden rounded-xl shadow-sm ring-1 ring-black/10" style={{ background: theme.rand }}>
-        <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} className="mx-auto block max-h-[80vh] w-full" role="img" aria-label={animation.titel}>
+      <div
+        className={compact ? "relative mx-auto w-fit overflow-hidden rounded-lg" : "relative overflow-hidden rounded-xl shadow-sm ring-1 ring-black/10"}
+        style={{ background: theme.rand }}
+      >
+        <svg
+          viewBox={turn ? `${vb.y} ${-(vb.x + vb.w)} ${vb.h} ${vb.w}` : `${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
+          className={compact ? "block" : "mx-auto block max-h-[80vh] w-full"}
+          role="img"
+          aria-label={animation.titel}
+        >
           <defs>
             <pattern id={`hatch-${uid}`} width={u * 0.9} height={u * 0.9} patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
               <rect width={u * 0.9} height={u * 0.9} fill="#ffffff" fillOpacity={0.08} />
@@ -181,38 +199,40 @@ export function AnimatedDrawing({
               <stop offset="100%" stopColor="#000000" stopOpacity={theme.vignet} />
             </radialGradient>
           </defs>
+          <g transform={turn ? `rotate(${-turn})` : undefined}>
 
-          <rect x={vb.x - 5} y={vb.y - 5} width={vb.w + 10} height={vb.h + 10} fill={theme.gras[0]} />
-          <path d={squares.join(" ")} fill={theme.gras[1]} />
+            <rect x={vb.x - 5} y={vb.y - 5} width={vb.w + 10} height={vb.h + 10} fill={theme.gras[0]} />
+            <path d={squares.join(" ")} fill={theme.gras[1]} />
 
-          {animation.raster && (
-            <g stroke={theme.lijnen} strokeOpacity={0.16} strokeWidth={u * 0.06} fill="none">
-              {animation.raster.x_m.map((x) => <path key={`x${x}`} d={path([[x, 0], [x, L]])} />)}
-              {animation.raster.y_m.map((y) => <path key={`y${y}`} d={path([[0, y], [W, y]])} />)}
-            </g>
-          )}
+            {animation.raster && (
+              <g stroke={theme.lijnen} strokeOpacity={0.16} strokeWidth={u * 0.06} fill="none">
+                {animation.raster.x_m.map((x) => <path key={`x${x}`} d={path([[x, 0], [x, L]])} />)}
+                {animation.raster.y_m.map((y) => <path key={`y${y}`} d={path([[0, y], [W, y]])} />)}
+              </g>
+            )}
 
-          <PitchLines L={L} ctx={ctx} />
+            <PitchLines L={L} ctx={ctx} />
 
-          {[...animation.vast, ...animation.overlays].filter(visible).map((o, i) => (
-            <OverlayView key={i} overlay={o} ctx={ctx} />
-          ))}
+            {[...animation.vast, ...animation.overlays].filter(visible).map((o, i) => (
+              <OverlayView key={i} overlay={o} ctx={ctx} />
+            ))}
 
-          {tokens.map((tk) => (
-            <Token key={tk.id} id={tk.id} at={pr.p(...tk.q)} s={pr.scale(...tk.q)} color={tk.color} label={tk.label} logo={tk.logo} ctx={ctx} />
-          ))}
+            {tokens.map((tk) => (
+              <Token key={tk.id} id={tk.id} at={pr.p(...tk.q)} s={pr.scale(...tk.q)} color={tk.color} label={tk.label} logo={tk.logo} ctx={ctx} />
+            ))}
 
-          <Ball at={pr.p(...ballM)} r={u * 0.55 * pr.scale(...ballM)} uid={uid} />
+            <Ball at={pr.p(...ballM)} r={u * 0.55 * pr.scale(...ballM)} uid={uid} />
 
-          {theme.vignet > 0 && <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} fill={`url(#vignette-${uid})`} pointerEvents="none" />}
+            {theme.vignet > 0 && <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} fill={`url(#vignette-${uid})`} pointerEvents="none" />}
+          </g>
         </svg>
-        {logoUrl && (
+        {logoUrl && !compact && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={logoUrl} alt="" className="pointer-events-none absolute top-3 right-3 h-14 w-14 object-contain drop-shadow" />
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm">
+      <div className={`flex flex-wrap items-center gap-3 text-sm print:hidden ${compact ? "hidden" : ""}`}>
         <button
           type="button"
           onClick={() => {
@@ -279,42 +299,44 @@ function Token({
   const logoSize = label ? r * 0.95 : r * 1.3;
   const logoY = label ? at.y - r * 0.32 : at.y;
   return (
-    <g filter={`url(#shadow-${uid})`}>
-      <ellipse cx={at.x} cy={at.y + depth} rx={r} ry={r * 0.92} fill={shade(color, -0.45)} />
-      <rect x={at.x - r} y={at.y} width={r * 2} height={depth} fill={shade(color, -0.45)} />
-      <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={color} />
-      <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={`url(#metal-${uid})`} />
-      <ellipse cx={at.x} cy={at.y} rx={r * 0.78} ry={r * 0.7} fill="none" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={r * 0.06} />
-      <ellipse cx={at.x - r * 0.25} cy={at.y - r * 0.38} rx={r * 0.45} ry={r * 0.2} fill="#ffffff" fillOpacity={0.45} />
-      {logo && (
-        <>
-          <clipPath id={`logo-${uid}-${id}`}>
-            <circle cx={at.x} cy={logoY} r={logoSize / 2} />
-          </clipPath>
-          <image
-            href={logo}
-            x={at.x - logoSize / 2}
-            y={logoY - logoSize / 2}
-            width={logoSize}
-            height={logoSize}
-            preserveAspectRatio="xMidYMid meet"
-            clipPath={`url(#logo-${uid}-${id})`}
-          />
-        </>
-      )}
-      {label && (
-        <text
-          x={at.x}
-          y={logo ? at.y + r * 0.45 : at.y + r * 0.04}
-          fontSize={r * (logo ? 0.55 : label.length > 2 ? 0.7 : 0.9)}
-          fontWeight={800}
-          fill={isLight(color) ? "#18181b" : "#ffffff"}
-          textAnchor="middle"
-          dominantBaseline="central"
-        >
-          {label}
-        </text>
-      )}
+    <g transform={ctx.turn ? `rotate(${ctx.turn} ${at.x} ${at.y})` : undefined}>
+      <g filter={`url(#shadow-${uid})`}>
+        <ellipse cx={at.x} cy={at.y + depth} rx={r} ry={r * 0.92} fill={shade(color, -0.45)} />
+        <rect x={at.x - r} y={at.y} width={r * 2} height={depth} fill={shade(color, -0.45)} />
+        <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={color} />
+        <ellipse cx={at.x} cy={at.y} rx={r} ry={r * 0.92} fill={`url(#metal-${uid})`} />
+        <ellipse cx={at.x} cy={at.y} rx={r * 0.78} ry={r * 0.7} fill="none" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={r * 0.06} />
+        <ellipse cx={at.x - r * 0.25} cy={at.y - r * 0.38} rx={r * 0.45} ry={r * 0.2} fill="#ffffff" fillOpacity={0.45} />
+        {logo && (
+          <>
+            <clipPath id={`logo-${uid}-${id}`}>
+              <circle cx={at.x} cy={logoY} r={logoSize / 2} />
+            </clipPath>
+            <image
+              href={logo}
+              x={at.x - logoSize / 2}
+              y={logoY - logoSize / 2}
+              width={logoSize}
+              height={logoSize}
+              preserveAspectRatio="xMidYMid meet"
+              clipPath={`url(#logo-${uid}-${id})`}
+            />
+          </>
+        )}
+        {label && (
+          <text
+            x={at.x}
+            y={logo ? at.y + r * 0.45 : at.y + r * 0.04}
+            fontSize={r * (logo ? 0.55 : label.length > 2 ? 0.7 : 0.9)}
+            fontWeight={800}
+            fill={isLight(color) ? "#18181b" : "#ffffff"}
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            {label}
+          </text>
+        )}
+      </g>
     </g>
   );
 }
@@ -376,13 +398,13 @@ function OverlayView({ overlay: o, ctx }: { overlay: Overlay; ctx: Ctx }) {
             strokeDasharray={o.stijl === "omlijnd" ? `${u * 0.6} ${u * 0.4}` : undefined}
             strokeLinejoin="round"
           />
-          {o.label && <Label x={minX + u * 0.6} y={maxY - u * 0.9} text={o.label} u={u} anchor="start" W={W} />}
+          {o.label && <Label x={minX + u * 0.6} y={maxY - u * 0.9} text={o.label} u={u} anchor="start" W={W} turn={ctx.turn} />}
         </g>
       );
     }
     case "tekst": {
       const p = pr.p(...m(o.x, o.y));
-      return <Label x={p.x} y={p.y} text={o.tekst} u={u} anchor="middle" W={W} />;
+      return <Label x={p.x} y={p.y} text={o.tekst} u={u} anchor="middle" W={W} turn={ctx.turn} />;
     }
     case "pijl": {
       const a = m(o.van_x, o.van_y);
@@ -445,7 +467,7 @@ function OverlayView({ overlay: o, ctx }: { overlay: Overlay; ctx: Ctx }) {
   }
 }
 
-function Label({ x, y, text, u, anchor, W }: { x: number; y: number; text: string; u: number; anchor: "start" | "middle"; W: number }) {
+function Label({ x, y, text, u, anchor, W, turn = 0 }: { x: number; y: number; text: string; u: number; anchor: "start" | "middle"; W: number; turn?: number }) {
   // Keep the label on the pitch: estimate its width and shift it inside.
   const size = u * 0.95;
   const width = text.length * size * 0.55;
@@ -455,6 +477,7 @@ function Label({ x, y, text, u, anchor, W }: { x: number; y: number; text: strin
     <text
       x={x + shift}
       y={y}
+      transform={turn ? `rotate(${turn} ${x + shift} ${y})` : undefined}
       fontSize={size}
       fontWeight={800}
       fill="#ffffff"

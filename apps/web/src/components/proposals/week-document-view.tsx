@@ -14,6 +14,7 @@ import { longDate, weekdayName } from "@/lib/weeks/dates";
 
 import { AnimatedDrawing } from "./animated-drawing";
 import { DrawingView } from "./drawing";
+import { VideoStill } from "./video-still";
 import { LoadPlanView, MasTable, type MasPlayer } from "./load-plan-view";
 import { Card, List, SetPieces, TacticalWeekView } from "./tactical-views";
 
@@ -250,7 +251,10 @@ export function WeekDocumentView({
                       labels={x.player}
                     />
                   ) : exercise?.videoUrl ? (
-                    <video src={exercise.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
+                    <div>
+                      <video src={exercise.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
+                      <VideoStill src={exercise.videoUrl} className="hidden print:block" />
+                    </div>
                   ) : (
                     drawing && <DrawingView drawing={drawing.tekening} />
                   )}
