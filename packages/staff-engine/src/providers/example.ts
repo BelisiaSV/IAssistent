@@ -82,7 +82,8 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
 
   const weekFactor = context.weekinput.periodisering.weektype?.reeksen_factor ?? 1;
   const physical = context.staf["physical-coach"] as { dagen?: { datum: string; rpe_doel: number | null }[] } | undefined;
-  const used = new Map<string, number>();
+  // Variation: an exercise is used at most once per week.
+  const used = new Set<string>();
 
   return days.map((d) => {
     if (!Array.isArray(d.onderdelen)) return d;
@@ -90,14 +91,10 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
     const factor = weekFactor * (staff.matchDays.dagen.find((m) => m.code === d.md)?.reeksen_factor ?? 1);
     const maxRpe = physical?.dagen?.find((x) => x.datum === d.datum)?.rpe_doel ?? null;
 
-    const today = new Set<string>();
     const parts: (Part & { _ex?: LibraryExercise })[] = (d.onderdelen as Part[]).map((part) => {
-      // Never the same exercise twice in one training.
-      const candidates = usable.filter((e) => (e.fase === part.fase || e.fase === null) && !today.has(e.id));
-      if (!candidates.length) return { ...part, oefening_id: null };
-      const exercise = [...candidates].sort((a, b) => (used.get(a.id) ?? 0) - (used.get(b.id) ?? 0))[0]!;
-      used.set(exercise.id, (used.get(exercise.id) ?? 0) + 1);
-      today.add(exercise.id);
+      const exercise = usable.find((e) => (e.fase === part.fase || e.fase === null) && !used.has(e.id));
+      if (!exercise) return { ...part, oefening_id: null };
+      used.add(exercise.id);
       return libraryPart(part, exercise, factor, maxRpe);
     });
 
