@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { readableOn, weekOverview } from "./overview";
+import { readableOn, shade, weekOverview, withAlpha } from "./overview";
+import { isoWeek } from "../weeks/dates";
 import type { WeekPlanningOutput, WeekPlanningPart } from "./types";
 
 const part = (fase: WeekPlanningPart["fase"], naam: string): WeekPlanningPart => ({
@@ -52,5 +53,14 @@ describe("week overview", () => {
     expect(readableOn("#0B3D91")).toBe("#ffffff");
     expect(readableOn("#F2C200")).toBe("#0f172a");
     expect(readableOn("oops")).toBe("#ffffff");
+    expect(withAlpha("#0B3D91", 0.1)).toBe("rgba(11, 61, 145, 0.1)");
+    expect(shade("#808080", 0.5)).toBe("#404040");
+    expect(shade("#808080", -0.5)).toBe("#c0c0c0");
+  });
+
+  it("knows the ISO week", () => {
+    expect(isoWeek("2026-10-19")).toBe(43);
+    expect(isoWeek("2026-01-01")).toBe(1);
+    expect(isoWeek("2027-01-01")).toBe(53);
   });
 });

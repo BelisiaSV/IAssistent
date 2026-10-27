@@ -63,7 +63,7 @@ export default async function TrainingSheetsPage({
             setPieces={doc.tc?.standaardsituaties ?? []}
             library={exercises}
             names={names}
-            team={{ clubName: team.club_name, teamName: team.name, primary: team.primary_color, logoUrl }}
+            team={{ clubName: team.club_name, teamName: team.name, primary: team.primary_color, secondary: team.secondary_color, logoUrl }}
           />
         ))}
       </div>

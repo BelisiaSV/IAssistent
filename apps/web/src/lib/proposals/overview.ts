@@ -74,3 +74,26 @@ export function readableOn(hex: string): "#ffffff" | "#0f172a" {
   const luminance = 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
   return luminance > 0.4 ? "#0f172a" : "#ffffff";
 }
+
+/** A team colour with transparency, for tints (alpha 0–1). */
+export function withAlpha(hex: string, alpha: number): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return `rgba(15, 23, 42, ${alpha})`;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(m[1]!.slice(i, i + 2), 16));
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** A darker (amount > 0) or lighter (amount < 0) shade of a team colour. */
+export function shade(hex: string, amount: number): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const target = amount > 0 ? 0 : 255;
+  const t = Math.min(1, Math.abs(amount));
+  const channel = (i: number) => {
+    const c = parseInt(m[1]!.slice(i, i + 2), 16);
+    return Math.round(c + (target - c) * t)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${channel(0)}${channel(2)}${channel(4)}`;
+}
