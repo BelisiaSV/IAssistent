@@ -5,6 +5,8 @@
 export interface WeekPlanningPart {
   /** Exercise from the coach's library, or null/absent for a new part. */
   oefening_id?: string | null;
+  /** Titles of the Tactical Coach's set pieces trained in this part. */
+  standaardsituaties?: string[];
   fase: "opwarming" | "kern" | "afsluiting";
   naam: string;
   doel: string;

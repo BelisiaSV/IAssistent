@@ -39,7 +39,8 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "laag",
-          "rpe": 3
+          "rpe": 3,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -57,7 +58,8 @@
           "werk_per_reeks": "4 min",
           "rust_tussen_reeksen": "1 min",
           "intensiteit": "matig",
-          "rpe": 5
+          "rpe": 5,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -75,7 +77,8 @@
           "werk_per_reeks": "7 min",
           "rust_tussen_reeksen": "2 min",
           "intensiteit": "matig",
-          "rpe": 6
+          "rpe": 6,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -92,7 +95,8 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "laag",
-          "rpe": 2
+          "rpe": 2,
+          "standaardsituaties": []
         }
       ],
       "opmerking": "Niet-gebruikte spelers van zondag: extra 15 min intervallopen na de training."
@@ -135,7 +139,8 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "matig",
-          "rpe": 4
+          "rpe": 4,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -153,7 +158,8 @@
           "werk_per_reeks": "3 min",
           "rust_tussen_reeksen": "2 min actieve rust",
           "intensiteit": "hoog",
-          "rpe": 8
+          "rpe": 8,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -171,7 +177,8 @@
           "werk_per_reeks": "8 min",
           "rust_tussen_reeksen": "2 min",
           "intensiteit": "hoog",
-          "rpe": 7
+          "rpe": 7,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -188,7 +195,8 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "laag",
-          "rpe": 2
+          "rpe": 2,
+          "standaardsituaties": []
         }
       ],
       "opmerking": null
@@ -219,7 +227,8 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "matig",
-          "rpe": 4
+          "rpe": 4,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -236,7 +245,8 @@
           "werk_per_reeks": "6 x 20 m",
           "rust_tussen_reeksen": "90 s tussen sprints, 3 min tussen reeksen",
           "intensiteit": "maximaal",
-          "rpe": 6
+          "rpe": 6,
+          "standaardsituaties": []
         },
         {
           "oefening_id": null,
@@ -254,7 +264,12 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "laag",
-          "rpe": 3
+          "rpe": 3,
+          "standaardsituaties": [
+            "Hoekschop aanvallend links",
+            "Hoekschop verdedigend",
+            "Vrije trap verdedigend"
+          ]
         },
         {
           "oefening_id": null,
@@ -269,7 +284,8 @@
           "werk_per_reeks": null,
           "rust_tussen_reeksen": null,
           "intensiteit": "laag",
-          "rpe": 2
+          "rpe": 2,
+          "standaardsituaties": []
         }
       ],
       "opmerking": null

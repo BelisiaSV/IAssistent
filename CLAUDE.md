@@ -249,6 +249,8 @@ Regels:
   teken (`signal`) en rollen met vereisten (`roles`, `[{ rol, vereiste }]`), zonder spelers. De
   Tactical Coach kiest eerst uit de eigen standaardsituaties (`standaardsituaties[].standaardsituatie_id`)
   en vult de rollen elke week in; hoogstens één nieuw voorstel (id null), dat de coach met
-  "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen.
+  "Bewaar in oefenstof" in zijn bibliotheek zet. De Assistent Coach gebruikt enkel oefeningen en
+  traint de standaardsituaties van het weekplan in een eigen onderdeel op de laatste training vóór
+  de wedstrijd (`onderdelen[].standaardsituaties` = titels); dat onderdeel wordt niet getekend.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; CSV-import; oefeningen handmatig wijzigen; videodienst.

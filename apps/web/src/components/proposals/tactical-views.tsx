@@ -103,7 +103,14 @@ export function SetPieces({
       <h3 className="font-semibold">{t.setPieces}</h3>
       <div className="grid gap-4 lg:grid-cols-2">
         {setPieces.map((sp, i) => (
-          <SetPieceCard key={i} setPiece={sp} names={names} library={library} save={source ? { ...source, index: i } : undefined} />
+          <SetPieceCard
+            key={i}
+            anchor={`standaardsituatie-${i}`}
+            setPiece={sp}
+            names={names}
+            library={library}
+            save={source ? { ...source, index: i } : undefined}
+          />
         ))}
       </div>
     </section>
@@ -232,7 +239,10 @@ export function SetPieceCard({
   large = false,
   library,
   save,
+  anchor,
 }: {
+  /** Element id, so other parts of the document can link to this set piece. */
+  anchor?: string;
   setPiece: SetPiece;
   names: Map<number, string>;
   large?: boolean;
@@ -243,7 +253,7 @@ export function SetPieceCard({
   const n = (text: string) => withShirtNames(text, names);
   const own = setPiece.standaardsituatie_id ? library?.items.get(setPiece.standaardsituatie_id) : undefined;
   return (
-    <article className={`break-inside-avoid rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:shadow-none print:ring-0 ${large ? "space-y-4" : "space-y-3"}`}>
+    <article id={anchor} className={`scroll-mt-4 break-inside-avoid rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:shadow-none print:ring-0 ${large ? "space-y-4" : "space-y-3"}`}>
       <header>
         <p className="flex flex-wrap items-center gap-2 text-xs">
           <span className="font-semibold tracking-wide text-brand uppercase">{t.setPieceKind[setPiece.soort]}</span>
@@ -270,10 +280,13 @@ export function SetPieceCard({
           logoOn={library!.display.logoOn}
           labels={x.player}
         />
+      ) : own?.videoUrl ? (
+        <video src={own.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
       ) : (
         <DrawingView drawing={setPiece.tekening} />
       )}
-      {setPiece.tekening.uitleg.length > 0 && (
+      {/* The explanation belongs to the staff's drawing, not to the coach's own animation or video. */}
+      {!own?.animation && !own?.videoUrl && setPiece.tekening.uitleg.length > 0 && (
         <ol className={`list-decimal space-y-0.5 pl-5 ${large ? "text-lg" : "text-sm"}`}>
           {setPiece.tekening.uitleg.map((step, i) => (
             <li key={i}>{n(step)}</li>
