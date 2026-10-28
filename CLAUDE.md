@@ -276,5 +276,8 @@ Regels:
   vorm (laatste 5 uitslagen uit `match_reports`), seizoensverloop (punten sinds
   `competition_start_date`, `seasonResults` in `lib/teams/dashboard.ts`), kits (de schijfjes uit
   `teams.animation_settings`) en de staf (naam en doel uit `rol.md`, status via de feature flags).
+  Gedeelde bouwstenen voor die stijl in `components/card.tsx` (`Card`, `CardHeader`, `EmptyState`,
+  `ButtonLink`, `StatTile`); Spelers (kaarten per linie, `players/player-card.tsx`) en Selecties
+  (kaarten met `components/mini-pitch.tsx`) volgen ze al, de andere pagina's volgen later.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

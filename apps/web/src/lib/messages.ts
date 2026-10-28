@@ -675,6 +675,8 @@ export const messages = {
     seasonsAtClub: (n: number) => (n === 1 ? "1e seizoen bij de club" : `${n} seizoenen bij de club`),
     returnExpected: (date: string) => `terug verwacht: ${date}`,
     count: (n: number) => (n === 1 ? "1 speler" : `${n} spelers`),
+    squad: "Kern",
+    footLabel: (foot: string) => `Voet: ${foot.toLowerCase()}`,
     status: {
       available: "Beschikbaar",
       injured: "Geblesseerd",

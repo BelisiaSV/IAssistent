@@ -5,6 +5,7 @@ import type { FormationCatalog, FormationSlot, PositionCatalog } from "@iassiste
 import { type FormEvent, startTransition, useActionState, useMemo, useState } from "react";
 
 import { Pitch } from "@/components/pitch";
+import { readableOn } from "@/lib/proposals/overview";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import {
   assignToSlot,
@@ -120,7 +121,7 @@ export function LineupEditor({
       {state.error && <Alert tone="error">{state.error}</Alert>}
       {state.success && !dirty && <Alert tone="success">{state.success}</Alert>}
 
-      <div className="grid gap-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:grid-cols-4">
+      <div className="grid gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:grid-cols-4">
         <Field label={m.titleLabel} error={errors.title}>
           <Input name="title" required maxLength={120} defaultValue={details.title} disabled={!canEdit} />
         </Field>
@@ -152,10 +153,16 @@ export function LineupEditor({
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-2">
-          <p className="text-sm text-slate-600">
-            {m.selectedCount(starterCount, formation.posten.length, lineup.bench.length)}
-            {canEdit && <> · {slot ? m.pickedSlot(slot.id) : m.pickSlot}</>}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold tracking-[0.15em] text-slate-500 uppercase">
+              {m.selectedCount(starterCount, formation.posten.length, lineup.bench.length)}
+            </p>
+            {canEdit && (
+              <p className={`rounded-full px-3 py-1 text-xs font-medium ${slot ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}>
+                {slot ? m.pickedSlot(slot.id) : m.pickSlot}
+              </p>
+            )}
+          </div>
           <Pitch>
             {formation.posten.map((s) => (
               <SlotMarker
@@ -176,6 +183,7 @@ export function LineupEditor({
           <PlayerList
             title={`${m.bench} (${lineup.bench.length})`}
             players={lineup.bench.map((id) => byId.get(id)).filter((p): p is LineupPlayer => !!p)}
+            color={colors.primary}
             canEdit={canEdit}
             highlight={fits}
             onPick={slot ? pickPlayer : undefined}
@@ -188,6 +196,7 @@ export function LineupEditor({
           <PlayerList
             title={`${m.notSelected} (${pool.length})`}
             players={pool}
+            color="#475569"
             canEdit={canEdit}
             highlight={fits}
             onPick={slot ? pickPlayer : undefined}
@@ -200,7 +209,12 @@ export function LineupEditor({
 
       {canEdit && (
         <div className="sticky bottom-4 flex justify-end">
-          <Button type="submit" disabled={pending} className="shadow-lg">
+          <Button
+            type="submit"
+            disabled={pending}
+            className="rounded-lg px-5 shadow-lg"
+            style={{ backgroundColor: colors.primary, color: readableOn(colors.primary) }}
+          >
             {pending ? messages.common.saving : messages.common.save}
           </Button>
         </div>
@@ -277,6 +291,7 @@ function SlotMarker({
 function PlayerList({
   title,
   players,
+  color,
   canEdit,
   highlight,
   onPick,
@@ -284,6 +299,7 @@ function PlayerList({
 }: {
   title: string;
   players: LineupPlayer[];
+  color: string;
   canEdit: boolean;
   highlight: (p: LineupPlayer) => boolean;
   onPick?: (playerId: string) => void;
@@ -291,8 +307,8 @@ function PlayerList({
 }) {
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">{title}</h3>
-      <ul className="divide-y divide-slate-100 rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <h3 className="text-xs font-bold tracking-[0.15em] text-slate-500 uppercase">{title}</h3>
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
         {players.map((p) => (
           <li key={p.id} className={`flex items-center gap-2 px-3 py-2 ${highlight(p) ? "bg-amber-50" : ""}`}>
             <button
@@ -301,7 +317,10 @@ function PlayerList({
               onClick={() => onPick?.(p.id)}
               className="flex min-w-0 flex-1 items-center gap-2 text-left enabled:hover:text-brand"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-black tabular-nums"
+                style={{ backgroundColor: color, color: readableOn(color) }}
+              >
                 {p.shirtNumber ?? "–"}
               </span>
               <span className="min-w-0">
@@ -329,7 +348,7 @@ function SmallButton({ onClick, children }: { onClick: () => void; children: Rea
     <button
       type="button"
       onClick={onClick}
-      className="shrink-0 rounded border border-slate-300 px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-50"
+      className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50"
     >
       {children}
     </button>

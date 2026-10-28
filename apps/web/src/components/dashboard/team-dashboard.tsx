@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { ButtonLink, CardHeader, EmptyState, StatTile } from "@/components/card";
 import { KitToken } from "@/components/dashboard/kit-token";
 import { RoleFigure } from "@/components/dashboard/role-figure";
 import { SeasonChart } from "@/components/dashboard/season-chart";
@@ -53,7 +53,7 @@ export function TeamDashboard({ team, logoUrl, today, next, opponent, season, fo
       <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:col-span-2">
         <CardHeader title={m.nextMatch.title} />
         {!next ? (
-          <Empty text={m.nextMatch.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
+          <EmptyBox text={m.nextMatch.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
         ) : (
           <div className="space-y-5 px-5 pb-5">
             <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-5 sm:px-6" style={{ backgroundColor: withAlpha(primary, 0.07) }}>
@@ -99,7 +99,7 @@ export function TeamDashboard({ team, logoUrl, today, next, opponent, season, fo
       <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
         <CardHeader title={m.form.title} hint={m.form.hint} />
         {!form.length ? (
-          <Empty text={m.form.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
+          <EmptyBox text={m.form.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
         ) : (
           <div className="space-y-4 px-5 pb-5">
             <div className="flex gap-1.5">
@@ -120,16 +120,16 @@ export function TeamDashboard({ team, logoUrl, today, next, opponent, season, fo
       <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:col-span-2">
         <CardHeader title={m.season.title} hint={seasonStart ? m.season.since(shortDate(seasonStart)) : m.season.hint} />
         {!season.matches.length ? (
-          <Empty text={m.season.none} />
+          <EmptyBox text={m.season.none} />
         ) : (
           <div className="space-y-4 px-5 pb-5">
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-              <Stat label={m.season.points} value={season.points} ink={ink} strong />
-              <Stat label={m.season.played} value={season.matches.length} />
+              <StatTile label={m.season.points} value={season.points} ink={ink} />
+              <StatTile label={m.season.played} value={season.matches.length} />
               {(["win", "draw", "loss"] as const).map((o) => (
-                <Stat key={o} label={m.form.outcome[o]} value={season.counts[o]} dot={OUTCOME_COLORS[o]} />
+                <StatTile key={o} label={m.form.outcome[o]} value={season.counts[o]} dot={OUTCOME_COLORS[o]} />
               ))}
-              <Stat label={m.season.goals} value={signed(season.goalsFor - season.goalsAgainst)} sub={`${season.goalsFor}-${season.goalsAgainst}`} />
+              <StatTile label={m.season.goals} value={signed(season.goalsFor - season.goalsAgainst)} sub={`${season.goalsFor}-${season.goalsAgainst}`} />
             </div>
             <div className="-mx-2 overflow-x-auto px-2">
               <div className="min-w-[520px]">
@@ -239,33 +239,6 @@ function countdown(days: number) {
 
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
-function CardHeader({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
-  return (
-    <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
-      <div>
-        <h2 className="text-xs font-bold tracking-[0.15em] text-slate-500 uppercase">{title}</h2>
-        {hint && <p className="mt-0.5 text-xs text-slate-400">{hint}</p>}
-      </div>
-      {action}
-    </div>
-  );
-}
-
-function Empty({ text, href, link }: { text: string; href?: string; link?: string }) {
-  return (
-    <div className="px-5 pb-5">
-      <div className="rounded-xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
-        <p>{text}</p>
-        {href && link && (
-          <Link href={href} className="mt-2 inline-block font-medium text-brand hover:text-brand-dark">
-            {link} →
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function Crest({ logoUrl, name, color }: { logoUrl?: string | null; name: string; color: string }) {
   if (logoUrl) {
     // eslint-disable-next-line @next/next/no-img-element
@@ -324,21 +297,6 @@ function AddressFact({ address, home }: { address: string | null; home: boolean 
   );
 }
 
-function ButtonLink({ href, children, color, subtle = false }: { href: string; children: ReactNode; color?: string; subtle?: boolean }) {
-  if (subtle || !color) {
-    return (
-      <Link href={href} className="inline-flex items-center rounded-lg px-3.5 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">
-        {children}
-      </Link>
-    );
-  }
-  return (
-    <Link href={href} className="inline-flex items-center rounded-lg px-3.5 py-2 text-sm font-semibold shadow-sm hover:opacity-90" style={{ backgroundColor: color, color: readableOn(color) }}>
-      {children}
-    </Link>
-  );
-}
-
 function OutcomeBadge({ outcome, large = false }: { outcome: PlayedMatch["outcome"]; large?: boolean }) {
   return (
     <span
@@ -367,21 +325,6 @@ function ResultRow({ match }: { match: PlayedMatch }) {
   );
 }
 
-function Stat({ label, value, sub, dot, ink, strong = false }: { label: string; value: ReactNode; sub?: string; dot?: string; ink?: string; strong?: boolean }) {
-  return (
-    <div className={`rounded-xl px-3 py-2 ${strong ? "" : "bg-slate-50"}`} style={strong && ink ? { backgroundColor: withAlpha(ink, 0.08) } : undefined}>
-      <p className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-        {dot && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: dot }} />}
-        {label}
-      </p>
-      <p className="text-xl font-extrabold text-slate-900 tabular-nums" style={strong && ink ? { color: ink } : undefined}>
-        {value}
-        {sub && <span className="ml-1 text-xs font-medium text-slate-400">{sub}</span>}
-      </p>
-    </div>
-  );
-}
-
 function StatusPill({ status }: { status: "active" | "off" | "soon" }) {
   const style = {
     active: "bg-emerald-50 text-emerald-700 ring-emerald-200",
@@ -393,5 +336,13 @@ function StatusPill({ status }: { status: "active" | "off" | "soon" }) {
       <span className={`h-1.5 w-1.5 rounded-full ${status === "active" ? "bg-emerald-500" : status === "off" ? "bg-amber-500" : "bg-slate-400"}`} />
       {m.staff.status[status]}
     </span>
+  );
+}
+
+function EmptyBox(props: { text: string; href?: string; link?: string }) {
+  return (
+    <div className="px-5 pb-5">
+      <EmptyState {...props} />
+    </div>
   );
 }
