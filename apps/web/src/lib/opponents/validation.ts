@@ -20,6 +20,8 @@ export const opponentFicheSchema = z.object({
   weaknesses: optionalText(1000, e.tooLong),
   setPieces: optionalText(1000, e.tooLong),
   notes: optionalText(2000, e.tooLong),
+  coachName: optionalText(120, e.tooLong),
+  address: optionalText(200, e.tooLong),
 });
 
 const shirtNumber = z.number().int(e.number).min(1, e.number).max(99, e.number).nullable();

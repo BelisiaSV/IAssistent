@@ -160,3 +160,22 @@ export async function saveAnimationSettings(
   revalidatePath(`/teams/${teamId}/settings`);
   return { success: s.display.saved };
 }
+
+const homeAddressSchema = z.string().trim().max(200, s.venue.tooLong).transform((v) => v || null);
+
+/** Saves the address of the own ground (shown with home matches). */
+export async function saveHomeAddress(teamId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
+  const parsed = homeAddressSchema.safeParse(String(formData.get("homeAddress") ?? ""));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? e.saveFailed };
+
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("teams").update({ home_address: parsed.data }).eq("id", teamId).select("id");
+  if (error || !data?.length) {
+    console.error("saveHomeAddress failed", error);
+    return { error: e.saveFailed };
+  }
+  revalidatePath(`/teams/${teamId}`, "layout");
+  return { success: s.venue.saved };
+}
