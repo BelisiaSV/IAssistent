@@ -11,6 +11,7 @@ import { trainingScheduleSchema } from "@/lib/weeks/validation";
 import { ScheduleForm } from "./schedule-form";
 import { DisplayForm } from "./display-form";
 import { SeasonForm } from "./season-form";
+import { VenueForm } from "./venue-form";
 
 const m = messages.settings;
 const PREVIEW_WEEKS = 16;
@@ -34,6 +35,7 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-600">{m.intro(team.name)}</p>
+      <VenueForm teamId={team.id} initial={team.home_address ?? ""} canEdit={canEdit} />
       <ScheduleForm teamId={team.id} initial={schedule.success ? schedule.data : []} canEdit={canEdit} />
       <SeasonForm
         teamId={team.id}
@@ -42,6 +44,7 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
         canEdit={canEdit}
       />
 
+      <div id="weergave" className="scroll-mt-6">
       <DisplayForm
         teamId={team.id}
         initial={{ stijl: display.settings.stijl, logo_op_schijfjes: display.settings.logo_op_schijfjes }}
@@ -49,6 +52,7 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
         hasLogo={!!team.logo_path}
         canEdit={canEdit}
       />
+      </div>
 
       <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="font-semibold">{m.preview.title}</h2>

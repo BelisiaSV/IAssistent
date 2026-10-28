@@ -76,10 +76,10 @@ describe("match evaluations", () => {
 
 describe("validation", () => {
   it("validates the fiche", () => {
-    expect(opponentFicheSchema.safeParse({ name: " ", playStyle: "", strengths: "", weaknesses: "", setPieces: "", notes: "" }).success).toBe(false);
+    expect(opponentFicheSchema.safeParse({ name: " ", playStyle: "", strengths: "", weaknesses: "", setPieces: "", notes: "", coachName: "", address: "" }).success).toBe(false);
     expect(
-      opponentFicheSchema.parse({ name: "KFC", playStyle: "", strengths: "x", weaknesses: "", setPieces: "", notes: "" }),
-    ).toMatchObject({ name: "KFC", playStyle: null, strengths: "x" });
+      opponentFicheSchema.parse({ name: "KFC", playStyle: "", strengths: "x", weaknesses: "", setPieces: "", notes: "", coachName: " Piet ", address: "" }),
+    ).toMatchObject({ name: "KFC", playStyle: null, strengths: "x", coachName: "Piet", address: null });
   });
 
   it("validates and compacts an opponent lineup", () => {

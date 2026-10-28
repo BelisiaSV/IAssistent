@@ -56,6 +56,8 @@ export default async function OpponentPage({ params }: { params: Promise<{ teamI
           weaknesses: opponent.weaknesses ?? "",
           setPieces: opponent.set_pieces ?? "",
           notes: opponent.notes ?? "",
+          coachName: opponent.coach_name ?? "",
+          address: opponent.address ?? "",
         }}
       />
 

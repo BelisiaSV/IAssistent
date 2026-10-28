@@ -19,7 +19,7 @@ export function FicheForm({
 }: {
   teamId: string;
   opponentId: string;
-  initial: { name: string; playStyle: string; strengths: string; weaknesses: string; setPieces: string; notes: string };
+  initial: { name: string; playStyle: string; strengths: string; weaknesses: string; setPieces: string; notes: string; coachName: string; address: string };
   canEdit: boolean;
 }) {
   const [state, action, pending] = useActionState<OpponentFormState, FormData>(
@@ -45,6 +45,14 @@ export function FicheForm({
       <Field label={m.name}>
         <Input name="name" defaultValue={initial.name} required maxLength={120} disabled={!canEdit} />
       </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={m.coachName}>
+          <Input name="coachName" defaultValue={initial.coachName} maxLength={120} disabled={!canEdit} />
+        </Field>
+        <Field label={m.address}>
+          <Input name="address" defaultValue={initial.address} maxLength={200} placeholder={m.addressPlaceholder} disabled={!canEdit} />
+        </Field>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {area("playStyle", m.playStyle, 1000, m.playStylePlaceholder)}
         {area("setPieces", m.setPieces, 1000)}

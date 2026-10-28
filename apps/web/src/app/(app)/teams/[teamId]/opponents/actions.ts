@@ -65,6 +65,8 @@ export async function saveOpponentFiche(
     weaknesses: String(formData.get("weaknesses") ?? ""),
     setPieces: String(formData.get("setPieces") ?? ""),
     notes: String(formData.get("notes") ?? ""),
+    coachName: String(formData.get("coachName") ?? ""),
+    address: String(formData.get("address") ?? ""),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? e.saveFailed };
 
@@ -80,6 +82,8 @@ export async function saveOpponentFiche(
       weaknesses: f.weaknesses,
       set_pieces: f.setPieces,
       notes: f.notes,
+      coach_name: f.coachName,
+      address: f.address,
     })
     .eq("id", opponentId)
     .eq("team_id", teamId)
