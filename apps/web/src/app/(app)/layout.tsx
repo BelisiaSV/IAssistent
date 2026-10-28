@@ -1,10 +1,13 @@
 import Link from "next/link";
 
+import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const admin = await isPlatformAdmin(await createClient());
 
   return (
     <div className="min-h-screen">
@@ -23,6 +26,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/profile/vision" className="text-slate-700 hover:text-brand">
               {messages.nav.vision}
             </Link>
+            {admin && (
+              <Link href="/admin/players" className="text-slate-700 hover:text-brand">
+                {messages.playerImport.nav}
+              </Link>
+            )}
             <span className="hidden text-slate-400 sm:inline">{user.email}</span>
             <form action="/auth/signout" method="post">
               <button type="submit" className="text-slate-700 hover:text-brand">
