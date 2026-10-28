@@ -18,8 +18,8 @@ export function NewLineupForm({ teamId, formations }: { teamId: string; formatio
   const errors = state.fieldErrors ?? {};
 
   return (
-    <form action={action} className="space-y-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-      <h2 className="font-semibold">{m.new}</h2>
+    <form action={action} className="space-y-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <h2 className="text-xs font-bold tracking-[0.15em] text-slate-500 uppercase">{m.new}</h2>
       {state.error && <Alert tone="error">{state.error}</Alert>}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={m.titleLabel} error={errors.title}>

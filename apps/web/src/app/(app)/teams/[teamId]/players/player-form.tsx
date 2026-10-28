@@ -45,7 +45,7 @@ export function PlayerForm({
 
   return (
     <div className="space-y-4">
-      <form onSubmit={onSubmit} className="space-y-5 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <form onSubmit={onSubmit} className="space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         {state.error && <Alert tone="error">{state.error}</Alert>}
 
         <div className="grid gap-5 sm:grid-cols-[1fr_1fr_8rem]">
