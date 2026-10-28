@@ -444,6 +444,7 @@ export type Database = {
           secondary_color: string;
           training_schedule: Json;
           competition_start_date: string | null;
+          home_address: string | null;
           preparation_start_date: string | null;
           preparation_weeks: number;
           animation_settings: Json;
@@ -464,6 +465,7 @@ export type Database = {
           secondary_color?: string;
           training_schedule?: Json;
           competition_start_date?: string | null;
+          home_address?: string | null;
           preparation_start_date?: string | null;
           preparation_weeks?: number;
           animation_settings?: Json;
@@ -484,6 +486,7 @@ export type Database = {
           secondary_color?: string;
           training_schedule?: Json;
           competition_start_date?: string | null;
+          home_address?: string | null;
           preparation_start_date?: string | null;
           preparation_weeks?: number;
           animation_settings?: Json;
@@ -832,6 +835,8 @@ export type Database = {
           weaknesses: string | null;
           set_pieces: string | null;
           notes: string | null;
+          address: string | null;
+          coach_name: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -845,6 +850,8 @@ export type Database = {
           weaknesses?: string | null;
           set_pieces?: string | null;
           notes?: string | null;
+          address?: string | null;
+          coach_name?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -858,6 +865,8 @@ export type Database = {
           weaknesses?: string | null;
           set_pieces?: string | null;
           notes?: string | null;
+          address?: string | null;
+          coach_name?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;

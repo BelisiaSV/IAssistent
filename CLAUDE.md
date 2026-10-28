@@ -268,5 +268,13 @@ Regels:
   downloaden (leeg of met de huidige kern, `lib/players/template.ts`, exceljs, keuzelijsten), bestand
   controleren (voorbeeld met fouten per rij, `parseImportRows` in `lib/players/import.ts`) en
   importeren: zelfde rugnummer = bijwerken, anders nieuw, niemand verwijderd, max. 200 rijen.
+- **Teamdashboard en navigatie** — bovenaan elke pagina een donkere balk met de **teamkiezer**
+  (`components/team-switcher.tsx`, opent een ander team op hetzelfde tabblad). Een team opent op zijn
+  **dashboard** (`/teams/[id]`, `components/dashboard/team-dashboard.tsx`) onder een banner in de
+  teamkleuren met de tabbladen: volgende wedstrijd (uit de weekinput; adres = `teams.home_address`
+  bij thuis, `opponents.address` bij uit; trainer `opponents.coach_name`, gaat nooit naar de AI),
+  vorm (laatste 5 uitslagen uit `match_reports`), seizoensverloop (punten sinds
+  `competition_start_date`, `seasonResults` in `lib/teams/dashboard.ts`), kits (de schijfjes uit
+  `teams.animation_settings`) en de staf (naam en doel uit `rol.md`, status via de feature flags).
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.
