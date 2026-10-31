@@ -14,6 +14,9 @@ export type NavIconName =
   | "videos"
   | "vision"
   | "admin"
+  | "logout"
+  | "collapse"
+  | "expand"
   | "menu"
   | "close";
 
@@ -96,6 +99,24 @@ const PATHS: Record<NavIconName, ReactNode> = {
     <>
       <rect x="4.5" y="10.5" width="15" height="10.5" rx="2" />
       <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5M21 12H9" />
+    </>
+  ),
+  collapse: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M9 4v16M15.5 9.5L13 12l2.5 2.5" />
+    </>
+  ),
+  expand: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M9 4v16M13 9.5l2.5 2.5L13 14.5" />
     </>
   ),
   menu: <path d="M4 6.5h16M4 12h16M4 17.5h16" />,

@@ -272,9 +272,10 @@ Regels:
   een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
   onderdeel) en de onderdelen in alfabetische volgorde (Matchday = selecties, Microcyclus = weekplanning;
   Animaties, Editor en Video's staan er als "Binnenkort"). Teamonderdelen openen voor het huidige team of
-  het laatst gebruikte (localStorage). Een team opent op zijn **dashboard** (`/teams/[id]`,
+  het laatst gebruikte (localStorage). Op grote schermen is de zijbalk **inklapbaar** tot enkel de iconen
+  (`components/app-shell.tsx`, cookie `iassistent-sidebar` zodat de server meteen de juiste breedte toont). Een team opent op zijn **dashboard** (`/teams/[id]`,
   `components/dashboard/team-dashboard.tsx`): één scherm in donkere stijl, zonder teambanner. Bovenaan
-  identiteit (logo + kit in de teamkleuren), volgende wedstrijd (uit de weekinput, met adres =
+  identiteit (logo en naam), volgende wedstrijd (uit de weekinput, met adres =
   `teams.home_address` bij thuis of `opponents.address` bij uit en trainer `opponents.coach_name`, die nooit
   naar de AI gaat), vorm (laatste 5 uit `match_reports`, punten sinds `competition_start_date`) en
   microcyclus (weektype uit de periodisering, trainingen en minuten). Daaronder de **kern op het veld** in de

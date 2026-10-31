@@ -1,9 +1,11 @@
 import { TEAM_LOGOS_BUCKET } from "@iassistent/db";
+import { cookies } from "next/headers";
 
-import { Sidebar } from "@/components/sidebar";
+import { AppShell } from "@/components/app-shell";
 import type { SwitcherTeam } from "@/components/team-switcher";
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
+import { SIDEBAR_COOKIE } from "@/lib/sidebar";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -29,10 +31,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     archived: !!t.archived_at,
   }));
 
+  const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "collapsed";
+
   return (
-    <div className="min-h-screen lg:pl-64 print:pl-0">
-      <Sidebar teams={switcherTeams} admin={admin} email={user.email ?? ""} />
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:p-0">{children}</main>
-    </div>
+    <AppShell teams={switcherTeams} admin={admin} email={user.email ?? ""} initialCollapsed={collapsed}>
+      {children}
+    </AppShell>
   );
 }

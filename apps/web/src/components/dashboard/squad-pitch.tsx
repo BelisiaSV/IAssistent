@@ -90,7 +90,7 @@ export function SquadPitch({
 
   return (
     <div className="space-y-3">
-      <div className="relative mx-auto aspect-[68/100] w-full max-w-[560px] overflow-hidden rounded-2xl shadow-inner ring-4 ring-emerald-900/20">
+      <div className="relative mx-auto aspect-[68/100] w-full max-w-[min(560px,calc((100vh-17rem)*0.68))] overflow-hidden rounded-2xl shadow-inner ring-4 ring-emerald-900/20">
         <svg viewBox="0 0 68 100" className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden>
           {Array.from({ length: 10 }, (_, i) => (
             <rect key={i} x="0" y={i * 10} width="68" height="10" fill={i % 2 ? "#2f8f46" : "#33994b"} />
@@ -213,7 +213,7 @@ function StatusDialog({
 }
 
 /** A shirt in the team colours with the position (or nothing) on it. */
-export function Jersey({ color, trim, label, className = "h-9 w-10 drop-shadow-md sm:h-11 sm:w-12" }: { color: string; trim: string; label?: string; className?: string }) {
+function Jersey({ color, trim, label, className = "h-9 w-10 drop-shadow-md sm:h-11 sm:w-12" }: { color: string; trim: string; label?: string; className?: string }) {
   return (
     <svg viewBox="0 0 48 44" className={className} aria-hidden>
       <path d="M16 3l-12 6 4 11 5-2v23h22V18l5 2 4-11-12-6c-1.5 3.5-4.5 5.5-8 5.5S17.5 6.5 16 3z" fill={color} stroke={shade(color, 0.35)} strokeWidth="1.2" strokeLinejoin="round" />

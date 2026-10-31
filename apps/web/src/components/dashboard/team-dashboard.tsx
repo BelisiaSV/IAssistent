@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { type LineupSpot, LineupPitch } from "@/components/dashboard/lineup-pitch";
-import { Jersey, type PitchPlayer, SquadPitch } from "@/components/dashboard/squad-pitch";
+import { type PitchPlayer, SquadPitch } from "@/components/dashboard/squad-pitch";
 import { messages } from "@/lib/messages";
 import { STATUS_COLORS } from "@/lib/players/status";
 import { PLAYER_STATUSES, type PlayerStatus } from "@/lib/players/validation";
@@ -74,7 +74,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
       <div className="space-y-4">
         {/* Top row: identity and the three key facts. */}
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-          <Panel className="flex items-center gap-4 p-4 xl:col-span-5">
+          <Panel className="flex items-center gap-4 p-4 xl:col-span-4">
             <Tile>
               {logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -89,12 +89,9 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
                 </span>
               )}
             </Tile>
-            <Tile>
-              <Jersey color={primary} trim={team.secondaryColor} className="h-16 w-[4.4rem] drop-shadow-lg" />
-            </Tile>
             <div className="min-w-0">
               <Eyebrow>{m.identity.title}</Eyebrow>
-              <p className="truncate text-xl font-extrabold tracking-tight text-white">{team.clubName}</p>
+              <p className="truncate text-2xl font-extrabold tracking-tight text-white">{team.clubName}</p>
               <p className="truncate text-xs text-slate-400">
                 {team.name}
                 {team.season ? ` · ${team.season}` : ""}
@@ -105,7 +102,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
             </div>
           </Panel>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:col-span-7">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:col-span-8">
             <Fact
               eyebrow={m.nextMatch.title}
               title={next ? next.opponent : m.nextMatch.noneShort}
@@ -170,7 +167,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
                 </>
               }
             />
-            <div className="grid gap-4 px-4 pb-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+            <div className="grid gap-4 px-4 pb-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
               <div className="min-w-0">
                 {squad.total === 0 ? (
                   <EmptyDark text={m.squad.none} href={squad.canEdit ? `${base}/players/new` : undefined} link={m.squad.addPlayers} />
