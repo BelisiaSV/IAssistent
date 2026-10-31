@@ -268,10 +268,15 @@ Regels:
   downloaden (leeg of met de huidige kern, `lib/players/template.ts`, exceljs, keuzelijsten), bestand
   controleren (voorbeeld met fouten per rij, `parseImportRows` in `lib/players/import.ts`) en
   importeren: zelfde rugnummer = bijwerken, anders nieuw, niemand verwijderd, max. 200 rijen.
-- **Teamdashboard en navigatie** — bovenaan elke pagina een donkere balk met de **teamkiezer**
-  (`components/team-switcher.tsx`, opent een ander team op hetzelfde tabblad). Een team opent op zijn
-  **dashboard** (`/teams/[id]`, `components/dashboard/team-dashboard.tsx`) onder een banner in de
-  teamkleuren met de tabbladen: volgende wedstrijd (uit de weekinput; adres = `teams.home_address`
+- **Teamdashboard en navigatie** — links een donkere **zijbalk** (`components/sidebar.tsx`; op mobiel
+  een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
+  onderdeel) en de onderdelen in alfabetische volgorde (Matchday = selecties, Microcyclus = weekplanning;
+  Animaties, Editor en Video's staan er als "Binnenkort"). Teamonderdelen openen voor het huidige team of
+  het laatst gebruikte (localStorage). Een team opent op zijn **dashboard** (`/teams/[id]`,
+  `components/dashboard/team-dashboard.tsx`) onder een banner in de teamkleuren: de **kern op het veld**
+  in de standaardformatie (`teams.default_formation`, Instellingen → Team; spelers per post via
+  `depthChart` in `lib/teams/depth-chart.ts`: hoofdpositie, dan andere posities, dan dezelfde linie;
+  klik op een speler om de status en terugkeerdatum te wijzigen), beschikbaarheid, volgende wedstrijd (uit de weekinput; adres = `teams.home_address`
   bij thuis, `opponents.address` bij uit; trainer `opponents.coach_name`, gaat nooit naar de AI),
   vorm (laatste 5 uitslagen uit `match_reports`), seizoensverloop (punten sinds
   `competition_start_date`, `seasonResults` in `lib/teams/dashboard.ts`), kits (de schijfjes uit

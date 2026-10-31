@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(6);
+select plan(8);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -51,6 +51,12 @@ select throws_ok($$update public.teams set home_address = repeat('x', 201) where
   '23514', null, 'the home address is at most 200 characters');
 select throws_ok($$update public.opponents set coach_name = repeat('x', 121) where id = (select id from ids where name = 'opp')$$,
   '23514', null, 'the coach name of an opponent is at most 120 characters');
+
+update public.teams set default_formation = '4-3-3' where id = (select id from ids where name = 'team');
+select is((select default_formation from public.teams where id = (select id from ids where name = 'team')), '4-3-3',
+  'the head coach sets the default formation');
+select throws_ok($$update public.teams set default_formation = repeat('x', 21) where id = (select id from ids where name = 'team')$$,
+  '23514', null, 'the default formation is a short code');
 
 select tests.login('other@test.local');
 update public.opponents set coach_name = 'Hacker' where id = (select id from ids where name = 'opp');

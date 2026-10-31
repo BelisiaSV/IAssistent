@@ -3,9 +3,12 @@ import { FEATURE_FLAGS, type FeatureFlagKey } from "@iassistent/db";
 import { type DashboardRole, TeamDashboard } from "@/components/dashboard/team-dashboard";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { opponentKey } from "@/lib/opponents/context";
-import { roleSummaries } from "@/lib/staff";
+import { PLAYER_STATUSES, type PlayerStatus } from "@/lib/players/validation";
+import { positionCatalog, roleSummaries } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { nextMatch, seasonResults } from "@/lib/teams/dashboard";
+import { depthChart } from "@/lib/teams/depth-chart";
+import { teamFormation } from "@/lib/teams/formation";
 import { getTeamContext } from "@/lib/teams/queries";
 import { addDays, mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 
@@ -20,11 +23,11 @@ const ROLE_ORDER = ["assistant-coach", "tactical-coach", "physical-coach", "vide
 
 export default async function TeamDashboardPage({ params }: { params: Promise<{ teamId: string }> }) {
   const { teamId } = await params;
-  const { team, logoUrl } = await getTeamContext(teamId);
+  const { team, logoUrl, canEdit } = await getTeamContext(teamId);
   const supabase = await createClient();
   const today = todayInBelgium();
 
-  const [{ data: weeks }, { data: reports }, { data: opponents }] = await Promise.all([
+  const [{ data: weeks }, { data: reports }, { data: opponents }, { data: players }] = await Promise.all([
     supabase
       .from("week_plans")
       .select("week_start, matches")
@@ -34,7 +37,27 @@ export default async function TeamDashboardPage({ params }: { params: Promise<{ 
       .limit(8),
     supabase.from("match_reports").select("match_date, opponent_name, home, goals_for, goals_against").eq("team_id", team.id),
     supabase.from("opponents").select("id, name, address, coach_name").eq("team_id", team.id),
+    supabase
+      .from("players")
+      .select("id, first_name, last_name, shirt_number, primary_position, secondary_positions, status, expected_return_date")
+      .eq("team_id", team.id)
+      .is("archived_at", null)
+      .order("shirt_number", { nullsFirst: false }),
   ]);
+
+  const squad = (players ?? []).map((p) => ({
+    id: p.id,
+    firstName: p.first_name,
+    lastName: p.last_name,
+    shirtNumber: p.shirt_number,
+    primaryPosition: p.primary_position,
+    secondaryPositions: p.secondary_positions,
+    status: p.status,
+    expectedReturnDate: p.expected_return_date,
+  }));
+  const formation = teamFormation(team.default_formation);
+  const chart = depthChart(squad, formation.posten, positionCatalog);
+  const counts = Object.fromEntries(PLAYER_STATUSES.map((st) => [st, squad.filter((p) => p.status === st).length])) as Record<PlayerStatus, number>;
 
   const next = nextMatch(weeks ?? [], today);
   const opponent = next ? (opponents ?? []).find((o) => opponentKey(o.name) === opponentKey(next.opponent)) : undefined;
@@ -54,6 +77,7 @@ export default async function TeamDashboardPage({ params }: { params: Promise<{ 
         id: team.id,
         clubName: team.club_name,
         primaryColor: team.primary_color,
+        secondaryColor: team.secondary_color,
         homeAddress: team.home_address,
         competitionStart: team.competition_start_date,
         animationSettings: team.animation_settings,
@@ -65,6 +89,14 @@ export default async function TeamDashboardPage({ params }: { params: Promise<{ 
       season={seasonResults(reports ?? [], team.competition_start_date)}
       form={seasonResults(reports ?? [], null).matches.slice(-5).reverse()}
       roles={roles}
+      squad={{
+        canEdit,
+        formation: formation.naam,
+        slots: formation.posten.map((slot) => ({ slot, players: chart.slots.get(slot.id) ?? [] })),
+        unplaced: chart.unplaced,
+        counts,
+        total: squad.length,
+      }}
     />
   );
 }

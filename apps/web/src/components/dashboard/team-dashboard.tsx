@@ -1,11 +1,15 @@
+import type { FormationSlot } from "@iassistent/staff-engine/content";
 import type { ReactNode } from "react";
 
 import { ButtonLink, CardHeader, EmptyState, StatTile } from "@/components/card";
 import { KitToken } from "@/components/dashboard/kit-token";
 import { RoleFigure } from "@/components/dashboard/role-figure";
+import { type PitchPlayer, SquadPitch } from "@/components/dashboard/squad-pitch";
 import { SeasonChart } from "@/components/dashboard/season-chart";
 import { themeForTeam } from "@/lib/animation/team-theme";
 import { messages } from "@/lib/messages";
+import { STATUS_COLORS } from "@/lib/players/status";
+import { PLAYER_STATUSES, type PlayerStatus } from "@/lib/players/validation";
 import { readableOn, shade, withAlpha } from "@/lib/proposals/overview";
 import { daysUntil, type NextMatch, OUTCOME_COLORS, type PlayedMatch, type SeasonResults } from "@/lib/teams/dashboard";
 import { longDate, shortDate } from "@/lib/weeks/dates";
@@ -24,6 +28,7 @@ export interface DashboardProps {
     id: string;
     clubName: string;
     primaryColor: string;
+    secondaryColor: string;
     homeAddress: string | null;
     competitionStart: string | null;
     animationSettings: unknown;
@@ -36,10 +41,18 @@ export interface DashboardProps {
   /** Last five results, newest first. */
   form: PlayedMatch[];
   roles: DashboardRole[];
+  squad: {
+    canEdit: boolean;
+    formation: string;
+    slots: { slot: FormationSlot; players: PitchPlayer[] }[];
+    unplaced: PitchPlayer[];
+    counts: Record<PlayerStatus, number>;
+    total: number;
+  };
 }
 
-/** The team at a glance: next match, form, season, kits and staff. */
-export function TeamDashboard({ team, logoUrl, today, next, opponent, season, form, roles }: DashboardProps) {
+/** The team at a glance: squad on the pitch, availability, next match, form, season, kits and staff. */
+export function TeamDashboard({ team, logoUrl, today, next, opponent, season, form, roles, squad }: DashboardProps) {
   const { theme, settings } = themeForTeam(team.animationSettings);
   const primary = team.primaryColor;
   // A light team colour is too faint for lines and text on white: use a darker shade.
@@ -48,168 +61,208 @@ export function TeamDashboard({ team, logoUrl, today, next, opponent, season, fo
   const seasonStart = team.competitionStart;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-3">
-      {/* Next match */}
-      <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:col-span-2">
-        <CardHeader title={m.nextMatch.title} />
-        {!next ? (
-          <EmptyBox text={m.nextMatch.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
-        ) : (
-          <div className="space-y-5 px-5 pb-5">
-            <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-5 sm:px-6" style={{ backgroundColor: withAlpha(primary, 0.07) }}>
-              <Side
-                name={next.home ? team.clubName : next.opponent}
-                crest={next.home ? <Crest logoUrl={logoUrl} name={team.clubName} color={primary} /> : <Crest name={next.opponent} color="#475569" />}
-              />
-              <div className="shrink-0 text-center">
-                <span
-                  className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wider uppercase"
-                  style={{ backgroundColor: next.home ? primary : "#334155", color: next.home ? readableOn(primary) : "#fff" }}
-                >
-                  {next.home ? m.nextMatch.home : m.nextMatch.away}
-                </span>
-                <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900 tabular-nums sm:text-3xl">{next.start ?? "vs"}</p>
-                <p className="text-xs font-semibold text-slate-500">{countdown(daysUntil(next.date, today))}</p>
-              </div>
-              <Side
-                name={next.home ? next.opponent : team.clubName}
-                crest={next.home ? <Crest name={next.opponent} color="#475569" /> : <Crest logoUrl={logoUrl} name={team.clubName} color={primary} />}
-              />
-            </div>
-            <dl className="grid gap-4 text-sm sm:grid-cols-3">
-              <Fact label={longDate(next.date)} value={next.start ? `${m.nextMatch.kickOff} ${next.start}` : m.nextMatch.noTime} />
-              <AddressFact address={next.home ? team.homeAddress : (opponent?.address ?? null)} home={next.home} />
-              <Fact label={m.nextMatch.coach} value={opponent?.coachName ?? m.nextMatch.noCoach} muted={!opponent?.coachName} />
-            </dl>
-            <div className="flex flex-wrap gap-2">
-              <ButtonLink href={`${base}/weeks/${next.weekStart}`} color={primary}>
-                {m.nextMatch.week}
-              </ButtonLink>
-              {opponent && (
-                <ButtonLink href={`${base}/opponents/${opponent.id}`} subtle>
-                  {m.nextMatch.fiche}
-                </ButtonLink>
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-start">
+        <div className="min-w-0 space-y-5 lg:col-span-2">
+          {/* Squad on the pitch */}
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <CardHeader
+              title={m.squad.title}
+              hint={squad.canEdit ? m.squad.hint(squad.formation) : m.squad.hintReadOnly(squad.formation)}
+              action={squad.canEdit && <ButtonLink href={`${base}/settings`} subtle>{m.squad.changeFormation}</ButtonLink>}
+            />
+            <div className="px-3 pb-5 sm:px-5">
+              {squad.total === 0 ? (
+                <EmptyState text={m.squad.none} href={squad.canEdit ? `${base}/players/new` : undefined} link={m.squad.addPlayers} />
+              ) : (
+                <SquadPitch
+                  teamId={team.id}
+                  canEdit={squad.canEdit}
+                  slots={squad.slots}
+                  unplaced={squad.unplaced}
+                  colors={{ primary, secondary: team.secondaryColor }}
+                  keeperColor={theme.doelman.eigen ?? team.secondaryColor}
+                />
               )}
             </div>
-          </div>
-        )}
-      </section>
-
-      {/* Form: last five results */}
-      <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <CardHeader title={m.form.title} hint={m.form.hint} />
-        {!form.length ? (
-          <EmptyBox text={m.form.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
-        ) : (
-          <div className="space-y-4 px-5 pb-5">
-            <div className="flex gap-1.5">
-              {[...form].reverse().map((r) => (
-                <OutcomeBadge key={r.date} outcome={r.outcome} large />
-              ))}
+          </section>
+          {/* Next match */}
+          <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <CardHeader title={m.nextMatch.title} />
+            {!next ? (
+              <EmptyBox text={m.nextMatch.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
+            ) : (
+              <div className="space-y-5 px-5 pb-5">
+                <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-5 sm:px-6" style={{ backgroundColor: withAlpha(primary, 0.07) }}>
+                  <Side
+                    name={next.home ? team.clubName : next.opponent}
+                    crest={next.home ? <Crest logoUrl={logoUrl} name={team.clubName} color={primary} /> : <Crest name={next.opponent} color="#475569" />}
+                  />
+                  <div className="shrink-0 text-center">
+                    <span
+                      className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wider uppercase"
+                      style={{ backgroundColor: next.home ? primary : "#334155", color: next.home ? readableOn(primary) : "#fff" }}
+                    >
+                      {next.home ? m.nextMatch.home : m.nextMatch.away}
+                    </span>
+                    <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900 tabular-nums sm:text-3xl">{next.start ?? "vs"}</p>
+                    <p className="text-xs font-semibold text-slate-500">{countdown(daysUntil(next.date, today))}</p>
+                  </div>
+                  <Side
+                    name={next.home ? next.opponent : team.clubName}
+                    crest={next.home ? <Crest name={next.opponent} color="#475569" /> : <Crest logoUrl={logoUrl} name={team.clubName} color={primary} />}
+                  />
+                </div>
+                <dl className="grid gap-4 text-sm sm:grid-cols-3">
+                  <Fact label={longDate(next.date)} value={next.start ? `${m.nextMatch.kickOff} ${next.start}` : m.nextMatch.noTime} />
+                  <AddressFact address={next.home ? team.homeAddress : (opponent?.address ?? null)} home={next.home} />
+                  <Fact label={m.nextMatch.coach} value={opponent?.coachName ?? m.nextMatch.noCoach} muted={!opponent?.coachName} />
+                </dl>
+                <div className="flex flex-wrap gap-2">
+                  <ButtonLink href={`${base}/weeks/${next.weekStart}`} color={primary}>
+                    {m.nextMatch.week}
+                  </ButtonLink>
+                  {opponent && (
+                    <ButtonLink href={`${base}/opponents/${opponent.id}`} subtle>
+                      {m.nextMatch.fiche}
+                    </ButtonLink>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+          {/* Season: running points */}
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <CardHeader title={m.season.title} hint={seasonStart ? m.season.since(shortDate(seasonStart)) : m.season.hint} />
+            {!season.matches.length ? (
+              <EmptyBox text={m.season.none} />
+            ) : (
+              <div className="space-y-4 px-5 pb-5">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  <StatTile label={m.season.points} value={season.points} ink={ink} />
+                  <StatTile label={m.season.played} value={season.matches.length} />
+                  {(["win", "draw", "loss"] as const).map((o) => (
+                    <StatTile key={o} label={m.form.outcome[o]} value={season.counts[o]} dot={OUTCOME_COLORS[o]} />
+                  ))}
+                  <StatTile label={m.season.goals} value={signed(season.goalsFor - season.goalsAgainst)} sub={`${season.goalsFor}-${season.goalsAgainst}`} />
+                </div>
+                <div className="-mx-2 overflow-x-auto px-2">
+                  <div className="min-w-[520px]">
+                    <SeasonChart matches={season.matches} color={ink} />
+                  </div>
+                </div>
+                <details className="text-sm">
+                  <summary className="cursor-pointer text-slate-500 hover:text-slate-700">{m.season.table}</summary>
+                  <table className="mt-2 w-full text-left">
+                    <thead className="text-xs text-slate-500">
+                      <tr>
+                        <th className="py-1 font-medium">{m.season.date}</th>
+                        <th className="py-1 font-medium">{m.season.opponent}</th>
+                        <th className="py-1 text-right font-medium">{m.season.score}</th>
+                        <th className="py-1 text-right font-medium">{m.season.points}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {season.matches.map((r) => (
+                        <tr key={r.date}>
+                          <td className="py-1.5">{shortDate(r.date)}</td>
+                          <td className="py-1.5">{r.opponent}</td>
+                          <td className="py-1.5 text-right tabular-nums">
+                            {r.goalsFor}-{r.goalsAgainst} <OutcomeBadge outcome={r.outcome} />
+                          </td>
+                          <td className="py-1.5 text-right tabular-nums">{r.points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </details>
+              </div>
+            )}
+          </section>
+        </div>
+        <div className="min-w-0 space-y-5">
+          {/* Availability of the squad */}
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <CardHeader title={m.availability.title} action={<ButtonLink href={`${base}/players`} subtle>{m.availability.open}</ButtonLink>} />
+            <div className="flex items-center gap-5 px-5 pb-5">
+              <AvailabilityDonut counts={squad.counts} total={squad.total} />
+              <ul className="flex-1 space-y-1.5 text-sm">
+                {PLAYER_STATUSES.map((s) => (
+                  <li key={s} className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[s] }} />
+                    <span className="flex-1 text-slate-600">{messages.players.status[s]}</span>
+                    <span className="font-bold tabular-nums">{squad.counts[s]}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="divide-y divide-slate-100">
-              {form.map((r) => (
-                <ResultRow key={r.date} match={r} />
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
-
-      {/* Season: running points */}
-      <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:col-span-2">
-        <CardHeader title={m.season.title} hint={seasonStart ? m.season.since(shortDate(seasonStart)) : m.season.hint} />
-        {!season.matches.length ? (
-          <EmptyBox text={m.season.none} />
-        ) : (
-          <div className="space-y-4 px-5 pb-5">
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-              <StatTile label={m.season.points} value={season.points} ink={ink} />
-              <StatTile label={m.season.played} value={season.matches.length} />
-              {(["win", "draw", "loss"] as const).map((o) => (
-                <StatTile key={o} label={m.form.outcome[o]} value={season.counts[o]} dot={OUTCOME_COLORS[o]} />
-              ))}
-              <StatTile label={m.season.goals} value={signed(season.goalsFor - season.goalsAgainst)} sub={`${season.goalsFor}-${season.goalsAgainst}`} />
-            </div>
-            <div className="-mx-2 overflow-x-auto px-2">
-              <div className="min-w-[520px]">
-                <SeasonChart matches={season.matches} color={ink} />
+          </section>
+          {/* Form: last five results */}
+          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <CardHeader title={m.form.title} hint={m.form.hint} />
+            {!form.length ? (
+              <EmptyBox text={m.form.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
+            ) : (
+              <div className="space-y-4 px-5 pb-5">
+                <div className="flex gap-1.5">
+                  {[...form].reverse().map((r) => (
+                    <OutcomeBadge key={r.date} outcome={r.outcome} large />
+                  ))}
+                </div>
+                <ul className="divide-y divide-slate-100">
+                  {form.map((r) => (
+                    <ResultRow key={r.date} match={r} />
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+          {/* Kits: the tokens of the animations */}
+          <section className="flex flex-col rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <CardHeader title={m.kits.title} hint={m.kits.hint} />
+            <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
+              <div
+                className="relative grid flex-1 grid-cols-5 place-items-center gap-1 overflow-hidden rounded-xl px-2 py-6"
+                style={{
+                  backgroundColor: theme.gras[0],
+                  backgroundImage: `repeating-linear-gradient(90deg, ${theme.gras[1]} 0 24px, transparent 24px 48px)`,
+                }}
+              >
+                <span aria-hidden className="absolute inset-y-0 left-1/2 w-px" style={{ backgroundColor: theme.lijnen, opacity: 0.35 }} />
+                <span
+                  aria-hidden
+                  className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+                  style={{ borderColor: theme.lijnen, opacity: 0.35 }}
+                />
+                {(
+                  [
+                    [theme.teams.eigen, "7", m.kits.own],
+                    [theme.doelman.eigen ?? theme.teams.eigen, "1", m.kits.ownKeeper],
+                    [theme.teams.tegenstander, "9", m.kits.opponent],
+                    [theme.doelman.tegenstander ?? theme.teams.tegenstander, "1", m.kits.opponentKeeper],
+                    [theme.teams.neutraal, "", m.kits.neutral],
+                  ] as const
+                ).map(([color, label, name]) => (
+                  <figure key={name + color} className="relative flex flex-col items-center gap-1">
+                    <KitToken color={color} label={label} size={46} />
+                    <figcaption className="text-center text-[10px] leading-tight font-medium" style={{ color: theme.lijnen }}>
+                      {name}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+              <p className="text-sm text-slate-600">{m.kits.style[settings.stijl]}</p>
+              <div className="mt-auto">
+                <ButtonLink href={`${base}/settings#weergave`} subtle>
+                  {m.kits.edit}
+                </ButtonLink>
               </div>
             </div>
-            <details className="text-sm">
-              <summary className="cursor-pointer text-slate-500 hover:text-slate-700">{m.season.table}</summary>
-              <table className="mt-2 w-full text-left">
-                <thead className="text-xs text-slate-500">
-                  <tr>
-                    <th className="py-1 font-medium">{m.season.date}</th>
-                    <th className="py-1 font-medium">{m.season.opponent}</th>
-                    <th className="py-1 text-right font-medium">{m.season.score}</th>
-                    <th className="py-1 text-right font-medium">{m.season.points}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {season.matches.map((r) => (
-                    <tr key={r.date}>
-                      <td className="py-1.5">{shortDate(r.date)}</td>
-                      <td className="py-1.5">{r.opponent}</td>
-                      <td className="py-1.5 text-right tabular-nums">
-                        {r.goalsFor}-{r.goalsAgainst} <OutcomeBadge outcome={r.outcome} />
-                      </td>
-                      <td className="py-1.5 text-right tabular-nums">{r.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </details>
-          </div>
-        )}
-      </section>
-
-      {/* Kits: the tokens of the animations */}
-      <section className="flex flex-col rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <CardHeader title={m.kits.title} hint={m.kits.hint} />
-        <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
-          <div
-            className="relative grid flex-1 grid-cols-5 place-items-center gap-1 overflow-hidden rounded-xl px-2 py-6"
-            style={{
-              backgroundColor: theme.gras[0],
-              backgroundImage: `repeating-linear-gradient(90deg, ${theme.gras[1]} 0 24px, transparent 24px 48px)`,
-            }}
-          >
-            <span aria-hidden className="absolute inset-y-0 left-1/2 w-px" style={{ backgroundColor: theme.lijnen, opacity: 0.35 }} />
-            <span
-              aria-hidden
-              className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border"
-              style={{ borderColor: theme.lijnen, opacity: 0.35 }}
-            />
-            {(
-              [
-                [theme.teams.eigen, "7", m.kits.own],
-                [theme.doelman.eigen ?? theme.teams.eigen, "1", m.kits.ownKeeper],
-                [theme.teams.tegenstander, "9", m.kits.opponent],
-                [theme.doelman.tegenstander ?? theme.teams.tegenstander, "1", m.kits.opponentKeeper],
-                [theme.teams.neutraal, "", m.kits.neutral],
-              ] as const
-            ).map(([color, label, name]) => (
-              <figure key={name + color} className="relative flex flex-col items-center gap-1">
-                <KitToken color={color} label={label} size={46} />
-                <figcaption className="text-center text-[10px] leading-tight font-medium" style={{ color: theme.lijnen }}>
-                  {name}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-          <p className="text-sm text-slate-600">{m.kits.style[settings.stijl]}</p>
-          <div className="mt-auto">
-            <ButtonLink href={`${base}/settings#weergave`} subtle>
-              {m.kits.edit}
-            </ButtonLink>
-          </div>
+          </section>
         </div>
-      </section>
-
+      </div>
       {/* Staff */}
-      <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:col-span-3">
+      <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
         <CardHeader title={m.staff.title} hint={m.staff.hint} action={<ButtonLink href={`${base}/weeks`} color={primary}>{m.staff.open}</ButtonLink>} />
         <ul className="grid gap-3 px-5 pb-5 sm:grid-cols-2 lg:grid-cols-4">
           {roles.map((role) => {
@@ -343,6 +396,47 @@ function EmptyBox(props: { text: string; href?: string; link?: string }) {
   return (
     <div className="px-5 pb-5">
       <EmptyState {...props} />
+    </div>
+  );
+}
+
+/** Ring with the share of available players, the other statuses as segments. */
+function AvailabilityDonut({ counts, total }: { counts: Record<PlayerStatus, number>; total: number }) {
+  const r = 40;
+  const c = 2 * Math.PI * r;
+  const gap = total > 1 ? 1.5 : 0;
+  let offset = 0;
+  return (
+    <div className="relative h-32 w-32 shrink-0">
+      <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
+        <circle cx="50" cy="50" r={r} fill="none" stroke="#e2e8f0" strokeWidth="11" />
+        {total > 0 &&
+          PLAYER_STATUSES.map((s) => {
+            const len = (counts[s] / total) * c;
+            if (!len) return null;
+            const seg = (
+              <circle
+                key={s}
+                cx="50"
+                cy="50"
+                r={r}
+                fill="none"
+                stroke={STATUS_COLORS[s]}
+                strokeWidth="11"
+                strokeDasharray={`${Math.max(len - gap, 0.5)} ${c}`}
+                strokeDashoffset={-offset}
+              />
+            );
+            offset += len;
+            return seg;
+          })}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-black tabular-nums">
+          {counts.available}/{total}
+        </span>
+        <span className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">{m.availability.available}</span>
+      </div>
     </div>
   );
 }

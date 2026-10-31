@@ -18,15 +18,15 @@ export interface SwitcherTeam {
 const m = messages.nav;
 
 /**
- * Pick the team at the top of every page. On a team page the other team
+ * Pick the team at the top of the side bar. On a team page the other team
  * opens on the same tab (players, weeks, …); elsewhere on its dashboard.
  */
-export function TeamSwitcher({ teams }: { teams: SwitcherTeam[] }) {
+export function TeamSwitcher({ teams, currentId }: { teams: SwitcherTeam[]; currentId: string | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const match = /^\/teams\/([0-9a-f-]{36})(\/[^/]+)?/.exec(pathname);
-  const current = teams.find((t) => t.id === match?.[1]) ?? null;
+  const current = teams.find((t) => t.id === (match?.[1] ?? currentId)) ?? null;
   const tab = match?.[2] ?? "";
 
   useEffect(() => {
@@ -52,16 +52,19 @@ export function TeamSwitcher({ teams }: { teams: SwitcherTeam[] }) {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex max-w-[16rem] items-center gap-2 rounded-lg border border-white/15 bg-white/10 py-1.5 pr-2.5 pl-1.5 text-sm font-medium text-white hover:bg-white/15"
+        className="flex w-full items-center gap-2 rounded-xl border border-white/15 bg-white/10 py-2 pr-2.5 pl-2 text-left text-sm font-medium text-white hover:bg-white/15"
       >
         {current ? <Crest team={current} /> : <span className="h-7 w-7 rounded-md bg-white/15" />}
-        <span className="min-w-0 truncate">{current ? `${current.clubName} · ${current.name}` : m.chooseTeam}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-semibold">{current ? current.clubName : m.chooseTeam}</span>
+          {current && <span className="block truncate text-xs text-slate-400">{current.name}</span>}
+        </span>
         <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 opacity-70" aria-hidden>
           <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
       {open && (
-        <div role="menu" className="absolute left-0 z-30 mt-2 w-72 overflow-hidden rounded-xl bg-white text-slate-800 shadow-xl ring-1 ring-slate-200">
+        <div role="menu" className="absolute left-0 z-30 mt-2 w-full min-w-60 overflow-hidden rounded-xl bg-white text-slate-800 shadow-xl ring-1 ring-slate-200">
           <ul className="max-h-80 overflow-y-auto py-1">
             {[...active, ...archived].map((t) => (
               <li key={t.id}>
