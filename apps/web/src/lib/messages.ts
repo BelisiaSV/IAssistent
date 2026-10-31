@@ -24,6 +24,8 @@ export const messages = {
     videos: "Video's",
     soon: "Binnenkort",
     closeMenu: "Menu sluiten",
+    collapse: "Menu inklappen",
+    expand: "Menu uitklappen",
     allTeams: "Alle teams",
     newTeam: "Nieuw team",
     menu: "Menu",

@@ -97,6 +97,12 @@ export function TeamSwitcher({ teams, currentId }: { teams: SwitcherTeam[]; curr
   );
 }
 
+/** Logo of a team, or its first letter in the team colour. */
+export function TeamCrest({ team }: { team: SwitcherTeam | null }) {
+  if (!team) return <span className="block h-7 w-7 rounded-md bg-white/15" />;
+  return <Crest team={team} />;
+}
+
 function Crest({ team }: { team: SwitcherTeam }) {
   if (team.logoUrl) {
     // eslint-disable-next-line @next/next/no-img-element
