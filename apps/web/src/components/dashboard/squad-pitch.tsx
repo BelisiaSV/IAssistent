@@ -11,6 +11,8 @@ import { readableOn, shade } from "@/lib/proposals/overview";
 
 const m = messages.dashboard.squad;
 const pm = messages.players;
+/** Players shown under a shirt; more opens the full list below the pitch. */
+const MAX_ON_PITCH = 3;
 
 export interface PitchPlayer {
   id: string;
@@ -44,6 +46,8 @@ export function SquadPitch({
   // Changes shown right away; the page refreshes with the saved data.
   const [changed, setChanged] = useState<Record<string, Pick<PitchPlayer, "status" | "expectedReturnDate">>>({});
   const [editing, setEditing] = useState<PitchPlayer | null>(null);
+  const [openSlot, setOpenSlot] = useState<string | null>(null);
+  const openList = slots.find((s) => s.slot.id === openSlot && s.players.length > MAX_ON_PITCH) ?? null;
   const withChanges = (p: PitchPlayer): PitchPlayer => ({ ...p, ...changed[p.id] });
 
   function save(player: PitchPlayer, status: PlayerStatus, returnDate: string) {
@@ -62,13 +66,13 @@ export function SquadPitch({
     const label = (
       <>
         <span className="h-2 w-2 shrink-0 rounded-full ring-1 ring-black/20" style={{ backgroundColor: STATUS_COLORS[p.status] }} />
-        <span className="tabular-nums">{p.shirtNumber ?? "–"}</span>
+        {p.shirtNumber !== null && <span className="tabular-nums">{p.shirtNumber}</span>}
         <span className="truncate">
           {p.firstName} {p.lastName.slice(0, 1)}.
         </span>
       </>
     );
-    const className = `flex max-w-full items-center gap-1 rounded-md bg-slate-950/80 px-1.5 py-0.5 text-[10px] leading-tight font-semibold text-white shadow-sm sm:text-[11px] ${
+    const className = `flex max-w-full items-center gap-1 rounded-md bg-slate-950/80 px-1.5 py-0.5 text-[clamp(9px,2.3cqw,12px)] leading-tight font-semibold text-white shadow-sm ${
       p.status === "available" ? "" : "opacity-75"
     }`;
     return canEdit ? (
@@ -90,7 +94,7 @@ export function SquadPitch({
 
   return (
     <div className="space-y-3">
-      <div className="relative mx-auto aspect-[68/100] w-full max-w-[min(560px,calc((100vh-17rem)*0.68))] overflow-hidden rounded-2xl shadow-inner ring-4 ring-emerald-900/20">
+      <div className="@container relative mx-auto aspect-[68/100] w-full max-w-[clamp(400px,calc((100vh-15rem)*0.68),600px)] overflow-hidden rounded-2xl shadow-inner ring-4 ring-emerald-900/20">
         <svg viewBox="0 0 68 100" className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden>
           {Array.from({ length: 10 }, (_, i) => (
             <rect key={i} x="0" y={i * 10} width="68" height="10" fill={i % 2 ? "#2f8f46" : "#33994b"} />
@@ -109,20 +113,52 @@ export function SquadPitch({
         </svg>
         {slots.map(({ slot, players }) => {
           const keeper = slot.positie === "GK";
+          // The keeper's names go beside the shirt, so the defenders above have room.
+          const beside = slot.y >= 85;
           return (
             <div
               key={slot.id}
-              className="absolute flex w-[29%] -translate-x-1/2 sm:w-[25%] -translate-y-[30%] flex-col items-center gap-0.5"
-              style={{ left: `${slot.x}%`, top: `${Math.min(slot.y, 86)}%` }}
+              className={`absolute flex items-center gap-[0.6cqw] ${
+                beside ? "w-[44cqw] -translate-x-[13cqw] -translate-y-1/2 flex-row" : "w-[27cqw] -translate-x-1/2 -translate-y-[30%] flex-col"
+              }`}
+              style={{ left: `${slot.x}%`, top: `${beside ? 91 : slot.y}%` }}
             >
-              <Jersey color={keeper ? keeperColor : colors.primary} trim={keeper ? shade(keeperColor, 0.3) : colors.secondary} label={slot.positie} />
-              <div className="flex w-full flex-col items-center gap-0.5">
-                {players.length ? players.map(chip) : <span className="rounded bg-black/25 px-1.5 text-[10px] text-white/70">{m.empty}</span>}
+              <Jersey
+                color={keeper ? keeperColor : colors.primary}
+                trim={keeper ? shade(keeperColor, 0.3) : colors.secondary}
+                label={slot.positie}
+                className="h-[10.5cqw] w-[11.5cqw] drop-shadow-md"
+              />
+              <div className={`flex min-w-0 flex-col gap-[0.6cqw] ${beside ? "items-start" : "w-full items-center"}`}>
+                {players.length === 0 && <span className="rounded bg-black/25 px-1.5 text-[10px] text-white/70">{m.empty}</span>}
+                {(players.length > MAX_ON_PITCH ? players.slice(0, MAX_ON_PITCH - 1) : players).map(chip)}
+                {players.length > MAX_ON_PITCH && (
+                  <button
+                    type="button"
+                    onClick={() => setOpenSlot(openSlot === slot.id ? null : slot.id)}
+                    aria-expanded={openSlot === slot.id}
+                    className="rounded-md bg-white/90 px-1.5 py-0.5 text-[clamp(9px,2.3cqw,12px)] leading-tight font-bold text-slate-900 shadow-sm hover:bg-white"
+                  >
+                    {m.more(players.length - MAX_ON_PITCH + 1)}
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {openList && (
+        <div className="rounded-xl bg-white/5 px-3 py-2">
+          <div className="mb-1.5 flex items-center justify-between">
+            <p className="text-[11px] font-semibold text-slate-300">{m.allOnPost(openList.slot.positie)}</p>
+            <button type="button" onClick={() => setOpenSlot(null)} className="text-[11px] font-semibold text-slate-400 hover:text-white">
+              {messages.common.close}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-1">{openList.players.map(chip)}</div>
+        </div>
+      )}
 
       {unplaced.length > 0 && (
         <div className="rounded-xl bg-white/5 px-3 py-2">
