@@ -273,14 +273,15 @@ Regels:
   onderdeel) en de onderdelen in alfabetische volgorde (Matchday = selecties, Microcyclus = weekplanning;
   Animaties, Editor en Video's staan er als "Binnenkort"). Teamonderdelen openen voor het huidige team of
   het laatst gebruikte (localStorage). Een team opent op zijn **dashboard** (`/teams/[id]`,
-  `components/dashboard/team-dashboard.tsx`) onder een banner in de teamkleuren: de **kern op het veld**
-  in de standaardformatie (`teams.default_formation`, Instellingen → Team; spelers per post via
-  `depthChart` in `lib/teams/depth-chart.ts`: hoofdpositie, dan andere posities, dan dezelfde linie;
-  klik op een speler om de status en terugkeerdatum te wijzigen), beschikbaarheid, volgende wedstrijd (uit de weekinput; adres = `teams.home_address`
-  bij thuis, `opponents.address` bij uit; trainer `opponents.coach_name`, gaat nooit naar de AI),
-  vorm (laatste 5 uitslagen uit `match_reports`), seizoensverloop (punten sinds
-  `competition_start_date`, `seasonResults` in `lib/teams/dashboard.ts`), kits (de schijfjes uit
-  `teams.animation_settings`) en de staf (naam en doel uit `rol.md`, status via de feature flags).
+  `components/dashboard/team-dashboard.tsx`): één scherm in donkere stijl, zonder teambanner. Bovenaan
+  identiteit (logo + kit in de teamkleuren), volgende wedstrijd (uit de weekinput, met adres =
+  `teams.home_address` bij thuis of `opponents.address` bij uit en trainer `opponents.coach_name`, die nooit
+  naar de AI gaat), vorm (laatste 5 uit `match_reports`, punten sinds `competition_start_date`) en
+  microcyclus (weektype uit de periodisering, trainingen en minuten). Daaronder de **kern op het veld** in de
+  standaardformatie (`teams.default_formation`, Instellingen → Team; spelers per post via `depthChart` in
+  `lib/teams/depth-chart.ts`: hoofdpositie, dan andere posities, dan dezelfde linie; klik op een speler om
+  status en terugkeerdatum te wijzigen) met vandaag, de volgende dagen en de duur per dag (`dayPlans` in
+  `lib/teams/microcycle.ts`, MD-labels uit `wedstrijddagen.json`), de laatste selectie en de beschikbaarheid.
   Gedeelde bouwstenen voor die stijl in `components/card.tsx` (`Card`, `CardHeader`, `EmptyState`,
   `ButtonLink`, `StatTile`); Spelers (kaarten per linie, `players/player-card.tsx`) en Selecties
   (kaarten met `components/mini-pitch.tsx`) volgen ze al, de andere pagina's volgen later.

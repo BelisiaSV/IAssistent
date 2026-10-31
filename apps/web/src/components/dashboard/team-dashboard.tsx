@@ -1,46 +1,43 @@
 import type { FormationSlot } from "@iassistent/staff-engine/content";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { ButtonLink, CardHeader, EmptyState, StatTile } from "@/components/card";
-import { KitToken } from "@/components/dashboard/kit-token";
-import { RoleFigure } from "@/components/dashboard/role-figure";
-import { type PitchPlayer, SquadPitch } from "@/components/dashboard/squad-pitch";
-import { SeasonChart } from "@/components/dashboard/season-chart";
-import { themeForTeam } from "@/lib/animation/team-theme";
+import { type LineupSpot, LineupPitch } from "@/components/dashboard/lineup-pitch";
+import { Jersey, type PitchPlayer, SquadPitch } from "@/components/dashboard/squad-pitch";
 import { messages } from "@/lib/messages";
 import { STATUS_COLORS } from "@/lib/players/status";
 import { PLAYER_STATUSES, type PlayerStatus } from "@/lib/players/validation";
-import { readableOn, shade, withAlpha } from "@/lib/proposals/overview";
-import { daysUntil, type NextMatch, OUTCOME_COLORS, type PlayedMatch, type SeasonResults } from "@/lib/teams/dashboard";
-import { longDate, shortDate } from "@/lib/weeks/dates";
+import { readableOn } from "@/lib/proposals/overview";
+import { daysUntil, type NextMatch, OUTCOME_COLORS, type PlayedMatch } from "@/lib/teams/dashboard";
+import type { DayPlan } from "@/lib/teams/microcycle";
+import { isoWeek, shortDate, weekdayName } from "@/lib/weeks/dates";
 
 const m = messages.dashboard;
-
-export interface DashboardRole {
-  id: string;
-  name: string;
-  goal: string | null;
-  status: "active" | "off" | "soon";
-}
 
 export interface DashboardProps {
   team: {
     id: string;
+    name: string;
     clubName: string;
+    season: string | null;
     primaryColor: string;
     secondaryColor: string;
-    homeAddress: string | null;
-    competitionStart: string | null;
-    animationSettings: unknown;
   };
   logoUrl: string | null;
   today: string;
   next: NextMatch | null;
-  opponent: { id: string; address: string | null; coachName: string | null } | null;
-  season: SeasonResults;
-  /** Last five results, newest first. */
-  form: PlayedMatch[];
-  roles: DashboardRole[];
+  /** Where the next match is played and who coaches the opponent. */
+  venue: { address: string | null; coach: string | null } | null;
+  /** Last five results, newest first, and the points of the season. */
+  form: { matches: PlayedMatch[]; points: number; played: number };
+  microcycle: {
+    weekStart: string;
+    weekType: string | null;
+    /** Monday to Sunday of this week. */
+    week: DayPlan[];
+    /** Today and the next days. */
+    upcoming: DayPlan[];
+  };
   squad: {
     canEdit: boolean;
     formation: string;
@@ -48,240 +45,258 @@ export interface DashboardProps {
     unplaced: PitchPlayer[];
     counts: Record<PlayerStatus, number>;
     total: number;
+    keeperColor: string;
   };
+  lineup: {
+    id: string;
+    title: string;
+    formation: string;
+    spots: LineupSpot[];
+    bench: { id: string; number: number | null; name: string; position: string | null; status: PlayerStatus }[];
+  } | null;
 }
 
-/** The team at a glance: squad on the pitch, availability, next match, form, season, kits and staff. */
-export function TeamDashboard({ team, logoUrl, today, next, opponent, season, form, roles, squad }: DashboardProps) {
-  const { theme, settings } = themeForTeam(team.animationSettings);
+/**
+ * The team at a glance, on one screen: identity and kit, next match, form and
+ * microcycle on top; the squad on the pitch with the days of the microcycle,
+ * the last lineup and the availability below.
+ */
+export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcycle, squad, lineup }: DashboardProps) {
   const primary = team.primaryColor;
-  // A light team colour is too faint for lines and text on white: use a darker shade.
-  const ink = readableOn(primary) === "#ffffff" ? primary : shade(primary, 0.5);
   const base = `/teams/${team.id}`;
-  const seasonStart = team.competitionStart;
+  const todayPlan = microcycle.upcoming[0];
+  const sessions = microcycle.week.filter((d) => d.training);
+  const minutes = sessions.reduce((sum, d) => sum + (d.training?.minutes ?? 0), 0);
+  const maxMinutes = Math.max(90, ...microcycle.week.map((d) => d.training?.minutes ?? (d.match ? 90 : 0)));
 
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-start">
-        <div className="min-w-0 space-y-5 lg:col-span-2">
-          {/* Squad on the pitch */}
-          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <CardHeader
-              title={m.squad.title}
-              hint={squad.canEdit ? m.squad.hint(squad.formation) : m.squad.hintReadOnly(squad.formation)}
-              action={squad.canEdit && <ButtonLink href={`${base}/settings`} subtle>{m.squad.changeFormation}</ButtonLink>}
-            />
-            <div className="px-3 pb-5 sm:px-5">
-              {squad.total === 0 ? (
-                <EmptyState text={m.squad.none} href={squad.canEdit ? `${base}/players/new` : undefined} link={m.squad.addPlayers} />
+    <div className="-mx-4 -my-6 min-h-screen bg-[#0b1220] px-3 py-4 text-slate-100 sm:-mx-6 sm:-my-8 sm:px-4 lg:-mx-8 lg:px-5">
+      <div className="space-y-4">
+        {/* Top row: identity and the three key facts. */}
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+          <Panel className="flex items-center gap-4 p-4 xl:col-span-5">
+            <Tile>
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt="" className="h-16 w-16 object-contain" />
               ) : (
-                <SquadPitch
-                  teamId={team.id}
-                  canEdit={squad.canEdit}
-                  slots={squad.slots}
-                  unplaced={squad.unplaced}
-                  colors={{ primary, secondary: team.secondaryColor }}
-                  keeperColor={theme.doelman.eigen ?? team.secondaryColor}
-                />
+                <span
+                  aria-hidden
+                  className="flex h-16 w-16 items-center justify-center rounded-xl text-3xl font-black"
+                  style={{ backgroundColor: primary, color: readableOn(primary) }}
+                >
+                  {team.clubName.slice(0, 1).toUpperCase()}
+                </span>
               )}
+            </Tile>
+            <Tile>
+              <Jersey color={primary} trim={team.secondaryColor} className="h-16 w-[4.4rem] drop-shadow-lg" />
+            </Tile>
+            <div className="min-w-0">
+              <Eyebrow>{m.identity.title}</Eyebrow>
+              <p className="truncate text-xl font-extrabold tracking-tight text-white">{team.clubName}</p>
+              <p className="truncate text-xs text-slate-400">
+                {team.name}
+                {team.season ? ` · ${team.season}` : ""}
+              </p>
+              <Link href={`${base}/settings`} className="mt-1.5 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-slate-200 hover:bg-white/15">
+                {m.identity.edit}
+              </Link>
             </div>
-          </section>
-          {/* Next match */}
-          <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <CardHeader title={m.nextMatch.title} />
-            {!next ? (
-              <EmptyBox text={m.nextMatch.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
-            ) : (
-              <div className="space-y-5 px-5 pb-5">
-                <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-5 sm:px-6" style={{ backgroundColor: withAlpha(primary, 0.07) }}>
-                  <Side
-                    name={next.home ? team.clubName : next.opponent}
-                    crest={next.home ? <Crest logoUrl={logoUrl} name={team.clubName} color={primary} /> : <Crest name={next.opponent} color="#475569" />}
-                  />
-                  <div className="shrink-0 text-center">
-                    <span
-                      className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wider uppercase"
-                      style={{ backgroundColor: next.home ? primary : "#334155", color: next.home ? readableOn(primary) : "#fff" }}
-                    >
-                      {next.home ? m.nextMatch.home : m.nextMatch.away}
-                    </span>
-                    <p className="mt-1.5 text-2xl font-black tracking-tight text-slate-900 tabular-nums sm:text-3xl">{next.start ?? "vs"}</p>
-                    <p className="text-xs font-semibold text-slate-500">{countdown(daysUntil(next.date, today))}</p>
+          </Panel>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:col-span-7">
+            <Fact
+              eyebrow={m.nextMatch.title}
+              title={next ? next.opponent : m.nextMatch.noneShort}
+              sub={next ? [shortDate(next.date), next.home ? m.nextMatch.home : m.nextMatch.away, next.start].filter(Boolean).join(" · ") : m.nextMatch.noneHint}
+              badge={next ? countdown(daysUntil(next.date, today)) : undefined}
+              href={next ? `${base}/weeks/${next.weekStart}` : `${base}/weeks`}
+            >
+              {venue?.address && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.address)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 block truncate text-[11px] text-sky-300 hover:underline"
+                >
+                  {venue.address} ↗
+                </a>
+              )}
+              {venue?.coach && <p className="truncate text-[11px] text-slate-400">{m.nextMatch.coach(venue.coach)}</p>}
+            </Fact>
+            <Panel className="p-4">
+              <Eyebrow>{m.form.title}</Eyebrow>
+              {form.matches.length ? (
+                <>
+                  <div className="mt-2 flex gap-1">
+                    {[...form.matches].reverse().map((r) => (
+                      <span
+                        key={r.date}
+                        title={`${shortDate(r.date)} · ${r.opponent} · ${r.goalsFor}-${r.goalsAgainst}`}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold text-white"
+                        style={{ backgroundColor: OUTCOME_COLORS[r.outcome] }}
+                      >
+                        {m.form.letter[r.outcome]}
+                      </span>
+                    ))}
                   </div>
-                  <Side
-                    name={next.home ? next.opponent : team.clubName}
-                    crest={next.home ? <Crest name={next.opponent} color="#475569" /> : <Crest logoUrl={logoUrl} name={team.clubName} color={primary} />}
-                  />
-                </div>
-                <dl className="grid gap-4 text-sm sm:grid-cols-3">
-                  <Fact label={longDate(next.date)} value={next.start ? `${m.nextMatch.kickOff} ${next.start}` : m.nextMatch.noTime} />
-                  <AddressFact address={next.home ? team.homeAddress : (opponent?.address ?? null)} home={next.home} />
-                  <Fact label={m.nextMatch.coach} value={opponent?.coachName ?? m.nextMatch.noCoach} muted={!opponent?.coachName} />
-                </dl>
-                <div className="flex flex-wrap gap-2">
-                  <ButtonLink href={`${base}/weeks/${next.weekStart}`} color={primary}>
-                    {m.nextMatch.week}
-                  </ButtonLink>
-                  {opponent && (
-                    <ButtonLink href={`${base}/opponents/${opponent.id}`} subtle>
-                      {m.nextMatch.fiche}
-                    </ButtonLink>
-                  )}
-                </div>
-              </div>
-            )}
-          </section>
-          {/* Season: running points */}
-          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <CardHeader title={m.season.title} hint={seasonStart ? m.season.since(shortDate(seasonStart)) : m.season.hint} />
-            {!season.matches.length ? (
-              <EmptyBox text={m.season.none} />
-            ) : (
-              <div className="space-y-4 px-5 pb-5">
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                  <StatTile label={m.season.points} value={season.points} ink={ink} />
-                  <StatTile label={m.season.played} value={season.matches.length} />
-                  {(["win", "draw", "loss"] as const).map((o) => (
-                    <StatTile key={o} label={m.form.outcome[o]} value={season.counts[o]} dot={OUTCOME_COLORS[o]} />
-                  ))}
-                  <StatTile label={m.season.goals} value={signed(season.goalsFor - season.goalsAgainst)} sub={`${season.goalsFor}-${season.goalsAgainst}`} />
-                </div>
-                <div className="-mx-2 overflow-x-auto px-2">
-                  <div className="min-w-[520px]">
-                    <SeasonChart matches={season.matches} color={ink} />
-                  </div>
-                </div>
-                <details className="text-sm">
-                  <summary className="cursor-pointer text-slate-500 hover:text-slate-700">{m.season.table}</summary>
-                  <table className="mt-2 w-full text-left">
-                    <thead className="text-xs text-slate-500">
-                      <tr>
-                        <th className="py-1 font-medium">{m.season.date}</th>
-                        <th className="py-1 font-medium">{m.season.opponent}</th>
-                        <th className="py-1 text-right font-medium">{m.season.score}</th>
-                        <th className="py-1 text-right font-medium">{m.season.points}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {season.matches.map((r) => (
-                        <tr key={r.date}>
-                          <td className="py-1.5">{shortDate(r.date)}</td>
-                          <td className="py-1.5">{r.opponent}</td>
-                          <td className="py-1.5 text-right tabular-nums">
-                            {r.goalsFor}-{r.goalsAgainst} <OutcomeBadge outcome={r.outcome} />
-                          </td>
-                          <td className="py-1.5 text-right tabular-nums">{r.points}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </details>
-              </div>
-            )}
-          </section>
+                  <p className="mt-1.5 text-xs text-slate-400">{m.form.season(form.points, form.played)}</p>
+                </>
+              ) : (
+                <p className="mt-1 text-sm font-semibold text-slate-300">{m.form.noneShort}</p>
+              )}
+            </Panel>
+            <Fact
+              eyebrow={m.microcycle.title}
+              title={m.microcycle.week(isoWeek(microcycle.weekStart), microcycle.weekType)}
+              sub={sessions.length ? m.microcycle.sessions(sessions.length, minutes) : m.microcycle.none}
+              href={`${base}/weeks/${microcycle.weekStart}`}
+            />
+          </div>
         </div>
-        <div className="min-w-0 space-y-5">
-          {/* Availability of the squad */}
-          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <CardHeader title={m.availability.title} action={<ButtonLink href={`${base}/players`} subtle>{m.availability.open}</ButtonLink>} />
-            <div className="flex items-center gap-5 px-5 pb-5">
-              <AvailabilityDonut counts={squad.counts} total={squad.total} />
-              <ul className="flex-1 space-y-1.5 text-sm">
-                {PLAYER_STATUSES.map((s) => (
-                  <li key={s} className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[s] }} />
-                    <span className="flex-1 text-slate-600">{messages.players.status[s]}</span>
-                    <span className="font-bold tabular-nums">{squad.counts[s]}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-          {/* Form: last five results */}
-          <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <CardHeader title={m.form.title} hint={m.form.hint} />
-            {!form.length ? (
-              <EmptyBox text={m.form.none} href={`${base}/weeks`} link={m.nextMatch.plan} />
-            ) : (
-              <div className="space-y-4 px-5 pb-5">
-                <div className="flex gap-1.5">
-                  {[...form].reverse().map((r) => (
-                    <OutcomeBadge key={r.date} outcome={r.outcome} large />
-                  ))}
+
+        {/* Main row. */}
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+          <Panel className="xl:col-span-8">
+            <PanelHeader
+              title={m.squad.title}
+              aside={
+                <>
+                  <Pill>{m.squad.formationPill(squad.formation)}</Pill>
+                  <HeaderLink href={squad.canEdit ? `${base}/settings` : `${base}/players`}>
+                    {squad.canEdit ? m.squad.changeFormation : m.availability.open}
+                  </HeaderLink>
+                </>
+              }
+            />
+            <div className="grid gap-4 px-4 pb-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+              <div className="min-w-0">
+                {squad.total === 0 ? (
+                  <EmptyDark text={m.squad.none} href={squad.canEdit ? `${base}/players/new` : undefined} link={m.squad.addPlayers} />
+                ) : (
+                  <SquadPitch
+                    teamId={team.id}
+                    canEdit={squad.canEdit}
+                    slots={squad.slots}
+                    unplaced={squad.unplaced}
+                    colors={{ primary, secondary: team.secondaryColor }}
+                    keeperColor={squad.keeperColor}
+                  />
+                )}
+              </div>
+
+              <div className="flex min-w-0 flex-col gap-3">
+                <SubPanel title={m.microcycle.today}>
+                  {todayPlan && <DayBadge day={todayPlan} />}
+                  <p className="mt-2 text-lg font-bold text-white">{todayPlan ? dayTitle(todayPlan) : m.microcycle.rest}</p>
+                  <p className="text-xs text-slate-400">{todayPlan ? daySub(todayPlan) : ""}</p>
+                </SubPanel>
+
+                <SubPanel title={m.microcycle.next}>
+                  <ul className="divide-y divide-white/5">
+                    {microcycle.upcoming.slice(1, 5).map((d) => (
+                      <li key={d.date} className="flex items-center gap-3 py-1.5 text-xs">
+                        <span className="w-16 shrink-0 font-semibold text-slate-300 uppercase">{weekdayName(d.date).slice(0, 2)} {shortDate(d.date)}</span>
+                        <span className="w-12 shrink-0">{d.md && <span className="rounded bg-white/10 px-1.5 py-0.5 font-bold text-slate-200">{d.md.code}</span>}</span>
+                        <span className="min-w-0 flex-1 truncate text-slate-300">{dayTitle(d)}</span>
+                        <span className="shrink-0 text-slate-500 tabular-nums">{d.training ? m.microcycle.minutes(d.training.minutes) : d.match?.start ?? "—"}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </SubPanel>
+
+                <SubPanel title={m.microcycle.duration} aside={minutes ? m.microcycle.minutes(minutes) : undefined}>
+                  <div className="flex h-28 items-stretch gap-2">
+                    {microcycle.week.map((d) => {
+                      const value = d.training?.minutes ?? (d.match ? 90 : 0);
+                      return (
+                        <div key={d.date} className="flex min-w-0 flex-1 flex-col items-center gap-1" title={`${weekdayName(d.date)} · ${dayTitle(d)}`}>
+                          <div className="relative flex w-full max-w-5 flex-1 items-end overflow-hidden rounded-full bg-white/5">
+                            <div
+                              className="w-full rounded-full"
+                              style={{ height: `${(value / maxMinutes) * 100}%`, backgroundColor: d.match ? team.secondaryColor : "#22c55e", opacity: d.date < today ? 0.5 : 1 }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-bold text-white tabular-nums">{value || "—"}</span>
+                          <span className="text-[9px] font-semibold text-slate-500 uppercase">{d.md?.code ?? weekdayName(d.date).slice(0, 2)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </SubPanel>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <MiniStat label={m.microcycle.total} value={minutes ? m.microcycle.minutes(minutes) : "—"} />
+                  <MiniStat label={m.microcycle.sessionsLabel} value={sessions.length || "—"} />
                 </div>
-                <ul className="divide-y divide-slate-100">
-                  {form.map((r) => (
-                    <ResultRow key={r.date} match={r} />
+              </div>
+            </div>
+          </Panel>
+
+          <div className="flex min-w-0 flex-col gap-4 xl:col-span-4">
+            <Panel>
+              <PanelHeader
+                title={m.lineup.title}
+                aside={lineup ? <Pill>{lineup.formation}</Pill> : undefined}
+              />
+              {lineup ? (
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 px-4 pb-4">
+                  <Link href={`${base}/lineups/${lineup.id}`} className="block h-64" title={lineup.title}>
+                    <LineupPitch spots={lineup.spots} color={primary} />
+                  </Link>
+                  <div className="min-w-0">
+                    <p className="mb-1.5 truncate text-[11px] font-bold tracking-wider text-slate-400 uppercase">{m.lineup.bench}</p>
+                    <ul className="space-y-1">
+                      {lineup.bench.slice(0, 7).map((p) => (
+                        <li key={p.id} className="flex items-center gap-2 rounded-lg bg-white/5 px-2 py-1">
+                          <span className="w-5 text-center text-[11px] font-black tabular-nums">{p.number ?? "–"}</span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[11px] font-semibold text-white">{p.name}</span>
+                            {p.position && <span className="block text-[9px] text-slate-400">{p.position}</span>}
+                          </span>
+                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[p.status] }} />
+                        </li>
+                      ))}
+                      {!lineup.bench.length && <li className="text-xs text-slate-500">—</li>}
+                    </ul>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-4 pb-4">
+                  <EmptyDark text={m.lineup.none} href={`${base}/lineups`} link={m.lineup.open} />
+                </div>
+              )}
+            </Panel>
+
+            <Panel>
+              <PanelHeader title={m.availability.title} aside={<HeaderLink href={`${base}/players`}>{m.availability.open}</HeaderLink>} />
+              <div className="flex items-center gap-5 px-4 pb-3">
+                <AvailabilityDonut counts={squad.counts} total={squad.total} />
+                <ul className="flex-1 space-y-1.5 text-xs">
+                  {PLAYER_STATUSES.map((s) => (
+                    <li key={s} className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[s] }} />
+                      <span className="flex-1 text-slate-300">{messages.players.status[s]}</span>
+                      <span className="font-bold text-white tabular-nums">{squad.counts[s]}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
-            )}
-          </section>
-          {/* Kits: the tokens of the animations */}
-          <section className="flex flex-col rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <CardHeader title={m.kits.title} hint={m.kits.hint} />
-            <div className="flex flex-1 flex-col gap-4 px-5 pb-5">
-              <div
-                className="relative grid flex-1 grid-cols-5 place-items-center gap-1 overflow-hidden rounded-xl px-2 py-6"
-                style={{
-                  backgroundColor: theme.gras[0],
-                  backgroundImage: `repeating-linear-gradient(90deg, ${theme.gras[1]} 0 24px, transparent 24px 48px)`,
-                }}
-              >
-                <span aria-hidden className="absolute inset-y-0 left-1/2 w-px" style={{ backgroundColor: theme.lijnen, opacity: 0.35 }} />
-                <span
-                  aria-hidden
-                  className="absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border"
-                  style={{ borderColor: theme.lijnen, opacity: 0.35 }}
-                />
-                {(
-                  [
-                    [theme.teams.eigen, "7", m.kits.own],
-                    [theme.doelman.eigen ?? theme.teams.eigen, "1", m.kits.ownKeeper],
-                    [theme.teams.tegenstander, "9", m.kits.opponent],
-                    [theme.doelman.tegenstander ?? theme.teams.tegenstander, "1", m.kits.opponentKeeper],
-                    [theme.teams.neutraal, "", m.kits.neutral],
-                  ] as const
-                ).map(([color, label, name]) => (
-                  <figure key={name + color} className="relative flex flex-col items-center gap-1">
-                    <KitToken color={color} label={label} size={46} />
-                    <figcaption className="text-center text-[10px] leading-tight font-medium" style={{ color: theme.lijnen }}>
-                      {name}
-                    </figcaption>
-                  </figure>
+              <div className="grid grid-cols-2 gap-2 px-4 pb-4 sm:grid-cols-4">
+                {PLAYER_STATUSES.map((s) => (
+                  <div key={s} className="rounded-xl bg-white/5 px-2.5 py-2">
+                    <p className="truncate text-[9px] font-bold tracking-wider text-slate-400 uppercase">{messages.players.status[s]}</p>
+                    <p className="text-lg font-black tabular-nums" style={{ color: s === "available" ? "#4ade80" : undefined }}>
+                      {squad.counts[s]}
+                    </p>
+                  </div>
                 ))}
               </div>
-              <p className="text-sm text-slate-600">{m.kits.style[settings.stijl]}</p>
-              <div className="mt-auto">
-                <ButtonLink href={`${base}/settings#weergave`} subtle>
-                  {m.kits.edit}
-                </ButtonLink>
-              </div>
-            </div>
-          </section>
+            </Panel>
+          </div>
         </div>
       </div>
-      {/* Staff */}
-      <section className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <CardHeader title={m.staff.title} hint={m.staff.hint} action={<ButtonLink href={`${base}/weeks`} color={primary}>{m.staff.open}</ButtonLink>} />
-        <ul className="grid gap-3 px-5 pb-5 sm:grid-cols-2 lg:grid-cols-4">
-          {roles.map((role) => {
-            const status = role.status;
-            return (
-              <li key={role.id} className={`flex flex-col gap-3 rounded-xl p-4 ring-1 ring-slate-200 ${status === "soon" ? "bg-slate-50" : ""}`}>
-                <div className="flex items-center gap-3">
-                  <RoleFigure role={role.id} color={status === "soon" ? "#94a3b8" : ink} />
-                  <div className="min-w-0">
-                    <p className="font-bold text-slate-900">{role.name}</p>
-                    <StatusPill status={status} />
-                  </div>
-                </div>
-                {role.goal && status !== "soon" && <p className="line-clamp-3 text-xs leading-relaxed text-slate-600">{role.goal}</p>}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
     </div>
   );
 }
@@ -290,112 +305,105 @@ function countdown(days: number) {
   return days <= 0 ? m.nextMatch.today : days === 1 ? m.nextMatch.tomorrow : m.nextMatch.inDays(days);
 }
 
-const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
-
-function Crest({ logoUrl, name, color }: { logoUrl?: string | null; name: string; color: string }) {
-  if (logoUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={logoUrl} alt="" className="h-14 w-14 rounded-2xl bg-white object-contain p-1 shadow-sm ring-1 ring-slate-200 sm:h-16 sm:w-16" />;
-  }
-  return (
-    <span
-      aria-hidden
-      className="flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-black shadow-sm sm:h-16 sm:w-16"
-      style={{ backgroundColor: color, color: readableOn(color) }}
-    >
-      {name.trim().slice(0, 1).toUpperCase()}
-    </span>
-  );
+function dayTitle(d: DayPlan) {
+  if (d.match) return m.microcycle.match(d.match.opponent);
+  if (d.training) return d.md ? d.md.naam : m.microcycle.training;
+  return m.microcycle.rest;
 }
 
-function Side({ name, crest }: { name: string; crest: ReactNode }) {
+function daySub(d: DayPlan) {
+  if (d.match) return [d.match.home ? m.nextMatch.home : m.nextMatch.away, d.match.start].filter(Boolean).join(" · ");
+  if (d.training) return m.microcycle.trainingAt(d.training.start, d.training.minutes);
+  return m.microcycle.noTraining;
+}
+
+function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <section className={`rounded-2xl bg-[#111a2e] ring-1 ring-white/10 ${className}`}>{children}</section>;
+}
+
+function PanelHeader({ title, aside }: { title: string; aside?: ReactNode }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center gap-2 text-center">
-      {crest}
-      <p className="line-clamp-2 text-sm font-bold text-slate-900 sm:text-base">{name}</p>
+    <div className="flex items-center justify-between gap-2 px-4 pt-3.5 pb-3">
+      <h2 className="text-base font-bold text-white">{title}</h2>
+      {aside && <div className="flex items-center gap-2">{aside}</div>}
     </div>
   );
 }
 
-function Fact({ label, value, muted = false }: { label: string; value: ReactNode; muted?: boolean }) {
+function SubPanel({ title, aside, children }: { title: string; aside?: string; children: ReactNode }) {
   return (
-    <div>
-      <dt className="text-xs font-medium text-slate-500 first-letter:uppercase">{label}</dt>
-      <dd className={`mt-0.5 font-semibold ${muted ? "text-slate-400" : "text-slate-900"}`}>{value}</dd>
+    <div className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/5">
+      <div className="mb-1.5 flex items-center justify-between">
+        <p className="text-xs font-bold text-slate-200">{title}</p>
+        {aside && <p className="text-xs font-semibold text-slate-400">{aside}</p>}
+      </div>
+      {children}
     </div>
   );
 }
 
-function AddressFact({ address, home }: { address: string | null; home: boolean }) {
-  if (!address) {
-    return <Fact label={m.nextMatch.address} value={home ? m.nextMatch.addHomeAddress : m.nextMatch.addAwayAddress} muted />;
-  }
+function Tile({ children }: { children: ReactNode }) {
+  return <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10">{children}</div>;
+}
+
+function Eyebrow({ children }: { children: ReactNode }) {
+  return <p className="text-[10px] font-bold tracking-[0.18em] text-slate-400 uppercase">{children}</p>;
+}
+
+function Fact({ eyebrow, title, sub, badge, href, children }: { eyebrow: string; title: string; sub: string; badge?: string; href: string; children?: ReactNode }) {
   return (
-    <Fact
-      label={m.nextMatch.address}
-      value={
-        <span>
-          {address}{" "}
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-medium text-brand hover:text-brand-dark"
-          >
-            {m.nextMatch.route} ↗
-          </a>
-        </span>
-      }
-    />
+    <div className="relative rounded-2xl bg-[#111a2e] p-4 ring-1 ring-white/10 transition hover:ring-white/25">
+      <div className="flex items-start justify-between gap-2">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        {badge && <span className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">{badge}</span>}
+      </div>
+      <Link href={href} className="mt-1.5 line-clamp-2 block text-base leading-snug font-bold text-white hover:underline">
+        {title}
+      </Link>
+      <p className="truncate text-xs text-slate-400">{sub}</p>
+      {children}
+    </div>
   );
 }
 
-function OutcomeBadge({ outcome, large = false }: { outcome: PlayedMatch["outcome"]; large?: boolean }) {
+function Pill({ children }: { children: ReactNode }) {
+  return <span className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-slate-300 ring-1 ring-white/10">{children}</span>;
+}
+
+function HeaderLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <span
-      title={m.form.outcome[outcome]}
-      className={`inline-flex items-center justify-center rounded-md font-bold text-white ${large ? "h-9 w-9 text-sm" : "h-5 w-5 text-[11px]"}`}
-      style={{ backgroundColor: OUTCOME_COLORS[outcome] }}
-    >
-      {m.form.letter[outcome]}
+    <Link href={href} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold whitespace-nowrap text-white hover:bg-white/15">
+      {children}
+    </Link>
+  );
+}
+
+function DayBadge({ day }: { day: DayPlan }) {
+  return (
+    <span className="inline-block rounded-md bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-300">
+      {day.md?.code ?? `${weekdayName(day.date)} ${shortDate(day.date)}`}
     </span>
   );
 }
 
-function ResultRow({ match }: { match: PlayedMatch }) {
+function MiniStat({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <li className="flex items-center gap-3 py-2 text-sm">
-      <OutcomeBadge outcome={match.outcome} />
-      <span className="w-14 shrink-0 text-xs text-slate-500">{shortDate(match.date)}</span>
-      <span className="min-w-0 flex-1 truncate">
-        {match.opponent}
-        {match.home !== null && <span className="ml-1 text-xs text-slate-400">({match.home ? m.nextMatch.home : m.nextMatch.away})</span>}
-      </span>
-      <span className="font-bold tabular-nums">
-        {match.goalsFor}-{match.goalsAgainst}
-      </span>
-    </li>
+    <div className="rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/5">
+      <p className="text-[9px] font-bold tracking-wider text-slate-400 uppercase">{label}</p>
+      <p className="text-sm font-bold text-white">{value}</p>
+    </div>
   );
 }
 
-function StatusPill({ status }: { status: "active" | "off" | "soon" }) {
-  const style = {
-    active: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    off: "bg-amber-50 text-amber-700 ring-amber-200",
-    soon: "bg-slate-100 text-slate-500 ring-slate-200",
-  }[status];
+function EmptyDark({ text, href, link }: { text: string; href?: string; link?: string }) {
   return (
-    <span className={`mt-0.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${style}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${status === "active" ? "bg-emerald-500" : status === "off" ? "bg-amber-500" : "bg-slate-400"}`} />
-      {m.staff.status[status]}
-    </span>
-  );
-}
-
-function EmptyBox(props: { text: string; href?: string; link?: string }) {
-  return (
-    <div className="px-5 pb-5">
-      <EmptyState {...props} />
+    <div className="rounded-xl border border-dashed border-white/15 px-4 py-6 text-center text-sm text-slate-400">
+      <p>{text}</p>
+      {href && link && (
+        <Link href={href} className="mt-2 inline-block font-semibold text-white hover:underline">
+          {link} →
+        </Link>
+      )}
     </div>
   );
 }
@@ -405,37 +413,33 @@ function AvailabilityDonut({ counts, total }: { counts: Record<PlayerStatus, num
   const r = 40;
   const c = 2 * Math.PI * r;
   const gap = total > 1 ? 1.5 : 0;
-  let offset = 0;
+  const segments = PLAYER_STATUSES.map((s) => ({ s, len: total ? (counts[s] / total) * c : 0 }));
+  const starts = segments.map((_, i) => segments.slice(0, i).reduce((sum, x) => sum + x.len, 0));
   return (
     <div className="relative h-32 w-32 shrink-0">
       <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
-        <circle cx="50" cy="50" r={r} fill="none" stroke="#e2e8f0" strokeWidth="11" />
-        {total > 0 &&
-          PLAYER_STATUSES.map((s) => {
-            const len = (counts[s] / total) * c;
-            if (!len) return null;
-            const seg = (
-              <circle
-                key={s}
-                cx="50"
-                cy="50"
-                r={r}
-                fill="none"
-                stroke={STATUS_COLORS[s]}
-                strokeWidth="11"
-                strokeDasharray={`${Math.max(len - gap, 0.5)} ${c}`}
-                strokeDashoffset={-offset}
-              />
-            );
-            offset += len;
-            return seg;
-          })}
+        <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="11" />
+        {segments.map(({ s, len }, i) =>
+          len ? (
+            <circle
+              key={s}
+              cx="50"
+              cy="50"
+              r={r}
+              fill="none"
+              stroke={STATUS_COLORS[s]}
+              strokeWidth="11"
+              strokeDasharray={`${Math.max(len - gap, 0.5)} ${c}`}
+              strokeDashoffset={-starts[i]!}
+            />
+          ) : null,
+        )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-black tabular-nums">
+        <span className="text-2xl font-black text-white tabular-nums">
           {counts.available}/{total}
         </span>
-        <span className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">{m.availability.available}</span>
+        <span className="text-[9px] font-bold tracking-wider text-slate-400 uppercase">{m.availability.available}</span>
       </div>
     </div>
   );

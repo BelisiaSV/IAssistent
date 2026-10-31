@@ -112,7 +112,7 @@ export function SquadPitch({
           return (
             <div
               key={slot.id}
-              className="absolute flex w-[29%] -translate-x-1/2 sm:w-[22%] -translate-y-[30%] flex-col items-center gap-0.5"
+              className="absolute flex w-[29%] -translate-x-1/2 sm:w-[25%] -translate-y-[30%] flex-col items-center gap-0.5"
               style={{ left: `${slot.x}%`, top: `${Math.min(slot.y, 86)}%` }}
             >
               <Jersey color={keeper ? keeperColor : colors.primary} trim={keeper ? shade(keeperColor, 0.3) : colors.secondary} label={slot.positie} />
@@ -125,13 +125,13 @@ export function SquadPitch({
       </div>
 
       {unplaced.length > 0 && (
-        <div className="rounded-xl bg-slate-50 px-3 py-2">
-          <p className="mb-1.5 text-[11px] font-semibold text-slate-500">{m.unplaced}</p>
+        <div className="rounded-xl bg-white/5 px-3 py-2">
+          <p className="mb-1.5 text-[11px] font-semibold text-slate-400">{m.unplaced}</p>
           <div className="flex flex-wrap gap-1">{unplaced.map(chip)}</div>
         </div>
       )}
 
-      <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-slate-500">
+      <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-slate-400">
         {PLAYER_STATUSES.map((s) => (
           <li key={s} className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[s] }} />
@@ -212,10 +212,10 @@ function StatusDialog({
   );
 }
 
-/** A shirt in the team colours with the position on it. */
-function Jersey({ color, trim, label }: { color: string; trim: string; label: string }) {
+/** A shirt in the team colours with the position (or nothing) on it. */
+export function Jersey({ color, trim, label, className = "h-9 w-10 drop-shadow-md sm:h-11 sm:w-12" }: { color: string; trim: string; label?: string; className?: string }) {
   return (
-    <svg viewBox="0 0 48 44" className="h-9 w-10 drop-shadow-md sm:h-11 sm:w-12" aria-hidden>
+    <svg viewBox="0 0 48 44" className={className} aria-hidden>
       <path d="M16 3l-12 6 4 11 5-2v23h22V18l5 2 4-11-12-6c-1.5 3.5-4.5 5.5-8 5.5S17.5 6.5 16 3z" fill={color} stroke={shade(color, 0.35)} strokeWidth="1.2" strokeLinejoin="round" />
       <path d="M16 3c1.5 3.5 4.5 5.5 8 5.5s6.5-2 8-5.5" fill="none" stroke={trim} strokeWidth="2.2" />
       <path d="M4.6 10.5l3.6 9.6M43.4 10.5l-3.6 9.6" stroke={trim} strokeWidth="2" />
