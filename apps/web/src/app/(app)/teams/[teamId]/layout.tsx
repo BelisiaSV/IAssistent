@@ -1,9 +1,8 @@
 import { TeamBanner } from "@/components/dashboard/team-banner";
+import { TeamHeader } from "@/components/dashboard/team-header";
 import { Alert } from "@/components/ui";
 import { messages } from "@/lib/messages";
 import { getTeamContext } from "@/lib/teams/queries";
-
-import { TeamTabs } from "./team-tabs";
 
 export default async function TeamLayout({
   children,
@@ -17,9 +16,9 @@ export default async function TeamLayout({
 
   return (
     <div className="space-y-6">
-      <TeamBanner team={team} logoUrl={logoUrl}>
-        <TeamTabs teamId={team.id} accent={team.secondary_color} />
-      </TeamBanner>
+      <TeamHeader teamId={team.id}>
+        <TeamBanner team={team} logoUrl={logoUrl} />
+      </TeamHeader>
       {team.archived_at && <Alert tone="error">{messages.common.readOnlyArchived}</Alert>}
       {!team.archived_at && !isHeadCoach && <Alert tone="success">{messages.common.readOnlyAssistant}</Alert>}
       {children}

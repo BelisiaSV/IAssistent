@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { animationSettingsSchema, compactSettings } from "@/lib/animation/team-theme";
+import { formationCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, isIsoDate, mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 import { trainingScheduleSchema, type WeekTraining } from "@/lib/weeks/validation";
@@ -161,19 +162,29 @@ export async function saveAnimationSettings(
   return { success: s.display.saved };
 }
 
-const homeAddressSchema = z.string().trim().max(200, s.venue.tooLong).transform((v) => v || null);
+const teamDetailsSchema = z.object({
+  homeAddress: z.string().trim().max(200, s.venue.tooLong).transform((v) => v || null),
+  formation: z.string().refine((code) => formationCatalog.formaties.some((f) => f.code === code), s.venue.formationInvalid),
+});
 
-/** Saves the address of the own ground (shown with home matches). */
-export async function saveHomeAddress(teamId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+/** Saves the own ground (shown with home matches) and the formation on the dashboard. */
+export async function saveTeamDetails(teamId: string, _prev: FormState, formData: FormData): Promise<FormState> {
   if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
-  const parsed = homeAddressSchema.safeParse(String(formData.get("homeAddress") ?? ""));
+  const parsed = teamDetailsSchema.safeParse({
+    homeAddress: String(formData.get("homeAddress") ?? ""),
+    formation: String(formData.get("formation") ?? ""),
+  });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? e.saveFailed };
 
   await requireUser();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("teams").update({ home_address: parsed.data }).eq("id", teamId).select("id");
+  const { data, error } = await supabase
+    .from("teams")
+    .update({ home_address: parsed.data.homeAddress, default_formation: parsed.data.formation })
+    .eq("id", teamId)
+    .select("id");
   if (error || !data?.length) {
-    console.error("saveHomeAddress failed", error);
+    console.error("saveTeamDetails failed", error);
     return { error: e.saveFailed };
   }
   revalidatePath(`/teams/${teamId}`, "layout");
