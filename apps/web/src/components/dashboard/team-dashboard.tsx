@@ -167,7 +167,8 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
                 </>
               }
             />
-            <div className="grid gap-4 px-4 pb-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+            <div className="@container px-4 pb-4">
+            <div className="grid gap-4 @[640px]:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
               <div className="min-w-0">
                 {squad.total === 0 ? (
                   <EmptyDark text={m.squad.none} href={squad.canEdit ? `${base}/players/new` : undefined} link={m.squad.addPlayers} />
@@ -228,6 +229,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
                   <MiniStat label={m.microcycle.sessionsLabel} value={sessions.length || "—"} />
                 </div>
               </div>
+            </div>
             </div>
           </Panel>
 
