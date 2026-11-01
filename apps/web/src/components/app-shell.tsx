@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { type ReactNode, useState } from "react";
 
 import { SIDEBAR_COOKIE } from "@/lib/sidebar";
@@ -22,6 +23,10 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const pathname = usePathname();
+  // Print pages stay light (paper); the dashboard has its own dark style.
+  const print = pathname.includes("/print");
+  const dashboard = /^\/teams\/[0-9a-f-]{36}$/.test(pathname);
 
   function toggle() {
     const next = !collapsed;
@@ -30,9 +35,15 @@ export function AppShell({
   }
 
   return (
-    <div className={`min-h-screen transition-[padding] print:pl-0 ${collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64"}`}>
+    <div className={`min-h-screen transition-[padding] print:pl-0 ${collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64"} ${print ? "" : "bg-[#0b1220]"}`}>
       <Sidebar teams={teams} admin={admin} email={email} collapsed={collapsed} onToggle={toggle} />
-      <main className="mx-auto max-w-[1760px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:p-0">{children}</main>
+      <main
+        className={`mx-auto max-w-[1760px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:p-0 ${
+          print || dashboard ? "" : "app-dark min-h-screen text-slate-900"
+        }`}
+      >
+        {children}
+      </main>
     </div>
   );
 }
