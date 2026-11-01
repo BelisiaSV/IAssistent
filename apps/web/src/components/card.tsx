@@ -54,7 +54,7 @@ export function ButtonLink({ href, children, color, subtle = false }: { href: st
 /** A number with a label, optionally with a coloured dot (status) or in the team colour. */
 export function StatTile({ label, value, sub, dot, ink }: { label: string; value: ReactNode; sub?: string; dot?: string; ink?: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 px-3 py-2" style={ink ? { backgroundColor: `color-mix(in srgb, ${ink} 8%, white)` } : undefined}>
+    <div className="rounded-xl bg-slate-50 px-3 py-2" style={ink ? { backgroundColor: `color-mix(in srgb, ${ink} 16%, transparent)` } : undefined}>
       <p className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
         {dot && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: dot }} />}
         {label}
