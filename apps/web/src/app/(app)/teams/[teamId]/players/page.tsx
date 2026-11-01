@@ -2,6 +2,7 @@ import type { Tables } from "@iassistent/db";
 
 import { ButtonLink, Card, CardHeader, EmptyState, StatTile } from "@/components/card";
 import { messages } from "@/lib/messages";
+import { STATUS_COLORS } from "@/lib/players/status";
 import { PLAYER_STATUSES } from "@/lib/players/validation";
 import { readableOn, shade } from "@/lib/proposals/overview";
 import { positionCatalog } from "@/lib/staff";
@@ -14,14 +15,6 @@ import { PlayerCard, ShirtNumber } from "./player-card";
 const m = messages.players;
 
 type Player = Tables<"players">;
-
-/** Dot colour per status (counts on the players page). */
-const STATUS_COLORS: Record<Player["status"], string> = {
-  available: "#16a34a",
-  injured: "#dc2626",
-  suspended: "#d97706",
-  unavailable: "#94a3b8",
-};
 
 function byShirtNumber(a: Player, b: Player) {
   return (a.shirt_number ?? 999) - (b.shirt_number ?? 999) || a.last_name.localeCompare(b.last_name);

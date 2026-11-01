@@ -2,7 +2,8 @@ import { weekPeriodization } from "@iassistent/staff-engine/content";
 
 import { themeForTeam } from "@/lib/animation/team-theme";
 import { messages } from "@/lib/messages";
-import { periodizationCatalog } from "@/lib/staff";
+import { formationCatalog, periodizationCatalog } from "@/lib/staff";
+import { teamFormation } from "@/lib/teams/formation";
 import { getTeamContext } from "@/lib/teams/queries";
 import { addDays, mondayOf, shortDate, todayInBelgium } from "@/lib/weeks/dates";
 import { seasonPlan } from "@/lib/weeks/season";
@@ -35,7 +36,12 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-600">{m.intro(team.name)}</p>
-      <VenueForm teamId={team.id} initial={team.home_address ?? ""} canEdit={canEdit} />
+      <VenueForm
+        teamId={team.id}
+        initial={{ homeAddress: team.home_address ?? "", formation: teamFormation(team.default_formation).code }}
+        formations={formationCatalog.formaties.map((f) => ({ code: f.code, naam: f.naam }))}
+        canEdit={canEdit}
+      />
       <ScheduleForm teamId={team.id} initial={schedule.success ? schedule.data : []} canEdit={canEdit} />
       <SeasonForm
         teamId={team.id}

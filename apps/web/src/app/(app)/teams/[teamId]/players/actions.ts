@@ -74,18 +74,26 @@ const statusSchema = z.object({
   teamId: z.uuid(),
   playerId: z.uuid(),
   status: z.enum(PLAYER_STATUSES),
+  /** Only with an injury; left out = keep the current date. */
+  expectedReturnDate: z.union([z.literal(""), z.iso.date()]).optional(),
 });
 
 export async function setPlayerStatus(formData: FormData) {
   const parsed = statusSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  const { teamId, playerId, status } = parsed.data;
+  const { teamId, playerId, status, expectedReturnDate } = parsed.data;
 
   await requireUser();
   const supabase = await createClient();
   const { error } = await supabase
     .from("players")
-    .update(status === "injured" ? { status } : { status, expected_return_date: null })
+    .update(
+      status !== "injured"
+        ? { status, expected_return_date: null }
+        : expectedReturnDate === undefined
+          ? { status }
+          : { status, expected_return_date: expectedReturnDate || null },
+    )
     .eq("id", playerId)
     .eq("team_id", teamId);
   if (error) console.error("setPlayerStatus failed", error);
