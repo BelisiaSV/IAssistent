@@ -285,6 +285,12 @@ Regels:
   `lib/teams/microcycle.ts`, MD-labels uit `wedstrijddagen.json`), de laatste selectie en de beschikbaarheid.
   Gedeelde bouwstenen voor die stijl in `components/card.tsx` (`Card`, `CardHeader`, `EmptyState`,
   `ButtonLink`, `StatTile`); Spelers (kaarten per linie, `players/player-card.tsx`) en Selecties
-  (kaarten met `components/mini-pitch.tsx`) volgen ze al, de andere pagina's volgen later.
+  (kaarten met `components/mini-pitch.tsx`) volgen ze al.
+- **Donker thema** — alle pagina's in het werkvlak zijn donker, zoals het dashboard: `AppShell` zet de
+  klasse `app-dark` op `<main>` (niet op het dashboard, dat een eigen donkere stijl heeft, en niet op de
+  afdrukpagina's `/print`, die licht blijven voor papier). `app-dark` in `globals.css` draait de slate-schaal
+  om, maakt `bg-white` een donker paneel en geeft de statuskleuren (groen, rood, amber, …) donkere tinten.
+  Schrijf nieuwe pagina's gewoon met de lichte klassen (`bg-white`, `text-slate-600`, …); kies voor iets dat
+  bewust donker moet blijven `bg-slate-800/900` (blijft donker) en vermijd vaste lichte hex-kleuren.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.
