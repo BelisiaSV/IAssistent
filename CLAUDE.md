@@ -296,6 +296,15 @@ Regels:
   Gedeelde bouwstenen voor die stijl in `components/card.tsx` (`Card`, `CardHeader`, `EmptyState`,
   `ButtonLink`, `StatTile`); Spelers (kaarten per linie, `players/player-card.tsx`) en Selecties
   (kaarten met `components/mini-pitch.tsx`) volgen ze al.
+- **Prijsplannen** — `plans` (naam, code, voor wie, prijs in cent of null = offerte op maat, per maand
+  of jaar, optionele jaarprijs, max. hoofdtrainers/teams, kenmerken als JSON-lijst, aanbevolen, actief,
+  volgorde). Iedereen leest de actieve plannen, enkel platformadmins beheren ze (RLS met
+  `is_platform_admin()`). Het plan van een account staat op `coaches.plan_id`; een coach kan het niet zelf
+  wijzigen (enkel `full_name` is te updaten), admins zetten het via `admin_set_account_plan()` en lezen
+  de accounts met `admin_accounts()`. Admin: tabbladen Spelersimport, Prijsplannen (`/admin/plans`,
+  bewerken en nieuw plan) en Accounts (`/admin/accounts`, plan koppelen, ook aan je eigen account om te
+  testen). Klant: **Mijn abonnement** (`/account`, via het account onderaan de zijbalk). Nog geen
+  online betaling en nog geen beperkingen per plan.
 - **Donker thema** — alle pagina's in het werkvlak zijn donker, zoals het dashboard: `AppShell` zet de
   klasse `app-dark` op `<main>` (niet op het dashboard, dat een eigen donkere stijl heeft, en niet op de
   afdrukpagina's `/print`, die licht blijven voor papier). `app-dark` in `globals.css` draait de slate-schaal
