@@ -11,7 +11,7 @@ status: placeholder
 
 ## Doel
 
-_Waarom bestaat deze rol in de staf? Eén à twee zinnen._
+Bouwt presentaties richting de volgende wedstrijd en tegenstander en werkt voor de jeugdteams evaluaties uit. Analyse op basis van beelden volgt later.
 
 ## Verantwoordelijkheden
 

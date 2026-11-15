@@ -173,7 +173,7 @@ export default async function WeekPage({
         canEdit={canEdit}
       />
 
-      <section className="space-y-2 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <section id="belasting" className="scroll-mt-6 space-y-2 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="font-semibold">{messages.weeks.load.title}</h2>
         <p className="text-sm text-slate-600">{messages.weeks.load.hint}</p>
         {sessions.length === 0 ? (

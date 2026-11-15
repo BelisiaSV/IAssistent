@@ -13,12 +13,14 @@ export function AppShell({
   teams,
   admin,
   email,
+  roleNames,
   initialCollapsed,
   children,
 }: {
   teams: SwitcherTeam[];
   admin: boolean;
   email: string;
+  roleNames: Record<string, string>;
   initialCollapsed: boolean;
   children: ReactNode;
 }) {
@@ -36,7 +38,7 @@ export function AppShell({
 
   return (
     <div className={`min-h-screen transition-[padding] print:pl-0 ${collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64"} ${print ? "" : "bg-[#0b1220]"}`}>
-      <Sidebar teams={teams} admin={admin} email={email} collapsed={collapsed} onToggle={toggle} />
+      <Sidebar teams={teams} admin={admin} email={email} roleNames={roleNames} collapsed={collapsed} onToggle={toggle} />
       <main
         className={`mx-auto max-w-[1760px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:p-0 ${
           print || dashboard ? "" : "app-dark min-h-screen text-slate-900"

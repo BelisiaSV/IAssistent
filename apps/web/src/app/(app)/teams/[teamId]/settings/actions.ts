@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { animationSettingsSchema, compactSettings } from "@/lib/animation/team-theme";
 import { formationCatalog } from "@/lib/staff";
+import { AGE_CATEGORIES } from "@/lib/teams/age-categories";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, isIsoDate, mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 import { trainingScheduleSchema, type WeekTraining } from "@/lib/weeks/validation";
@@ -165,6 +166,7 @@ export async function saveAnimationSettings(
 const teamDetailsSchema = z.object({
   homeAddress: z.string().trim().max(200, s.venue.tooLong).transform((v) => v || null),
   formation: z.string().refine((code) => formationCatalog.formaties.some((f) => f.code === code), s.venue.formationInvalid),
+  ageCategory: z.enum(AGE_CATEGORIES, messages.teamForm.errors.ageCategory),
 });
 
 /** Saves the own ground (shown with home matches) and the formation on the dashboard. */
@@ -173,6 +175,7 @@ export async function saveTeamDetails(teamId: string, _prev: FormState, formData
   const parsed = teamDetailsSchema.safeParse({
     homeAddress: String(formData.get("homeAddress") ?? ""),
     formation: String(formData.get("formation") ?? ""),
+    ageCategory: String(formData.get("ageCategory") ?? ""),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? e.saveFailed };
 
@@ -180,7 +183,7 @@ export async function saveTeamDetails(teamId: string, _prev: FormState, formData
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("teams")
-    .update({ home_address: parsed.data.homeAddress, default_formation: parsed.data.formation })
+    .update({ home_address: parsed.data.homeAddress, default_formation: parsed.data.formation, age_category: parsed.data.ageCategory })
     .eq("id", teamId)
     .select("id");
   if (error || !data?.length) {

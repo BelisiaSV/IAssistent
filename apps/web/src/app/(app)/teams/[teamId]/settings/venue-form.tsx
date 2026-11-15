@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { messages } from "@/lib/messages";
+import { AGE_CATEGORIES, type AgeCategory } from "@/lib/teams/age-categories";
 
 import { type FormState, saveTeamDetails } from "./actions";
 
@@ -17,7 +18,7 @@ export function VenueForm({
   canEdit,
 }: {
   teamId: string;
-  initial: { homeAddress: string; formation: string };
+  initial: { homeAddress: string; formation: string; ageCategory: AgeCategory };
   formations: { code: string; naam: string }[];
   canEdit: boolean;
 }) {
@@ -28,9 +29,23 @@ export function VenueForm({
         <h2 className="font-semibold">{m.title}</h2>
         <p className="text-sm text-slate-600">{m.hint}</p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_11rem_auto] sm:items-end">
         <Field label={m.address}>
           <Input name="homeAddress" defaultValue={initial.homeAddress} maxLength={200} placeholder={messages.opponents.addressPlaceholder} disabled={!canEdit} />
+        </Field>
+        <Field label={messages.teamForm.ageCategory}>
+          <select
+            name="ageCategory"
+            defaultValue={initial.ageCategory}
+            disabled={!canEdit}
+            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm disabled:bg-slate-50"
+          >
+            {AGE_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {messages.ageCategories[c]}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label={m.formation}>
           <select

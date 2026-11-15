@@ -1,43 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { messages } from "@/lib/messages";
+import { isActive, NAV_GROUPS, type NavGroup, sectionHref } from "@/lib/navigation";
 
-import { NavIcon, type NavIconName } from "./nav-icons";
+import { RoleAvatar, staffColor } from "./staff/role-avatar";
+
+import { NavIcon } from "./nav-icons";
 import { type SwitcherTeam, TeamCrest, TeamSwitcher } from "./team-switcher";
 
 const m = messages.nav;
 const LAST_TEAM_KEY = "iassistent.team";
-
-interface NavItem {
-  label: string;
-  icon: NavIconName;
-  /** Path under the team (null = not built yet), or an absolute path. */
-  teamPath?: string | null;
-  href?: string;
-  exact?: boolean;
-}
-
-/** Every item of the side bar; shown in alphabetical order of their labels. */
-const ITEMS: NavItem[] = (
-  [
-  { label: m.animations, icon: "animations", teamPath: null },
-  { label: m.dashboard, icon: "dashboard", teamPath: "", exact: true },
-  { label: m.editor, icon: "editor", teamPath: null },
-  { label: m.settings, icon: "settings", teamPath: "/settings" },
-  { label: m.matchday, icon: "matchday", teamPath: "/lineups" },
-  { label: m.microcycle, icon: "microcycle", teamPath: "/weeks" },
-  { label: m.exercises, icon: "exercises", href: "/exercises" },
-  { label: m.players, icon: "players", teamPath: "/players" },
-  { label: m.opponents, icon: "opponents", teamPath: "/opponents" },
-  { label: m.tests, icon: "tests", teamPath: "/tests" },
-  { label: m.videos, icon: "videos", teamPath: null },
-    { label: m.vision, icon: "vision", href: "/profile/vision" },
-  ] satisfies NavItem[]
-).sort((a, b) => a.label.localeCompare(b.label, "nl"));
 
 function readLastTeam() {
   try {
@@ -49,26 +25,34 @@ function readLastTeam() {
 const noSubscribe = () => () => {};
 
 /**
- * The side bar of the platform: team switcher, the sections in alphabetical
- * order (team sections open for the current team, or the last one used) and
- * the account. On small screens it opens as a drawer from the top bar.
+ * The side bar of the platform: team switcher, then the staff (head coach
+ * on top, then every role) with the parts each one is responsible for in a
+ * fold-out list (team parts open for the current team, or the last one used),
+ * and the account. On small screens it opens as a drawer from the top bar;
+ * collapsed, it shows the staff as avatars.
  */
 export function Sidebar({
   teams,
   admin,
   email,
+  roleNames,
   collapsed,
   onToggle,
 }: {
   teams: SwitcherTeam[];
   admin: boolean;
   email: string;
+  /** Name of each staff role (from /staff). */
+  roleNames: Record<string, string>;
   /** Large screens: only the icons. */
   collapsed: boolean;
   onToggle: () => void;
 }) {
   const pathname = usePathname();
+  const search = useSearchParams();
   const [open, setOpen] = useState(false);
+  // Groups the user opened or closed; the others follow the current page.
+  const [toggled, setToggled] = useState<Record<string, boolean>>({});
   const routeTeam = /^\/teams\/([0-9a-f-]{36})/.exec(pathname)?.[1] ?? null;
   const lastTeam = useSyncExternalStore(noSubscribe, readLastTeam, () => null);
   const teamId =
@@ -84,6 +68,7 @@ export function Sidebar({
   }, [routeTeam]);
 
   const current = teams.find((t) => t.id === teamId) ?? null;
+  const groupName = (group: NavGroup) => (group.member === "head-coach" ? m.headCoach : (roleNames[group.member] ?? group.member));
 
   const nav = (compact: boolean) => (
     <nav className={`flex h-full flex-col gap-4 overflow-y-auto py-4 ${compact ? "items-center px-2" : "px-3"}`}>
@@ -107,48 +92,91 @@ export function Sidebar({
         <TeamSwitcher teams={teams} currentId={teamId} />
       )}
 
-      <ul className={`space-y-0.5 ${compact ? "w-full" : ""}`}>
-        {ITEMS.map((item) => {
-          const href = item.href ?? (item.teamPath === null || !teamId ? null : `/teams/${teamId}${item.teamPath}`);
-          const title = compact ? (item.teamPath === null ? `${item.label} · ${m.soon}` : item.label) : undefined;
-          const layout = compact ? "justify-center px-0" : "gap-3 px-3";
-          if (!href) {
+      <div className={`space-y-1 ${compact ? "flex w-full flex-col items-center" : ""}`}>
+        {NAV_GROUPS.map((group) => {
+          const name = groupName(group);
+          const containsActive = group.sections.some((sec) => {
+            const href = sectionHref(sec, teamId);
+            return href && isActive(sec, href, pathname, search, group.sections);
+          });
+          if (compact) {
             return (
-              <li key={item.label}>
-                <span title={title} className={`flex cursor-default items-center rounded-lg py-2 text-sm text-slate-500 ${layout}`}>
-                  <NavIcon name={item.icon} />
-                  {!compact && <span className="flex-1">{item.label}</span>}
-                  {!compact && item.teamPath === null && (
-                    <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
-                      {m.soon}
-                    </span>
-                  )}
-                </span>
-              </li>
+              <button
+                key={group.member}
+                type="button"
+                title={name}
+                aria-label={name}
+                onClick={() => {
+                  setToggled((t) => ({ ...t, [group.member]: true }));
+                  onToggle();
+                }}
+                className={`rounded-full p-1 transition hover:bg-white/10 ${containsActive ? "bg-white/10" : ""}`}
+              >
+                <RoleAvatar member={group.member} size={30} />
+              </button>
             );
           }
-          const active = item.exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+          const expanded = toggled[group.member] ?? (containsActive || group.member === "head-coach");
           return (
-            <li key={item.label}>
-              <Link
-                href={href}
-                title={title}
-                onClick={() => setOpen(false)}
-                aria-current={active ? "page" : undefined}
-                className={`relative flex items-center rounded-lg py-2 text-sm font-medium transition ${layout} ${
-                  active ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
+            <div key={group.member}>
+              <button
+                type="button"
+                onClick={() => setToggled((t) => ({ ...t, [group.member]: !expanded }))}
+                aria-expanded={expanded}
+                aria-label={m.toggleGroup(name)}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm font-semibold transition hover:bg-white/5 ${
+                  containsActive ? "text-white" : "text-slate-300"
                 }`}
               >
-                {active && (
-                  <span className="absolute inset-y-1.5 left-0 w-1 rounded-r-full" style={{ backgroundColor: current?.primaryColor ?? "#ffffff" }} />
-                )}
-                <NavIcon name={item.icon} />
-                {!compact && item.label}
-              </Link>
-            </li>
+                <RoleAvatar member={group.member} size={26} />
+                <span className="min-w-0 flex-1 truncate">{name}</span>
+                <NavIcon name="chevron" className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${expanded ? "rotate-90" : ""}`} />
+              </button>
+              {expanded && (
+                <ul className="mt-0.5 mb-1.5 ml-[1.15rem] space-y-0.5 border-l border-white/10 pl-2.5">
+                  {group.sections.map((sec) => {
+                    const href = sectionHref(sec, teamId);
+                    if (!href) {
+                      return (
+                        <li key={sec.label}>
+                          <span className="flex cursor-default items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] text-slate-500">
+                            <NavIcon name={sec.icon} className="h-4 w-4" />
+                            <span className="flex-1 truncate">{sec.label}</span>
+                            {sec.teamPath === null && (
+                              <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] font-semibold tracking-wide text-slate-400 uppercase">
+                                {m.soon}
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    }
+                    const active = isActive(sec, href, pathname, search, group.sections);
+                    return (
+                      <li key={sec.label}>
+                        <Link
+                          href={href}
+                          onClick={() => setOpen(false)}
+                          aria-current={active ? "page" : undefined}
+                          className={`relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition ${
+                            active ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
+                          }`}
+                        >
+                          {active && (
+                            <span className="absolute inset-y-1.5 -left-[11px] w-[3px] rounded-full" style={{ backgroundColor: staffColor(group.member) }} />
+                          )}
+                          <NavIcon name={sec.icon} className="h-4 w-4" />
+                          <span className="truncate">{sec.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           );
         })}
-      </ul>
+      </div>
 
       <div className={`mt-auto space-y-1 border-t border-white/10 pt-3 ${compact ? "flex w-full flex-col items-center" : ""}`}>
         {admin && (

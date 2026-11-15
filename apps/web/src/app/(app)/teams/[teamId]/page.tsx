@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { nextMatch, seasonResults } from "@/lib/teams/dashboard";
 import { depthChart } from "@/lib/teams/depth-chart";
 import { teamFormation } from "@/lib/teams/formation";
+import { ageCategory } from "@/lib/teams/age-categories";
 import { dayPlans } from "@/lib/teams/microcycle";
 import { getTeamContext } from "@/lib/teams/queries";
 import { addDays, mondayOf, todayInBelgium, weekDates } from "@/lib/weeks/dates";
@@ -83,6 +84,7 @@ export default async function TeamDashboardPage({ params }: { params: Promise<{ 
         name: team.name,
         clubName: team.club_name,
         season: team.season,
+        ageCategory: ageCategory(team.age_category),
         primaryColor: team.primary_color,
         secondaryColor: team.secondary_color,
       }}

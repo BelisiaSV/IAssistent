@@ -25,6 +25,8 @@ staff/
 | tactical-coach   | Tactical Coach  |
 | physical-coach   | Physical Coach  |
 | video-analyst    | Video Analist   |
+| player-development | Player Development |
+| team-manager     | Team Manager    |
 
 ## Regels
 

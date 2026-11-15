@@ -1,11 +1,13 @@
+import { messages } from "@/lib/messages";
 import { readableOn, shade } from "@/lib/proposals/overview";
+import { ageCategory } from "@/lib/teams/age-categories";
 
 /** Header of every team page in the team colours: crest, club and team. */
 export function TeamBanner({
   team,
   logoUrl,
 }: {
-  team: { name: string; club_name: string; season: string | null; primary_color: string; secondary_color: string };
+  team: { name: string; club_name: string; season: string | null; age_category: string; primary_color: string; secondary_color: string };
   logoUrl: string | null;
 }) {
   const primary = team.primary_color;
@@ -32,8 +34,7 @@ export function TeamBanner({
       )}
       <div className="min-w-0">
         <p className="text-xs font-semibold tracking-[0.2em] uppercase opacity-75">
-          {team.name}
-          {team.season ? ` · ${team.season}` : ""}
+          {[team.name, messages.ageCategories[ageCategory(team.age_category)], team.season].filter(Boolean).join(" · ")}
         </p>
         <h1 className="truncate text-2xl font-extrabold tracking-tight sm:text-3xl">{team.club_name}</h1>
       </div>

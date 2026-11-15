@@ -9,6 +9,7 @@ import { STATUS_COLORS } from "@/lib/players/status";
 import { PLAYER_STATUSES, type PlayerStatus } from "@/lib/players/validation";
 import { readableOn } from "@/lib/proposals/overview";
 import { daysUntil, type NextMatch, OUTCOME_COLORS, type PlayedMatch } from "@/lib/teams/dashboard";
+import type { AgeCategory } from "@/lib/teams/age-categories";
 import type { DayPlan } from "@/lib/teams/microcycle";
 import { isoWeek, shortDate, weekdayName } from "@/lib/weeks/dates";
 
@@ -20,6 +21,7 @@ export interface DashboardProps {
     name: string;
     clubName: string;
     season: string | null;
+    ageCategory: AgeCategory;
     primaryColor: string;
     secondaryColor: string;
   };
@@ -93,8 +95,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
               <Eyebrow>{m.identity.title}</Eyebrow>
               <p className="truncate text-2xl font-extrabold tracking-tight text-white">{team.clubName}</p>
               <p className="truncate text-xs text-slate-400">
-                {team.name}
-                {team.season ? ` · ${team.season}` : ""}
+                {[team.name, messages.ageCategories[team.ageCategory], team.season].filter(Boolean).join(" · ")}
               </p>
               <Link href={`${base}/settings`} className="mt-1.5 inline-block rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-slate-200 hover:bg-white/15">
                 {m.identity.edit}
