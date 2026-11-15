@@ -1,4 +1,5 @@
 import type { RoleContext } from "../context";
+import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
 import type { Staff, StaffRole } from "../types";
 
@@ -10,8 +11,8 @@ export interface GenerateRequest {
   outputSchema: Record<string, unknown>;
   system: string;
   user: string;
-  /** The week context of a role task, or the conversation (task "gesprek"). */
-  context: RoleContext | ConversationInput;
+  /** The week context of a role task, the conversation (task "gesprek") or a joint task ("samenwerking"). */
+  context: RoleContext | ConversationInput | CollaborationInput;
 }
 
 export interface GenerateResult {

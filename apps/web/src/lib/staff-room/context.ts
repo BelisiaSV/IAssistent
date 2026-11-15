@@ -13,20 +13,25 @@ import { buildRoleContext } from "@/lib/weeks/context";
 import { mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 import { contextForRole, loadWeek } from "@/lib/weeks/load";
 
+import { stepOutput } from "./tasks";
+
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 /** Evaluations that go along (the most recent ones). */
 const EVALUATIONS = 10;
+/** Approved joint tasks that go along (the most recent ones). */
+const APPROVED_TASKS = 5;
 
 /**
  * The approved context of a team that every role in the Staff Room may read:
  * the team, the vision of the head coach, the squad (shirt numbers, no names),
- * this week, the approved plans of this week and the exercise library. Built
+ * this week, the approved plans of this week, the approved joint tasks and the
+ * exercise library. Built
  * with the same helpers as the week tasks, so the same privacy rules apply.
  */
 export async function teamContextForChat(supabase: Supabase, team: Tables<"teams">, coachId: string) {
   const weekStart = mondayOf(todayInBelgium());
-  const [data, { data: profile }, { data: exercises }] = await Promise.all([
+  const [data, { data: profile }, { data: exercises }, { data: tasks }] = await Promise.all([
     loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", coachId).maybeSingle(),
     supabase
@@ -35,6 +40,13 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
       .eq("use_in_planning", true)
       .order("updated_at", { ascending: false })
       .limit(LIBRARY_LIMIT),
+    supabase
+      .from("staff_tasks")
+      .select("title, version, decided_at, staff_task_steps(version, phase, output)")
+      .eq("team_id", team.id)
+      .eq("status", "approved")
+      .order("decided_at", { ascending: false })
+      .limit(APPROVED_TASKS),
   ]);
 
   // Approved work of this week, per role (and task when it is not the default one).
@@ -81,5 +93,9 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
     evaluaties: context.evaluaties,
     bibliotheek: context.bibliotheek,
     goedgekeurd: context.staf,
+    goedgekeurde_taken: (tasks ?? []).flatMap((task) => {
+      const final = stepOutput(task.staff_task_steps.find((s) => s.version === task.version && s.phase === "eindvoorstel")?.output);
+      return final ? [{ titel: task.title, goedgekeurd_op: task.decided_at?.slice(0, 10) ?? null, voorstel: final }] : [];
+    }),
   };
 }

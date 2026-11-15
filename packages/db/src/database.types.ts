@@ -351,6 +351,135 @@ export type Database = {
           },
         ];
       };
+      staff_task_steps: {
+        Row: {
+          id: string;
+          task_id: string;
+          team_id: string;
+          version: number;
+          position: number;
+          role: string;
+          phase: "bijdrage" | "eindvoorstel";
+          status: "pending" | "generating" | "ready" | "failed";
+          output: Json | null;
+          provider: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          team_id: string;
+          version: number;
+          position: number;
+          role: string;
+          phase: "bijdrage" | "eindvoorstel";
+          status?: "pending" | "generating" | "ready" | "failed";
+          output?: Json | null;
+          provider: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          task_id?: string;
+          team_id?: string;
+          version?: number;
+          position?: number;
+          role?: string;
+          phase?: "bijdrage" | "eindvoorstel";
+          status?: "pending" | "generating" | "ready" | "failed";
+          output?: Json | null;
+          provider?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_task_steps_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_task_steps_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_tasks: {
+        Row: {
+          id: string;
+          team_id: string;
+          source_message_id: string;
+          owner_role: string;
+          roles: string[];
+          title: string;
+          assignment: string;
+          status: "running" | "ready" | "failed" | "approved";
+          version: number;
+          feedback: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          decided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          source_message_id: string;
+          owner_role: string;
+          roles: string[];
+          title: string;
+          assignment: string;
+          status?: "running" | "ready" | "failed" | "approved";
+          version?: number;
+          feedback?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          decided_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          source_message_id?: string;
+          owner_role?: string;
+          roles?: string[];
+          title?: string;
+          assignment?: string;
+          status?: "running" | "ready" | "failed" | "approved";
+          version?: number;
+          feedback?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          decided_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_tasks_source_message_id_fkey";
+            columns: ["source_message_id"];
+            isOneToOne: true;
+            referencedRelation: "staff_messages";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_tasks_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff_runs: {
         Row: {
           id: string;
@@ -1240,6 +1369,7 @@ export type Database = {
       is_team_head_coach: { Args: { p_team_id: string }; Returns: boolean };
       staff_chat_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       staff_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
+      staff_task_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
     };
     Enums: {

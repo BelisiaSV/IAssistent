@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 
 import { ChatThread } from "@/components/staff/chat-thread";
 import { RoleAvatar, staffColor } from "@/components/staff/role-avatar";
-import { TaskProgress } from "@/components/staff/task-progress";
 import { TaskProposalCard } from "@/components/staff/task-proposal-card";
 import { messages } from "@/lib/messages";
 import { MESSAGE_MAX } from "@/lib/staff-room/roles";
@@ -172,9 +171,17 @@ export function StaffRoom({
           ) : (
             <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 2xl:grid-cols-1">
               {tasks.slice(0, TASKS_SHOWN).map((t) => (
-                <li key={t.id} className="space-y-2">
-                  <TaskProposalCard task={t.task} roleNames={roleNames} owner={t.role} showOwner />
-                  <TaskProgress step={0} />
+                <li key={t.id}>
+                  <TaskProposalCard
+                    task={t.task}
+                    roleNames={roleNames}
+                    owner={t.role}
+                    showOwner
+                    messageId={t.id}
+                    teamId={teamId}
+                    confirmed={t.confirmed}
+                    canWrite={canWrite}
+                  />
                 </li>
               ))}
             </ul>

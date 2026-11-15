@@ -7,6 +7,7 @@ export * from "./output";
 export * from "./prompt";
 export * from "./run";
 export * from "./conversation";
+export * from "./collaboration";
 export * from "./providers/types";
 export { exampleProvider } from "./providers/example";
 export { anthropicProvider, DEFAULT_MODEL } from "./providers/anthropic";

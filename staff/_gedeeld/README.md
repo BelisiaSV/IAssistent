@@ -16,5 +16,8 @@ Afspraken die voor álle rollen gelden. Elke rol krijgt deze bestanden mee.
   aan een AI-rol opbouwt. `{{…}}` zijn invulvelden; de engine controleert dat ze bestaan.
 - `gesprek-systeem.md` en `gesprek-gebruiker.md` — sjablonen voor een gesprek met een rol in de
   Staff Room (taak `gesprek` van elke rol: `<rol>/taken/gesprek/`).
+- `samenwerking-systeem.md` en `samenwerking-gebruiker.md` — sjablonen voor een gezamenlijke taak
+  (taak `samenwerking` van elke rol: eerst een bijdrage van de betrokken rollen, dan het
+  eindvoorstel van de rol die de taak voorstelde).
 - `periodisering.json` — weektypes (belasting %, km) en cycli van 4, 6 en 8 weken vanaf de eerste competitiewedstrijd.
 - `testen.json` — fysieke testen (VAMEVAL/MAS) met eenheid, grenzen en interval.
