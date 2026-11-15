@@ -20,6 +20,7 @@ export type Database = {
           id: string;
           email: string;
           full_name: string | null;
+          plan_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export type Database = {
           id: string;
           email: string;
           full_name?: string | null;
+          plan_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +36,7 @@ export type Database = {
           id?: string;
           email?: string;
           full_name?: string | null;
+          plan_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -300,6 +303,50 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_messages: {
+        Row: {
+          id: string;
+          team_id: string;
+          role: string;
+          author: "coach" | "role";
+          content: string;
+          task_proposal: Json | null;
+          provider: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          role: string;
+          author: "coach" | "role";
+          content: string;
+          task_proposal?: Json | null;
+          provider?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          role?: string;
+          author?: "coach" | "role";
+          content?: string;
+          task_proposal?: Json | null;
+          provider?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_messages_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
             referencedColumns: ["id"];
           },
         ];
@@ -831,6 +878,63 @@ export type Database = {
           },
         ];
       };
+      plans: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          audience: string;
+          description: string | null;
+          price_cents: number | null;
+          billing_period: string;
+          yearly_price_cents: number | null;
+          max_coaches: number | null;
+          max_teams: number | null;
+          features: Json;
+          recommended: boolean;
+          active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          audience: string;
+          description?: string | null;
+          price_cents?: number | null;
+          billing_period?: string;
+          yearly_price_cents?: number | null;
+          max_coaches?: number | null;
+          max_teams?: number | null;
+          features?: Json;
+          recommended?: boolean;
+          active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          audience?: string;
+          description?: string | null;
+          price_cents?: number | null;
+          billing_period?: string;
+          yearly_price_cents?: number | null;
+          max_coaches?: number | null;
+          max_teams?: number | null;
+          features?: Json;
+          recommended?: boolean;
+          active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       opponents: {
         Row: {
           id: string;
@@ -1115,6 +1219,11 @@ export type Database = {
     Functions: {
       admin_import_players: { Args: { p_team_id: string; p_players: Json }; Returns: Json };
       admin_team_players: { Args: { p_team_id: string }; Returns: Database["public"]["Tables"]["players"]["Row"][] };
+      admin_accounts: {
+        Args: Record<PropertyKey, never>;
+        Returns: { id: string; email: string; full_name: string | null; plan_id: string | null }[];
+      };
+      admin_set_account_plan: { Args: { p_coach: string; p_plan: string | null }; Returns: undefined };
       admin_teams: {
         Args: Record<PropertyKey, never>;
         Returns: { id: string; name: string; club_name: string; head_coach_email: string; archived: boolean }[];
@@ -1129,6 +1238,7 @@ export type Database = {
       is_feature_enabled: { Args: { p_key: string }; Returns: boolean };
       is_platform_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_team_head_coach: { Args: { p_team_id: string }; Returns: boolean };
+      staff_chat_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       staff_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
     };

@@ -1,0 +1,11 @@
+{
+  "antwoord": "Begrepen. De Assistent Coach werkt dit uit en stemt de belasting af met de Physical Coach. Bevestig je de taak, dan gaan ze aan de slag; je krijgt één voorstel om goed te keuren.",
+  "taakvoorstel": {
+    "titel": "Nieuwe opdracht van de hoofdcoach",
+    "betrokken_rollen": [
+      "assistant-coach",
+      "physical-coach"
+    ],
+    "opdracht": "Werk de opdracht van de hoofdcoach uit en stem de belasting onderling af. Lever één gezamenlijk voorstel op."
+  }
+}

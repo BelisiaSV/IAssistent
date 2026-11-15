@@ -5,11 +5,14 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   anthropicProvider,
   buildRolePrompt,
+  canConverse,
+  CONVERSATION_TASK,
   exampleProvider,
   loadStaff,
   matchDayFor,
   type RoleContext,
   roleExample,
+  runConversation,
   runRole,
   type SeasonPlan,
   type Staff,
@@ -199,7 +202,7 @@ describe("tactical coach", () => {
 
   it("has valid examples for all tasks", () => {
     const role = staff.roles.find((r) => r.id === "tactical-coach")!;
-    expect(role.tasks.map((t) => t.id).sort()).toEqual(["oefenstof", "wedstrijdvoorbereiding"]);
+    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "wedstrijdvoorbereiding"]);
     expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
     for (const task of role.tasks) {
       expect(validateOutput(task.outputSchema, roleExample(role, task.id))).toEqual({ ok: true });
@@ -477,5 +480,57 @@ describe("anthropicProvider (fake client, no network)", () => {
     await expect(runRole(staff, "assistant-coach", context(), anthropicProvider({ client }))).rejects.toMatchObject({
       code: "refusal",
     });
+  });
+});
+
+describe("runConversation", () => {
+  const input = { teamcontext: { team: { leeftijdscategorie: "senioren" } }, gesprek: [], vraag: "Wat stel je voor donderdag voor?" };
+
+  it("every role can talk and its examples match its schema", () => {
+    for (const role of staff.roles) {
+      expect(canConverse(staff, role.id)).toBe(true);
+      const task = role.tasks.find((t) => t.id === CONVERSATION_TASK)!;
+      const examples = task.examples.filter((f) => f.path.endsWith(".json"));
+      expect(examples.length).toBeGreaterThan(0);
+      for (const f of examples) expect(validateOutput(task.outputSchema, JSON.parse(f.content)).ok, f.path).toBe(true);
+    }
+  });
+
+  it("answers in test mode, also for a placeholder role, and rotates the examples", async () => {
+    const first = await runConversation(staff, "assistant-coach", input, exampleProvider);
+    expect(first.provider).toBe("example");
+    expect(first.reply.taakvoorstel?.betrokken_rollen).toEqual(["physical-coach"]);
+    const second = await runConversation(
+      staff,
+      "assistant-coach",
+      { ...input, gesprek: [{ van: "hoofdcoach", tekst: "x" }, { van: "rol", tekst: first.reply.antwoord }] },
+      exampleProvider,
+    );
+    expect(second.reply.antwoord).not.toBe(first.reply.antwoord);
+    const placeholder = await runConversation(staff, "team-manager", input, exampleProvider);
+    expect(placeholder.reply.antwoord.length).toBeGreaterThan(0);
+  });
+
+  it("builds the prompt from the shared templates and drops unknown roles from a task", async () => {
+    let seen: { system: string; user: string } | null = null;
+    const provider: StaffModelProvider = {
+      id: "anthropic",
+      async generate(req) {
+        seen = { system: req.system, user: req.user };
+        return { output: { antwoord: "Ok", taakvoorstel: { titel: "T", betrokken_rollen: ["physical-coach", "bestaat-niet", "tactical-coach"], opdracht: "O" } }, provider: "anthropic", model: null, usage: null };
+      },
+    };
+    const result = await runConversation(staff, "tactical-coach", input, provider);
+    expect(result.reply.taakvoorstel?.betrokken_rollen).toEqual(["physical-coach"]);
+    expect(seen!.system).toContain("AI Staff Coordinator");
+    expect(seen!.user).toContain("Wat stel je voor donderdag voor?");
+    expect(seen!.system).not.toMatch(/\{\{/);
+    expect(seen!.user).not.toMatch(/\{\{/);
+  });
+
+  it("refuses an unknown role and invalid output", async () => {
+    await expect(runConversation(staff, "bestaat-niet", input, exampleProvider)).rejects.toBeInstanceOf(StaffGenerationError);
+    const bad: StaffModelProvider = { id: "anthropic", async generate() { return { output: { antwoord: "" }, provider: "anthropic", model: null, usage: null }; } };
+    await expect(runConversation(staff, "tactical-coach", input, bad)).rejects.toBeInstanceOf(StaffGenerationError);
   });
 });

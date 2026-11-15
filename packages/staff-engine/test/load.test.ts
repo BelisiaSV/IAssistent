@@ -114,6 +114,8 @@ beforeEach(async () => {
   );
   await write("_gedeeld/opdracht-systeem.md", "{{rol}}\n");
   await write("_gedeeld/opdracht-gebruiker.md", "{{weekinput}}\n");
+  await write("_gedeeld/gesprek-systeem.md", "{{rol}}\n");
+  await write("_gedeeld/gesprek-gebruiker.md", "{{vraag}}\n");
 });
 
 afterEach(async () => {
@@ -132,6 +134,8 @@ describe("loadStaff", () => {
     expect(staff.shared.map((f) => f.path)).toEqual([
       "_gedeeld/afspraken.md",
       "_gedeeld/formaties.json",
+      "_gedeeld/gesprek-gebruiker.md",
+      "_gedeeld/gesprek-systeem.md",
       "_gedeeld/opdracht-gebruiker.md",
       "_gedeeld/opdracht-systeem.md",
       "_gedeeld/periodisering.json",
@@ -310,10 +314,11 @@ describe("prompt templates", () => {
 });
 
 describe("repository /staff", () => {
-  it("is valid and contains the six roles", async () => {
+  it("is valid and contains the seven roles", async () => {
     const staff = await loadStaff(REPO_STAFF_DIR);
     expect(staff.roles.map((r) => r.id)).toEqual([
       "assistant-coach",
+      "coordinator",
       "physical-coach",
       "player-development",
       "tactical-coach",

@@ -33,6 +33,16 @@ export function todayInBelgium(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Brussels" }).format(now);
 }
 
+/** Midnight of today in Belgium, as a timestamp with the offset of Brussels (for "today" limits). */
+export function startOfTodayInBelgium(now = new Date()): string {
+  const zone = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Brussels", timeZoneName: "shortOffset" })
+    .formatToParts(now)
+    .find((part) => part.type === "timeZoneName")?.value;
+  const hours = Number(/GMT([+-]\d+)/.exec(zone ?? "")?.[1] ?? 0);
+  const offset = `${hours < 0 ? "-" : "+"}${String(Math.abs(hours)).padStart(2, "0")}:00`;
+  return `${todayInBelgium(now)}T00:00:00${offset}`;
+}
+
 const weekdayFormat = new Intl.DateTimeFormat("nl-BE", { weekday: "long", timeZone: "UTC" });
 const shortFormat = new Intl.DateTimeFormat("nl-BE", { day: "numeric", month: "short", timeZone: "UTC" });
 const longFormat = new Intl.DateTimeFormat("nl-BE", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });

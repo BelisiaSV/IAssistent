@@ -7,6 +7,8 @@ import type { Staff, StaffFile, StaffRole } from "./types";
 export const TEMPLATE_PLACEHOLDERS = {
   system: ["afspraken", "visie_afspraken", "wedstrijddagen", "periodisering", "rol", "instructies", "referentie", "voorbeeld"],
   user: ["visie", "weekinput", "kern", "tegenstander", "evaluaties", "belastingshistoriek", "testen", "bibliotheek", "staf", "feedback"],
+  conversationSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
+  conversationUser: ["teamcontext", "gesprek", "vraag"],
 } as const;
 
 const PLACEHOLDER = /\{\{\s*([a-z_]+)\s*\}\}/g;
@@ -23,7 +25,7 @@ export function renderTemplate(template: string, values: Record<string, string>)
   });
 }
 
-function sharedText(staff: Staff, fileName: string): string {
+export function sharedText(staff: Staff, fileName: string): string {
   const file = staff.shared.find((f) => f.path === `${SHARED_DIR}/${fileName}`);
   if (!file) throw new Error(`missing shared file ${fileName}`);
   return file.content.trim();

@@ -1,0 +1,10 @@
+{
+  "antwoord": "De gemiddelde RPE van dinsdag lag hoger dan gepland (6,5 in plaats van 5). Ik stel voor om donderdag een reeks minder te doen in de partijvorm. Zal ik dat met de Assistent Coach in de planning verwerken?",
+  "taakvoorstel": {
+    "titel": "Belasting donderdag bijsturen",
+    "betrokken_rollen": [
+      "assistant-coach"
+    ],
+    "opdracht": "Verwerk een reeks minder in de partijvorm van donderdag na de hoge RPE van dinsdag, zonder het doel van de training te veranderen."
+  }
+}
