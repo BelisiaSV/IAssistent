@@ -1,4 +1,5 @@
 import type { RoleContext } from "../context";
+import type { ConversationInput } from "../conversation";
 import type { Staff, StaffRole } from "../types";
 
 export interface GenerateRequest {
@@ -9,7 +10,8 @@ export interface GenerateRequest {
   outputSchema: Record<string, unknown>;
   system: string;
   user: string;
-  context: RoleContext;
+  /** The week context of a role task, or the conversation (task "gesprek"). */
+  context: RoleContext | ConversationInput;
 }
 
 export interface GenerateResult {

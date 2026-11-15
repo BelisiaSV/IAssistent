@@ -40,4 +40,9 @@ export const SHARED_TEXT_FILES = {
   visionAgreements: "visie-hoofdcoach.md",
   systemTemplate: "opdracht-systeem.md",
   userTemplate: "opdracht-gebruiker.md",
+  conversationSystemTemplate: "gesprek-systeem.md",
+  conversationUserTemplate: "gesprek-gebruiker.md",
 } as const;
+
+/** The conversation with a role (Staff Room): task taken/gesprek of every role. */
+export const CONVERSATION_TASK = "gesprek";

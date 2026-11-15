@@ -5,7 +5,7 @@ import type { Staff } from "@iassistent/staff-engine/content";
 import bundle from "@/generated/staff.json";
 
 import { buildRoleContext, loadHistory, sessionAu, weekLabels } from "./context";
-import { addDays, isoWeekday, mondayOf, weekDates } from "./dates";
+import { addDays, isoWeekday, mondayOf, startOfTodayInBelgium, weekDates } from "./dates";
 import { weekPlanSchema } from "./validation";
 
 const staff = bundle as unknown as Staff;
@@ -141,5 +141,12 @@ describe("loadHistory", () => {
     expect(history).toHaveLength(1);
     expect(history[0]).toMatchObject({ gepland_au: 1300, werkelijk_au: 400 + 630 });
     expect(history[0]!.sessies).toHaveLength(3);
+  });
+});
+
+describe("startOfTodayInBelgium", () => {
+  it("uses the offset of Brussels in winter and summer", () => {
+    expect(startOfTodayInBelgium(new Date("2026-11-15T23:30:00Z"))).toBe("2026-11-16T00:00:00+01:00");
+    expect(startOfTodayInBelgium(new Date("2026-07-01T10:00:00Z"))).toBe("2026-07-01T00:00:00+02:00");
   });
 });

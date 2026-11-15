@@ -18,7 +18,7 @@ const PLANNED = "#2a78d6";
 const ACTUAL = "#eb6834";
 
 /** Planned vs. actual AU per day, as grouped bars on one axis. */
-export function LoadChart({ days }: { days: LoadChartDay[] }) {
+export function LoadChart({ days, title = m.chartTitle }: { days: LoadChartDay[]; title?: string }) {
   const [hover, setHover] = useState<number | null>(null);
   const max = Math.max(100, ...days.flatMap((d) => [d.planned ?? 0, d.actual ?? 0]));
   const niceMax = Math.ceil(max / 200) * 200;
@@ -47,7 +47,7 @@ export function LoadChart({ days }: { days: LoadChartDay[] }) {
   return (
     <figure className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 print:hidden">
       <figcaption className="mb-2 flex flex-wrap items-center gap-4 text-sm">
-        <span className="font-semibold">{m.chartTitle}</span>
+        <span className="font-semibold">{title}</span>
         <span className="flex items-center gap-1.5 text-slate-600">
           <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: PLANNED }} /> {m.planned}
         </span>
@@ -60,7 +60,7 @@ export function LoadChart({ days }: { days: LoadChartDay[] }) {
           </span>
         )}
       </figcaption>
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={m.chartTitle}>
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={title}>
         {ticks.map((t) => (
           <g key={t}>
             <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="rgba(148,163,184,0.25)" strokeWidth={1} />

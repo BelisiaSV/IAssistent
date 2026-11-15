@@ -128,15 +128,16 @@ function checkTemplates(shared: StaffFile[], issues: StaffIssue[]) {
       issues.push({ path: filePath, message: "bestand ontbreekt" });
       continue;
     }
-    const allowed =
-      fileName === SHARED_TEXT_FILES.systemTemplate
-        ? TEMPLATE_PLACEHOLDERS.system
-        : fileName === SHARED_TEXT_FILES.userTemplate
-          ? TEMPLATE_PLACEHOLDERS.user
-          : null;
+    const templates: Record<string, readonly string[]> = {
+      [SHARED_TEXT_FILES.systemTemplate]: TEMPLATE_PLACEHOLDERS.system,
+      [SHARED_TEXT_FILES.userTemplate]: TEMPLATE_PLACEHOLDERS.user,
+      [SHARED_TEXT_FILES.conversationSystemTemplate]: TEMPLATE_PLACEHOLDERS.conversationSystem,
+      [SHARED_TEXT_FILES.conversationUserTemplate]: TEMPLATE_PLACEHOLDERS.conversationUser,
+    };
+    const allowed = templates[fileName];
     if (!allowed) continue;
     for (const name of templatePlaceholders(file.content)) {
-      if (!(allowed as readonly string[]).includes(name)) {
+      if (!allowed.includes(name)) {
         issues.push({ path: filePath, message: `onbekend invulveld {{${name}}} (toegelaten: ${allowed.join(", ")})` });
       }
     }

@@ -1,6 +1,8 @@
 import type { LibraryExercise, RoleContext } from "../context";
-import { roleExample } from "../prompt";
-import type { Staff } from "../types";
+import type { ConversationInput } from "../conversation";
+import { CONVERSATION_TASK } from "../layout";
+import { roleExample, roleTask } from "../prompt";
+import type { Staff, StaffRole } from "../types";
 import { StaffGenerationError, type StaffModelProvider } from "./types";
 
 type Day = Record<string, unknown> & { soort: string; md: string | null };
@@ -13,7 +15,9 @@ type Example = Record<string, unknown>;
  */
 export const exampleProvider: StaffModelProvider = {
   id: "example",
-  async generate({ staff, role, task, context }) {
+  async generate({ staff, role, task, context: input }) {
+    if (task === CONVERSATION_TASK) return { output: conversationExample(role, input as ConversationInput), provider: "example", model: null, usage: null };
+    const context = input as RoleContext;
     const example = roleExample(role, task) as Example | null;
     if (!example) {
       throw new StaffGenerationError("provider_error", `role ${role.id} (${task}) has no example`);
@@ -333,4 +337,15 @@ function fitDrawings(example: Example, context: RoleContext): Example {
     }),
   );
   return { ...example, oefeningen };
+}
+
+/**
+ * Test mode for a conversation: the examples of the role take turns, so a
+ * conversation shows every example once before the first comes back.
+ */
+function conversationExample(role: StaffRole, input: ConversationInput): unknown {
+  const examples = (roleTask(role, CONVERSATION_TASK)?.examples ?? []).filter((f) => f.path.endsWith(".json")).sort((a, b) => a.path.localeCompare(b.path));
+  if (!examples.length) throw new StaffGenerationError("provider_error", `role ${role.id} has no conversation example`);
+  const asked = input.gesprek.filter((t) => t.van === "hoofdcoach").length;
+  return JSON.parse(examples[asked % examples.length]!.content);
 }

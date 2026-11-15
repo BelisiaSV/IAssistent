@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { AppShell } from "@/components/app-shell";
 import type { SwitcherTeam } from "@/components/team-switcher";
 import { isPlatformAdmin } from "@/lib/admin";
+import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
 import { SIDEBAR_COOKIE } from "@/lib/sidebar";
 import { staff } from "@/lib/staff";
@@ -41,6 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       email={user.email ?? ""}
       roleNames={Object.fromEntries(staff.roles.map((r) => [r.id, r.meta.naam]))}
       initialCollapsed={collapsed}
+      testMode={getStaffProvider().id === "example"}
     >
       {children}
     </AppShell>
