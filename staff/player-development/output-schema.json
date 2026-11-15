@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/player-development/output-schema.json",
+  "title": "Player Development — output",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": true
+}

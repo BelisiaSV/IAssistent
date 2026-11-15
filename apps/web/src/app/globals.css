@@ -8,3 +8,65 @@
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
+
+/*
+ * Dark theme of the work area (every page in the app except the dashboard,
+ * which has its own dark style, and the print pages). The slate scale is
+ * flipped, white cards become dark panels and the status colours get dark
+ * tints with light text. Unlayered, so it wins over the utility layer.
+ */
+.app-dark {
+  color-scheme: dark;
+  --color-slate-50: #0e1729;
+  --color-slate-100: #18233a;
+  --color-slate-200: #25314b;
+  --color-slate-300: #36435f;
+  --color-slate-400: #7d8aa3;
+  --color-slate-500: #94a3b8;
+  --color-slate-600: #aab6c8;
+  --color-slate-700: #cbd5e1;
+  --color-slate-800: #e2e8f0;
+  --color-slate-900: #f1f5f9;
+  --color-slate-950: #f8fafc;
+  --color-brand: #4c9be3;
+  --color-brand-dark: #3b82c4;
+  --color-green-50: #0f2a1c;
+  --color-green-100: #14361f;
+  --color-green-200: #1f5132;
+  --color-green-700: #86efac;
+  --color-green-800: #86efac;
+  --color-emerald-50: #0c2a22;
+  --color-emerald-200: #1b4d3e;
+  --color-emerald-700: #6ee7b7;
+  --color-red-50: #2c1418;
+  --color-red-100: #3a1a1f;
+  --color-red-200: #5c2730;
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fca5a5;
+  --color-amber-50: #2b2110;
+  --color-amber-100: #3a2c12;
+  --color-amber-200: #5a4419;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fcd34d;
+  --color-amber-900: #fde68a;
+  --color-yellow-100: #36300f;
+  --color-yellow-800: #fde047;
+  --color-orange-100: #3a2410;
+  --color-orange-800: #fdba74;
+  --color-blue-800: #93c5fd;
+}
+
+.app-dark .bg-white {
+  background-color: #111a2e;
+}
+
+/* Elements that are dark on purpose (badges, labels on the pitch) stay dark. */
+.app-dark .bg-slate-800,
+.app-dark .bg-slate-900 {
+  background-color: #050a14;
+}
+
+.app-dark .bg-slate-900\/80 {
+  background-color: rgb(5 10 20 / 0.8);
+}

@@ -6,6 +6,7 @@ import { type FormEvent, startTransition, useActionState, useEffect, useState } 
 
 import { TeamCard } from "@/components/team-card";
 import { Alert, Button, Field, Input } from "@/components/ui";
+import { AGE_CATEGORIES } from "@/lib/teams/age-categories";
 import { messages } from "@/lib/messages";
 
 import { createTeam, type TeamFormState } from "../actions";
@@ -49,7 +50,7 @@ export function TeamForm() {
         />
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-3">
         <Field label={m.name} error={errors.name}>
           <Input
             name="name"
@@ -59,6 +60,19 @@ export function TeamForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+        </Field>
+        <Field label={m.ageCategory} error={errors.ageCategory}>
+          <select
+            name="ageCategory"
+            defaultValue="senioren"
+            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+          >
+            {AGE_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {messages.ageCategories[c]}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label={m.season} error={errors.season}>
           <Input

@@ -63,8 +63,8 @@ export function LoadChart({ days }: { days: LoadChartDay[] }) {
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={m.chartTitle}>
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="#e5e7eb" strokeWidth={1} />
-            <text x={pad.left - 6} y={y(t) + 4} textAnchor="end" fontSize={10} fill="#52514e">
+            <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="rgba(148,163,184,0.25)" strokeWidth={1} />
+            <text x={pad.left - 6} y={y(t) + 4} textAnchor="end" fontSize={10} fill="#94a3b8">
               {t}
             </text>
           </g>
@@ -73,10 +73,10 @@ export function LoadChart({ days }: { days: LoadChartDay[] }) {
           const cx = pad.left + band * i + band / 2;
           return (
             <g key={d.date} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
-              <rect x={pad.left + band * i} y={pad.top} width={band} height={plotH} fill={hover === i ? "#f1f5f9" : "transparent"} />
+              <rect x={pad.left + band * i} y={pad.top} width={band} height={plotH} fill={hover === i ? "rgba(148,163,184,0.12)" : "transparent"} />
               {bar(cx - barW - 1, d.planned, PLANNED)}
               {bar(cx + 1, d.actual, ACTUAL)}
-              <text x={cx} y={height - 10} textAnchor="middle" fontSize={11} fill="#52514e">
+              <text x={cx} y={height - 10} textAnchor="middle" fontSize={11} fill="#94a3b8">
                 {d.label}
               </text>
             </g>

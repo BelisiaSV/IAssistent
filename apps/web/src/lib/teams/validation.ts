@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { messages } from "@/lib/messages";
 
+import { AGE_CATEGORIES } from "./age-categories";
+
 const t = messages.teamForm.errors;
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, t.color);
 
@@ -16,6 +18,7 @@ export const teamInputSchema = z.object({
   clubName: z.string().trim().min(1, t.clubNameRequired).max(120, t.tooLong),
   primaryColor: hexColor,
   secondaryColor: hexColor,
+  ageCategory: z.enum(AGE_CATEGORIES, t.ageCategory).default("senioren"),
 });
 
 export type TeamInput = z.infer<typeof teamInputSchema>;
