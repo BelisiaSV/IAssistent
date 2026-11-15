@@ -1,0 +1,11 @@
+{
+  "antwoord": "Dit is iets voor de Tactical Coach, met de Video Analist voor de presentatie. Bevestig je de taak, dan zet ik hen aan het werk.",
+  "taakvoorstel": {
+    "titel": "Voorbereiding volgende wedstrijd",
+    "betrokken_rollen": [
+      "tactical-coach",
+      "video-analyst"
+    ],
+    "opdracht": "Bereid de volgende wedstrijd voor: speelplan en standaardsituaties (Tactical Coach) en een korte presentatie voor de spelers (Video Analist)."
+  }
+}

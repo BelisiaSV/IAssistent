@@ -28,7 +28,11 @@ export type NavIconName =
   | "collapse"
   | "expand"
   | "menu"
-  | "close";
+  | "close"
+  | "tasks"
+  | "reports"
+  | "send"
+  | "chat";
 
 const PATHS: Record<NavIconName, ReactNode> = {
   animations: (
@@ -121,6 +125,20 @@ const PATHS: Record<NavIconName, ReactNode> = {
     </>
   ),
   load: <path d="M3 12h4l3-7 4 14 3-7h4" />,
+  tasks: (
+    <>
+      <path d="M4 6.5l1.5 1.5L8.5 5M4 12.5l1.5 1.5 3-3M4 18.5l1.5 1.5 3-3" />
+      <path d="M11.5 6.5H20M11.5 12.5H20M11.5 18.5H20" />
+    </>
+  ),
+  reports: (
+    <>
+      <path d="M4 20V4M4 20h16" />
+      <path d="M8 16v-4M12 16V8M16 16v-6" />
+    </>
+  ),
+  send: <path d="M4 12l16-8-6 16-2.5-6.5zM11.5 13.5L20 4" />,
+  chat: <path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z" />,
   periodization: (
     <>
       <rect x="3" y="4.5" width="18" height="16.5" rx="2" />

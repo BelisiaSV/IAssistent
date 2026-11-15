@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/coordinator/taken/gesprek/output-schema.json",
+  "title": "Antwoord in de Staff Room",
+  "description": "Het antwoord van de rol aan de hoofdcoach, eventueel met een voorstel voor een gezamenlijke taak.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "antwoord",
+    "taakvoorstel"
+  ],
+  "properties": {
+    "antwoord": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "description": "Het antwoord in het Nederlands, kort en concreet."
+    },
+    "taakvoorstel": {
+      "description": "Een gezamenlijke taak met andere rollen, of null. De hoofdcoach bevestigt ze eerst.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "titel",
+            "betrokken_rollen",
+            "opdracht"
+          ],
+          "properties": {
+            "titel": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "betrokken_rollen": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "string"
+              }
+            },
+            "opdracht": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          }
+        }
+      ]
+    }
+  }
+}

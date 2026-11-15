@@ -15,12 +15,15 @@ staff/
     referentie/             achtergrondkennis (methodiek, periodisering, ...)
     voorbeelden/            voorbeeldinput en -output
     tests/                  testgevallen voor de rol
+    taken/<taak-id>/        extra taak (instructies.md, output-schema.json, voorbeelden/);
+                            elke rol heeft `taken/gesprek` voor de Staff Room
 ```
 
 ## Rollen
 
 | id               | naam            |
 |------------------|-----------------|
+| coordinator      | AI Staff Coordinator |
 | assistant-coach  | Assistent Coach |
 | tactical-coach   | Tactical Coach  |
 | physical-coach   | Physical Coach  |

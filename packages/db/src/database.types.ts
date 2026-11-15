@@ -307,6 +307,50 @@ export type Database = {
           },
         ];
       };
+      staff_messages: {
+        Row: {
+          id: string;
+          team_id: string;
+          role: string;
+          author: "coach" | "role";
+          content: string;
+          task_proposal: Json | null;
+          provider: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          role: string;
+          author: "coach" | "role";
+          content: string;
+          task_proposal?: Json | null;
+          provider?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          role?: string;
+          author?: "coach" | "role";
+          content?: string;
+          task_proposal?: Json | null;
+          provider?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_messages_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff_runs: {
         Row: {
           id: string;
@@ -1194,6 +1238,7 @@ export type Database = {
       is_feature_enabled: { Args: { p_key: string }; Returns: boolean };
       is_platform_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_team_head_coach: { Args: { p_team_id: string }; Returns: boolean };
+      staff_chat_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       staff_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
     };

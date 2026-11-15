@@ -71,8 +71,10 @@ staff/                    ALLE rolinhoud (markdown + JSON)
   _gedeeld/               gedeelde afspraken, rol-sjabloon.md, posities.json, formaties.json,
                           visieprofiel.json, wedstrijddagen.json (MD-labels), periodisering.json
                           (weektypes + cycli 4/6/8 weken), testen.json (VAMEVAL/MAS),
-                          opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI)
-  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
+                          opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI),
+                          gesprek-systeem.md + gesprek-gebruiker.md (gesprek met een rol)
+  coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
+  player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
     taken/<taak-id>/      extra taak van een rol (eigen instructies.md, output-schema.json,
                           voorbeelden/), bv. tactical-coach/taken/oefenstof
@@ -270,16 +272,15 @@ Regels:
   importeren: zelfde rugnummer = bijwerken, anders nieuw, niemand verwijderd, max. 200 rijen.
 - **Teamdashboard en navigatie** — links een donkere **zijbalk** (`components/sidebar.tsx`; op mobiel
   een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
-  onderdeel) en de **staf als hiërarchie** (`NAV_GROUPS` in `lib/navigation.ts`): Hoofdcoach (Dashboard,
-  Mijn staf, Visie, Instellingen), dan per rol een uitklapbaar menu met haar onderdelen — Assistent Coach
-  (Microcyclus, Oefenstof, Editor), Physical Coach (Belasting, Periodisering, Testen), Video Analist
-  (Presentaties, Evaluaties, Video's, Animaties), Tactical Coach (Wedstrijdplan, Tegenstanders,
-  Standaardsituaties), Player Development (Individuele ontwikkeling, Clubdoelstellingen), Team Manager
-  (Selectie, Spelersbeheer). Wat nog niet bestaat staat er als "Binnenkort". Elke rol heeft een eigen
-  mannetje (`components/staff/role-avatar.tsx`, kleur per rol). **Mijn staf** (`/teams/[id]/staff`) toont
-  de hiërarchie: hoofdcoach → AI Staff Coordinator → de rollen → goedkeuring en publicatie (gesprek met
-  een rol volgt). Belasting en Wedstrijdplan verwijzen naar de weekpagina (`/load`, `/match`);
-  Periodisering is een eigen pagina. Elk team heeft een **leeftijdscategorie** (`teams.age_category`:
+  onderdeel) en enkel de **8 menu's van de hoofdcoach** (`NAV_ITEMS` in `lib/navigation.ts`): Dashboard,
+  Mijn team (Spelers, Selecties, Instellingen, Visie), Planning (Microcyclus, Periodisering, Belasting),
+  Staff Room, Taken, Wedstrijdanalyse (Volgende wedstrijd, Tegenstanders, Evaluaties), Oefenbibliotheek
+  (Oefeningen, Standaardsituaties) en Rapportage (Testen, Seizoensverloop, Belasting per week). De
+  onderdelen van een menu staan als **tabbladen** bovenaan de pagina (`components/section-tabs.tsx`), elk
+  met het mannetje van de rol die het verzorgt (`member`). Elke rol heeft een eigen mannetje
+  (`components/staff/role-avatar.tsx`, kleur per rol). `/teams/[id]/staff` verwijst naar de Staff Room.
+  Belasting en Volgende wedstrijd verwijzen naar de weekpagina (`/load`, `/match`); Periodisering is een
+  eigen pagina. Elk team heeft een **leeftijdscategorie** (`teams.age_category`:
   u15, u16, u17, u19, beloften, b-elftal, senioren; `lib/teams/age-categories.ts`).
   Teamonderdelen openen voor het huidige team of
   het laatst gebruikte (localStorage). Op grote schermen is de zijbalk **inklapbaar** tot enkel de iconen
@@ -311,5 +312,22 @@ Regels:
   om, maakt `bg-white` een donker paneel en geeft de statuskleuren (groen, rood, amber, …) donkere tinten.
   Schrijf nieuwe pagina's gewoon met de lichte klassen (`bg-white`, `text-slate-600`, …); kies voor iets dat
   bewust donker moet blijven `bg-slate-800/900` (blijft donker) en vermijd vaste lichte hex-kleuren.
-- Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
+- **Staff Room en gesprek met een rol (testmodus)** — elke rol (ook de **AI Staff Coordinator**,
+  `staff/coordinator`) heeft de taak `gesprek` (`taken/gesprek/`: instructies, schema `{ antwoord,
+  taakvoorstel }`, voorbeelden). `runConversation` in de staff-engine bouwt de opdracht uit
+  `gesprek-systeem.md`/`gesprek-gebruiker.md` en werkt ook voor placeholder-rollen; in testmodus wisselen
+  de voorbeelden af. Elke rol heeft per team een **eigen gesprekshistoriek** (`staff_messages`: `role`,
+  `author` coach/role, `content`, `task_proposal`, `provider`; lezen `can_read_team`, schrijven
+  `can_write_team`, nooit wijzigen of verwijderen; daglimiet echte AI `staff_chat_daily_limit()` = 30).
+  De rol krijgt de **goedgekeurde teamcontext** (`lib/staff-room/context.ts`: team, visie, kern zonder
+  namen, deze week, goedgekeurde voorstellen, oefenstof) en de laatste 20 berichten. Server actions in
+  `lib/staff-room/actions.ts` (`loadThread`, `sendMessage`). **Staff Room** (`/teams/[id]/staff-room?rol=`):
+  bovenaan een nieuwe opdracht (naar de coördinator), links de rollen, midden het gesprek
+  (`components/staff/chat-thread.tsx`), rechts de voorgestelde taken met betrokken rollen en voortgang.
+  Op elke pagina staat rechts de **staf als kolom van mannetjes** (`components/staff/staff-dock.tsx`);
+  een klik opent het gesprek in een paneel over de pagina. Een rol kan een **gezamenlijke taak**
+  voorstellen (`taakvoorstel`); bevestigen en uitvoeren door de staf volgt in de volgende stap (pagina
+  **Taken**, `/teams/[id]/tasks`, toont ze al). Nieuwe pagina's: Evaluaties (`/evaluations`),
+  Seizoensverloop (`/reports`) en Belasting per week (`/reports/load`).
+- Nog niet gebouwd: gezamenlijke taken uitvoeren, Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.
