@@ -6,6 +6,7 @@ import type { SwitcherTeam } from "@/components/team-switcher";
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
 import { SIDEBAR_COOKIE } from "@/lib/sidebar";
+import { staff } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -34,7 +35,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const collapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "collapsed";
 
   return (
-    <AppShell teams={switcherTeams} admin={admin} email={user.email ?? ""} initialCollapsed={collapsed}>
+    <AppShell
+      teams={switcherTeams}
+      admin={admin}
+      email={user.email ?? ""}
+      roleNames={Object.fromEntries(staff.roles.map((r) => [r.id, r.meta.naam]))}
+      initialCollapsed={collapsed}
+    >
       {children}
     </AppShell>
   );

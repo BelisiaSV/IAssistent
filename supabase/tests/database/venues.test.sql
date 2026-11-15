@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(8);
+select plan(11);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -57,6 +57,14 @@ select is((select default_formation from public.teams where id = (select id from
   'the head coach sets the default formation');
 select throws_ok($$update public.teams set default_formation = repeat('x', 21) where id = (select id from ids where name = 'team')$$,
   '23514', null, 'the default formation is a short code');
+
+select is((select age_category from public.teams where id = (select id from ids where name = 'team')), 'senioren',
+  'a new team is a first team unless told otherwise');
+update public.teams set age_category = 'u17' where id = (select id from ids where name = 'team');
+select is((select age_category from public.teams where id = (select id from ids where name = 'team')), 'u17',
+  'the head coach sets the age category');
+select throws_ok($$update public.teams set age_category = 'u21' where id = (select id from ids where name = 'team')$$,
+  '23514', null, 'only the known age categories are allowed');
 
 select tests.login('other@test.local');
 update public.opponents set coach_name = 'Hacker' where id = (select id from ids where name = 'opp');

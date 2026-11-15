@@ -19,7 +19,9 @@ describe("teamInputSchema", () => {
   };
 
   it("trims and normalises input", () => {
-    expect(teamInputSchema.parse(valid)).toEqual({ ...valid, name: "Eerste ploeg", season: null });
+    expect(teamInputSchema.parse(valid)).toEqual({ ...valid, name: "Eerste ploeg", season: null, ageCategory: "senioren" });
+    expect(teamInputSchema.parse({ ...valid, ageCategory: "u17" }).ageCategory).toBe("u17");
+    expect(teamInputSchema.safeParse({ ...valid, ageCategory: "u21" }).success).toBe(false);
   });
 
   it("requires a team name and club name in Dutch", () => {

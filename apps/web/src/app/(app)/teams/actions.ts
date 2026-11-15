@@ -11,7 +11,7 @@ import { checkLogo, teamInputSchema } from "@/lib/teams/validation";
 
 export type TeamFormState = {
   error?: string;
-  fieldErrors?: Partial<Record<"name" | "season" | "clubName" | "primaryColor" | "secondaryColor" | "logo", string>>;
+  fieldErrors?: Partial<Record<"name" | "season" | "clubName" | "primaryColor" | "secondaryColor" | "ageCategory" | "logo", string>>;
 };
 
 const LICENSE_HINT = "license_seats_exhausted";
@@ -23,6 +23,7 @@ export async function createTeam(_prev: TeamFormState, formData: FormData): Prom
     clubName: formData.get("clubName") ?? "",
     primaryColor: formData.get("primaryColor") ?? "",
     secondaryColor: formData.get("secondaryColor") ?? "",
+    ageCategory: formData.get("ageCategory") || undefined,
   });
 
   const logo = formData.get("logo");
@@ -53,6 +54,7 @@ export async function createTeam(_prev: TeamFormState, formData: FormData): Prom
       club_name: input.clubName,
       primary_color: input.primaryColor,
       secondary_color: input.secondaryColor,
+      age_category: input.ageCategory,
     })
     .select("id")
     .single();

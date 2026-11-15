@@ -270,8 +270,18 @@ Regels:
   importeren: zelfde rugnummer = bijwerken, anders nieuw, niemand verwijderd, max. 200 rijen.
 - **Teamdashboard en navigatie** — links een donkere **zijbalk** (`components/sidebar.tsx`; op mobiel
   een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
-  onderdeel) en de onderdelen in alfabetische volgorde (Matchday = selecties, Microcyclus = weekplanning;
-  Animaties, Editor en Video's staan er als "Binnenkort"). Teamonderdelen openen voor het huidige team of
+  onderdeel) en de **staf als hiërarchie** (`NAV_GROUPS` in `lib/navigation.ts`): Hoofdcoach (Dashboard,
+  Mijn staf, Visie, Instellingen), dan per rol een uitklapbaar menu met haar onderdelen — Assistent Coach
+  (Microcyclus, Oefenstof, Editor), Physical Coach (Belasting, Periodisering, Testen), Video Analist
+  (Presentaties, Evaluaties, Video's, Animaties), Tactical Coach (Wedstrijdplan, Tegenstanders,
+  Standaardsituaties), Player Development (Individuele ontwikkeling, Clubdoelstellingen), Team Manager
+  (Selectie, Spelersbeheer). Wat nog niet bestaat staat er als "Binnenkort". Elke rol heeft een eigen
+  mannetje (`components/staff/role-avatar.tsx`, kleur per rol). **Mijn staf** (`/teams/[id]/staff`) toont
+  de hiërarchie: hoofdcoach → AI Staff Coordinator → de rollen → goedkeuring en publicatie (gesprek met
+  een rol volgt). Belasting en Wedstrijdplan verwijzen naar de weekpagina (`/load`, `/match`);
+  Periodisering is een eigen pagina. Elk team heeft een **leeftijdscategorie** (`teams.age_category`:
+  u15, u16, u17, u19, beloften, b-elftal, senioren; `lib/teams/age-categories.ts`).
+  Teamonderdelen openen voor het huidige team of
   het laatst gebruikte (localStorage). Op grote schermen is de zijbalk **inklapbaar** tot enkel de iconen
   (`components/app-shell.tsx`, cookie `iassistent-sidebar` zodat de server meteen de juiste breedte toont). Een team opent op zijn **dashboard** (`/teams/[id]`,
   `components/dashboard/team-dashboard.tsx`): één scherm in donkere stijl, zonder teambanner. Bovenaan

@@ -310,12 +310,14 @@ describe("prompt templates", () => {
 });
 
 describe("repository /staff", () => {
-  it("is valid and contains the four roles", async () => {
+  it("is valid and contains the six roles", async () => {
     const staff = await loadStaff(REPO_STAFF_DIR);
     expect(staff.roles.map((r) => r.id)).toEqual([
       "assistant-coach",
       "physical-coach",
+      "player-development",
       "tactical-coach",
+      "team-manager",
       "video-analyst",
     ]);
     expect(staff.formations.formaties.length).toBeGreaterThan(0);

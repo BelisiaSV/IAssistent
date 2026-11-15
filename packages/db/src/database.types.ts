@@ -446,6 +446,7 @@ export type Database = {
           competition_start_date: string | null;
           home_address: string | null;
           default_formation: string | null;
+          age_category: string;
           preparation_start_date: string | null;
           preparation_weeks: number;
           animation_settings: Json;
@@ -468,6 +469,7 @@ export type Database = {
           competition_start_date?: string | null;
           home_address?: string | null;
           default_formation?: string | null;
+          age_category?: string;
           preparation_start_date?: string | null;
           preparation_weeks?: number;
           animation_settings?: Json;
@@ -490,6 +492,7 @@ export type Database = {
           competition_start_date?: string | null;
           home_address?: string | null;
           default_formation?: string | null;
+          age_category?: string;
           preparation_start_date?: string | null;
           preparation_weeks?: number;
           animation_settings?: Json;
