@@ -192,12 +192,22 @@ export function Sidebar({
             {!compact && messages.playerImport.nav}
           </Link>
         )}
-        <div className={`flex items-center rounded-lg py-2 ${compact ? "justify-center" : "gap-3 px-3"}`} title={compact ? email : undefined}>
+        <Link
+          href="/account"
+          onClick={() => setOpen(false)}
+          title={compact ? `${email} · ${messages.plans.account.title}` : undefined}
+          className={`flex items-center rounded-lg py-2 hover:bg-white/5 ${pathname.startsWith("/account") ? "bg-white/10" : ""} ${compact ? "w-full justify-center" : "gap-3 px-3"}`}
+        >
           <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
             {email.slice(0, 1).toUpperCase()}
           </span>
-          {!compact && <span className="min-w-0 flex-1 truncate text-xs text-slate-400">{email}</span>}
-        </div>
+          {!compact && (
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-xs text-slate-300">{email}</span>
+              <span className="block text-[11px] text-slate-500">{messages.plans.account.title}</span>
+            </span>
+          )}
+        </Link>
         <form action="/auth/signout" method="post" className={compact ? "w-full" : ""}>
           <button
             type="submit"
