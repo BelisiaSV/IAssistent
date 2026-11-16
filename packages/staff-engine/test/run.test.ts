@@ -5,13 +5,16 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   anthropicProvider,
   buildRolePrompt,
+  canCollaborate,
   canConverse,
+  COLLABORATION_TASK,
   CONVERSATION_TASK,
   exampleProvider,
   loadStaff,
   matchDayFor,
   type RoleContext,
   roleExample,
+  runCollaboration,
   runConversation,
   runRole,
   type SeasonPlan,
@@ -202,7 +205,7 @@ describe("tactical coach", () => {
 
   it("has valid examples for all tasks", () => {
     const role = staff.roles.find((r) => r.id === "tactical-coach")!;
-    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "wedstrijdvoorbereiding"]);
+    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "samenwerking", "wedstrijdvoorbereiding"]);
     expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
     for (const task of role.tasks) {
       expect(validateOutput(task.outputSchema, roleExample(role, task.id))).toEqual({ ok: true });
@@ -532,5 +535,60 @@ describe("runConversation", () => {
     await expect(runConversation(staff, "bestaat-niet", input, exampleProvider)).rejects.toBeInstanceOf(StaffGenerationError);
     const bad: StaffModelProvider = { id: "anthropic", async generate() { return { output: { antwoord: "" }, provider: "anthropic", model: null, usage: null }; } };
     await expect(runConversation(staff, "tactical-coach", input, bad)).rejects.toBeInstanceOf(StaffGenerationError);
+  });
+});
+
+describe("runCollaboration", () => {
+  const taak = {
+    titel: "Belasting training donderdag afstemmen",
+    opdracht: "Bepaal de belasting van de drie oefeningen.",
+    eigenaar: "assistant-coach",
+    betrokken_rollen: ["physical-coach"],
+    aanleiding: "Drie oefeningen uit de bibliotheek.",
+  };
+  const input = { teamcontext: {}, taak, fase: "bijdrage" as const, bijdragen: [], feedback: null };
+
+  it("every role can work on joint tasks with valid examples for both phases", () => {
+    for (const role of staff.roles) {
+      expect(canCollaborate(staff, role.id)).toBe(true);
+      const task = role.tasks.find((t) => t.id === COLLABORATION_TASK)!;
+      const names = task.examples.map((f) => f.path.split("/").pop());
+      expect(names).toEqual(expect.arrayContaining(["bijdrage.json", "eindvoorstel.json"]));
+      for (const f of task.examples) expect(validateOutput(task.outputSchema, JSON.parse(f.content)).ok, f.path).toBe(true);
+    }
+  });
+
+  it("answers with the example of the phase in test mode", async () => {
+    const contribution = await runCollaboration(staff, "physical-coach", input, exampleProvider);
+    const final = await runCollaboration(
+      staff,
+      "assistant-coach",
+      { ...input, fase: "eindvoorstel", bijdragen: [{ rol: "physical-coach", ...contribution.output }] },
+      exampleProvider,
+    );
+    expect(contribution.provider).toBe("example");
+    expect(final.output.samenvatting).not.toBe(contribution.output.samenvatting);
+  });
+
+  it("builds the prompt from the shared templates", async () => {
+    let seen = { system: "", user: "" };
+    const provider: StaffModelProvider = {
+      id: "anthropic",
+      async generate(req) {
+        seen = { system: req.system, user: req.user };
+        return { output: { samenvatting: "S", inhoud: "I", aandachtspunten: [] }, provider: "anthropic", model: null, usage: null };
+      },
+    };
+    await runCollaboration(staff, "physical-coach", { ...input, feedback: { vorige_versie: { samenvatting: "a", inhoud: "b", aandachtspunten: [] }, feedback: "Korter" } }, provider);
+    expect(seen.user).toContain("Belasting training donderdag afstemmen");
+    expect(seen.user).toContain("Korter");
+    expect(seen.system).not.toMatch(/\{\{/);
+    expect(seen.user).not.toMatch(/\{\{/);
+  });
+
+  it("refuses an unknown role and invalid output", async () => {
+    await expect(runCollaboration(staff, "bestaat-niet", input, exampleProvider)).rejects.toBeInstanceOf(StaffGenerationError);
+    const bad: StaffModelProvider = { id: "anthropic", async generate() { return { output: { samenvatting: "" }, provider: "anthropic", model: null, usage: null }; } };
+    await expect(runCollaboration(staff, "physical-coach", input, bad)).rejects.toBeInstanceOf(StaffGenerationError);
   });
 });

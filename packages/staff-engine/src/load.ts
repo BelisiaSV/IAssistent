@@ -133,6 +133,8 @@ function checkTemplates(shared: StaffFile[], issues: StaffIssue[]) {
       [SHARED_TEXT_FILES.userTemplate]: TEMPLATE_PLACEHOLDERS.user,
       [SHARED_TEXT_FILES.conversationSystemTemplate]: TEMPLATE_PLACEHOLDERS.conversationSystem,
       [SHARED_TEXT_FILES.conversationUserTemplate]: TEMPLATE_PLACEHOLDERS.conversationUser,
+      [SHARED_TEXT_FILES.collaborationSystemTemplate]: TEMPLATE_PLACEHOLDERS.collaborationSystem,
+      [SHARED_TEXT_FILES.collaborationUserTemplate]: TEMPLATE_PLACEHOLDERS.collaborationUser,
     };
     const allowed = templates[fileName];
     if (!allowed) continue;

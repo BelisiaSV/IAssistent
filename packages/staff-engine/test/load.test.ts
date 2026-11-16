@@ -116,6 +116,8 @@ beforeEach(async () => {
   await write("_gedeeld/opdracht-gebruiker.md", "{{weekinput}}\n");
   await write("_gedeeld/gesprek-systeem.md", "{{rol}}\n");
   await write("_gedeeld/gesprek-gebruiker.md", "{{vraag}}\n");
+  await write("_gedeeld/samenwerking-systeem.md", "{{rol}}\n");
+  await write("_gedeeld/samenwerking-gebruiker.md", "{{taak}}\n");
 });
 
 afterEach(async () => {
@@ -141,6 +143,8 @@ describe("loadStaff", () => {
       "_gedeeld/periodisering.json",
       "_gedeeld/posities.json",
       "_gedeeld/rol-sjabloon.md",
+      "_gedeeld/samenwerking-gebruiker.md",
+      "_gedeeld/samenwerking-systeem.md",
       "_gedeeld/testen.json",
       "_gedeeld/visie-hoofdcoach.md",
       "_gedeeld/visieprofiel.json",

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/assistant-coach/taken/samenwerking/output-schema.json",
+  "title": "Gezamenlijke taak — bijdrage of eindvoorstel",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "samenvatting",
+    "inhoud",
+    "aandachtspunten"
+  ],
+  "properties": {
+    "samenvatting": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 600,
+      "description": "Eén tot drie zinnen: wat stel je voor?"
+    },
+    "inhoud": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 6000,
+      "description": "De uitwerking, als leesbare tekst met korte lijstjes."
+    },
+    "aandachtspunten": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      }
+    }
+  }
+}

@@ -12,3 +12,4 @@ export * from "./shared/vision";
 export type { ParseResult } from "./shared/parse";
 export type { Staff, StaffFile, StaffIssue, StaffRole, RoleMeta } from "./types";
 export type { ConversationInput, ConversationReply, ConversationTurn, TaskProposal } from "./conversation";
+export type { CollaborationInput, CollaborationOutput, CollaborationPhase, CollaborationTask } from "./collaboration";

@@ -1,6 +1,7 @@
 import type { LibraryExercise, RoleContext } from "../context";
+import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
-import { CONVERSATION_TASK } from "../layout";
+import { COLLABORATION_TASK, CONVERSATION_TASK } from "../layout";
 import { roleExample, roleTask } from "../prompt";
 import type { Staff, StaffRole } from "../types";
 import { StaffGenerationError, type StaffModelProvider } from "./types";
@@ -17,6 +18,7 @@ export const exampleProvider: StaffModelProvider = {
   id: "example",
   async generate({ staff, role, task, context: input }) {
     if (task === CONVERSATION_TASK) return { output: conversationExample(role, input as ConversationInput), provider: "example", model: null, usage: null };
+    if (task === COLLABORATION_TASK) return { output: collaborationExample(role, input as CollaborationInput), provider: "example", model: null, usage: null };
     const context = input as RoleContext;
     const example = roleExample(role, task) as Example | null;
     if (!example) {
@@ -348,4 +350,12 @@ function conversationExample(role: StaffRole, input: ConversationInput): unknown
   if (!examples.length) throw new StaffGenerationError("provider_error", `role ${role.id} has no conversation example`);
   const asked = input.gesprek.filter((t) => t.van === "hoofdcoach").length;
   return JSON.parse(examples[asked % examples.length]!.content);
+}
+
+/** Test mode for a joint task: the example of the role for this phase (bijdrage or eindvoorstel). */
+function collaborationExample(role: StaffRole, input: CollaborationInput): unknown {
+  const examples = (roleTask(role, COLLABORATION_TASK)?.examples ?? []).filter((f) => f.path.endsWith(".json"));
+  const example = examples.find((f) => f.path.split("/").pop()!.startsWith(input.fase)) ?? examples[0];
+  if (!example) throw new StaffGenerationError("provider_error", `role ${role.id} has no collaboration example`);
+  return JSON.parse(example.content);
 }

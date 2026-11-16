@@ -72,7 +72,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           visieprofiel.json, wedstrijddagen.json (MD-labels), periodisering.json
                           (weektypes + cycli 4/6/8 weken), testen.json (VAMEVAL/MAS),
                           opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI),
-                          gesprek-systeem.md + gesprek-gebruiker.md (gesprek met een rol)
+                          gesprek-systeem.md + gesprek-gebruiker.md (gesprek met een rol),
+                          samenwerking-systeem.md + samenwerking-gebruiker.md (gezamenlijke taak)
   coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
   player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -325,9 +326,21 @@ Regels:
   bovenaan een nieuwe opdracht (naar de coördinator), links de rollen, midden het gesprek
   (`components/staff/chat-thread.tsx`), rechts de voorgestelde taken met betrokken rollen en voortgang.
   Op elke pagina staat rechts de **staf als kolom van mannetjes** (`components/staff/staff-dock.tsx`);
-  een klik opent het gesprek in een paneel over de pagina. Een rol kan een **gezamenlijke taak**
-  voorstellen (`taakvoorstel`); bevestigen en uitvoeren door de staf volgt in de volgende stap (pagina
-  **Taken**, `/teams/[id]/tasks`, toont ze al). Nieuwe pagina's: Evaluaties (`/evaluations`),
+  een klik opent het gesprek in een paneel over de pagina. Nieuwe pagina's: Evaluaties (`/evaluations`),
   Seizoensverloop (`/reports`) en Belasting per week (`/reports/load`).
-- Nog niet gebouwd: gezamenlijke taken uitvoeren, Video Analist, volledige stafmeeting; UI voor T2-toegang,
+- **Gezamenlijke taken** — een rol stelt in een gesprek een taak voor (`taakvoorstel`); de hoofdcoach
+  bevestigt ze ("Bevestig taak", `confirmTask`) en er ontstaat een `staff_tasks`-rij (één per voorstel,
+  `source_message_id` uniek; `owner_role` = de rol die ze voorstelde). De stappen (`staff_task_steps`,
+  per `version`): eerst een **bijdrage** van elke betrokken rol, dan het **eindvoorstel** van de eigenaar
+  (`plannedSteps` in `lib/staff-room/tasks.ts`), elk met de taak `samenwerking` van de rol
+  (`runCollaboration`, schema `{ samenvatting, inhoud, aandachtspunten }`, voorbeelden `bijdrage.json` en
+  `eindvoorstel.json`). Elke stap draait in een eigen request (`advanceTask`, geclaimd met een
+  voorwaardelijke update; `useTaskRunner` op de pagina vraagt de volgende stap zolang de taak loopt).
+  Status `running` → `ready` (ter goedkeuring) → `approved`, of `failed` (opnieuw proberen). Aanpassen met
+  feedback maakt een nieuwe versie waarin alle rollen opnieuw werken met de vorige versie en de feedback.
+  RLS: lezen `can_read_team`, schrijven `can_write_team`, nooit verwijderen; daglimiet echte AI-stappen
+  `staff_task_daily_limit()` = 20. Goedgekeurde taken gaan mee in de teamcontext (`goedgekeurde_taken`).
+  Pagina's: **Taken** (`/teams/[id]/tasks`: lopend, voorgesteld, goedgekeurd) en de taak
+  (`/teams/[id]/tasks/[taskId]`: werkverdeling, voorstel, bijdragen, eerdere versies).
+- Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

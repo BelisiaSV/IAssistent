@@ -42,7 +42,12 @@ export const SHARED_TEXT_FILES = {
   userTemplate: "opdracht-gebruiker.md",
   conversationSystemTemplate: "gesprek-systeem.md",
   conversationUserTemplate: "gesprek-gebruiker.md",
+  collaborationSystemTemplate: "samenwerking-systeem.md",
+  collaborationUserTemplate: "samenwerking-gebruiker.md",
 } as const;
 
 /** The conversation with a role (Staff Room): task taken/gesprek of every role. */
 export const CONVERSATION_TASK = "gesprek";
+
+/** A joint task of several roles: task taken/samenwerking of every role. */
+export const COLLABORATION_TASK = "samenwerking";
