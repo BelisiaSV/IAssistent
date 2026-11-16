@@ -159,6 +159,8 @@ export interface TacticalWeekOutput {
     omschakeling_verdediging: string[];
     pressing: string;
   };
+  /** The principle of the week (for the match presentation); missing in older plans. */
+  principe?: { titel: string; uitleg: string; tekening: Drawing };
   standaardsituaties: SetPiece[];
   trainingsaccenten: { datum: string; md: string | null; thema: string; doel: string; aandachtspunten: string[] }[];
   aandachtspunten: string[];

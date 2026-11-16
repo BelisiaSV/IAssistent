@@ -9,6 +9,7 @@
     "tegenstander",
     "lessen",
     "speelplan",
+    "principe",
     "standaardsituaties",
     "trainingsaccenten",
     "aandachtspunten",
@@ -131,6 +132,30 @@
         },
         "pressing": {
           "type": "string"
+        }
+      }
+    },
+    "principe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "titel",
+        "uitleg",
+        "tekening"
+      ],
+      "description": "Het spelprincipe van de week, voor de wedstrijdpresentatie: een korte titel, uitleg en een veldtekening (bv. de zones met overtal: 4v3, 2v4, 3v3).",
+      "properties": {
+        "titel": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Kort, bv. Overtal in de opbouw."
+        },
+        "uitleg": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "tekening": {
+          "$ref": "#/$defs/tekening"
         }
       }
     },

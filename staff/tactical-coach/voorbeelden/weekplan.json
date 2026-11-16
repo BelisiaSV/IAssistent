@@ -50,6 +50,214 @@
     ],
     "pressing": "Middenblok, druk zetten wanneer hun centrale middenvelder de bal krijgt."
   },
+  "principe": {
+    "titel": "Overtal in de opbouw",
+    "uitleg": "We bouwen op met vier tegen drie achteraan, de middenvelders lokken met twee tegen vier en voorin spelen we drie tegen drie: de bal snel naar de vrije man in de laatste zone.",
+    "tekening": {
+      "titel": "Overtal in de opbouw",
+      "veld": {
+        "type": "volledig",
+        "breedte_m": 68,
+        "lengte_m": 105
+      },
+      "elementen": [
+        {
+          "soort": "doelman",
+          "team": "eigen",
+          "label": "1",
+          "x": 50,
+          "y": 95
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "2",
+          "x": 85,
+          "y": 72
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "4",
+          "x": 62,
+          "y": 80
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "5",
+          "x": 38,
+          "y": 80
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "3",
+          "x": 15,
+          "y": 72
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 30,
+          "y": 68
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 50,
+          "y": 66
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 70,
+          "y": 68
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "6",
+          "x": 40,
+          "y": 52
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "8",
+          "x": 60,
+          "y": 52
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 20,
+          "y": 48
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 40,
+          "y": 45
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 60,
+          "y": 45
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 80,
+          "y": 48
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "7",
+          "x": 20,
+          "y": 28
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "9",
+          "x": 50,
+          "y": 24
+        },
+        {
+          "soort": "speler",
+          "team": "eigen",
+          "label": "11",
+          "x": 80,
+          "y": 28
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 30,
+          "y": 20
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 50,
+          "y": 15
+        },
+        {
+          "soort": "speler",
+          "team": "tegenstander",
+          "label": null,
+          "x": 70,
+          "y": 20
+        }
+      ],
+      "pijlen": [
+        {
+          "soort": "pass",
+          "van_x": 38,
+          "van_y": 80,
+          "naar_x": 15,
+          "naar_y": 72,
+          "label": null
+        },
+        {
+          "soort": "pass",
+          "van_x": 15,
+          "van_y": 72,
+          "naar_x": 20,
+          "naar_y": 28,
+          "label": "vrije man"
+        },
+        {
+          "soort": "loop",
+          "van_x": 50,
+          "van_y": 24,
+          "naar_x": 45,
+          "naar_y": 10,
+          "label": null
+        }
+      ],
+      "zones": [
+        {
+          "x": 0,
+          "y": 60,
+          "breedte": 100,
+          "hoogte": 28,
+          "label": "4v3"
+        },
+        {
+          "x": 0,
+          "y": 38,
+          "breedte": 100,
+          "hoogte": 22,
+          "label": "2v4"
+        },
+        {
+          "x": 0,
+          "y": 10,
+          "breedte": 100,
+          "hoogte": 28,
+          "label": "3v3"
+        }
+      ],
+      "uitleg": [
+        "Achteraan altijd een man meer.",
+        "De middenvelders lokken de pressing.",
+        "Voorin de vrije man zoeken."
+      ]
+    }
+  },
   "standaardsituaties": [
     {
       "standaardsituatie_id": null,
