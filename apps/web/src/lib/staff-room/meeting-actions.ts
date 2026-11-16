@@ -1,7 +1,7 @@
 "use server";
 
 import type { Json } from "@iassistent/db";
-import { meetingTurns, runMeetingTurn, StaffGenerationError } from "@iassistent/staff-engine";
+import { meetingTurns, runMeetingTurn, StaffGenerationError, validateOutput } from "@iassistent/staff-engine";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -15,6 +15,10 @@ import { teamContextForChat } from "./context";
 import { currentOverview, MEETING_COLUMNS, meetingConversation, type MeetingView, toMeetingView, TURN_COLUMNS } from "./meetings";
 import { MESSAGE_MAX } from "./roles";
 import { nextStep, statusFromSteps } from "./tasks";
+import { weekDocumentFromMeeting, weekInputFromPlan } from "./week-from-meeting";
+import { decideRun } from "@/lib/staff-runs/server";
+import { opponentOf } from "@/lib/competition/team";
+import { isoWeekday, mondayOf } from "@/lib/weeks/dates";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 export type MeetingResult = { meeting: MeetingView; error?: string } | { meeting?: undefined; error: string };
@@ -209,4 +213,94 @@ export async function retryMeeting(meetingId: string): Promise<MeetingResult> {
   }
   await supabase.from("staff_meetings").update({ status: "running" }).eq("id", meetingId).eq("status", "failed");
   return { meeting: (await loadMeeting(supabase, meetingId))! };
+}
+
+/**
+ * Puts the week plan of a meeting in the microcycle: it becomes the approved
+ * week document of that week (a run with one Assistant Coach step, provider
+ * "staffkamer"). Approves the meeting when it was not yet. A week without
+ * week input gets the trainings and matches of the plan.
+ */
+export async function applyMeetingToWeek(meetingId: string): Promise<{ weekStart?: string; error?: string }> {
+  const w = messages.staffRoom.meeting.toWeek;
+  if (!uuid.safeParse(meetingId).success) return { error: w.failed };
+  await requireUser();
+  const supabase = await createClient();
+  const view = await loadMeeting(supabase, meetingId);
+  const overview = view ? currentOverview(view) : null;
+  if (!view || !overview?.weekplan || !["ready", "approved"].includes(view.status)) return { error: w.noPlan };
+  const plan = overview.weekplan;
+  const weekStart = mondayOf(plan.dagen[0]?.datum ?? plan.week_van);
+  if (isoWeekday(weekStart) !== 1) return { error: w.failed };
+
+  // The week document must match the schema of the Assistant Coach.
+  const doc = weekDocumentFromMeeting({ ...overview, weekplan: plan });
+  const assistant = staff.roles.find((r) => r.id === "assistant-coach");
+  if (!assistant || !validateOutput(assistant.outputSchema, doc).ok) return { error: w.failed };
+
+  const { data: team } = await supabase.from("teams").select("id, federation_team, federation_divisions").eq("id", view.teamId).single();
+  if (!team) return { error: w.failed };
+
+  let { data: week } = await supabase.from("week_plans").select("id").eq("team_id", team.id).eq("week_start", weekStart).maybeSingle();
+  if (!week) {
+    // Opponents from the competition, when the team is linked to it.
+    const { data: matches } = team.federation_team
+      ? await supabase
+          .from("competition_matches")
+          .select("match_date, home, away")
+          .in("division", team.federation_divisions)
+          .or(`home.eq."${team.federation_team}",away.eq."${team.federation_team}"`)
+      : { data: [] };
+    const input = weekInputFromPlan(
+      plan,
+      (date) => {
+        const m = (matches ?? []).find((x) => x.match_date === date);
+        return m && team.federation_team ? { name: opponentOf(m, team.federation_team), home: m.home === team.federation_team } : null;
+      },
+      w.match,
+    );
+    const { data: created, error } = await supabase
+      .from("week_plans")
+      .insert({ team_id: team.id, week_start: weekStart, trainings: input.trainings, matches: input.matches })
+      .select("id")
+      .single();
+    if (error || !created) {
+      if (error?.code !== "42501") console.error("applyMeetingToWeek: week failed", error);
+      return { error: error?.code === "42501" ? e.readOnly : w.failed };
+    }
+    week = created;
+  }
+
+  const { data: run, error: runError } = await supabase
+    .from("staff_runs")
+    .insert({ team_id: team.id, week_plan_id: week.id, kind: "week", provider: "staffkamer", status: "ready", meeting_id: view.id })
+    .select("*")
+    .single();
+  if (runError || !run) {
+    if (runError?.code !== "42501") console.error("applyMeetingToWeek: run failed", runError);
+    return { error: runError?.code === "42501" ? e.readOnly : w.failed };
+  }
+  const { error: proposalError } = await supabase.from("staff_proposals").insert({
+    team_id: team.id,
+    week_plan_id: week.id,
+    run_id: run.id,
+    step: "ac",
+    role: "assistant-coach",
+    task: "default",
+    status: "ready",
+    output: doc,
+    provider: "staffkamer",
+  });
+  if (proposalError) {
+    console.error("applyMeetingToWeek: proposal failed", proposalError);
+    await supabase.from("staff_runs").update({ status: "failed" }).eq("id", run.id);
+    return { error: w.failed };
+  }
+  await decideRun(supabase, run, "approved");
+  if (view.status === "ready") {
+    await supabase.from("staff_meetings").update({ status: "approved", decided_at: new Date().toISOString() }).eq("id", view.id).eq("status", "ready");
+  }
+  revalidatePath(`/teams/${team.id}/weeks/${weekStart}`);
+  revalidatePath(`/teams/${team.id}/staff-room`);
+  return { weekStart };
 }

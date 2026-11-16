@@ -357,7 +357,11 @@ Regels:
   werk, rust, intensiteit en RPE, en een spelersplanning per dag (`components/staff/week-plan-view.tsx`,
   tabbladen "Voor de coach" en "Voor de spelers"; namen bij de rugnummers enkel in de app). De week is de
   huidige (op zondag de volgende); zonder weekinput gelden de vaste trainingsdagen. In testmodus past de
-  voorbeeldweek zich aan de trainings- en wedstrijddagen en de kern aan (`fitMeetingWeek`). Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
+  voorbeeldweek zich aan de trainings- en wedstrijddagen en de kern aan (`fitMeetingWeek`). Met **"Zet in de
+  Microcyclus"** (`applyMeetingToWeek`) wordt het weekplan de goedgekeurde versie van het weekdocument van die
+  week: een run met `provider` `staffkamer` en `meeting_id`, één stap `ac` met de uitvoer van de Assistent Coach
+  (`weekDocumentFromMeeting` in `lib/staff-room/week-from-meeting.ts`, gevalideerd tegen zijn schema); zonder
+  weekinput maakt hij die week aan met de trainingen en wedstrijden van het plan. Telt niet voor de daglimiet. Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
   Bovenaan de **lichtstroom** (`components/staff/flow-bar.tsx`: rollen als kaartjes, oplichtende lijnen
   naar wie spreekt, CSS `flow-dot`/`glow-pulse` in `globals.css`), midden de chat
   (`components/staff/meeting-feed.tsx`), links "Raadpleeg je staf" (gesprek met één rol), rechts eerdere
