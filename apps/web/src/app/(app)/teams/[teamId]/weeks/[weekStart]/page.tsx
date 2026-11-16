@@ -438,7 +438,18 @@ function RunSection({
 
       {selected && ["ready", "approved", "rejected"].includes(selected.status) && (
         <>
-          {(selected.provider === "example" || testMode) && <p className="text-xs text-slate-500">{m.testMode}</p>}
+          {selected.provider === "staffkamer" ? (
+            <p className="text-xs text-slate-500">
+              {m.fromStaffRoom}{" "}
+              {selected.meeting_id && (
+                <Link href={`/teams/${teamId}/staff-room?opdracht=${selected.meeting_id}`} className="font-medium text-brand hover:underline">
+                  {messages.nav.staffRoom} →
+                </Link>
+              )}
+            </p>
+          ) : (
+            (selected.provider === "example" || testMode) && <p className="text-xs text-slate-500">{m.testMode}</p>
+          )}
           <div className="flex flex-wrap items-start gap-2 print:hidden">
             {canEdit && selected.status !== "approved" && (
               <DecisionButton teamId={teamId} weekStart={weekStart} runId={selected.id} decision="approved" />

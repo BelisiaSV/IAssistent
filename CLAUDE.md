@@ -276,7 +276,7 @@ Regels:
   een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
   onderdeel) en enkel de **8 menu's van de hoofdcoach** (`NAV_ITEMS` in `lib/navigation.ts`): Dashboard,
   Mijn team (Spelers, Selecties, Instellingen, Visie), Planning (Microcyclus, Periodisering, Belasting),
-  Staff Room, Taken, Wedstrijdanalyse (Volgende wedstrijd, Tegenstanders, Competitie, Evaluaties), Oefenbibliotheek
+  Staff Room, Taken, Wedstrijdanalyse (Volgende wedstrijd, Tegenstanders, Competitie, Presentatie, Evaluaties), Oefenbibliotheek
   (Oefeningen, Standaardsituaties) en Rapportage (Testen, Seizoensverloop, Belasting per week). De
   onderdelen van een menu staan als **tabbladen** bovenaan de pagina (`components/section-tabs.tsx`), elk
   met het mannetje van de rol die het verzorgt (`member`). Elke rol heeft een eigen mannetje
@@ -357,7 +357,11 @@ Regels:
   werk, rust, intensiteit en RPE, en een spelersplanning per dag (`components/staff/week-plan-view.tsx`,
   tabbladen "Voor de coach" en "Voor de spelers"; namen bij de rugnummers enkel in de app). De week is de
   huidige (op zondag de volgende); zonder weekinput gelden de vaste trainingsdagen. In testmodus past de
-  voorbeeldweek zich aan de trainings- en wedstrijddagen en de kern aan (`fitMeetingWeek`). Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
+  voorbeeldweek zich aan de trainings- en wedstrijddagen en de kern aan (`fitMeetingWeek`). Met **"Zet in de
+  Microcyclus"** (`applyMeetingToWeek`) wordt het weekplan de goedgekeurde versie van het weekdocument van die
+  week: een run met `provider` `staffkamer` en `meeting_id`, één stap `ac` met de uitvoer van de Assistent Coach
+  (`weekDocumentFromMeeting` in `lib/staff-room/week-from-meeting.ts`, gevalideerd tegen zijn schema); zonder
+  weekinput maakt hij die week aan met de trainingen en wedstrijden van het plan. Telt niet voor de daglimiet. Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
   Bovenaan de **lichtstroom** (`components/staff/flow-bar.tsx`: rollen als kaartjes, oplichtende lijnen
   naar wie spreekt, CSS `flow-dot`/`glow-pulse` in `globals.css`), midden de chat
   (`components/staff/meeting-feed.tsx`), links "Raadpleeg je staf" (gesprek met één rol), rechts eerdere
@@ -384,5 +388,18 @@ Regels:
   tegenstander, kalender en uitslagen (statuscodes zoals PP = uitgesteld), klassement per periode. De staf krijgt
   `competitie` in de teamcontext zonder namen van andere ploegen (eigen plaats, punten, vorm; plaats en vorm van
   de volgende tegenstander).
-- Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
+- **Wedstrijdpresentatie (Video Analist)** — Wedstrijdanalyse → **Presentatie** (`/teams/[id]/presentation?datum=`):
+  de 6 dia's van het Canva-sjabloon van de club (16:9, 1440 × 810, `components/presentation/slides.tsx`):
+  matchday-omslag, tegenstander in cijfers (plaats, W-G-V, punten uit de laatste vijf, laatste vijf met logo's van
+  die tegenstanders; `opponentStats` in `lib/presentation/stats.ts`, uit de competitie), opstelling van de
+  tegenstander (`opponent_lineups`, naast de balk "Opponent analysis" met hun logo) en de eigen opstelling uit
+  Selecties, beide als lineup-grafiek (`LineupPitch`: stadion, veld in perspectief met het doel boven, truitjes met
+  rugnummer en naam; eigen truitjes in de teamkleuren, die van de tegenstander in `opponents.shirt_color` +
+  `shirt_trim_color`, in te stellen op de pagina; de doelman draait de kleuren om), en het **principe** van de
+  Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan).
+  Download per dia of alles als PNG (`html-to-image`), of afdrukken als PDF. Data in `loadPresentation`
+  (`lib/presentation/load.ts`); namen enkel in de app. Logo's per tegenstander (`opponents.logo_path`, ook voor
+  ploegen die het team zelf niet speelt: de fiche wordt aangemaakt) in de privébucket `team-media`
+  (`<team_id>/…`). Dia's blijven licht in het donkere thema (`slide-light`).
+- Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

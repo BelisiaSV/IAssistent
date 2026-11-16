@@ -62,6 +62,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: m.nextMatch, teamPath: "/match", member: "tactical-coach" },
       { label: m.opponents, teamPath: "/opponents", member: "tactical-coach" },
       { label: m.competition, teamPath: "/competition", member: "team-manager" },
+      { label: m.presentation, teamPath: "/presentation", member: "video-analyst" },
       { label: m.evaluations, teamPath: "/evaluations", member: "video-analyst" },
     ],
   },

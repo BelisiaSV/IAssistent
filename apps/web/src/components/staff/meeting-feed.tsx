@@ -1,10 +1,11 @@
 "use client";
 
 import type { MeetingOverview } from "@iassistent/staff-engine/content";
+import Link from "next/link";
 import { Fragment, useEffect, useRef, useState, useTransition } from "react";
 
 import { messages } from "@/lib/messages";
-import { approveMeeting, type MeetingResult, retryMeeting } from "@/lib/staff-room/meeting-actions";
+import { applyMeetingToWeek, approveMeeting, type MeetingResult, retryMeeting } from "@/lib/staff-room/meeting-actions";
 import { currentOverview, type MeetingView } from "@/lib/staff-room/meetings";
 import { longDate } from "@/lib/weeks/dates";
 
@@ -35,6 +36,8 @@ export function MeetingFeed({
   const bottom = useRef<HTMLDivElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Week of the microcycle the plan was put in (in this view).
+  const [week, setWeek] = useState<string | null>(null);
   const name = (id: string) => (id === "hoofdcoach" ? m.headCoach : (roleNames[id] ?? id));
   const speaking = meeting.status === "running" ? meeting.turns.find((t) => t.version === meeting.version && t.status !== "ready") : undefined;
   const overview = currentOverview(meeting);
@@ -124,6 +127,32 @@ export function MeetingFeed({
                 <button type="button" disabled={pending} onClick={() => act(() => approveMeeting(meeting.id))} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50">
                   {m.approve}
                 </button>
+              )}
+              {overview.weekplan && !week && (
+                <button
+                  type="button"
+                  disabled={pending}
+                  title={m.toWeek.hint}
+                  onClick={() =>
+                    startTransition(async () => {
+                      setError(null);
+                      const result = await applyMeetingToWeek(meeting.id);
+                      if (result.weekStart) {
+                        setWeek(result.weekStart);
+                        if (meeting.status === "ready") onChange({ ...meeting, status: "approved", decidedAt: new Date().toISOString() });
+                      }
+                      if (result.error) setError(result.error);
+                    })
+                  }
+                  className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-50"
+                >
+                  {pending ? m.toWeek.busy : m.toWeek.button}
+                </button>
+              )}
+              {week && (
+                <Link href={`/teams/${meeting.teamId}/weeks/${week}`} className="rounded-lg bg-green-50 px-4 py-2 text-sm font-semibold text-green-800 ring-1 ring-green-200 hover:underline">
+                  ✓ {m.toWeek.done} {m.toWeek.open} →
+                </Link>
               )}
               <p className="text-sm text-slate-500">{m.replyHint}</p>
             </div>
