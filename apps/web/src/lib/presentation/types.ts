@@ -6,22 +6,43 @@ export interface SlidePlayer {
   x: number;
   y: number;
   number: number | null;
+  /** Main line under the shirt (surname, or the name as entered for an opponent). */
   name: string;
+  /** Second, smaller line (first name). */
+  detail: string | null;
+  goalkeeper: boolean;
 }
 
 export interface SlideLineup {
   formation: string;
   players: SlidePlayer[];
-  bench: { number: number | null; name: string }[];
 }
 
-/** Everything the seven slides of the match presentation show. */
+/** Everything the slides of the match presentation show. */
 export interface PresentationData {
-  team: { id: string; name: string; clubName: string; primary: string; secondary: string; logoUrl: string | null; coverUrl: string | null; photoUrl: string | null };
-  match: { date: string; start: string | null; home: boolean; opponent: string } | null;
+  team: {
+    id: string;
+    name: string;
+    clubName: string;
+    primary: string;
+    secondary: string;
+    logoUrl: string | null;
+  };
+  match: {
+    date: string;
+    start: string | null;
+    home: boolean;
+    opponent: string;
+  } | null;
   /** Upcoming matches the coach can choose from. */
   matches: { date: string; opponent: string }[];
-  opponent: { name: string; logoUrl: string | null } | null;
+  /** Shirt colours are null when the coach did not set them. */
+  opponent: {
+    name: string;
+    logoUrl: string | null;
+    shirt: string | null;
+    trim: string | null;
+  } | null;
   stats: {
     position: number | null;
     record: { win: number; draw: number; loss: number };
@@ -30,7 +51,11 @@ export interface PresentationData {
     last: { outcome: Outcome; opponent: string; logoUrl: string | null }[];
   } | null;
   opponentLineup: SlideLineup | null;
-  ownLineups: SlideLineup[];
-  principle: { title: string; explanation: string; drawing: Drawing | null } | null;
+  ownLineup: SlideLineup | null;
+  principle: {
+    title: string;
+    explanation: string;
+    drawing: Drawing | null;
+  } | null;
   canEdit: boolean;
 }

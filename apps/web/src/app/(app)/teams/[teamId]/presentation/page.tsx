@@ -51,7 +51,7 @@ export default async function PresentationPage({
             </nav>
           )}
           <PresentationViewer data={data} fileName={`presentatie-${data.match.date}`} />
-          <LogoManager teamId={teamId} teams={logos} canEdit={data.canEdit} />
+          <LogoManager teamId={teamId} teams={logos} shirt={data.opponent} canEdit={data.canEdit} />
         </>
       )}
     </div>

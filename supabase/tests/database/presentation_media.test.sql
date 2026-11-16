@@ -1,10 +1,10 @@
--- Presentation media: opponent logos and team photos in the private bucket
+-- Presentation media: opponent logos (private bucket team-media) and shirt colours,
 -- team-media, written by the head coach, read by whoever can read the team.
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(7);
+select plan(8);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -54,9 +54,12 @@ select throws_ok(
 select lives_ok(
   $$insert into public.opponents (team_id, name, logo_path) select id, 'Tegenstander', id || '/opponents/x.png' from ids where name = 'team_a' returning id$$,
   'an opponent keeps its logo (insert ... returning)');
-update public.teams set cover_photo_path = 'p/cover.jpg', team_photo_path = 'p/team.jpg' where id = (select id from ids where name = 'team_a');
-select is((select cover_photo_path || ' ' || team_photo_path from public.teams where id = (select id from ids where name = 'team_a')), 'p/cover.jpg p/team.jpg',
-  'head coach sets the photos of the team');
+update public.opponents set shirt_color = '#FFD700', shirt_trim_color = '#0B6623' where name = 'Tegenstander';
+select is((select shirt_color || ' ' || shirt_trim_color from public.opponents where name = 'Tegenstander'), '#FFD700 #0B6623',
+  'head coach sets the shirt colours of an opponent');
+select throws_ok(
+  $$update public.opponents set shirt_color = 'yellow' where name = 'Tegenstander'$$,
+  '23514', null, 'a shirt colour is a hex colour');
 select tests.logout();
 
 select tests.login('t2@test.local');

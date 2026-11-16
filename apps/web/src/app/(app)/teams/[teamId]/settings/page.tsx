@@ -1,4 +1,3 @@
-import { TEAM_MEDIA_BUCKET } from "@iassistent/db";
 import Link from "next/link";
 
 import { themeForTeam } from "@/lib/animation/team-theme";
@@ -7,13 +6,11 @@ import { cardRules } from "@/lib/players/cards";
 import { formationCatalog } from "@/lib/staff";
 import { ageCategory } from "@/lib/teams/age-categories";
 import { teamFormation } from "@/lib/teams/formation";
-import { createClient } from "@/lib/supabase/server";
 import { getTeamContext } from "@/lib/teams/queries";
 import { trainingScheduleSchema } from "@/lib/weeks/validation";
 
 import { CardRulesForm } from "./card-rules-form";
 import { ScheduleForm } from "./schedule-form";
-import { TeamPhotosForm } from "./team-photos-form";
 import { DisplayForm } from "./display-form";
 import { VenueForm } from "./venue-form";
 
@@ -24,11 +21,6 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
   const { team, canEdit } = await getTeamContext(teamId);
   const schedule = trainingScheduleSchema.safeParse(team.training_schedule);
   const display = themeForTeam(team.animation_settings);
-  const supabase = await createClient();
-  const paths = [team.cover_photo_path, team.team_photo_path].filter((p): p is string => !!p);
-  const { data: signed } = paths.length ? await supabase.storage.from(TEAM_MEDIA_BUCKET).createSignedUrls(paths, 3600) : { data: [] };
-  const urlOf = (p: string | null) => (p ? (signed ?? []).find((x) => x.path === p)?.signedUrl ?? null : null);
-  const photos = { cover: urlOf(team.cover_photo_path), team: urlOf(team.team_photo_path) };
 
   return (
     <div className="space-y-6">
@@ -47,8 +39,6 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
           {messages.nav.periodization} →
         </Link>
       </p>
-
-      <TeamPhotosForm teamId={team.id} photos={photos} canEdit={canEdit} />
 
       <div id="weergave" className="scroll-mt-6">
       <DisplayForm

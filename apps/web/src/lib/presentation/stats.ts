@@ -1,4 +1,9 @@
-import { type CompetitionMatch, matchesOf, opponentOf, outcomeFor } from "@/lib/competition/team";
+import {
+  type CompetitionMatch,
+  matchesOf,
+  opponentOf,
+  outcomeFor,
+} from "@/lib/competition/team";
 import type { Outcome } from "@/lib/teams/dashboard";
 
 const POINTS: Record<Outcome, number> = { win: 3, draw: 1, loss: 0 };
@@ -29,12 +34,20 @@ export function opponentStats(
     .filter((m) => m.match_date < before)
     .flatMap((m) => {
       const outcome = outcomeFor(m, team);
-      return outcome ? [{ outcome, opponent: opponentOf(m, team), date: m.match_date }] : [];
+      return outcome
+        ? [{ outcome, opponent: opponentOf(m, team), date: m.match_date }]
+        : [];
     })
     .slice(-count);
   const record = { win: 0, draw: 0, loss: 0 };
   for (const r of last) record[r.outcome] += 1;
-  return { position, record, points: last.reduce((sum, r) => sum + POINTS[r.outcome], 0), matches: last.length, last };
+  return {
+    position,
+    record,
+    points: last.reduce((sum, r) => sum + POINTS[r.outcome], 0),
+    matches: last.length,
+    last,
+  };
 }
 
 /** The name of a team as in the competition, matched loosely (case, spaces). */

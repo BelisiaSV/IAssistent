@@ -389,15 +389,17 @@ Regels:
   `competitie` in de teamcontext zonder namen van andere ploegen (eigen plaats, punten, vorm; plaats en vorm van
   de volgende tegenstander).
 - **Wedstrijdpresentatie (Video Analist)** — Wedstrijdanalyse → **Presentatie** (`/teams/[id]/presentation?datum=`):
-  de 7 dia's van het Canva-sjabloon van de club (16:9, 1440 × 810, `components/presentation/slides.tsx`):
+  de 6 dia's van het Canva-sjabloon van de club (16:9, 1440 × 810, `components/presentation/slides.tsx`):
   matchday-omslag, tegenstander in cijfers (plaats, W-G-V, punten uit de laatste vijf, laatste vijf met logo's van
   die tegenstanders; `opponentStats` in `lib/presentation/stats.ts`, uit de competitie), opstelling van de
-  tegenstander (`opponent_lineups`), eigen opstelling(en) uit Selecties (+ "gamechangers" = bank) op een veld in
-  perspectief, en het **principe** van de Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan).
+  tegenstander (`opponent_lineups`, naast de balk "Opponent analysis" met hun logo) en de eigen opstelling uit
+  Selecties, beide als lineup-grafiek (`LineupPitch`: stadion, veld in perspectief met het doel boven, truitjes met
+  rugnummer en naam; eigen truitjes in de teamkleuren, die van de tegenstander in `opponents.shirt_color` +
+  `shirt_trim_color`, in te stellen op de pagina; de doelman draait de kleuren om), en het **principe** van de
+  Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan).
   Download per dia of alles als PNG (`html-to-image`), of afdrukken als PDF. Data in `loadPresentation`
   (`lib/presentation/load.ts`); namen enkel in de app. Logo's per tegenstander (`opponents.logo_path`, ook voor
-  ploegen die het team zelf niet speelt: de fiche wordt aangemaakt) en omslag-/teamfoto per team
-  (`teams.cover_photo_path`, `team_photo_path`, Instellingen → Presentatie) in de privébucket `team-media`
-  (`<team_id>/…`, max. 8 MB, foto's via signed upload URL). Dia's blijven licht in het donkere thema (`slide-light`).
+  ploegen die het team zelf niet speelt: de fiche wordt aangemaakt) in de privébucket `team-media`
+  (`<team_id>/…`). Dia's blijven licht in het donkere thema (`slide-light`).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

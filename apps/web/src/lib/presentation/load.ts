@@ -15,22 +15,30 @@ import type { PresentationData, SlideLineup } from "./types";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
-async function signed(supabase: Supabase, bucket: string, paths: (string | null)[]) {
+async function signed(
+  supabase: Supabase,
+  bucket: string,
+  paths: (string | null)[],
+) {
   const wanted = [...new Set(paths.filter((p): p is string => !!p))];
   const urls = new Map<string, string>();
   if (!wanted.length) return urls;
-  const { data } = await supabase.storage.from(bucket).createSignedUrls(wanted, 3600);
-  for (const item of data ?? []) if (item.path && item.signedUrl) urls.set(item.path, item.signedUrl);
+  const { data } = await supabase.storage
+    .from(bucket)
+    .createSignedUrls(wanted, 3600);
+  for (const item of data ?? [])
+    if (item.path && item.signedUrl) urls.set(item.path, item.signedUrl);
   return urls;
 }
-
-const firstName = (p: { first_name: string; last_name: string }) => (p.first_name || p.last_name).toUpperCase();
 
 /**
  * The data of the match presentation for a match of the team (the next one,
  * or the one on `date`). Names are only shown; nothing here goes to the AI.
  */
-export async function loadPresentation(teamId: string, date: string | undefined): Promise<PresentationData> {
+export async function loadPresentation(
+  teamId: string,
+  date: string | undefined,
+): Promise<PresentationData> {
   const { team, logoUrl, canEdit } = await getTeamContext(teamId);
   const supabase = await createClient();
   const today = todayInBelgium();
@@ -44,22 +52,37 @@ export async function loadPresentation(teamId: string, date: string | undefined)
     .limit(8);
   const upcoming: NextMatch[] = [];
   for (let i = 0; i < 6; i += 1) {
-    const next = nextMatch(weeks ?? [], i === 0 ? today : addDay(upcoming.at(-1)!.date));
+    const next = nextMatch(
+      weeks ?? [],
+      i === 0 ? today : addDay(upcoming.at(-1)!.date),
+    );
     if (!next) break;
     upcoming.push(next);
   }
   const match = upcoming.find((m) => m.date === date) ?? upcoming[0] ?? null;
 
-  const [{ data: opponents }, { data: players }, media] = await Promise.all([
-    supabase.from("opponents").select("id, name, logo_path").eq("team_id", team.id),
-    supabase.from("players").select("id, first_name, last_name, shirt_number").eq("team_id", team.id),
-    signed(supabase, TEAM_MEDIA_BUCKET, [team.cover_photo_path, team.team_photo_path]),
+  const [{ data: opponents }, { data: players }] = await Promise.all([
+    supabase
+      .from("opponents")
+      .select("id, name, logo_path, shirt_color, shirt_trim_color")
+      .eq("team_id", team.id),
+    supabase
+      .from("players")
+      .select("id, first_name, last_name, shirt_number")
+      .eq("team_id", team.id),
   ]);
-  const logos = await signed(supabase, TEAM_MEDIA_BUCKET, (opponents ?? []).map((o) => o.logo_path));
+  const logos = await signed(
+    supabase,
+    TEAM_MEDIA_BUCKET,
+    (opponents ?? []).map((o) => o.logo_path),
+  );
+  const ficheOf = (name: string) =>
+    (opponents ?? []).find((x) => opponentKey(x.name) === opponentKey(name));
   const logoOf = (name: string) => {
-    const o = (opponents ?? []).find((x) => opponentKey(x.name) === opponentKey(name));
+    const o = ficheOf(name);
     return o?.logo_path ? (logos.get(o.logo_path) ?? null) : null;
   };
+  const fiche = match ? ficheOf(match.opponent) : undefined;
 
   const base: PresentationData = {
     team: {
@@ -69,15 +92,27 @@ export async function loadPresentation(teamId: string, date: string | undefined)
       primary: team.primary_color,
       secondary: team.secondary_color,
       logoUrl,
-      coverUrl: team.cover_photo_path ? (media.get(team.cover_photo_path) ?? null) : null,
-      photoUrl: team.team_photo_path ? (media.get(team.team_photo_path) ?? null) : null,
     },
-    match: match ? { date: match.date, start: match.start, home: match.home, opponent: match.opponent } : null,
+    match: match
+      ? {
+          date: match.date,
+          start: match.start,
+          home: match.home,
+          opponent: match.opponent,
+        }
+      : null,
     matches: upcoming.map((m) => ({ date: m.date, opponent: m.opponent })),
-    opponent: match ? { name: match.opponent, logoUrl: logoOf(match.opponent) } : null,
+    opponent: match
+      ? {
+          name: match.opponent,
+          logoUrl: logoOf(match.opponent),
+          shirt: fiche?.shirt_color ?? null,
+          trim: fiche?.shirt_trim_color ?? null,
+        }
+      : null,
     stats: null,
     opponentLineup: null,
-    ownLineups: [],
+    ownLineup: null,
     principle: null,
     canEdit,
   };
@@ -86,73 +121,122 @@ export async function loadPresentation(teamId: string, date: string | undefined)
   // Competition: position and the last five results of the opponent.
   if (team.federation_team && team.federation_divisions.length) {
     const [{ data: compMatches }, { data: standings }] = await Promise.all([
-      supabase.from("competition_matches").select("*").in("division", team.federation_divisions),
-      supabase.from("competition_standings").select("*").in("division", team.federation_divisions).eq("period", 0),
+      supabase
+        .from("competition_matches")
+        .select("*")
+        .in("division", team.federation_divisions),
+      supabase
+        .from("competition_standings")
+        .select("*")
+        .in("division", team.federation_divisions)
+        .eq("period", 0),
     ]);
     const all = compMatches ?? [];
-    const name = all.flatMap((m) => [m.home, m.away]).find((n) => sameTeam(n, match.opponent));
+    const name = all
+      .flatMap((m) => [m.home, m.away])
+      .find((n) => sameTeam(n, match.opponent));
     if (name) {
       const row = (standings ?? []).find((s) => sameTeam(s.team, name));
       const s = opponentStats(all, name, row?.position ?? null, match.date);
-      base.stats = { ...s, last: s.last.map((r) => ({ outcome: r.outcome, opponent: r.opponent, logoUrl: logoOf(r.opponent) })) };
-    }
-  }
-
-  // Opponent lineup (latest entered by the coach).
-  const fiche = (opponents ?? []).find((o) => opponentKey(o.name) === opponentKey(match.opponent));
-  if (fiche) {
-    const { data: lineup } = await supabase
-      .from("opponent_lineups")
-      .select("formation, starters, bench")
-      .eq("opponent_id", fiche.id)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const formation = lineup ? formationCatalog.formaties.find((f) => f.code === lineup.formation) : undefined;
-    if (lineup && formation) {
-      const starters = lineup.starters as Record<string, { number?: number; name?: string }>;
-      base.opponentLineup = {
-        formation: formation.naam,
-        players: formation.posten.flatMap((slot) => {
-          const p = starters[slot.id];
-          return p ? [{ x: slot.x, y: slot.y, number: p.number ?? null, name: (p.name ?? "").toUpperCase() }] : [];
-        }),
-        bench: ((lineup.bench ?? []) as { number?: number; name?: string }[]).map((b) => ({ number: b.number ?? null, name: (b.name ?? "").toUpperCase() })),
+      base.stats = {
+        ...s,
+        last: s.last.map((r) => ({
+          outcome: r.outcome,
+          opponent: r.opponent,
+          logoUrl: logoOf(r.opponent),
+        })),
       };
     }
   }
 
-  // Own lineups: those for this match (newest first), else the latest one.
+  // Opponent lineup (latest entered by the coach).
+  if (fiche) {
+    const { data: lineup } = await supabase
+      .from("opponent_lineups")
+      .select("formation, starters")
+      .eq("opponent_id", fiche.id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const formation = lineup
+      ? formationCatalog.formaties.find((f) => f.code === lineup.formation)
+      : undefined;
+    if (lineup && formation) {
+      const starters = lineup.starters as Record<
+        string,
+        { number?: number; name?: string }
+      >;
+      base.opponentLineup = {
+        formation: formation.naam,
+        players: formation.posten.flatMap((slot) => {
+          const p = starters[slot.id];
+          return p
+            ? [
+                {
+                  x: slot.x,
+                  y: slot.y,
+                  number: p.number ?? null,
+                  name: p.name ?? "",
+                  detail: null,
+                  goalkeeper: slot.positie === "GK",
+                },
+              ]
+            : [];
+        }),
+      };
+    }
+  }
+
+  // Own lineup: the newest one for this match, else the latest one.
   const { data: lineups } = await supabase
     .from("lineups")
-    .select("formation, starters, bench, match_date")
+    .select("formation, starters, match_date")
     .eq("team_id", team.id)
     .order("match_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(10);
   const forMatch = (lineups ?? []).filter((l) => l.match_date === match.date);
   const byId = new Map((players ?? []).map((p) => [p.id, p]));
-  base.ownLineups = (forMatch.length ? forMatch.slice(0, 2) : (lineups ?? []).slice(0, 1)).flatMap((l): SlideLineup[] => {
-    const formation = formationCatalog.formaties.find((f) => f.code === l.formation);
-    if (!formation) return [];
-    const starters = l.starters as Record<string, string>;
-    return [
-      {
-        formation: formation.naam,
-        players: formation.posten.flatMap((slot) => {
-          const p = starters[slot.id] ? byId.get(starters[slot.id]!) : undefined;
-          return p ? [{ x: slot.x, y: slot.y, number: p.shirt_number, name: firstName(p) }] : [];
-        }),
-        bench: l.bench.flatMap((id) => {
-          const p = byId.get(id);
-          return p ? [{ number: p.shirt_number, name: firstName(p) }] : [];
-        }),
-      },
-    ];
-  });
+  base.ownLineup =
+    (forMatch.length ? forMatch : (lineups ?? []))
+      .slice(0, 1)
+      .flatMap((l): SlideLineup[] => {
+        const formation = formationCatalog.formaties.find(
+          (f) => f.code === l.formation,
+        );
+        if (!formation) return [];
+        const starters = l.starters as Record<string, string>;
+        return [
+          {
+            formation: formation.naam,
+            players: formation.posten.flatMap((slot) => {
+              const p = starters[slot.id]
+                ? byId.get(starters[slot.id]!)
+                : undefined;
+              return p
+                ? [
+                    {
+                      x: slot.x,
+                      y: slot.y,
+                      number: p.shirt_number,
+                      name: p.last_name || p.first_name,
+                      detail: p.last_name ? p.first_name || null : null,
+                      goalkeeper: slot.positie === "GK",
+                    },
+                  ]
+                : [];
+            }),
+          },
+        ];
+      })[0] ?? null;
 
   // Principle of the week from the Tactical Coach (approved first, else the latest).
-  const { data: week } = await supabase.from("week_plans").select("id").eq("team_id", team.id).eq("week_start", match.weekStart).maybeSingle();
+  const { data: week } = await supabase
+    .from("week_plans")
+    .select("id")
+    .eq("team_id", team.id)
+    .eq("week_start", match.weekStart)
+    .maybeSingle();
   if (week) {
     const { data: plans } = await supabase
       .from("staff_proposals")
@@ -162,9 +246,21 @@ export async function loadPresentation(teamId: string, date: string | undefined)
       .eq("task", "default")
       .not("output", "is", null)
       .order("version", { ascending: false });
-    const plan = ((plans ?? []).find((p) => p.status === "approved") ?? plans?.[0])?.output as Partial<TacticalWeekOutput> | undefined;
-    if (plan?.principe) base.principle = { title: plan.principe.titel, explanation: plan.principe.uitleg, drawing: plan.principe.tekening };
-    else if (plan?.speelplan) base.principle = { title: plan.speelplan.kernboodschap, explanation: "", drawing: null };
+    const plan = (
+      (plans ?? []).find((p) => p.status === "approved") ?? plans?.[0]
+    )?.output as Partial<TacticalWeekOutput> | undefined;
+    if (plan?.principe)
+      base.principle = {
+        title: plan.principe.titel,
+        explanation: plan.principe.uitleg,
+        drawing: plan.principe.tekening,
+      };
+    else if (plan?.speelplan)
+      base.principle = {
+        title: plan.speelplan.kernboodschap,
+        explanation: "",
+        drawing: null,
+      };
   }
   return base;
 }
