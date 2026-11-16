@@ -853,6 +853,8 @@ export type Database = {
           red_card_ban: number;
           federation_team: string | null;
           federation_divisions: string[];
+          cover_photo_path: string | null;
+          team_photo_path: string | null;
         };
         Insert: {
           id?: string;
@@ -881,6 +883,8 @@ export type Database = {
           red_card_ban?: number;
           federation_team?: string | null;
           federation_divisions?: string[];
+          cover_photo_path?: string | null;
+          team_photo_path?: string | null;
         };
         Update: {
           id?: string;
@@ -909,6 +913,8 @@ export type Database = {
           red_card_ban?: number;
           federation_team?: string | null;
           federation_divisions?: string[];
+          cover_photo_path?: string | null;
+          team_photo_path?: string | null;
         };
         Relationships: [
           {
@@ -1312,6 +1318,7 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          logo_path: string | null;
         };
         Insert: {
           id?: string;
@@ -1327,6 +1334,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          logo_path?: string | null;
         };
         Update: {
           id?: string;
@@ -1342,6 +1350,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          logo_path?: string | null;
         };
         Relationships: [
           {
