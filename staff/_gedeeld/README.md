@@ -4,7 +4,7 @@ Afspraken die voor álle rollen gelden. Elke rol krijgt deze bestanden mee.
 
 - `afspraken.md` — taal, toon, hoe we de hoofdcoach aanspreken, wat altijd/nooit mag.
 - `visie-hoofdcoach.md` — hoe rollen omgaan met het visieprofiel van de coach.
-- `stafmeeting.md` — hoe rollen onderling afstemmen (wordt uitgewerkt in een latere fase).
+- `stafmeeting.md` — hoe rollen onderling afstemmen en wie beslist.
 - `woordenlijst.md` — vaste begrippen zodat alle rollen dezelfde taal spreken.
 - `rol-sjabloon.md` — sjabloon voor elke `rol.md`. De `##`-secties hier zijn verplicht in
   elke rol; `pnpm staff:validate` controleert dat.
@@ -19,5 +19,7 @@ Afspraken die voor álle rollen gelden. Elke rol krijgt deze bestanden mee.
 - `samenwerking-systeem.md` en `samenwerking-gebruiker.md` — sjablonen voor een gezamenlijke taak
   (taak `samenwerking` van elke rol: eerst een bijdrage van de betrokken rollen, dan het
   eindvoorstel van de rol die de taak voorstelde).
+- `staffkamer.json` — de volgorde waarin de rollen spreken in de Staff Room (groepschat), met
+  `staffkamer-systeem.md` en `staffkamer-gebruiker.md` als sjablonen (taak `staffkamer` van elke rol).
 - `periodisering.json` — weektypes (belasting %, km) en cycli van 4, 6 en 8 weken vanaf de eerste competitiewedstrijd.
 - `testen.json` — fysieke testen (VAMEVAL/MAS) met eenheid, grenzen en interval.

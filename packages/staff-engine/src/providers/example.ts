@@ -1,7 +1,8 @@
 import type { LibraryExercise, RoleContext } from "../context";
 import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
-import { COLLABORATION_TASK, CONVERSATION_TASK } from "../layout";
+import { COLLABORATION_TASK, CONVERSATION_TASK, MEETING_TASK } from "../layout";
+import type { MeetingInput } from "../meeting";
 import { roleExample, roleTask } from "../prompt";
 import type { Staff, StaffRole } from "../types";
 import { StaffGenerationError, type StaffModelProvider } from "./types";
@@ -18,6 +19,7 @@ export const exampleProvider: StaffModelProvider = {
   id: "example",
   async generate({ staff, role, task, context: input }) {
     if (task === CONVERSATION_TASK) return { output: conversationExample(role, input as ConversationInput), provider: "example", model: null, usage: null };
+    if (task === MEETING_TASK) return { output: meetingExample(role, input as MeetingInput), provider: "example", model: null, usage: null };
     if (task === COLLABORATION_TASK) return { output: collaborationExample(role, input as CollaborationInput), provider: "example", model: null, usage: null };
     const context = input as RoleContext;
     const example = roleExample(role, task) as Example | null;
@@ -357,5 +359,24 @@ function collaborationExample(role: StaffRole, input: CollaborationInput): unkno
   const examples = (roleTask(role, COLLABORATION_TASK)?.examples ?? []).filter((f) => f.path.endsWith(".json"));
   const example = examples.find((f) => f.path.split("/").pop()!.startsWith(input.fase)) ?? examples[0];
   if (!example) throw new StaffGenerationError("provider_error", `role ${role.id} has no collaboration example`);
+  return JSON.parse(example.content);
+}
+
+/**
+ * Test mode for the staff meeting: the example of the role for this kind of
+ * turn. A role that speaks a second time with the same kind gets its next
+ * example (reactie-2.json, …) when there is one.
+ */
+function meetingExample(role: StaffRole, input: MeetingInput): unknown {
+  const examples = (roleTask(role, MEETING_TASK)?.examples ?? []).filter((f) => f.path.endsWith(".json"));
+  const ofKind = examples
+    .filter((f) => {
+      const name = f.path.split("/").pop()!;
+      return name === `${input.soort}.json` || name.startsWith(`${input.soort}-`);
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+  const earlier = input.gesprek.filter((t) => t.van === role.id).length;
+  const example = ofKind[Math.min(earlier, ofKind.length - 1)] ?? ofKind[0] ?? examples[0];
+  if (!example) throw new StaffGenerationError("provider_error", `role ${role.id} has no staff meeting example`);
   return JSON.parse(example.content);
 }

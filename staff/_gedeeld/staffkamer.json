@@ -1,0 +1,46 @@
+{
+  "versie": "1",
+  "uitleg": "De volgorde waarin de staf spreekt in de Staff Room. Elke beurt is een bericht in de groepschat; een rol reageert op wat eerder gezegd is. De laatste beurt (soort overzicht) maakt het gezamenlijke overzicht voor de hoofdcoach.",
+  "beurten": [
+    {
+      "rol": "coordinator",
+      "soort": "opening",
+      "uitleg": "Herhaalt kort de opdracht en zegt wie wat doet."
+    },
+    {
+      "rol": "team-manager",
+      "soort": "bijdrage",
+      "uitleg": "Beschikbaarheid: aanwezig, afwezig, geblesseerd, geschorst."
+    },
+    {
+      "rol": "physical-coach",
+      "soort": "bijdrage",
+      "uitleg": "Belasting van de week en wie wat aankan."
+    },
+    {
+      "rol": "tactical-coach",
+      "soort": "bijdrage",
+      "uitleg": "Spelprincipes en accenten voor de opdracht."
+    },
+    {
+      "rol": "physical-coach",
+      "soort": "reactie",
+      "uitleg": "Reageert op de tactische accenten: intensiteit en duur."
+    },
+    {
+      "rol": "assistant-coach",
+      "soort": "bijdrage",
+      "uitleg": "Kiest de oefeningen uit de bibliotheek en zet de training in elkaar."
+    },
+    {
+      "rol": "tactical-coach",
+      "soort": "reactie",
+      "uitleg": "Vult coachingspunten aan of stuurt bij."
+    },
+    {
+      "rol": "coordinator",
+      "soort": "overzicht",
+      "uitleg": "Bundelt alles in één overzicht voor de hoofdcoach."
+    }
+  ]
+}

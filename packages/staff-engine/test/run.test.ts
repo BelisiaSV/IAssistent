@@ -6,6 +6,7 @@ import {
   anthropicProvider,
   buildRolePrompt,
   canCollaborate,
+  canMeet,
   canConverse,
   COLLABORATION_TASK,
   CONVERSATION_TASK,
@@ -14,7 +15,10 @@ import {
   matchDayFor,
   type RoleContext,
   roleExample,
+  meetingTurns,
+  MEETING_TASK,
   runCollaboration,
+  runMeetingTurn,
   runConversation,
   runRole,
   type SeasonPlan,
@@ -205,7 +209,7 @@ describe("tactical coach", () => {
 
   it("has valid examples for all tasks", () => {
     const role = staff.roles.find((r) => r.id === "tactical-coach")!;
-    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "samenwerking", "wedstrijdvoorbereiding"]);
+    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "samenwerking", "staffkamer", "wedstrijdvoorbereiding"]);
     expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
     for (const task of role.tasks) {
       expect(validateOutput(task.outputSchema, roleExample(role, task.id))).toEqual({ ok: true });
@@ -590,5 +594,49 @@ describe("runCollaboration", () => {
     await expect(runCollaboration(staff, "bestaat-niet", input, exampleProvider)).rejects.toBeInstanceOf(StaffGenerationError);
     const bad: StaffModelProvider = { id: "anthropic", async generate() { return { output: { samenvatting: "" }, provider: "anthropic", model: null, usage: null }; } };
     await expect(runCollaboration(staff, "physical-coach", input, bad)).rejects.toBeInstanceOf(StaffGenerationError);
+  });
+});
+
+describe("staff meeting", () => {
+  const base = { teamcontext: {}, opdracht: "Omschakeling vanuit een medium blok", gesprek: [], feedback: null };
+
+  it("has a turn plan with roles that can speak and an example for every turn", () => {
+    const turns = meetingTurns(staff);
+    expect(turns.length).toBe(staff.meeting.beurten.length);
+    expect(turns.at(-1)?.kind).toBe("overzicht");
+    for (const turn of turns) {
+      expect(canMeet(staff, turn.role)).toBe(true);
+      const task = staff.roles.find((r) => r.id === turn.role)!.tasks.find((t) => t.id === MEETING_TASK)!;
+      expect(task.examples.some((f) => f.path.endsWith(`/${turn.kind}.json`)), `${turn.role} ${turn.kind}`).toBe(true);
+      for (const f of task.examples) expect(validateOutput(task.outputSchema, JSON.parse(f.content)).ok, f.path).toBe(true);
+    }
+  });
+
+  it("runs a full meeting in test mode and ends with an overview", async () => {
+    const gesprek: { van: string; bericht: string; aan: string | null }[] = [];
+    let last = null;
+    for (const turn of meetingTurns(staff)) {
+      const result = await runMeetingTurn(staff, turn.role, { ...base, soort: turn.kind, gesprek }, exampleProvider);
+      gesprek.push({ van: turn.role, bericht: result.output.bericht, aan: result.output.aan });
+      last = result.output;
+      if (turn.kind !== "overzicht") expect(result.output.overzicht).toBeNull();
+    }
+    expect(last?.overzicht?.onderdelen.length).toBeGreaterThan(0);
+  });
+
+  it("builds the prompt from the shared templates and needs an overview on the last turn", async () => {
+    let seen = { system: "", user: "" };
+    const provider: StaffModelProvider = {
+      id: "anthropic",
+      async generate(req) {
+        seen = { system: req.system, user: req.user };
+        return { output: { bericht: "Ok", aan: null, overzicht: null }, provider: "anthropic", model: null, usage: null };
+      },
+    };
+    await runMeetingTurn(staff, "tactical-coach", { ...base, soort: "bijdrage" }, provider);
+    expect(seen.user).toContain("Omschakeling vanuit een medium blok");
+    expect(seen.system).not.toMatch(/\{\{/);
+    expect(seen.user).not.toMatch(/\{\{/);
+    await expect(runMeetingTurn(staff, "coordinator", { ...base, soort: "overzicht" }, provider)).rejects.toBeInstanceOf(StaffGenerationError);
   });
 });

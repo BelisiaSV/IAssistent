@@ -193,3 +193,29 @@ export async function saveTeamDetails(teamId: string, _prev: FormState, formData
   revalidatePath(`/teams/${teamId}`, "layout");
   return { success: s.venue.saved };
 }
+
+const cardRulesSchema = z.object({
+  yellowLimit: z.coerce.number().int().min(1).max(20),
+  yellowBan: z.coerce.number().int().min(0).max(10),
+  redBan: z.coerce.number().int().min(0).max(20),
+});
+
+/** Saves how cards lead to a suspension (for the Team Manager in the staff meeting). */
+export async function saveCardRules(teamId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const c = messages.cards.rules;
+  if (!uuid.safeParse(teamId).success) return { error: e.saveFailed };
+  const parsed = cardRulesSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: c.invalid };
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("teams")
+    .update({ yellow_card_limit: parsed.data.yellowLimit, yellow_card_ban: parsed.data.yellowBan, red_card_ban: parsed.data.redBan })
+    .eq("id", teamId);
+  if (error) {
+    console.error("saveCardRules failed", error);
+    return { error: e.saveFailed };
+  }
+  revalidatePath(`/teams/${teamId}/settings`);
+  return { success: c.saved };
+}

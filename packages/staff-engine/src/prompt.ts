@@ -11,6 +11,8 @@ export const TEMPLATE_PLACEHOLDERS = {
   conversationUser: ["teamcontext", "gesprek", "vraag"],
   collaborationSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
   collaborationUser: ["teamcontext", "taak", "fase", "bijdragen", "feedback"],
+  meetingSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
+  meetingUser: ["teamcontext", "opdracht", "soort", "gesprek", "feedback"],
 } as const;
 
 const PLACEHOLDER = /\{\{\s*([a-z_]+)\s*\}\}/g;

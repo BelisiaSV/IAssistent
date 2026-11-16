@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iassistent.app/staff/tactical-coach/taken/staffkamer/output-schema.json",
+  "title": "Bericht in de staffkamer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bericht",
+    "aan",
+    "overzicht"
+  ],
+  "properties": {
+    "bericht": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500,
+      "description": "Je bericht in de groepschat: kort, concreet, zoals in een echte staffvergadering."
+    },
+    "aan": {
+      "description": "Tot wie je je richt: een rol-id, \"hoofdcoach\" of null (iedereen).",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 40
+    },
+    "overzicht": {
+      "description": "Enkel bij de beurt overzicht; anders null.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "titel",
+            "samenvatting",
+            "onderdelen",
+            "aandachtspunten"
+          ],
+          "properties": {
+            "titel": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "samenvatting": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800
+            },
+            "onderdelen": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 10,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "titel",
+                  "inhoud",
+                  "rol"
+                ],
+                "properties": {
+                  "titel": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "inhoud": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "rol": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 40
+                  }
+                }
+              }
+            },
+            "aandachtspunten": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

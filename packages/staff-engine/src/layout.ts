@@ -32,6 +32,7 @@ export const SHARED_FILES = {
   matchDays: "wedstrijddagen.json",
   periodization: "periodisering.json",
   tests: "testen.json",
+  meeting: "staffkamer.json",
 } as const;
 
 /** Markdown files in _gedeeld that the prompt builder uses. */
@@ -44,6 +45,8 @@ export const SHARED_TEXT_FILES = {
   conversationUserTemplate: "gesprek-gebruiker.md",
   collaborationSystemTemplate: "samenwerking-systeem.md",
   collaborationUserTemplate: "samenwerking-gebruiker.md",
+  meetingSystemTemplate: "staffkamer-systeem.md",
+  meetingUserTemplate: "staffkamer-gebruiker.md",
 } as const;
 
 /** The conversation with a role (Staff Room): task taken/gesprek of every role. */
@@ -51,3 +54,6 @@ export const CONVERSATION_TASK = "gesprek";
 
 /** A joint task of several roles: task taken/samenwerking of every role. */
 export const COLLABORATION_TASK = "samenwerking";
+
+/** A turn of a role in the staff meeting (Staff Room group chat): task taken/staffkamer. */
+export const MEETING_TASK = "staffkamer";

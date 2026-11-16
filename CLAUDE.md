@@ -73,7 +73,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           (weektypes + cycli 4/6/8 weken), testen.json (VAMEVAL/MAS),
                           opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI),
                           gesprek-systeem.md + gesprek-gebruiker.md (gesprek met een rol),
-                          samenwerking-systeem.md + samenwerking-gebruiker.md (gezamenlijke taak)
+                          samenwerking-systeem.md + samenwerking-gebruiker.md (gezamenlijke taak),
+                          staffkamer.json + staffkamer-systeem.md + staffkamer-gebruiker.md (groepschat)
   coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
   player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -322,9 +323,8 @@ Regels:
   `can_write_team`, nooit wijzigen of verwijderen; daglimiet echte AI `staff_chat_daily_limit()` = 30).
   De rol krijgt de **goedgekeurde teamcontext** (`lib/staff-room/context.ts`: team, visie, kern zonder
   namen, deze week, goedgekeurde voorstellen, oefenstof) en de laatste 20 berichten. Server actions in
-  `lib/staff-room/actions.ts` (`loadThread`, `sendMessage`). **Staff Room** (`/teams/[id]/staff-room?rol=`):
-  bovenaan een nieuwe opdracht (naar de coördinator), links de rollen, midden het gesprek
-  (`components/staff/chat-thread.tsx`), rechts de voorgestelde taken met betrokken rollen en voortgang.
+  `lib/staff-room/actions.ts` (`loadThread`, `sendMessage`); het gesprek zelf in
+  `components/staff/chat-thread.tsx`, als paneel `RoleChatPanel` (`components/staff/staff-dock.tsx`).
   Op elke pagina staat rechts de **staf als kolom van mannetjes** (`components/staff/staff-dock.tsx`);
   een klik opent het gesprek in een paneel over de pagina. Nieuwe pagina's: Evaluaties (`/evaluations`),
   Seizoensverloop (`/reports`) en Belasting per week (`/reports/load`).
@@ -342,5 +342,25 @@ Regels:
   `staff_task_daily_limit()` = 20. Goedgekeurde taken gaan mee in de teamcontext (`goedgekeurde_taken`).
   Pagina's: **Taken** (`/teams/[id]/tasks`: lopend, voorgesteld, goedgekeurd) en de taak
   (`/teams/[id]/tasks/[taskId]`: werkverdeling, voorstel, bijdragen, eerdere versies).
+- **Staffkamer (groepschat)** — de **Staff Room** (`/teams/[id]/staff-room?opdracht=&rol=`) is één groepschat:
+  de hoofdcoach typt één opdracht (`staff_meetings`), de rollen spreken om beurten in de volgorde van
+  `staff/_gedeeld/staffkamer.json` (soorten `opening`, `bijdrage`, `reactie`, `overzicht`; `meetingTurns`)
+  en reageren op elkaar (`aan`); de laatste beurt maakt het **gezamenlijke overzicht** (`{ titel,
+  samenvatting, onderdelen[{titel, inhoud, rol}], aandachtspunten }`). Elke rol heeft de taak `staffkamer`
+  (`runMeetingTurn`, voorbeelden per soort, bv. `reactie.json`). Beurten in `staff_meeting_turns` (per
+  `version`), één per request (`advanceMeeting`, geclaimd; `useMeetingRunner` laat een rol minstens
+  1,3 s "typen"). Goedkeuren, of aanpassen met feedback (`staff_meetings.feedbacks`, nieuwe versie waarin de
+  staf verder praat met de feedback). Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
+  Bovenaan de **lichtstroom** (`components/staff/flow-bar.tsx`: rollen als kaartjes, oplichtende lijnen
+  naar wie spreekt, CSS `flow-dot`/`glow-pulse` in `globals.css`), midden de chat
+  (`components/staff/meeting-feed.tsx`), links "Raadpleeg je staf" (gesprek met één rol), rechts eerdere
+  opdrachten en taken op één regel (uitklapbaar). Goedgekeurde overzichten gaan mee in de teamcontext
+  (`goedgekeurde_stafvergaderingen`).
+- **Kaarten en schorsingen** — `player_cards` (geel/rood per speler per wedstrijd, ingevuld bij de
+  wedstrijdevaluatie in de weekpagina, `match-cards.tsx`; ook getoond bij Evaluaties) en de regels per team
+  (`teams.yellow_card_limit`, `yellow_card_ban`, `red_card_ban`; Instellingen → Schorsingen).
+  `suspensions()` in `lib/players/cards.ts` telt per seizoen (vanaf `competition_start_date`) en laat elke
+  schorsing uitzitten met de gespeelde wedstrijden erna. De kern in de teamcontext krijgt `gele_kaarten` en
+  `geschorst_wedstrijden`, zodat de Team Manager schorsingen meldt.
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.
