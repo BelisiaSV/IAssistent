@@ -60,6 +60,7 @@ export default async function CompetitionPage({ params }: { params: Promise<{ te
                     <p className="text-sm text-slate-500">
                       {weekdayName(next.match_date)} {longDate(next.match_date)}
                       {next.kickoff && ` · ${next.kickoff}`} · {m.division(next.division)}
+                      {next.match_type && ` · ${m.matchType[next.match_type] ?? next.match_type}`}
                     </p>
                     <p className="text-lg font-bold">
                       {next.home} – {next.away}
@@ -69,13 +70,13 @@ export default async function CompetitionPage({ params }: { params: Promise<{ te
                         {next.referee && (
                           <>
                             <dt className="text-slate-500">{m.referee}</dt>
-                            <dd>{next.referee}</dd>
+                            <dd>{official(next.referee)}</dd>
                           </>
                         )}
                         {(next.assistant_1 || next.assistant_2) && (
                           <>
                             <dt className="text-slate-500">{m.assistants}</dt>
-                            <dd>{[next.assistant_1, next.assistant_2].filter(Boolean).join(", ")}</dd>
+                            <dd>{[...new Set([next.assistant_1, next.assistant_2].filter((x): x is string => !!x).map(official))].join(", ")}</dd>
                           </>
                         )}
                       </dl>
@@ -153,6 +154,9 @@ export default async function CompetitionPage({ params }: { params: Promise<{ te
     </div>
   );
 }
+
+/** A name, or the meaning of an assignment code (e.g. CRC). */
+const official = (value: string) => m.assignment[value] ?? value;
 
 function MatchLine({ match, own }: { match: Parameters<typeof outcomeFor>[0]; own: string }) {
   const outcome = outcomeFor(match, own);

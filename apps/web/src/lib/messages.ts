@@ -211,7 +211,24 @@ export const messages = {
       opponentPlace: (pos: number, pts: number) => `${pos}e met ${pts} punten`,
       noUpcoming: "Geen komende wedstrijden in de kalender.",
       updated: (date: string) => `Laatst bijgewerkt: ${date}`,
-      status: { PP: "Uitgesteld", F1: "Forfait", F2: "Forfait", FF: "Forfait", FI: "Forfait", ST: "Stopgezet", AMC: "Afgelast" } as Record<string, string>,
+      // Legend of voetbalvlaanderen.be
+      status: {
+        PP: "Uitgesteld",
+        ST: "Stopgezet",
+        AMC: "Algemeen forfait",
+        F1: "Forfait één ploeg",
+        F2: "Forfait beide ploegen",
+        FI: "Forfait (identiteitskaart, 1 ploeg)",
+        FF: "Forfait (identiteitskaart, 2 ploegen)",
+      } as Record<string, string>,
+      matchType: { CHP: "Kampioenschap", CUP: "Beker", FRG: "Vriendschappelijk" } as Record<string, string>,
+      assignment: {
+        TRN: "Aanduiding door het Provinciaal Scheidsrechters Comité",
+        CRC: "Aanduiding door het Centraal Scheidsrechters Comité",
+        "Yet To Be Assigned": "Nog aan te duiden",
+        Club: "Aanduiding door de club",
+        "No assignment": "Geen aanduiding door de KBVB",
+      } as Record<string, string>,
     },
   },
   cards: {
