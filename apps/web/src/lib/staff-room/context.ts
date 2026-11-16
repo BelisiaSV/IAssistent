@@ -6,6 +6,7 @@ import type { VisionAnswers } from "@iassistent/staff-engine/content";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
 import { matchEvaluations } from "@/lib/opponents/context";
+import { formOf, nextMatchOf, opponentOf } from "@/lib/competition/team";
 import { cardRules, suspensions, yellowCounts } from "@/lib/players/cards";
 import { matchDayCatalog, periodizationCatalog, testCatalog, visionQuestionnaire } from "@/lib/staff";
 import type { createClient } from "@/lib/supabase/server";
@@ -40,7 +41,8 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
   // On Sunday the staff already looks ahead to the next week.
   const weekStart = isoWeekday(today) === 7 ? addDays(mondayOf(today), 7) : mondayOf(today);
   const schedule = trainingScheduleSchema.safeParse(team.training_schedule);
-  const [data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }] = await Promise.all([
+  const divisions = team.federation_team ? team.federation_divisions : [];
+  const [data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
     loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", coachId).maybeSingle(),
     supabase
@@ -66,6 +68,12 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
     supabase.from("player_cards").select("player_id, match_date, card").eq("team_id", team.id),
     supabase.from("match_reports").select("match_date").eq("team_id", team.id).lte("match_date", today),
     supabase.from("week_plans").select("matches").eq("team_id", team.id).lte("week_start", today),
+    divisions.length
+      ? supabase.from("competition_matches").select("*").in("division", divisions)
+      : Promise.resolve({ data: [] as Tables<"competition_matches">[] }),
+    divisions.length
+      ? supabase.from("competition_standings").select("*").in("division", divisions).eq("period", 0)
+      : Promise.resolve({ data: [] as Tables<"competition_standings">[] }),
   ]);
 
   // Approved work of this week, per role (and task when it is not the default one).
@@ -129,6 +137,7 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
   });
 
   return {
+    competitie: competitionContext(team.federation_team, competitionMatches ?? [], standings ?? [], today),
     team: { leeftijdscategorie: ageCategory(team.age_category), standaardformatie: teamFormation(team.default_formation).code },
     visie: context.visie,
     week: { ...context.weekinput, weekinput_ingevuld: !!data.week },
@@ -147,5 +156,41 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
       const overview = turnOutput(meeting.staff_meeting_turns.find((t) => t.version === meeting.version && t.kind === "overzicht")?.output)?.overzicht;
       return overview ? [{ opdracht: meeting.assignment, goedgekeurd_op: meeting.decided_at?.slice(0, 10) ?? null, overzicht: overview }] : [];
     }),
+  };
+}
+
+/**
+ * The competition as the staff may know it: positions, points and form of
+ * the own team and the next opponent, without names of other teams.
+ */
+function competitionContext(
+  own: string | null,
+  matches: Tables<"competition_matches">[],
+  standings: Tables<"competition_standings">[],
+  today: string,
+) {
+  if (!own || (!matches.length && !standings.length)) return null;
+  const letter = (o: "win" | "draw" | "loss") => messages.dashboard.form.letter[o];
+  const row = standings.find((s) => s.team === own);
+  const next = nextMatchOf(matches, own, today);
+  const opponent = next ? opponentOf(next, own) : null;
+  const opponentRow = opponent ? standings.find((s) => s.team === opponent && s.division === next!.division) : undefined;
+  return {
+    reeks: row?.division ?? next?.division ?? null,
+    plaats: row?.position ?? null,
+    punten: row?.points ?? null,
+    gespeeld: row?.played ?? null,
+    aantal_ploegen: row ? standings.filter((s) => s.division === row.division).length : null,
+    vorm: formOf(matches, own).map(letter),
+    volgende_wedstrijd: next
+      ? {
+          datum: next.match_date,
+          aanvang: next.kickoff,
+          thuis: next.home === own,
+          tegenstander_plaats: opponentRow?.position ?? null,
+          tegenstander_punten: opponentRow?.points ?? null,
+          tegenstander_vorm: formOf(matches, opponent!).map(letter),
+        }
+      : null,
   };
 }

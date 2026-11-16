@@ -276,7 +276,7 @@ Regels:
   een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
   onderdeel) en enkel de **8 menu's van de hoofdcoach** (`NAV_ITEMS` in `lib/navigation.ts`): Dashboard,
   Mijn team (Spelers, Selecties, Instellingen, Visie), Planning (Microcyclus, Periodisering, Belasting),
-  Staff Room, Taken, Wedstrijdanalyse (Volgende wedstrijd, Tegenstanders, Evaluaties), Oefenbibliotheek
+  Staff Room, Taken, Wedstrijdanalyse (Volgende wedstrijd, Tegenstanders, Competitie, Evaluaties), Oefenbibliotheek
   (Oefeningen, Standaardsituaties) en Rapportage (Testen, Seizoensverloop, Belasting per week). De
   onderdelen van een menu staan als **tabbladen** bovenaan de pagina (`components/section-tabs.tsx`), elk
   met het mannetje van de rol die het verzorgt (`member`). Elke rol heeft een eigen mannetje
@@ -369,5 +369,20 @@ Regels:
   `suspensions()` in `lib/players/cards.ts` telt per seizoen (vanaf `competition_start_date`) en laat elke
   schorsing uitzitten met de gespeelde wedstrijden erna. De kern in de teamcontext krijgt `gele_kaarten` en
   `geschorst_wedstrijden`, zodat de Team Manager schorsingen meldt.
+- **Competitie (Voetbal Vlaanderen)** — de platformadmin laadt wekelijks de exports van voetbalvlaanderen.be op
+  (`/admin/competition`): uitslagen + kalender (`vvlresdown`), klassementen (`vvlcltdown`, `PER` 0 = seizoen,
+  1..n = periode) en scheidsrechters (`vvldesdown`). De bestanden bevatten alle reeksen van alle clubs; ze worden
+  in de browser gelezen (`lib/competition/parse.ts`, UTF-8 of Windows-1252) en enkel de **gekoppelde reeksen**
+  gaan naar de server. Koppeling per team: `teams.federation_team` (ploegnaam zoals in de export, bv.
+  "Belisia Bilzen SV A") + `teams.federation_divisions` (bv. `{1, BVVD}`); enkel admins wijzigen ze
+  (`admin_set_team_competition`, trigger). Data per reeks in `competition_matches` (uniek op reeks, datum, thuis,
+  uit) en `competition_standings`; lezen via `can_read_division` (wie een gekoppeld team mag lezen).
+  `admin_import_competition` vervangt de wedstrijden/klassementen van de reeks, zet de scheidsrechters, en
+  **vult aan** zonder te overschrijven: komende wedstrijden in de weekinput (nieuwe week met de vaste
+  trainingsdagen, geen training op de wedstrijddag) en scores in `match_reports`. Pagina **Competitie**
+  (`/teams/[id]/competition`, Wedstrijdanalyse): volgende wedstrijd met scheidsrechters en vorm/plaats van de
+  tegenstander, kalender en uitslagen (statuscodes zoals PP = uitgesteld), klassement per periode. De staf krijgt
+  `competitie` in de teamcontext zonder namen van andere ploegen (eigen plaats, punten, vorm; plaats en vorm van
+  de volgende tegenstander).
 - Nog niet gebouwd: Video Analist, volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

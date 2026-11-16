@@ -61,6 +61,7 @@ export const NAV_ITEMS: NavItem[] = [
     tabs: [
       { label: m.nextMatch, teamPath: "/match", member: "tactical-coach" },
       { label: m.opponents, teamPath: "/opponents", member: "tactical-coach" },
+      { label: m.competition, teamPath: "/competition", member: "team-manager" },
       { label: m.evaluations, teamPath: "/evaluations", member: "video-analyst" },
     ],
   },

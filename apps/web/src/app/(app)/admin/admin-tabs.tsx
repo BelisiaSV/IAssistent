@@ -9,6 +9,7 @@ const TABS = [
   { href: "/admin/players", label: messages.plans.adminTabs.players },
   { href: "/admin/plans", label: messages.plans.adminTabs.plans },
   { href: "/admin/accounts", label: messages.plans.adminTabs.accounts },
+  { href: "/admin/competition", label: messages.plans.adminTabs.competition },
 ];
 
 export function AdminTabs() {
