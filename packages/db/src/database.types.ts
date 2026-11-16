@@ -15,6 +15,114 @@ export type Database = {
   };
   public: {
     Tables: {
+      competition_matches: {
+        Row: {
+          id: string;
+          division: string;
+          match_date: string;
+          kickoff: string | null;
+          home: string;
+          away: string;
+          home_goals: number | null;
+          away_goals: number | null;
+          status: string | null;
+          matchday: number | null;
+          home_club: string | null;
+          away_club: string | null;
+          referee: string | null;
+          assistant_1: string | null;
+          assistant_2: string | null;
+          fourth_official: string | null;
+          match_type: string | null;
+          imported_at: string;
+        };
+        Insert: {
+          id?: string;
+          division: string;
+          match_date: string;
+          kickoff?: string | null;
+          home: string;
+          away: string;
+          home_goals?: number | null;
+          away_goals?: number | null;
+          status?: string | null;
+          matchday?: number | null;
+          home_club?: string | null;
+          away_club?: string | null;
+          referee?: string | null;
+          assistant_1?: string | null;
+          assistant_2?: string | null;
+          fourth_official?: string | null;
+          match_type?: string | null;
+          imported_at?: string;
+        };
+        Update: {
+          id?: string;
+          division?: string;
+          match_date?: string;
+          kickoff?: string | null;
+          home?: string;
+          away?: string;
+          home_goals?: number | null;
+          away_goals?: number | null;
+          status?: string | null;
+          matchday?: number | null;
+          home_club?: string | null;
+          away_club?: string | null;
+          referee?: string | null;
+          assistant_1?: string | null;
+          assistant_2?: string | null;
+          fourth_official?: string | null;
+          match_type?: string | null;
+          imported_at?: string;
+        };
+        Relationships: [];
+      };
+      competition_standings: {
+        Row: {
+          division: string;
+          period: number;
+          position: number;
+          team: string;
+          played: number;
+          won: number;
+          lost: number;
+          drawn: number;
+          goals_for: number;
+          goals_against: number;
+          points: number;
+          imported_at: string;
+        };
+        Insert: {
+          division: string;
+          period?: number;
+          position: number;
+          team: string;
+          played?: number;
+          won?: number;
+          lost?: number;
+          drawn?: number;
+          goals_for?: number;
+          goals_against?: number;
+          points?: number;
+          imported_at?: string;
+        };
+        Update: {
+          division?: string;
+          period?: number;
+          position?: number;
+          team?: string;
+          played?: number;
+          won?: number;
+          lost?: number;
+          drawn?: number;
+          goals_for?: number;
+          goals_against?: number;
+          points?: number;
+          imported_at?: string;
+        };
+        Relationships: [];
+      };
       coaches: {
         Row: {
           id: string;
@@ -743,6 +851,8 @@ export type Database = {
           yellow_card_limit: number;
           yellow_card_ban: number;
           red_card_ban: number;
+          federation_team: string | null;
+          federation_divisions: string[];
         };
         Insert: {
           id?: string;
@@ -769,6 +879,8 @@ export type Database = {
           yellow_card_limit?: number;
           yellow_card_ban?: number;
           red_card_ban?: number;
+          federation_team?: string | null;
+          federation_divisions?: string[];
         };
         Update: {
           id?: string;
@@ -795,6 +907,8 @@ export type Database = {
           yellow_card_limit?: number;
           yellow_card_ban?: number;
           red_card_ban?: number;
+          federation_team?: string | null;
+          federation_divisions?: string[];
         };
         Relationships: [
           {
@@ -1512,6 +1626,15 @@ export type Database = {
     Functions: {
       admin_import_players: { Args: { p_team_id: string; p_players: Json }; Returns: Json };
       admin_team_players: { Args: { p_team_id: string }; Returns: Database["public"]["Tables"]["players"]["Row"][] };
+      admin_competition_teams: {
+        Args: Record<PropertyKey, never>;
+        Returns: { id: string; name: string; club_name: string; archived: boolean; federation_team: string | null; federation_divisions: string[] }[];
+      };
+      admin_import_competition: {
+        Args: { p_divisions: string[]; p_matches: Json; p_standings: Json; p_referees: Json };
+        Returns: Json;
+      };
+      admin_set_team_competition: { Args: { p_team: string; p_federation_team: string; p_divisions: string[] }; Returns: undefined };
       admin_accounts: {
         Args: Record<PropertyKey, never>;
         Returns: { id: string; email: string; full_name: string | null; plan_id: string | null }[];
@@ -1525,6 +1648,7 @@ export type Database = {
       can_read_team: { Args: { p_team_id: string }; Returns: boolean };
       can_see_club: { Args: { p_club_id: string }; Returns: boolean };
       can_see_coach: { Args: { p_coach_id: string }; Returns: boolean };
+      can_read_division: { Args: { p_division: string }; Returns: boolean };
       can_write_team: { Args: { p_team_id: string }; Returns: boolean };
       has_assistant_access: { Args: { p_team_id: string }; Returns: boolean };
       is_club_owner: { Args: { p_club_id: string }; Returns: boolean };
