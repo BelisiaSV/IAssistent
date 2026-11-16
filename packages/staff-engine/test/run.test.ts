@@ -640,3 +640,33 @@ describe("staff meeting", () => {
     await expect(runMeetingTurn(staff, "coordinator", { ...base, soort: "overzicht" }, provider)).rejects.toBeInstanceOf(StaffGenerationError);
   });
 });
+
+describe("staff meeting week plan in test mode", () => {
+  it("fits the example week onto the week of the team", async () => {
+    const days = ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"].map((datum, i) => ({
+      datum,
+      weekdag: ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"][i]!,
+      md: i === 5 ? "MD" : null,
+      training: i === 1 || i === 3 ? { aanvang: "20:00", duur_min: 80 } : null,
+      wedstrijd: i === 5 ? { aanvang: "19:30" } : null,
+    }));
+    const teamcontext = {
+      week: { week_van: "2026-11-23", dagen: days },
+      kern: [
+        { rugnummer: 1, beschikbaar: true, status: "beschikbaar", terug_verwacht: null, geschorst_wedstrijden: 0 },
+        { rugnummer: 7, beschikbaar: false, status: "geblesseerd", terug_verwacht: "2026-12-01", geschorst_wedstrijden: 0 },
+        { rugnummer: 8, beschikbaar: true, status: "beschikbaar", terug_verwacht: null, geschorst_wedstrijden: 1 },
+      ],
+    };
+    const result = await runMeetingTurn(staff, "coordinator", { teamcontext, opdracht: "Week", soort: "overzicht", gesprek: [], feedback: null }, exampleProvider);
+    const plan = result.output.overzicht!.weekplan!;
+    expect(plan.week_van).toBe("2026-11-23");
+    expect(plan.dagen.map((d) => d.soort)).toEqual(["rust", "training", "rust", "training", "rust", "wedstrijd", "rust"]);
+    expect(plan.dagen[3]).toMatchObject({ datum: "2026-11-26", tijdstip: "20:00", totale_duur_min: 80 });
+    expect(plan.dagen[3]!.onderdelen.length).toBeGreaterThan(0);
+    expect(plan.dagen[5]!.tijdstip).toBe("19:30");
+    expect(plan.beschikbaarheid.beschikbaar).toBe(1);
+    expect(plan.beschikbaarheid.niet_beschikbaar.map((p) => p.rugnummer)).toEqual([7, 8]);
+    expect(plan.spelersplanning).toHaveLength(7);
+  });
+});

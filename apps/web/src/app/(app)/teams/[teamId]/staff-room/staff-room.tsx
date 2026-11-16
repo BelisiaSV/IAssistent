@@ -10,7 +10,7 @@ import { RoleChatPanel } from "@/components/staff/staff-dock";
 import { StatusBadge, TaskProposalCard } from "@/components/staff/task-proposal-card";
 import { useMeetingRunner } from "@/components/staff/use-meeting-runner";
 import { messages } from "@/lib/messages";
-import { startMeeting } from "@/lib/staff-room/meeting-actions";
+import { adjustMeeting, startMeeting } from "@/lib/staff-room/meeting-actions";
 import { currentOverview, type MeetingView } from "@/lib/staff-room/meetings";
 import { MESSAGE_MAX } from "@/lib/staff-room/roles";
 import type { TaskStatus } from "@/lib/staff-room/tasks";
@@ -37,6 +37,7 @@ export function StaffRoom({
   initialMeeting,
   tasks,
   initialConsult,
+  names,
   canWrite,
   testMode,
 }: {
@@ -49,6 +50,8 @@ export function StaffRoom({
   initialMeeting: MeetingView | null;
   tasks: ReturnType<typeof taskProposals>;
   initialConsult: string | null;
+  /** Player names by shirt number (only shown, never sent to the AI). */
+  names: Record<number, string>;
   canWrite: boolean;
   testMode: boolean;
 }) {
@@ -67,18 +70,28 @@ export function StaffRoom({
     window.history.replaceState(null, "", `?opdracht=${next.id}`);
   }
 
-  function start() {
-    const assignment = text.trim();
-    if (!assignment) return;
+  // After the overview the box continues the conversation; otherwise it starts a new one.
+  const replying = !!meeting && (meeting.status === "ready" || meeting.status === "approved");
+  const busy = meeting?.status === "running" || meeting?.status === "failed";
+
+  function send() {
+    const value = text.trim();
+    if (!value || busy) return;
     setError(null);
     startTransition(async () => {
-      const result = await startMeeting(teamId, assignment);
+      const result = replying ? await adjustMeeting(meeting!.id, value) : await startMeeting(teamId, value);
       if (result.meeting) {
         show(result.meeting);
         setText("");
       }
       if (result.error) setError(result.error);
     });
+  }
+
+  function close() {
+    setMeeting(null);
+    setError(null);
+    window.history.replaceState(null, "", window.location.pathname);
   }
 
   return (
@@ -123,9 +136,21 @@ export function StaffRoom({
         {/* Middle: the light flow, the group chat and the box for a new assignment. */}
         <section className="order-1 flex min-w-0 flex-col gap-4 xl:order-2">
           <FlowBar steps={flowSteps(meeting, plan)} overview={overviewState(meeting)} roleNames={roleNames} />
+          {meeting && meeting.status !== "running" && (
+            <div className="-mb-1 flex justify-end">
+              <button
+                type="button"
+                onClick={close}
+                title={mm.closeHint}
+                className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50"
+              >
+                + {mm.close}
+              </button>
+            </div>
+          )}
           <div className="h-[calc(100vh-22rem)] min-h-[420px] overflow-y-auto rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-5">
             {meeting ? (
-              <MeetingFeed key={meeting.id} meeting={meeting} roleNames={roleNames} canWrite={canWrite} onChange={show} />
+              <MeetingFeed key={meeting.id} meeting={meeting} roleNames={roleNames} names={names} canWrite={canWrite} onChange={show} />
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-4 py-12 text-center">
                 <div className="flex -space-x-2">
@@ -142,7 +167,7 @@ export function StaffRoom({
               className="flex items-end gap-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200"
               onSubmit={(event) => {
                 event.preventDefault();
-                start();
+                send();
               }}
             >
               <RoleAvatar member="head-coach" size={36} />
@@ -152,21 +177,21 @@ export function StaffRoom({
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                     event.preventDefault();
-                    start();
+                    send();
                   }
                 }}
                 rows={2}
                 maxLength={MESSAGE_MAX}
-                aria-label={mm.label}
-                placeholder={mm.placeholder}
+                aria-label={replying ? mm.reply : mm.label}
+                placeholder={replying ? mm.replyPlaceholder : mm.placeholder}
                 className="min-h-11 flex-1 resize-none rounded-xl border-0 bg-slate-50 px-3 py-2.5 text-sm ring-1 ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-brand focus:outline-none"
               />
               <button
                 type="submit"
-                disabled={!text.trim() || pending || meeting?.status === "running"}
+                disabled={!text.trim() || pending || busy}
                 className="h-11 shrink-0 rounded-xl bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-40"
               >
-                {pending ? mm.starting : mm.send}
+                {pending ? mm.starting : replying ? mm.reply : mm.send}
               </button>
             </form>
           )}

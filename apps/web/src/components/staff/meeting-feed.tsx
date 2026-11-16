@@ -4,11 +4,12 @@ import type { MeetingOverview } from "@iassistent/staff-engine/content";
 import { Fragment, useEffect, useRef, useState, useTransition } from "react";
 
 import { messages } from "@/lib/messages";
-import { adjustMeeting, approveMeeting, type MeetingResult, retryMeeting } from "@/lib/staff-room/meeting-actions";
+import { approveMeeting, type MeetingResult, retryMeeting } from "@/lib/staff-room/meeting-actions";
 import { currentOverview, type MeetingView } from "@/lib/staff-room/meetings";
 import { longDate } from "@/lib/weeks/dates";
 
 import { RoleAvatar, staffColor } from "./role-avatar";
+import { WeekPlanView } from "./week-plan-view";
 
 const m = messages.staffRoom.meeting;
 
@@ -20,19 +21,20 @@ const m = messages.staffRoom.meeting;
 export function MeetingFeed({
   meeting,
   roleNames,
+  names,
   canWrite,
   onChange,
 }: {
   meeting: MeetingView;
   roleNames: Record<string, string>;
+  /** Player names by shirt number, shown with the week plan. */
+  names: Record<number, string>;
   canWrite: boolean;
   onChange: (meeting: MeetingView) => void;
 }) {
   const bottom = useRef<HTMLDivElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [adjusting, setAdjusting] = useState(false);
-  const [feedback, setFeedback] = useState("");
   const name = (id: string) => (id === "hoofdcoach" ? m.headCoach : (roleNames[id] ?? id));
   const speaking = meeting.status === "running" ? meeting.turns.find((t) => t.version === meeting.version && t.status !== "ready") : undefined;
   const overview = currentOverview(meeting);
@@ -80,7 +82,7 @@ export function MeetingFeed({
                   >
                     {turn.message}
                   </div>
-                  {turn.overview && version < meeting.version && <OverviewCard overview={turn.overview} roleNames={roleNames} muted />}
+                  {turn.overview && version < meeting.version && <OverviewCard overview={turn.overview} roleNames={roleNames} names={names} muted />}
                 </div>
               </div>
             ))}
@@ -114,49 +116,17 @@ export function MeetingFeed({
 
       {overview && meeting.status !== "running" && (
         <div className="space-y-3">
-          <OverviewCard overview={overview} roleNames={roleNames} />
+          <OverviewCard overview={overview} roleNames={roleNames} names={names} />
           {meeting.status === "approved" && meeting.decidedAt && <p className="text-sm font-medium text-green-700">{m.approved(longDate(meeting.decidedAt.slice(0, 10)))}</p>}
-          {canWrite && !adjusting && (
-            <div className="flex flex-wrap gap-2">
+          {canWrite && (
+            <div className="flex flex-wrap items-center gap-3">
               {meeting.status === "ready" && (
                 <button type="button" disabled={pending} onClick={() => act(() => approveMeeting(meeting.id))} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50">
                   {m.approve}
                 </button>
               )}
-              <button type="button" onClick={() => setAdjusting(true)} className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">
-                {m.adjust}
-              </button>
+              <p className="text-sm text-slate-500">{m.replyHint}</p>
             </div>
-          )}
-          {adjusting && (
-            <form
-              className="space-y-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                act(() => adjustMeeting(meeting.id, feedback), () => {
-                  setAdjusting(false);
-                  setFeedback("");
-                });
-              }}
-            >
-              <textarea
-                value={feedback}
-                onChange={(event) => setFeedback(event.target.value)}
-                rows={3}
-                maxLength={2000}
-                aria-label={m.adjust}
-                placeholder={m.adjustPlaceholder}
-                className="w-full rounded-xl border-0 bg-white px-3 py-2 text-sm ring-1 ring-slate-200 focus:ring-2 focus:ring-brand focus:outline-none"
-              />
-              <div className="flex gap-2">
-                <button type="submit" disabled={pending || !feedback.trim()} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-                  {m.adjustSend}
-                </button>
-                <button type="button" onClick={() => setAdjusting(false)} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100">
-                  {m.cancel}
-                </button>
-              </div>
-            </form>
           )}
         </div>
       )}
@@ -179,7 +149,17 @@ function CoachBubble({ text }: { text: string }) {
 }
 
 /** The joint overview of the staff. */
-export function OverviewCard({ overview, roleNames, muted = false }: { overview: MeetingOverview; roleNames: Record<string, string>; muted?: boolean }) {
+export function OverviewCard({
+  overview,
+  roleNames,
+  names,
+  muted = false,
+}: {
+  overview: MeetingOverview;
+  roleNames: Record<string, string>;
+  names: Record<number, string>;
+  muted?: boolean;
+}) {
   return (
     <section className={`space-y-4 rounded-2xl bg-white p-5 shadow-sm ${muted ? "opacity-70 ring-1 ring-slate-200" : "ring-2 ring-brand/50"}`}>
       <div>
@@ -199,6 +179,7 @@ export function OverviewCard({ overview, roleNames, muted = false }: { overview:
           </div>
         ))}
       </div>
+      {overview.weekplan && <WeekPlanView plan={overview.weekplan} names={names} />}
       {overview.aandachtspunten.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500">{m.attention}</p>

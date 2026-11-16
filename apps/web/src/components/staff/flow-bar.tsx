@@ -34,7 +34,7 @@ export function FlowBar({
               {previous && <Connector from={previousColor} to={color} state={node.state} />}
               <div
                 title={node.role ? (roleNames[node.role] ?? node.role) : m.flowDone}
-                className={`flex w-[92px] shrink-0 flex-col items-center gap-1 rounded-xl border px-1.5 py-2 text-center transition ${node.state === "active" ? "glow-pulse" : ""} ${
+                className={`flex w-[80px] shrink-0 flex-col items-center gap-1 rounded-xl border px-1.5 py-2 text-center transition ${node.state === "active" ? "glow-pulse" : ""} ${
                   node.state === "waiting" ? "border-white/10 opacity-50" : ""
                 }`}
                 style={
@@ -70,7 +70,7 @@ export function FlowBar({
 function Connector({ from, to, state }: { from: string; to: string; state: FlowState }) {
   const lit = state !== "waiting";
   return (
-    <span aria-hidden className="relative mx-1 block h-[3px] min-w-5 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: lit ? undefined : "rgb(255 255 255 / 0.08)" }}>
+    <span aria-hidden className="relative mx-0.5 block h-[3px] min-w-3 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: lit ? undefined : "rgb(255 255 255 / 0.08)" }}>
       {lit && (
         <span
           className="absolute inset-0 rounded-full"

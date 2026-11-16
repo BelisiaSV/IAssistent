@@ -37,7 +37,8 @@
             "titel",
             "samenvatting",
             "onderdelen",
-            "aandachtspunten"
+            "aandachtspunten",
+            "weekplan"
           ],
           "properties": {
             "titel": {
@@ -91,10 +92,335 @@
                 "minLength": 1,
                 "maxLength": 300
               }
+            },
+            "weekplan": {
+              "description": "De volledige weekplanning als de opdracht over de (trainings)week gaat; anders null.",
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "week_van",
+                    "beschikbaarheid",
+                    "dagen",
+                    "spelersplanning"
+                  ],
+                  "description": "De volledige week: elke dag van maandag tot zondag.",
+                  "properties": {
+                    "week_van": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "beschikbaarheid": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "beschikbaar",
+                        "niet_beschikbaar"
+                      ],
+                      "properties": {
+                        "beschikbaar": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "niet_beschikbaar": {
+                          "type": "array",
+                          "maxItems": 40,
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "rugnummer",
+                              "reden",
+                              "terug_verwacht",
+                              "aanpassing"
+                            ],
+                            "properties": {
+                              "rugnummer": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              },
+                              "reden": {
+                                "type": "string",
+                                "maxLength": 80,
+                                "description": "Bv. geblesseerd, geschorst (5e gele kaart), afwezig."
+                              },
+                              "terug_verwacht": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "date"
+                              },
+                              "aanpassing": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "maxLength": 300,
+                                "description": "Aangepast programma deze week, of null."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "dagen": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 7,
+                      "items": {
+                        "$ref": "#/$defs/dag"
+                      }
+                    },
+                    "spelersplanning": {
+                      "type": "array",
+                      "maxItems": 7,
+                      "description": "Wat de spelers per dag moeten weten.",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "datum",
+                          "weekdag",
+                          "activiteit",
+                          "aanvang",
+                          "opmerking"
+                        ],
+                        "properties": {
+                          "datum": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "weekdag": {
+                            "type": "string",
+                            "maxLength": 20
+                          },
+                          "activiteit": {
+                            "type": "string",
+                            "maxLength": 120
+                          },
+                          "aanvang": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "opmerking": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "maxLength": 300
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
       ]
+    }
+  },
+  "$defs": {
+    "dag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datum",
+        "weekdag",
+        "md",
+        "soort",
+        "titel",
+        "doel",
+        "tijdstip",
+        "totale_duur_min",
+        "belasting",
+        "onderdelen",
+        "opmerking"
+      ],
+      "properties": {
+        "datum": {
+          "type": "string",
+          "format": "date"
+        },
+        "weekdag": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "md": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 10
+        },
+        "soort": {
+          "type": "string",
+          "enum": [
+            "training",
+            "wedstrijd",
+            "rust"
+          ]
+        },
+        "titel": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "doel": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "tijdstip": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Aanvangsuur (HH:MM) of null."
+        },
+        "totale_duur_min": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 240
+        },
+        "belasting": {
+          "type": "string",
+          "enum": [
+            "rust",
+            "laag",
+            "matig",
+            "hoog",
+            "zeer hoog"
+          ]
+        },
+        "onderdelen": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/onderdeel"
+          }
+        },
+        "opmerking": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 400
+        }
+      }
+    },
+    "onderdeel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oefening_id",
+        "fase",
+        "naam",
+        "organisatie",
+        "spelers",
+        "duur_min",
+        "reeksen",
+        "werk_per_reeks",
+        "rust_tussen_reeksen",
+        "intensiteit",
+        "rpe",
+        "coachingspunten"
+      ],
+      "properties": {
+        "oefening_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "id uit de oefenstof van de coach, of null voor een nieuw voorstel."
+        },
+        "fase": {
+          "type": "string",
+          "enum": [
+            "opwarming",
+            "kern",
+            "afsluiting"
+          ]
+        },
+        "naam": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "organisatie": {
+          "type": "string",
+          "maxLength": 600,
+          "description": "Terrein, materiaal, opstelling."
+        },
+        "spelers": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Aantallen, bv. 8 tegen 8 + 2 doelmannen."
+        },
+        "duur_min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "reeksen": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 20
+        },
+        "werk_per_reeks": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 60
+        },
+        "rust_tussen_reeksen": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 60
+        },
+        "intensiteit": {
+          "type": "string",
+          "enum": [
+            "laag",
+            "matig",
+            "hoog",
+            "maximaal"
+          ]
+        },
+        "rpe": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 10
+        },
+        "coachingspunten": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
     }
   }
 }

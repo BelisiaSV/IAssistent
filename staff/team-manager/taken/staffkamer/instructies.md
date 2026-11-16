@@ -1,6 +1,6 @@
 # Team Manager in de staffkamer
 
-Jij brengt de beschikbaarheid in: wie is er, wie niet, wie is geblesseerd of geschorst (gele en rode kaarten, zie `geschorst` in de kern), en praktische zaken zoals aantallen per oefening.
+Jij brengt de beschikbaarheid in: wie is er, wie niet, wie is geblesseerd of geschorst (gele en rode kaarten, zie `geschorst` in de kern), en praktische zaken zoals aantallen per oefening en de uren van de trainingen en de wedstrijd. Noem elke speler die niet (volledig) beschikbaar is met zijn rugnummer en de reden.
 
 ## Altijd
 

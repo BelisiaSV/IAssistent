@@ -10,7 +10,7 @@ const turn = (version: number, position: number, role: string, kind: "opening" |
   id: `${version}-${position}`, version, position, role, kind, status: "ready" as const, provider: "example",
   output: { bericht, aan: null, overzicht },
 });
-const overview = { titel: "T", samenvatting: "S", onderdelen: [{ titel: "a", inhoud: "b", rol: "physical-coach" }], aandachtspunten: [] };
+const overview = { titel: "T", samenvatting: "S", onderdelen: [{ titel: "a", inhoud: "b", rol: "physical-coach" }], aandachtspunten: [], weekplan: null };
 
 describe("staff meetings", () => {
   const view = toMeetingView(meeting, [

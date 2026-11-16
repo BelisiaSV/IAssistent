@@ -24,7 +24,7 @@ export default async function StaffRoomPage({
   const [{ teamId }, { rol, opdracht }] = await Promise.all([params, searchParams]);
   const { team, canEdit } = await getTeamContext(teamId);
   const supabase = await createClient();
-  const [{ data: meetings }, { data: proposals }] = await Promise.all([
+  const [{ data: meetings }, { data: proposals }, { data: players }] = await Promise.all([
     supabase.from("staff_meetings").select(MEETING_COLUMNS).eq("team_id", team.id).order("created_at", { ascending: false }).limit(HISTORY),
     supabase
       .from("staff_messages")
@@ -33,6 +33,7 @@ export default async function StaffRoomPage({
       .not("task_proposal", "is", null)
       .order("created_at", { ascending: false })
       .limit(50),
+    supabase.from("players").select("shirt_number, first_name, last_name").eq("team_id", team.id).is("archived_at", null),
   ]);
 
   const selectedId = opdracht && z.uuid().safeParse(opdracht).success ? opdracht : meetings?.[0]?.id;
@@ -50,6 +51,7 @@ export default async function StaffRoomPage({
       history={(meetings ?? []).map((m) => ({ id: m.id, assignment: m.assignment, status: m.status, createdAt: m.created_at }))}
       initialMeeting={selected ? toMeetingView(selected, turns ?? []) : null}
       tasks={taskProposals((proposals ?? []).map(toChatMessage))}
+      names={Object.fromEntries((players ?? []).flatMap((p) => (p.shirt_number === null ? [] : [[p.shirt_number, `${p.first_name} ${p.last_name}`]])))}
       initialConsult={rol && isStaffRoomRole(rol) && roles.includes(rol) ? rol : null}
       canWrite={canEdit}
       testMode={getStaffProvider().id === "example"}

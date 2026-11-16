@@ -2,33 +2,415 @@
   "bericht": "Coach, hieronder het gezamenlijke voorstel van de staf. Keur het goed of zeg wat er anders moet.",
   "aan": "hoofdcoach",
   "overzicht": {
-    "titel": "Omschakeling vanuit medium blok naar final third",
-    "samenvatting": "Eén kerntraining op MD-3 (90 min) met drie oefeningen uit je bibliotheek, opgebouwd van balverovering in het medium blok tot afwerking binnen tien seconden. 15 spelers beschikbaar; #4 en #9 in aangepast programma, #8 geschorst.",
+    "titel": "Week van 16 november: omschakeling vanuit medium blok",
+    "samenvatting": "Drie trainingen naar de wedstrijd van zondag toe. Dinsdag herstel en techniek, donderdag (MD-3) de kerntraining rond omschakeling vanuit het medium blok met afwerking, vrijdag scherp met de standaardsituaties. 15 spelers beschikbaar; #8 geschorst, #4 en #9 in aangepast programma.",
     "onderdelen": [
       {
         "titel": "Beschikbaarheid",
-        "inhoud": "15 spelers beschikbaar. #8 geschorst (5e gele kaart). #4 en #9 in herstel: mee tot en met de tweede oefening.",
+        "inhoud": "15 spelers beschikbaar. #8 geschorst voor zondag (5e gele kaart). #4 en #9 in herstel. #13 afwezig donderdag.",
         "rol": "team-manager"
       },
       {
         "titel": "Spelprincipes",
-        "inhoud": "Medium blok in 4-4-2 met de lijn op 35 m. Trigger: terugspeelbal of slechte aanname. Na verovering: eerste pass vooruit naar de diepe spits of de vrije flankspeler, twee spelers sprinten mee, binnen tien seconden afwerken.",
+        "inhoud": "Medium blok in 4-4-2 met de lijn op 35 m. Trigger: terugspeelbal of slechte aanname. Na verovering: eerste pass vooruit, twee spelers sprinten mee, binnen tien seconden afwerken.",
         "rol": "tactical-coach"
       },
       {
-        "titel": "Training (MD-3, 90 min)",
-        "inhoud": "1. Positiespel 5 tegen 5 + 2 met omschakeling naar kleine doelen — 15 min.\n2. Medium blok 7 tegen 6 met counter op groot doel — 3 × 6 min, 2 min rust, RPE 7.\n3. Partijvorm 8 tegen 8: punt dubbel bij doelpunt binnen tien seconden na verovering — 3 × 6 min, RPE 8.\n4. Afwerking na omschakeling in golven — 12 min.",
+        "titel": "Opbouw van de week",
+        "inhoud": "Dinsdag techniek en afwerking, donderdag de omschakeling in drie stappen (klein, medium blok, partijvorm), vrijdag kort en scherp met de standaardsituaties.",
         "rol": "assistant-coach"
       },
       {
         "titel": "Belasting",
-        "inhoud": "Rond 600 AU. De partijvorm drie reeksen in plaats van vier. #4 en #9: daarna 2 × 6 min lopen aan 70 % van hun MAS.",
+        "inhoud": "Dinsdag matig (RPE 5), donderdag hoog (RPE 7–8, rond 600 AU), vrijdag kort (RPE 5–6). De partijvorm drie reeksen in plaats van vier.",
         "rol": "physical-coach"
       }
     ],
     "aandachtspunten": [
       "Wil je de partijvorm op 2/3 van het veld of op het volledige veld?",
-      "Coachingspunt van de Tactical Coach: de bal na verovering eerst vooruit spelen."
-    ]
+      "Wie vervangt #8 zondag?"
+    ],
+    "weekplan": {
+      "week_van": "2026-11-16",
+      "beschikbaarheid": {
+        "beschikbaar": 15,
+        "niet_beschikbaar": [
+          {
+            "rugnummer": 8,
+            "reden": "geschorst (5e gele kaart)",
+            "terug_verwacht": null,
+            "aanpassing": "Traint normaal mee, speelt zondag niet."
+          },
+          {
+            "rugnummer": 4,
+            "reden": "geblesseerd (herstel)",
+            "terug_verwacht": "2026-11-29",
+            "aanpassing": "Mee tot en met de tweede oefening, daarna aangepaste loop."
+          },
+          {
+            "rugnummer": 9,
+            "reden": "geblesseerd (herstel)",
+            "terug_verwacht": "2026-11-22",
+            "aanpassing": "Mee tot en met de tweede oefening, daarna aangepaste loop."
+          },
+          {
+            "rugnummer": 13,
+            "reden": "afwezig donderdag (werk)",
+            "terug_verwacht": null,
+            "aanpassing": null
+          }
+        ]
+      },
+      "dagen": [
+        {
+          "datum": "2026-11-16",
+          "weekdag": "maandag",
+          "md": "MD+1",
+          "soort": "rust",
+          "titel": "Rust",
+          "doel": "Herstel na de wedstrijd.",
+          "tijdstip": null,
+          "totale_duur_min": null,
+          "belasting": "rust",
+          "onderdelen": [],
+          "opmerking": "Spelers die meer dan 60 minuten speelden: 20 minuten rustig fietsen of wandelen."
+        },
+        {
+          "datum": "2026-11-17",
+          "weekdag": "dinsdag",
+          "md": "MD+2",
+          "soort": "training",
+          "titel": "Herstel en techniek",
+          "doel": "Benen losmaken en de omschakeling technisch voorbereiden.",
+          "tijdstip": "19:30",
+          "totale_duur_min": 75,
+          "belasting": "matig",
+          "onderdelen": [
+            {
+              "oefening_id": null,
+              "fase": "opwarming",
+              "naam": "Losmaken en mobiliteit",
+              "organisatie": "Halve cirkel rond de middenstip, kegels op 10 m.",
+              "spelers": "Hele groep",
+              "duur_min": 15,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "laag",
+              "rpe": 3,
+              "coachingspunten": [
+                "Rustig opbouwen"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "kern",
+              "naam": "Rondo 5 tegen 2 met omschakeling",
+              "organisatie": "Twee vakken van 12 × 12 m. Bij balverovering van de twee spelen ze direct naar het andere vak.",
+              "spelers": "2 × (5 tegen 2)",
+              "duur_min": 20,
+              "reeksen": 4,
+              "werk_per_reeks": "4 min",
+              "rust_tussen_reeksen": "1 min",
+              "intensiteit": "matig",
+              "rpe": 5,
+              "coachingspunten": [
+                "Eerste pass weg van de druk",
+                "Na verovering meteen vooruit"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "kern",
+              "naam": "Afwerking na korte combinatie",
+              "organisatie": "Twee groepen aan de rand van de zestien, golven op groot doel.",
+              "spelers": "2 groepen + doelman",
+              "duur_min": 25,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "matig",
+              "rpe": 5,
+              "coachingspunten": [
+                "Afwerken binnen twee balcontacten"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "afsluiting",
+              "naam": "Uitlopen",
+              "organisatie": "Rond het veld.",
+              "spelers": "Hele groep",
+              "duur_min": 15,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "laag",
+              "rpe": 2,
+              "coachingspunten": []
+            }
+          ],
+          "opmerking": null
+        },
+        {
+          "datum": "2026-11-18",
+          "weekdag": "woensdag",
+          "md": "MD-4",
+          "soort": "rust",
+          "titel": "Rust",
+          "doel": "Herstel.",
+          "tijdstip": null,
+          "totale_duur_min": null,
+          "belasting": "rust",
+          "onderdelen": [],
+          "opmerking": null
+        },
+        {
+          "datum": "2026-11-19",
+          "weekdag": "donderdag",
+          "md": "MD-3",
+          "soort": "training",
+          "titel": "Omschakeling vanuit medium blok",
+          "doel": "Balverovering in het medium blok en binnen tien seconden afwerken.",
+          "tijdstip": "19:30",
+          "totale_duur_min": 90,
+          "belasting": "hoog",
+          "onderdelen": [
+            {
+              "oefening_id": null,
+              "fase": "opwarming",
+              "naam": "Positiespel 5 tegen 5 + 2 met kleine doelen",
+              "organisatie": "30 × 25 m, vier kleine doelen; na verovering scoren op de kleine doelen.",
+              "spelers": "5 tegen 5 + 2 neutralen",
+              "duur_min": 15,
+              "reeksen": 3,
+              "werk_per_reeks": "4 min",
+              "rust_tussen_reeksen": "1 min",
+              "intensiteit": "matig",
+              "rpe": 6,
+              "coachingspunten": [
+                "Druk bij terugspeelbal"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "kern",
+              "naam": "Medium blok 7 tegen 6 met counter",
+              "organisatie": "Half veld; blok met de lijn op 35 m, na verovering counter op groot doel.",
+              "spelers": "7 tegen 6 + doelman",
+              "duur_min": 20,
+              "reeksen": 3,
+              "werk_per_reeks": "6 min",
+              "rust_tussen_reeksen": "2 min",
+              "intensiteit": "hoog",
+              "rpe": 7,
+              "coachingspunten": [
+                "Eerste pass vooruit naar de diepe spits of vrije flank",
+                "Twee spelers sprinten mee"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "kern",
+              "naam": "Partijvorm 8 tegen 8 op 2/3 veld",
+              "organisatie": "Twee grote doelen; doelpunt binnen tien seconden na verovering telt dubbel.",
+              "spelers": "8 tegen 8 + 2 doelmannen",
+              "duur_min": 24,
+              "reeksen": 3,
+              "werk_per_reeks": "6 min",
+              "rust_tussen_reeksen": "2 min",
+              "intensiteit": "hoog",
+              "rpe": 8,
+              "coachingspunten": [
+                "Tempo na verovering",
+                "Restverdediging achter de bal"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "afsluiting",
+              "naam": "Afwerking in golven na omschakeling",
+              "organisatie": "Vanaf de middellijn 3 tegen 2 naar groot doel.",
+              "spelers": "3 tegen 2",
+              "duur_min": 12,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "hoog",
+              "rpe": 7,
+              "coachingspunten": [
+                "Afwerken binnen tien seconden"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "afsluiting",
+              "naam": "Uitlopen en stretching",
+              "organisatie": "",
+              "spelers": "Hele groep",
+              "duur_min": 8,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "laag",
+              "rpe": 2,
+              "coachingspunten": []
+            }
+          ],
+          "opmerking": "Nummers 4 en 9 doen mee tot en met het medium blok en lopen daarna apart 2 × 6 min aan 70 % van hun MAS."
+        },
+        {
+          "datum": "2026-11-20",
+          "weekdag": "vrijdag",
+          "md": "MD-2",
+          "soort": "training",
+          "titel": "Scherp en standaardsituaties",
+          "doel": "Snelheid, korte vormen en de standaardsituaties voor zondag.",
+          "tijdstip": "19:30",
+          "totale_duur_min": 70,
+          "belasting": "matig",
+          "onderdelen": [
+            {
+              "oefening_id": null,
+              "fase": "opwarming",
+              "naam": "Coördinatie en korte sprints",
+              "organisatie": "Ladder en kegels, sprints over 10 tot 15 m.",
+              "spelers": "Hele groep",
+              "duur_min": 15,
+              "reeksen": 4,
+              "werk_per_reeks": "6 × 10 m",
+              "rust_tussen_reeksen": "1 min",
+              "intensiteit": "matig",
+              "rpe": 5,
+              "coachingspunten": []
+            },
+            {
+              "oefening_id": null,
+              "fase": "kern",
+              "naam": "Positiespel 6 tegen 4 + 3",
+              "organisatie": "40 × 30 m, korte reeksen.",
+              "spelers": "6 tegen 4 + 3",
+              "duur_min": 15,
+              "reeksen": 4,
+              "werk_per_reeks": "2 min",
+              "rust_tussen_reeksen": "1 min",
+              "intensiteit": "hoog",
+              "rpe": 6,
+              "coachingspunten": [
+                "Korte steun bij balbezit"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "kern",
+              "naam": "Standaardsituaties",
+              "organisatie": "Hoekschoppen en vrije trappen op de flank, aanvallend en verdedigend.",
+              "spelers": "Hele groep",
+              "duur_min": 25,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "laag",
+              "rpe": 3,
+              "coachingspunten": [
+                "Iedereen kent zijn rol"
+              ]
+            },
+            {
+              "oefening_id": null,
+              "fase": "afsluiting",
+              "naam": "Uitlopen",
+              "organisatie": "",
+              "spelers": "Hele groep",
+              "duur_min": 15,
+              "reeksen": null,
+              "werk_per_reeks": null,
+              "rust_tussen_reeksen": null,
+              "intensiteit": "laag",
+              "rpe": 2,
+              "coachingspunten": []
+            }
+          ],
+          "opmerking": null
+        },
+        {
+          "datum": "2026-11-21",
+          "weekdag": "zaterdag",
+          "md": "MD-1",
+          "soort": "rust",
+          "titel": "Rust",
+          "doel": "Fris aan de wedstrijd.",
+          "tijdstip": null,
+          "totale_duur_min": null,
+          "belasting": "rust",
+          "onderdelen": [],
+          "opmerking": "Vrij, voldoende slapen en drinken."
+        },
+        {
+          "datum": "2026-11-22",
+          "weekdag": "zondag",
+          "md": "MD",
+          "soort": "wedstrijd",
+          "titel": "Wedstrijd",
+          "doel": "Omschakeling vanuit het medium blok toepassen.",
+          "tijdstip": "15:00",
+          "totale_duur_min": null,
+          "belasting": "zeer hoog",
+          "onderdelen": [],
+          "opmerking": "Verzamelen 1u15 voor de aftrap."
+        }
+      ],
+      "spelersplanning": [
+        {
+          "datum": "2026-11-16",
+          "weekdag": "maandag",
+          "activiteit": "Rust (herstel na de wedstrijd)",
+          "aanvang": null,
+          "opmerking": "Wie meer dan 60 minuten speelde: 20 minuten rustig fietsen."
+        },
+        {
+          "datum": "2026-11-17",
+          "weekdag": "dinsdag",
+          "activiteit": "Training — herstel en techniek",
+          "aanvang": "19:30",
+          "opmerking": "Aanwezig om 19:00."
+        },
+        {
+          "datum": "2026-11-18",
+          "weekdag": "woensdag",
+          "activiteit": "Rust",
+          "aanvang": null,
+          "opmerking": null
+        },
+        {
+          "datum": "2026-11-19",
+          "weekdag": "donderdag",
+          "activiteit": "Training — omschakeling",
+          "aanvang": "19:30",
+          "opmerking": "Zwaarste training van de week."
+        },
+        {
+          "datum": "2026-11-20",
+          "weekdag": "vrijdag",
+          "activiteit": "Training — scherp en standaardsituaties",
+          "aanvang": "19:30",
+          "opmerking": null
+        },
+        {
+          "datum": "2026-11-21",
+          "weekdag": "zaterdag",
+          "activiteit": "Rust",
+          "aanvang": null,
+          "opmerking": "Vroeg slapen."
+        },
+        {
+          "datum": "2026-11-22",
+          "weekdag": "zondag",
+          "activiteit": "Wedstrijd",
+          "aanvang": "15:00",
+          "opmerking": "Verzamelen om 13:45."
+        }
+      ]
+    }
   }
 }

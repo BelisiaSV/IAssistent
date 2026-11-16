@@ -1,4 +1,4 @@
-import type { MeetingOutput, MeetingOverview, MeetingTurnKind } from "@iassistent/staff-engine/content";
+import type { MeetingOutput, MeetingOverview, MeetingTurnKind, MeetingWeekPlan } from "@iassistent/staff-engine/content";
 
 import type { StepStatus, TaskStatus } from "./tasks";
 
@@ -45,9 +45,29 @@ export function turnOutput(raw: unknown): MeetingOutput | null {
             .filter((p) => p && typeof p.titel === "string" && typeof p.inhoud === "string")
             .map((p) => ({ titel: p.titel as string, inhoud: p.inhoud as string, rol: typeof p.rol === "string" ? p.rol : null })),
           aandachtspunten: Array.isArray(ov.aandachtspunten) ? ov.aandachtspunten.filter((x): x is string => typeof x === "string") : [],
+          weekplan: weekPlan(ov.weekplan),
         }
       : null;
   return { bericht: o.bericht, aan: typeof o.aan === "string" ? o.aan : null, overzicht: overview };
+}
+
+/**
+ * A stored week plan, or null. The output was validated against the schema
+ * of the role when it was stored; this only guards the shape the app reads.
+ */
+function weekPlan(raw: unknown): MeetingWeekPlan | null {
+  if (!raw || typeof raw !== "object") return null;
+  const p = raw as Partial<MeetingWeekPlan>;
+  if (typeof p.week_van !== "string" || !Array.isArray(p.dagen) || !Array.isArray(p.spelersplanning) || !p.beschikbaarheid) return null;
+  return {
+    week_van: p.week_van,
+    beschikbaarheid: {
+      beschikbaar: Number(p.beschikbaarheid.beschikbaar) || 0,
+      niet_beschikbaar: Array.isArray(p.beschikbaarheid.niet_beschikbaar) ? p.beschikbaarheid.niet_beschikbaar : [],
+    },
+    dagen: p.dagen.filter((d) => d && typeof d.datum === "string").map((d) => ({ ...d, onderdelen: Array.isArray(d.onderdelen) ? d.onderdelen : [] })),
+    spelersplanning: p.spelersplanning.filter((s) => s && typeof s.datum === "string"),
+  };
 }
 
 type MeetingRow = {

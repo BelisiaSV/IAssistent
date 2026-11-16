@@ -11,11 +11,53 @@ import type { Staff } from "./types";
  * each other, until one role writes the joint overview. Keys are Dutch
  * because this data goes to the AI as-is. No names of players or opponents.
  */
+export interface WeekPlanPart {
+  oefening_id: string | null;
+  fase: "opwarming" | "kern" | "afsluiting";
+  naam: string;
+  organisatie: string;
+  spelers: string;
+  duur_min: number;
+  reeksen: number | null;
+  werk_per_reeks: string | null;
+  rust_tussen_reeksen: string | null;
+  intensiteit: "laag" | "matig" | "hoog" | "maximaal";
+  rpe: number | null;
+  coachingspunten: string[];
+}
+
+export interface WeekPlanDay {
+  datum: string;
+  weekdag: string;
+  md: string | null;
+  soort: "training" | "wedstrijd" | "rust";
+  titel: string;
+  doel: string;
+  tijdstip: string | null;
+  totale_duur_min: number | null;
+  belasting: "rust" | "laag" | "matig" | "hoog" | "zeer hoog";
+  onderdelen: WeekPlanPart[];
+  opmerking: string | null;
+}
+
+/** The full week that comes out of a meeting about the (training) week. */
+export interface MeetingWeekPlan {
+  week_van: string;
+  beschikbaarheid: {
+    beschikbaar: number;
+    niet_beschikbaar: { rugnummer: number | null; reden: string; terug_verwacht: string | null; aanpassing: string | null }[];
+  };
+  dagen: WeekPlanDay[];
+  spelersplanning: { datum: string; weekdag: string; activiteit: string; aanvang: string | null; opmerking: string | null }[];
+}
+
 export interface MeetingOverview {
   titel: string;
   samenvatting: string;
   onderdelen: { titel: string; inhoud: string; rol: string | null }[];
   aandachtspunten: string[];
+  /** The full week, when the assignment is about the (training) week; else null. */
+  weekplan: MeetingWeekPlan | null;
 }
 
 export interface MeetingOutput {

@@ -349,8 +349,15 @@ Regels:
   samenvatting, onderdelen[{titel, inhoud, rol}], aandachtspunten }`). Elke rol heeft de taak `staffkamer`
   (`runMeetingTurn`, voorbeelden per soort, bv. `reactie.json`). Beurten in `staff_meeting_turns` (per
   `version`), één per request (`advanceMeeting`, geclaimd; `useMeetingRunner` laat een rol minstens
-  1,3 s "typen"). Goedkeuren, of aanpassen met feedback (`staff_meetings.feedbacks`, nieuwe versie waarin de
-  staf verder praat met de feedback). Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
+  1,3 s "typen"). Goedkeuren, of gewoon terugschrijven in de chat (`adjustMeeting`,
+  `staff_meetings.feedbacks`, nieuwe versie waarin de staf verder praat met de feedback); "Nieuwe opdracht"
+  sluit de bespreking en start een nieuwe. Gaat de opdracht over de week, dan bevat het overzicht een
+  **`weekplan`**: beschikbaarheid (niet beschikbaar met reden, terugkeer en aanpassing), **elke dag** van
+  maandag tot zondag met blokken (opwarming, kern, afsluiting), oefeningen (`oefening_id`), duur, reeksen,
+  werk, rust, intensiteit en RPE, en een spelersplanning per dag (`components/staff/week-plan-view.tsx`,
+  tabbladen "Voor de coach" en "Voor de spelers"; namen bij de rugnummers enkel in de app). De week is de
+  huidige (op zondag de volgende); zonder weekinput gelden de vaste trainingsdagen. In testmodus past de
+  voorbeeldweek zich aan de trainings- en wedstrijddagen en de kern aan (`fitMeetingWeek`). Daglimiet echte AI-beurten `staff_meeting_daily_limit()` = 80.
   Bovenaan de **lichtstroom** (`components/staff/flow-bar.tsx`: rollen als kaartjes, oplichtende lijnen
   naar wie spreekt, CSS `flow-dot`/`glow-pulse` in `globals.css`), midden de chat
   (`components/staff/meeting-feed.tsx`), links "Raadpleeg je staf" (gesprek met één rol), rechts eerdere

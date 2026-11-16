@@ -4,6 +4,7 @@ import type { Tables } from "@iassistent/db";
 import type { VisionAnswers } from "@iassistent/staff-engine/content";
 
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
+import { messages } from "@/lib/messages";
 import { matchEvaluations } from "@/lib/opponents/context";
 import { cardRules, suspensions, yellowCounts } from "@/lib/players/cards";
 import { matchDayCatalog, periodizationCatalog, testCatalog, visionQuestionnaire } from "@/lib/staff";
@@ -11,7 +12,8 @@ import type { createClient } from "@/lib/supabase/server";
 import { ageCategory } from "@/lib/teams/age-categories";
 import { teamFormation } from "@/lib/teams/formation";
 import { buildRoleContext } from "@/lib/weeks/context";
-import { mondayOf, todayInBelgium } from "@/lib/weeks/dates";
+import { addDays, isoWeekday, mondayOf, todayInBelgium } from "@/lib/weeks/dates";
+import { trainingScheduleSchema } from "@/lib/weeks/validation";
 import { contextForRole, loadWeek } from "@/lib/weeks/load";
 
 import { turnOutput } from "./meetings";
@@ -34,8 +36,10 @@ const APPROVED_MEETINGS = 3;
  * with the same helpers as the week tasks, so the same privacy rules apply.
  */
 export async function teamContextForChat(supabase: Supabase, team: Tables<"teams">, coachId: string) {
-  const weekStart = mondayOf(todayInBelgium());
   const today = todayInBelgium();
+  // On Sunday the staff already looks ahead to the next week.
+  const weekStart = isoWeekday(today) === 7 ? addDays(mondayOf(today), 7) : mondayOf(today);
+  const schedule = trainingScheduleSchema.safeParse(team.training_schedule);
   const [data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }] = await Promise.all([
     loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", coachId).maybeSingle(),
@@ -77,7 +81,12 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
     ? contextForRole(data, weekStart, { staff: approved, vision, feedback: null, library })
     : buildRoleContext({
         weekStart,
-        trainings: [],
+        // No week input yet: the fixed training days of the team.
+        trainings: (schedule.success ? schedule.data : []).map((slot) => ({
+          date: addDays(weekStart, slot.weekday - 1),
+          start: slot.start,
+          duration_min: slot.duration_min,
+        })),
         matches: [],
         previousMatchDate: null,
         notes: null,
@@ -110,7 +119,13 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
   const kern = context.kern.map((k) => {
     const id = byNumber.get(k.rugnummer);
     const ban = id ? suspended.get(id) : undefined;
-    return { ...k, gele_kaarten: (id && yellows.get(id)) || 0, geschorst_wedstrijden: ban?.matches ?? 0 };
+    const isSuspended = (ban?.matches ?? 0) > 0;
+    return {
+      ...k,
+      ...(isSuspended ? { beschikbaar: false, status: messages.players.status.suspended.toLowerCase() } : {}),
+      gele_kaarten: (id && yellows.get(id)) || 0,
+      geschorst_wedstrijden: ban?.matches ?? 0,
+    };
   });
 
   return {
