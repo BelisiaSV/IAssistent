@@ -8,6 +8,7 @@ export * from "./prompt";
 export * from "./run";
 export * from "./conversation";
 export * from "./collaboration";
+export * from "./meeting";
 export * from "./providers/types";
 export { exampleProvider } from "./providers/example";
 export { anthropicProvider, DEFAULT_MODEL } from "./providers/anthropic";

@@ -16,12 +16,15 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
   const { teamId } = await params;
   const { team } = await getTeamContext(teamId);
   const supabase = await createClient();
-  const { data: reports } = await supabase
-    .from("match_reports")
-    .select("*")
-    .eq("team_id", team.id)
-    .order("match_date", { ascending: false })
-    .limit(60);
+  const [{ data: reports }, { data: cards }, { data: players }] = await Promise.all([
+    supabase.from("match_reports").select("*").eq("team_id", team.id).order("match_date", { ascending: false }).limit(60),
+    supabase.from("player_cards").select("id, player_id, match_date, card").eq("team_id", team.id),
+    supabase.from("players").select("id, shirt_number, first_name, last_name").eq("team_id", team.id),
+  ]);
+  const playerName = (id: string) => {
+    const p = (players ?? []).find((x) => x.id === id);
+    return p ? `${p.shirt_number ?? "–"} · ${p.first_name} ${p.last_name}` : "?";
+  };
 
   return (
     <div className="space-y-5">
@@ -88,6 +91,22 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
                         </div>
                       ))}
                     </dl>
+                  )}
+                  {(cards ?? []).some((c) => c.match_date === report.match_date) && (
+                    <div className="mt-4">
+                      <p className="text-xs font-semibold text-slate-500">{messages.cards.title}</p>
+                      <ul className="mt-1 flex flex-wrap gap-1.5">
+                        {(cards ?? [])
+                          .filter((c) => c.match_date === report.match_date)
+                          .map((c) => (
+                            <li key={c.id} className="flex items-center gap-1.5 rounded-full bg-slate-50 px-2 py-0.5 text-xs ring-1 ring-slate-200">
+                              <span aria-hidden className="inline-block h-3 w-2 rounded-[2px]" style={{ backgroundColor: c.card === "yellow" ? "#facc15" : "#dc2626" }} />
+                              {playerName(c.player_id)}
+                              <span className="sr-only">{messages.cards[c.card]}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
                   )}
                   <Link href={`/teams/${team.id}/weeks/${mondayOf(report.match_date)}`} className="mt-4 inline-block text-xs font-medium text-brand hover:underline">
                     {m.toWeek} →

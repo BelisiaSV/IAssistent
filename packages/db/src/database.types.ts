@@ -307,6 +307,116 @@ export type Database = {
           },
         ];
       };
+      staff_meeting_turns: {
+        Row: {
+          id: string;
+          meeting_id: string;
+          team_id: string;
+          version: number;
+          position: number;
+          role: string;
+          kind: "opening" | "bijdrage" | "reactie" | "overzicht";
+          status: "pending" | "generating" | "ready" | "failed";
+          output: Json | null;
+          provider: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          meeting_id: string;
+          team_id: string;
+          version: number;
+          position: number;
+          role: string;
+          kind: "opening" | "bijdrage" | "reactie" | "overzicht";
+          status?: "pending" | "generating" | "ready" | "failed";
+          output?: Json | null;
+          provider: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          meeting_id?: string;
+          team_id?: string;
+          version?: number;
+          position?: number;
+          role?: string;
+          kind?: "opening" | "bijdrage" | "reactie" | "overzicht";
+          status?: "pending" | "generating" | "ready" | "failed";
+          output?: Json | null;
+          provider?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_meeting_turns_meeting_id_fkey";
+            columns: ["meeting_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_meetings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_meeting_turns_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_meetings: {
+        Row: {
+          id: string;
+          team_id: string;
+          assignment: string;
+          status: "running" | "ready" | "failed" | "approved";
+          version: number;
+          feedbacks: string[];
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          decided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          assignment: string;
+          status?: "running" | "ready" | "failed" | "approved";
+          version?: number;
+          feedbacks?: string[];
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          decided_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          assignment?: string;
+          status?: "running" | "ready" | "failed" | "approved";
+          version?: number;
+          feedbacks?: string[];
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          decided_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_meetings_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff_messages: {
         Row: {
           id: string;
@@ -630,6 +740,9 @@ export type Database = {
           archived_at: string | null;
           created_at: string;
           updated_at: string;
+          yellow_card_limit: number;
+          yellow_card_ban: number;
+          red_card_ban: number;
         };
         Insert: {
           id?: string;
@@ -653,6 +766,9 @@ export type Database = {
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          yellow_card_limit?: number;
+          yellow_card_ban?: number;
+          red_card_ban?: number;
         };
         Update: {
           id?: string;
@@ -676,6 +792,9 @@ export type Database = {
           archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          yellow_card_limit?: number;
+          yellow_card_ban?: number;
+          red_card_ban?: number;
         };
         Relationships: [
           {
@@ -1133,6 +1252,51 @@ export type Database = {
         Update: { coach_id?: string; created_at?: string };
         Relationships: [];
       };
+      player_cards: {
+        Row: {
+          id: string;
+          team_id: string;
+          player_id: string;
+          match_date: string;
+          card: "yellow" | "red";
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          player_id: string;
+          match_date: string;
+          card: "yellow" | "red";
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          player_id?: string;
+          match_date?: string;
+          card?: "yellow" | "red";
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "player_cards_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "players";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "player_cards_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       players: {
         Row: {
           id: string;
@@ -1369,6 +1533,7 @@ export type Database = {
       is_team_head_coach: { Args: { p_team_id: string }; Returns: boolean };
       staff_chat_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       staff_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
+      staff_meeting_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       staff_task_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
     };

@@ -118,6 +118,12 @@ beforeEach(async () => {
   await write("_gedeeld/gesprek-gebruiker.md", "{{vraag}}\n");
   await write("_gedeeld/samenwerking-systeem.md", "{{rol}}\n");
   await write("_gedeeld/samenwerking-gebruiker.md", "{{taak}}\n");
+  await write("_gedeeld/staffkamer-systeem.md", "{{rol}}\n");
+  await write("_gedeeld/staffkamer-gebruiker.md", "{{opdracht}}\n");
+  await write(
+    "_gedeeld/staffkamer.json",
+    JSON.stringify({ versie: "1", beurten: [{ rol: "test-role", soort: "bijdrage" }, { rol: "test-role", soort: "overzicht" }] }),
+  );
 });
 
 afterEach(async () => {
@@ -145,6 +151,9 @@ describe("loadStaff", () => {
       "_gedeeld/rol-sjabloon.md",
       "_gedeeld/samenwerking-gebruiker.md",
       "_gedeeld/samenwerking-systeem.md",
+      "_gedeeld/staffkamer-gebruiker.md",
+      "_gedeeld/staffkamer-systeem.md",
+      "_gedeeld/staffkamer.json",
       "_gedeeld/testen.json",
       "_gedeeld/visie-hoofdcoach.md",
       "_gedeeld/visieprofiel.json",
@@ -314,6 +323,15 @@ describe("prompt templates", () => {
     const issues = await validateStaff(root);
     expect(issues).toHaveLength(1);
     expect(issues[0]?.message).toMatch(/onbekend invulveld \{\{onbekend\}\}/);
+  });
+});
+
+describe("staff meeting plan", () => {
+  it("needs exactly one overview, as the last turn", async () => {
+    await writeRole("test-role");
+    await write("_gedeeld/staffkamer.json", JSON.stringify({ versie: "1", beurten: [{ rol: "test-role", soort: "overzicht" }, { rol: "test-role", soort: "bijdrage" }] }));
+    const issues = await validateStaff(root);
+    expect(issues.map((i) => i.message).join(" ")).toMatch(/overzicht/);
   });
 });
 

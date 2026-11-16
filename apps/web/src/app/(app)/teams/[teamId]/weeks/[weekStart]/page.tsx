@@ -25,6 +25,7 @@ import { loadWeek, squadMas } from "@/lib/weeks/load";
 import { weekPlanSchema } from "@/lib/weeks/validation";
 
 import { decideRunAction, lineupFromProposal } from "../actions";
+import { MatchCards } from "./match-cards";
 import { MatchReportForm } from "./match-report-form";
 import { AdjustRunForm, DeleteRunButton, RequestRunButton, RetryRunButton, RunProgress, StepList } from "./run-controls";
 import { SessionLoadForm } from "./session-load-form";
@@ -121,6 +122,17 @@ export default async function WeekPage({
 
   // Matches of this week that were played: the head coach adds his findings.
   const playedMatches = input.matches.filter((x) => x.date <= today);
+  const { data: matchCards } = playedMatches.length
+    ? await supabase
+        .from("player_cards")
+        .select("id, player_id, match_date, card")
+        .eq("team_id", team.id)
+        .in("match_date", playedMatches.map((x) => x.date))
+    : { data: [] };
+  const cardPlayers = data.players
+    .filter((p) => !p.archived_at)
+    .toSorted((a, b) => (a.shirt_number ?? 999) - (b.shirt_number ?? 999))
+    .map((p) => ({ id: p.id, label: `${p.shirt_number ?? "–"} · ${p.first_name} ${p.last_name}` }));
   const formationOptions = formationCatalog.formaties.map((f) => ({ code: f.code, name: f.naam }));
   const chartDays = weekDates(weekStart).map((date) => {
     const logged = data.sessionsThisWeek.find((s) => s.session_date === date && s.kind === "training");
@@ -196,6 +208,7 @@ export default async function WeekPage({
           {playedMatches.map((match) => {
             const report = data.reports.find((r) => r.match_date === match.date);
             return (
+              <div key={match.date} className="space-y-3">
               <MatchReportForm
                 key={match.date}
                 teamId={team.id}
@@ -220,6 +233,16 @@ export default async function WeekPage({
                 formations={formationOptions}
                 canEdit={canEdit}
               />
+              <MatchCards
+                teamId={team.id}
+                matchDate={match.date}
+                players={cardPlayers}
+                initial={(matchCards ?? [])
+                  .filter((c) => c.match_date === match.date)
+                  .map((c) => ({ id: c.id, playerId: c.player_id, card: c.card }))}
+                canEdit={canEdit}
+              />
+              </div>
             );
           })}
         </section>
