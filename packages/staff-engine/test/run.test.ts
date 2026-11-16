@@ -5,13 +5,20 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   anthropicProvider,
   buildRolePrompt,
+  canCollaborate,
+  canMeet,
   canConverse,
+  COLLABORATION_TASK,
   CONVERSATION_TASK,
   exampleProvider,
   loadStaff,
   matchDayFor,
   type RoleContext,
   roleExample,
+  meetingTurns,
+  MEETING_TASK,
+  runCollaboration,
+  runMeetingTurn,
   runConversation,
   runRole,
   type SeasonPlan,
@@ -202,7 +209,7 @@ describe("tactical coach", () => {
 
   it("has valid examples for all tasks", () => {
     const role = staff.roles.find((r) => r.id === "tactical-coach")!;
-    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "wedstrijdvoorbereiding"]);
+    expect(role.tasks.map((t) => t.id).sort()).toEqual(["gesprek", "oefenstof", "samenwerking", "staffkamer", "wedstrijdvoorbereiding"]);
     expect(validateOutput(role.outputSchema, roleExample(role))).toEqual({ ok: true });
     for (const task of role.tasks) {
       expect(validateOutput(task.outputSchema, roleExample(role, task.id))).toEqual({ ok: true });
@@ -532,5 +539,134 @@ describe("runConversation", () => {
     await expect(runConversation(staff, "bestaat-niet", input, exampleProvider)).rejects.toBeInstanceOf(StaffGenerationError);
     const bad: StaffModelProvider = { id: "anthropic", async generate() { return { output: { antwoord: "" }, provider: "anthropic", model: null, usage: null }; } };
     await expect(runConversation(staff, "tactical-coach", input, bad)).rejects.toBeInstanceOf(StaffGenerationError);
+  });
+});
+
+describe("runCollaboration", () => {
+  const taak = {
+    titel: "Belasting training donderdag afstemmen",
+    opdracht: "Bepaal de belasting van de drie oefeningen.",
+    eigenaar: "assistant-coach",
+    betrokken_rollen: ["physical-coach"],
+    aanleiding: "Drie oefeningen uit de bibliotheek.",
+  };
+  const input = { teamcontext: {}, taak, fase: "bijdrage" as const, bijdragen: [], feedback: null };
+
+  it("every role can work on joint tasks with valid examples for both phases", () => {
+    for (const role of staff.roles) {
+      expect(canCollaborate(staff, role.id)).toBe(true);
+      const task = role.tasks.find((t) => t.id === COLLABORATION_TASK)!;
+      const names = task.examples.map((f) => f.path.split("/").pop());
+      expect(names).toEqual(expect.arrayContaining(["bijdrage.json", "eindvoorstel.json"]));
+      for (const f of task.examples) expect(validateOutput(task.outputSchema, JSON.parse(f.content)).ok, f.path).toBe(true);
+    }
+  });
+
+  it("answers with the example of the phase in test mode", async () => {
+    const contribution = await runCollaboration(staff, "physical-coach", input, exampleProvider);
+    const final = await runCollaboration(
+      staff,
+      "assistant-coach",
+      { ...input, fase: "eindvoorstel", bijdragen: [{ rol: "physical-coach", ...contribution.output }] },
+      exampleProvider,
+    );
+    expect(contribution.provider).toBe("example");
+    expect(final.output.samenvatting).not.toBe(contribution.output.samenvatting);
+  });
+
+  it("builds the prompt from the shared templates", async () => {
+    let seen = { system: "", user: "" };
+    const provider: StaffModelProvider = {
+      id: "anthropic",
+      async generate(req) {
+        seen = { system: req.system, user: req.user };
+        return { output: { samenvatting: "S", inhoud: "I", aandachtspunten: [] }, provider: "anthropic", model: null, usage: null };
+      },
+    };
+    await runCollaboration(staff, "physical-coach", { ...input, feedback: { vorige_versie: { samenvatting: "a", inhoud: "b", aandachtspunten: [] }, feedback: "Korter" } }, provider);
+    expect(seen.user).toContain("Belasting training donderdag afstemmen");
+    expect(seen.user).toContain("Korter");
+    expect(seen.system).not.toMatch(/\{\{/);
+    expect(seen.user).not.toMatch(/\{\{/);
+  });
+
+  it("refuses an unknown role and invalid output", async () => {
+    await expect(runCollaboration(staff, "bestaat-niet", input, exampleProvider)).rejects.toBeInstanceOf(StaffGenerationError);
+    const bad: StaffModelProvider = { id: "anthropic", async generate() { return { output: { samenvatting: "" }, provider: "anthropic", model: null, usage: null }; } };
+    await expect(runCollaboration(staff, "physical-coach", input, bad)).rejects.toBeInstanceOf(StaffGenerationError);
+  });
+});
+
+describe("staff meeting", () => {
+  const base = { teamcontext: {}, opdracht: "Omschakeling vanuit een medium blok", gesprek: [], feedback: null };
+
+  it("has a turn plan with roles that can speak and an example for every turn", () => {
+    const turns = meetingTurns(staff);
+    expect(turns.length).toBe(staff.meeting.beurten.length);
+    expect(turns.at(-1)?.kind).toBe("overzicht");
+    for (const turn of turns) {
+      expect(canMeet(staff, turn.role)).toBe(true);
+      const task = staff.roles.find((r) => r.id === turn.role)!.tasks.find((t) => t.id === MEETING_TASK)!;
+      expect(task.examples.some((f) => f.path.endsWith(`/${turn.kind}.json`)), `${turn.role} ${turn.kind}`).toBe(true);
+      for (const f of task.examples) expect(validateOutput(task.outputSchema, JSON.parse(f.content)).ok, f.path).toBe(true);
+    }
+  });
+
+  it("runs a full meeting in test mode and ends with an overview", async () => {
+    const gesprek: { van: string; bericht: string; aan: string | null }[] = [];
+    let last = null;
+    for (const turn of meetingTurns(staff)) {
+      const result = await runMeetingTurn(staff, turn.role, { ...base, soort: turn.kind, gesprek }, exampleProvider);
+      gesprek.push({ van: turn.role, bericht: result.output.bericht, aan: result.output.aan });
+      last = result.output;
+      if (turn.kind !== "overzicht") expect(result.output.overzicht).toBeNull();
+    }
+    expect(last?.overzicht?.onderdelen.length).toBeGreaterThan(0);
+  });
+
+  it("builds the prompt from the shared templates and needs an overview on the last turn", async () => {
+    let seen = { system: "", user: "" };
+    const provider: StaffModelProvider = {
+      id: "anthropic",
+      async generate(req) {
+        seen = { system: req.system, user: req.user };
+        return { output: { bericht: "Ok", aan: null, overzicht: null }, provider: "anthropic", model: null, usage: null };
+      },
+    };
+    await runMeetingTurn(staff, "tactical-coach", { ...base, soort: "bijdrage" }, provider);
+    expect(seen.user).toContain("Omschakeling vanuit een medium blok");
+    expect(seen.system).not.toMatch(/\{\{/);
+    expect(seen.user).not.toMatch(/\{\{/);
+    await expect(runMeetingTurn(staff, "coordinator", { ...base, soort: "overzicht" }, provider)).rejects.toBeInstanceOf(StaffGenerationError);
+  });
+});
+
+describe("staff meeting week plan in test mode", () => {
+  it("fits the example week onto the week of the team", async () => {
+    const days = ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"].map((datum, i) => ({
+      datum,
+      weekdag: ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"][i]!,
+      md: i === 5 ? "MD" : null,
+      training: i === 1 || i === 3 ? { aanvang: "20:00", duur_min: 80 } : null,
+      wedstrijd: i === 5 ? { aanvang: "19:30" } : null,
+    }));
+    const teamcontext = {
+      week: { week_van: "2026-11-23", dagen: days },
+      kern: [
+        { rugnummer: 1, beschikbaar: true, status: "beschikbaar", terug_verwacht: null, geschorst_wedstrijden: 0 },
+        { rugnummer: 7, beschikbaar: false, status: "geblesseerd", terug_verwacht: "2026-12-01", geschorst_wedstrijden: 0 },
+        { rugnummer: 8, beschikbaar: true, status: "beschikbaar", terug_verwacht: null, geschorst_wedstrijden: 1 },
+      ],
+    };
+    const result = await runMeetingTurn(staff, "coordinator", { teamcontext, opdracht: "Week", soort: "overzicht", gesprek: [], feedback: null }, exampleProvider);
+    const plan = result.output.overzicht!.weekplan!;
+    expect(plan.week_van).toBe("2026-11-23");
+    expect(plan.dagen.map((d) => d.soort)).toEqual(["rust", "training", "rust", "training", "rust", "wedstrijd", "rust"]);
+    expect(plan.dagen[3]).toMatchObject({ datum: "2026-11-26", tijdstip: "20:00", totale_duur_min: 80 });
+    expect(plan.dagen[3]!.onderdelen.length).toBeGreaterThan(0);
+    expect(plan.dagen[5]!.tijdstip).toBe("19:30");
+    expect(plan.beschikbaarheid.beschikbaar).toBe(1);
+    expect(plan.beschikbaarheid.niet_beschikbaar.map((p) => p.rugnummer)).toEqual([7, 8]);
+    expect(plan.spelersplanning).toHaveLength(7);
   });
 });

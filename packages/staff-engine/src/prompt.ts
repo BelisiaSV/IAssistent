@@ -9,6 +9,10 @@ export const TEMPLATE_PLACEHOLDERS = {
   user: ["visie", "weekinput", "kern", "tegenstander", "evaluaties", "belastingshistoriek", "testen", "bibliotheek", "staf", "feedback"],
   conversationSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
   conversationUser: ["teamcontext", "gesprek", "vraag"],
+  collaborationSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
+  collaborationUser: ["teamcontext", "taak", "fase", "bijdragen", "feedback"],
+  meetingSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
+  meetingUser: ["teamcontext", "opdracht", "soort", "gesprek", "feedback"],
 } as const;
 
 const PLACEHOLDER = /\{\{\s*([a-z_]+)\s*\}\}/g;

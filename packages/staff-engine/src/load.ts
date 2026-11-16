@@ -16,6 +16,7 @@ import { createAjv } from "./output";
 import { TEMPLATE_PLACEHOLDERS, templatePlaceholders } from "./prompt";
 import { parseMatchDays } from "./shared/matchdays";
 import { parsePeriodization } from "./shared/periodization";
+import { parseMeetingPlan } from "./shared/meeting";
 import { parseTests } from "./shared/tests";
 import { parseFormations } from "./shared/formations";
 import { parsePositions } from "./shared/positions";
@@ -108,13 +109,14 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
     issues,
   );
   const tests = collect(parseTests(readSharedJson(shared, SHARED_FILES.tests, issues)), issues);
+  const meeting = collect(parseMeetingPlan(readSharedJson(shared, SHARED_FILES.meeting, issues)), issues);
   checkTemplates(shared, issues);
 
-  if (!positions || !formations || !vision || !matchDays || !periodization || !tests) {
+  if (!positions || !formations || !vision || !matchDays || !periodization || !tests || !meeting) {
     return { staff: null, issues };
   }
   return {
-    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays, periodization, tests },
+    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays, periodization, tests, meeting },
     issues,
   };
 }
@@ -133,6 +135,10 @@ function checkTemplates(shared: StaffFile[], issues: StaffIssue[]) {
       [SHARED_TEXT_FILES.userTemplate]: TEMPLATE_PLACEHOLDERS.user,
       [SHARED_TEXT_FILES.conversationSystemTemplate]: TEMPLATE_PLACEHOLDERS.conversationSystem,
       [SHARED_TEXT_FILES.conversationUserTemplate]: TEMPLATE_PLACEHOLDERS.conversationUser,
+      [SHARED_TEXT_FILES.collaborationSystemTemplate]: TEMPLATE_PLACEHOLDERS.collaborationSystem,
+      [SHARED_TEXT_FILES.collaborationUserTemplate]: TEMPLATE_PLACEHOLDERS.collaborationUser,
+      [SHARED_TEXT_FILES.meetingSystemTemplate]: TEMPLATE_PLACEHOLDERS.meetingSystem,
+      [SHARED_TEXT_FILES.meetingUserTemplate]: TEMPLATE_PLACEHOLDERS.meetingUser,
     };
     const allowed = templates[fileName];
     if (!allowed) continue;

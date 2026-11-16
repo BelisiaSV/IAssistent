@@ -1,6 +1,8 @@
 import type { LibraryExercise, RoleContext } from "../context";
+import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
-import { CONVERSATION_TASK } from "../layout";
+import { COLLABORATION_TASK, CONVERSATION_TASK, MEETING_TASK } from "../layout";
+import type { MeetingInput, MeetingOutput, MeetingWeekPlan, WeekPlanDay } from "../meeting";
 import { roleExample, roleTask } from "../prompt";
 import type { Staff, StaffRole } from "../types";
 import { StaffGenerationError, type StaffModelProvider } from "./types";
@@ -17,6 +19,8 @@ export const exampleProvider: StaffModelProvider = {
   id: "example",
   async generate({ staff, role, task, context: input }) {
     if (task === CONVERSATION_TASK) return { output: conversationExample(role, input as ConversationInput), provider: "example", model: null, usage: null };
+    if (task === MEETING_TASK) return { output: meetingExample(role, input as MeetingInput), provider: "example", model: null, usage: null };
+    if (task === COLLABORATION_TASK) return { output: collaborationExample(role, input as CollaborationInput), provider: "example", model: null, usage: null };
     const context = input as RoleContext;
     const example = roleExample(role, task) as Example | null;
     if (!example) {
@@ -348,4 +352,92 @@ function conversationExample(role: StaffRole, input: ConversationInput): unknown
   if (!examples.length) throw new StaffGenerationError("provider_error", `role ${role.id} has no conversation example`);
   const asked = input.gesprek.filter((t) => t.van === "hoofdcoach").length;
   return JSON.parse(examples[asked % examples.length]!.content);
+}
+
+/** Test mode for a joint task: the example of the role for this phase (bijdrage or eindvoorstel). */
+function collaborationExample(role: StaffRole, input: CollaborationInput): unknown {
+  const examples = (roleTask(role, COLLABORATION_TASK)?.examples ?? []).filter((f) => f.path.endsWith(".json"));
+  const example = examples.find((f) => f.path.split("/").pop()!.startsWith(input.fase)) ?? examples[0];
+  if (!example) throw new StaffGenerationError("provider_error", `role ${role.id} has no collaboration example`);
+  return JSON.parse(example.content);
+}
+
+/**
+ * Test mode for the staff meeting: the example of the role for this kind of
+ * turn. A role that speaks a second time with the same kind gets its next
+ * example (reactie-2.json, …) when there is one.
+ */
+function meetingExample(role: StaffRole, input: MeetingInput): unknown {
+  const examples = (roleTask(role, MEETING_TASK)?.examples ?? []).filter((f) => f.path.endsWith(".json"));
+  const ofKind = examples
+    .filter((f) => {
+      const name = f.path.split("/").pop()!;
+      return name === `${input.soort}.json` || name.startsWith(`${input.soort}-`);
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+  const earlier = input.gesprek.filter((t) => t.van === role.id).length;
+  const example = ofKind[Math.min(earlier, ofKind.length - 1)] ?? ofKind[0] ?? examples[0];
+  if (!example) throw new StaffGenerationError("provider_error", `role ${role.id} has no staff meeting example`);
+  const output = JSON.parse(example.content) as MeetingOutput;
+  const plan = output.overzicht?.weekplan;
+  return plan ? { ...output, overzicht: { ...output.overzicht!, weekplan: fitMeetingWeek(plan, input.teamcontext) } } : output;
+}
+
+type ContextDay = {
+  datum: string;
+  weekdag: string;
+  md: string | null;
+  training: { aanvang: string; duur_min: number } | null;
+  wedstrijd: { aanvang: string | null } | null;
+};
+type ContextPlayer = { rugnummer: number | null; beschikbaar: boolean; status: string; terug_verwacht: string | null; geschorst_wedstrijden?: number };
+
+/**
+ * Fits the example week onto the week in the team context: every day of the
+ * week, the example trainings on the training days (the last example training
+ * on the last training before the match), the match on match days, rest on the
+ * others; availability from the squad. The content comes from the example.
+ */
+function fitMeetingWeek(plan: MeetingWeekPlan, teamcontext: Record<string, unknown>): MeetingWeekPlan {
+  const week = teamcontext.week as { week_van?: string; dagen?: ContextDay[] } | undefined;
+  const days = week?.dagen ?? [];
+  if (!days.length) return plan;
+  const trainings = plan.dagen.filter((d) => d.soort === "training");
+  const match = plan.dagen.find((d) => d.soort === "wedstrijd");
+  const rest = plan.dagen.find((d) => d.soort === "rust");
+  const trainingDays = days.filter((d) => d.training);
+  const dagen = days.map((day): WeekPlanDay => {
+    const base = { datum: day.datum, weekdag: day.weekdag, md: day.md };
+    if (day.wedstrijd && match) return { ...match, ...base, tijdstip: day.wedstrijd.aanvang ?? match.tijdstip };
+    if (day.training && trainings.length) {
+      // Align from the end: the last training of the week gets the last example training.
+      const fromEnd = trainingDays.length - 1 - trainingDays.indexOf(day);
+      const template = trainings[Math.max(0, trainings.length - 1 - fromEnd)]!;
+      return { ...template, ...base, tijdstip: day.training.aanvang, totale_duur_min: day.training.duur_min };
+    }
+    return rest ? { ...rest, ...base } : { ...base, soort: "rust", titel: "", doel: "", tijdstip: null, totale_duur_min: null, belasting: "rust", onderdelen: [], opmerking: null };
+  });
+  const players = (teamcontext.kern as ContextPlayer[] | undefined) ?? [];
+  const unavailable = players.filter((p) => !p.beschikbaar || (p.geschorst_wedstrijden ?? 0) > 0);
+  const byDate = new Map(plan.spelersplanning.map((s) => [s.weekdag, s]));
+  return {
+    week_van: week?.week_van ?? plan.week_van,
+    beschikbaarheid: players.length
+      ? {
+          beschikbaar: players.length - unavailable.length,
+          niet_beschikbaar: unavailable.map((p) => ({ rugnummer: p.rugnummer, reden: p.status, terug_verwacht: p.terug_verwacht, aanpassing: null })),
+        }
+      : plan.beschikbaarheid,
+    dagen,
+    spelersplanning: dagen.map((day) => {
+      const template = byDate.get(day.weekdag);
+      return {
+        datum: day.datum,
+        weekdag: day.weekdag,
+        activiteit: day.soort === "rust" ? (rest?.titel ?? "") : day.titel,
+        aanvang: day.tijdstip,
+        opmerking: day.soort === "training" || day.soort === "wedstrijd" ? (template?.opmerking ?? null) : null,
+      };
+    }),
+  };
 }

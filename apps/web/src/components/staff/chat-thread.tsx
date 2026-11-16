@@ -105,11 +105,11 @@ export function ChatThread({
           </div>
         )}
         {list.map((msg) => (
-          <Bubble key={msg.id} msg={msg} name={name} roleNames={roleNames} />
+          <Bubble key={msg.id} msg={msg} name={name} roleNames={roleNames} teamId={teamId} canWrite={!!thread?.canWrite} />
         ))}
         {pending && (
           <>
-            <Bubble msg={{ id: "pending", role, author: "coach", content: pending, taskProposal: null, provider: null, createdAt: "" }} name={name} roleNames={roleNames} />
+            <Bubble msg={{ id: "pending", role, author: "coach", content: pending, taskProposal: null, provider: null, createdAt: "", task: null }} name={name} roleNames={roleNames} teamId={teamId} canWrite={!!thread?.canWrite} />
             <div className="flex items-center gap-2 text-sm text-slate-500">
               <RoleAvatar member={role} size={28} />
               <span className="animate-pulse">{m.thinking(name)}</span>
@@ -161,7 +161,19 @@ export function ChatThread({
   );
 }
 
-function Bubble({ msg, name, roleNames }: { msg: ChatMessage; name: string; roleNames: Record<string, string> }) {
+function Bubble({
+  msg,
+  name,
+  roleNames,
+  teamId,
+  canWrite,
+}: {
+  msg: ChatMessage;
+  name: string;
+  roleNames: Record<string, string>;
+  teamId: string;
+  canWrite: boolean;
+}) {
   const coach = msg.author === "coach";
   return (
     <div className={`flex gap-2.5 ${coach ? "flex-row-reverse" : ""}`}>
@@ -181,7 +193,15 @@ function Bubble({ msg, name, roleNames }: { msg: ChatMessage; name: string; role
         >
           {msg.content}
         </div>
-        {msg.taskProposal && <TaskProposalCard task={msg.taskProposal} roleNames={roleNames} owner={msg.role} />}
+        {msg.taskProposal && <TaskProposalCard
+            task={msg.taskProposal}
+            roleNames={roleNames}
+            owner={msg.role}
+            messageId={msg.id}
+            teamId={teamId}
+            confirmed={msg.task}
+            canWrite={canWrite}
+          />}
       </div>
     </div>
   );
