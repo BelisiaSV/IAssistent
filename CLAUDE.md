@@ -401,5 +401,16 @@ Regels:
   (`lib/presentation/load.ts`); namen enkel in de app. Logo's per tegenstander (`opponents.logo_path`, ook voor
   ploegen die het team zelf niet speelt: de fiche wordt aangemaakt) in de privébucket `team-media`
   (`<team_id>/…`). Dia's blijven licht in het donkere thema (`slide-light`).
+- **Oefenstofbank (centraal)** — oefeningen van het platform, beheerd door de platformadmin, naast de
+  persoonlijke bibliotheek van een coach (`exercises`). Tabel `bank_exercises` (nummer zoals `OEF-007` = sleutel,
+  titel, type, spelfase, doelgroep, tags, principes; de oefening zelf als `content` met de Nederlandse sleutels
+  van de bron; `media_kind`/`media_key` van de tekening of video, het bestand volgt later; `status` `review` of
+  `approved`; `version`). Coaches lezen enkel goedgekeurde oefeningen, de admin alles; schrijven enkel via
+  `admin_import_bank_exercises(jsonb)` (zelfde nummer = bijwerken als de inhoud wijzigde, status blijft; nieuw =
+  `review`; niets verwijderd; max. 500) en `admin_set_bank_exercise_status`. Admin → **Oefenstofbank**
+  (`/admin/exercise-bank`): backup (JSON) opladen, controle in de browser (`parseBank` in
+  `lib/exercise-bank/import.ts`, ongeldige of dubbele nummers overgeslagen, open vraagtekens zoals "regels: ?"
+  gemarkeerd), importeren, nakijken en goedkeuren. Nog niet: gebruik door de staf, overnemen naar de eigen
+  oefenstof, media.
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

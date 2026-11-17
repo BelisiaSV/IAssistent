@@ -1,0 +1,153 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { isPlatformAdmin } from "@/lib/admin";
+import { hasOpenQuestion } from "@/lib/exercise-bank/import";
+import { requireUser } from "@/lib/auth";
+import { messages } from "@/lib/messages";
+import { createClient } from "@/lib/supabase/server";
+
+import { BankImport } from "./bank-import";
+import { StatusButton } from "./status-button";
+
+const m = messages.exerciseBank.admin;
+const FILTERS = ["all", "review", "approved"] as const;
+/** Fields of an exercise shown in the detail, in this order. */
+const DETAIL_FIELDS = Object.keys(m.fields);
+
+function FieldValue({ value }: { value: unknown }) {
+  if (Array.isArray(value)) {
+    return (
+      <ul className="list-disc pl-5">
+        {value.map((item, i) => (
+          <li key={i}>
+            {typeof item === "object" && item
+              ? String((item as { tekst?: unknown }).tekst ?? "")
+              : String(item)}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return <span>{String(value)}</span>;
+}
+
+/** Admin only: the exercise bank of the platform (import, check and approve). */
+export default async function AdminExerciseBankPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  await requireUser();
+  const supabase = await createClient();
+  if (!(await isPlatformAdmin(supabase))) notFound();
+  const { status } = await searchParams;
+  const filter = FILTERS.find((f) => f === status) ?? "all";
+
+  const { data } = await supabase
+    .from("bank_exercises")
+    .select(
+      "id, number, title, kind, phase, tags, content, media_kind, media_key, status, version",
+    )
+    .order("number");
+  const all = data ?? [];
+  const shown = filter === "all" ? all : all.filter((x) => x.status === filter);
+
+  return (
+    <div className="space-y-4">
+      <div className="max-w-3xl space-y-1">
+        <h1 className="text-2xl font-semibold">{m.title}</h1>
+        <p className="text-sm text-slate-600">{m.intro}</p>
+      </div>
+      <BankImport existing={all.map((x) => x.number)} />
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">{m.listTitle(all.length)}</h2>
+          <nav className="flex gap-1">
+            {FILTERS.map((f) => (
+              <Link
+                key={f}
+                href={f === "all" ? "?" : `?status=${f}`}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ${f === filter ? "bg-brand text-white ring-brand" : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"}`}
+              >
+                {m.filters[f]} (
+                {f === "all"
+                  ? all.length
+                  : all.filter((x) => x.status === f).length}
+                )
+              </Link>
+            ))}
+          </nav>
+        </div>
+        {all.length === 0 ? (
+          <p className="rounded-xl bg-white p-5 text-sm text-slate-600 ring-1 ring-slate-200">
+            {m.empty}
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {shown.map((x) => {
+              const content = (x.content ?? {}) as Record<string, unknown>;
+              const status = x.status === "approved" ? "approved" : "review";
+              return (
+                <li
+                  key={x.id}
+                  className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200"
+                >
+                  <details>
+                    <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
+                      <span className="font-mono text-xs text-slate-500">
+                        {x.number}
+                      </span>
+                      <span className="min-w-0 flex-1 font-medium">
+                        {x.title}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {[x.kind, x.phase].filter(Boolean).join(" · ")}
+                        {x.media_kind &&
+                          ` · ${m.media[x.media_kind]} (${m.mediaMissing})`}
+                      </span>
+                      {hasOpenQuestion(content) && (
+                        <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                          {m.uncertain}
+                        </span>
+                      )}
+                      <span
+                        className={`rounded px-2 py-0.5 text-xs font-medium ${status === "approved" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-700"}`}
+                      >
+                        {m.status[status]}
+                      </span>
+                      <StatusButton id={x.id} status={status} />
+                    </summary>
+                    <dl className="grid gap-x-6 gap-y-3 border-t border-slate-200 px-4 py-3 text-sm sm:grid-cols-2">
+                      {DETAIL_FIELDS.filter((key) => {
+                        const v = content[key];
+                        return Array.isArray(v)
+                          ? v.length > 0
+                          : v != null && String(v).trim() !== "";
+                      }).map((key) => (
+                        <div key={key}>
+                          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            {m.fields[key]}
+                          </dt>
+                          <dd className="mt-0.5 text-slate-800">
+                            <FieldValue value={content[key]} />
+                          </dd>
+                        </div>
+                      ))}
+                      <p className="text-xs text-slate-500 sm:col-span-2">
+                        {m.version(x.version)}
+                        {x.tags.length > 0 &&
+                          ` · ${x.tags.map((t) => `#${t}`).join(" ")}`}
+                      </p>
+                    </dl>
+                  </details>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
