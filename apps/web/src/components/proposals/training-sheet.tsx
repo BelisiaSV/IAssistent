@@ -220,8 +220,9 @@ function PartCard({
   team: SheetTeam;
 }) {
   const own = part.oefening_id ? library.items.get(part.oefening_id) : undefined;
+  const bank = part.bank_nummer ? library.bank.get(part.bank_nummer) : undefined;
   const drawing =
-    part.oefening_id || part.standaardsituaties?.length ? undefined : drawings?.oefeningen.find((d) => d.datum === datum && d.onderdeel === part.naam);
+    part.oefening_id || part.standaardsituaties?.length || bank ? undefined : drawings?.oefeningen.find((d) => d.datum === datum && d.onderdeel === part.naam);
   const course = own?.course ?? drawing?.verloop ?? [];
   const variations = own?.variations ?? drawing?.variaties ?? [];
   const space = n(drawing?.organisatie ?? part.organisatie);
@@ -240,7 +241,13 @@ function PartCard({
           <SectionList icon="flag" title={s.setPieces} items={part.standaardsituaties} color={color} />
         </div>
       ) : (
-        <Visual animation={own?.animation ?? null} videoUrl={own?.videoUrl ?? null} drawing={drawing?.tekening ?? null} library={library} />
+        <Visual
+          animation={own?.animation ?? null}
+          videoUrl={own?.videoUrl ?? (bank?.kind === "video" ? bank.url : null)}
+          imageUrl={bank?.kind === "image" ? bank.url : null}
+          drawing={drawing?.tekening ?? null}
+          library={library}
+        />
       )}
       <div className="grid grid-cols-4 gap-1">
         {stats.map(([label, value]) => (
@@ -342,11 +349,14 @@ function Card({
 function Visual({
   animation,
   videoUrl,
+  imageUrl = null,
   drawing,
   library,
 }: {
   animation: NonNullable<ReturnType<WeekExercises["items"]["get"]>>["animation"];
   videoUrl: string | null;
+  /** Drawing of a bank exercise (an image). */
+  imageUrl?: string | null;
   drawing: Drawing | null;
   library: WeekExercises;
 }) {
@@ -357,6 +367,9 @@ function Visual({
         <AnimatedDrawing compact animation={animation} theme={library.display.theme} logoUrl={library.logoUrl} logoOn={library.display.logoOn} labels={x.player} />
       ) : videoUrl ? (
         <VideoStill src={videoUrl} />
+      ) : imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={imageUrl} alt="" />
       ) : drawing ? (
         <DrawingView drawing={drawing} />
       ) : (

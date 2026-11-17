@@ -114,6 +114,7 @@ export async function loadPresentation(
     opponentLineup: null,
     ownLineup: null,
     principle: null,
+    principleEdit: null,
     canEdit,
   };
   if (!match) return base;
@@ -233,7 +234,7 @@ export async function loadPresentation(
   // Principle of the week from the Tactical Coach (approved first, else the latest).
   const { data: week } = await supabase
     .from("week_plans")
-    .select("id")
+    .select("id, principle_override")
     .eq("team_id", team.id)
     .eq("week_start", match.weekStart)
     .maybeSingle();
@@ -261,6 +262,13 @@ export async function loadPresentation(
         explanation: "",
         drawing: null,
       };
+    // The head coach's own words win; the drawing stays the Tactical Coach's.
+    const override = week.principle_override as { titel?: string; uitleg?: string } | null;
+    const original = base.principle ? { title: base.principle.title, explanation: base.principle.explanation } : null;
+    if (override?.titel) {
+      base.principle = { title: override.titel, explanation: override.uitleg ?? "", drawing: base.principle?.drawing ?? null };
+    }
+    base.principleEdit = { weekPlanId: week.id, custom: !!override?.titel, original };
   }
   return base;
 }

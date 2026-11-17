@@ -57,5 +57,13 @@ export interface PresentationData {
     explanation: string;
     drawing: Drawing | null;
   } | null;
+  /** The week of the match, to rewrite the principle (null without a week). */
+  principleEdit: {
+    weekPlanId: string;
+    /** The head coach rewrote the principle. */
+    custom: boolean;
+    /** The principle of the Tactical Coach, if any. */
+    original: { title: string; explanation: string } | null;
+  } | null;
   canEdit: boolean;
 }

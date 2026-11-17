@@ -396,7 +396,9 @@ Regels:
   Selecties, beide als lineup-grafiek (`LineupPitch`: stadion, veld in perspectief met het doel boven, truitjes met
   rugnummer en naam; eigen truitjes in de teamkleuren, die van de tegenstander in `opponents.shirt_color` +
   `shirt_trim_color`, in te stellen op de pagina; de doelman draait de kleuren om), en het **principe** van de
-  Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan).
+  Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan). De hoofdcoach kan titel en uitleg op de
+  pagina herschrijven (`week_plans.principle_override` `{ titel, uitleg }`, `savePrinciple`; de tekening blijft die van
+  de Tactical Coach; "Terug naar het voorstel" zet null).
   Download per dia of alles als PNG (`html-to-image`), of afdrukken als PDF. Data in `loadPresentation`
   (`lib/presentation/load.ts`); namen enkel in de app. Logo's per tegenstander (`opponents.logo_path`, ook voor
   ploegen die het team zelf niet speelt: de fiche wordt aangemaakt) in de privébucket `team-media`
@@ -423,6 +425,17 @@ Regels:
   **Voor trainers:** Oefenbibliotheek → **Oefenstofbank** (`/exercises/bank`, zoeken en filteren op type en
   spelfase; `/exercises/bank/[nummer]`): "Overnemen naar mijn oefenstof" maakt een eigen oefening
   (`bankToExercise` in `lib/exercise-bank/copy.ts`, `exercises.bank_number`, één keer per coach) die de coach
-  daarna aanpast (fase, spelers, standaardbelasting). Nog niet: media (tekeningen en video's).
+  daarna aanpast (fase, spelers, standaardbelasting); een video gaat mee (storage-copy naar `exercise-videos`).
+  **Media:** de bestanden staan in de privé bucket `bank-media` (`<media_key>.<ext>`, max. 25 MB, PNG/JPG/WEBP/GIF/
+  MP4/WEBM/MOV), `bank_exercises.media_path`. De admin laadt ze op bij Admin → Oefenstofbank → "Tekeningen en
+  video's" (meerdere tegelijk; bestandsnaam = code uit de backup; signed upload URL, `admin_set_bank_media` koppelt
+  alle oefeningen met die code; een import met een nieuwe code wist de koppeling). Lezen: de admin alles, een coach
+  enkel het bestand van een goedgekeurde oefening. Getoond bij de oefening (admin, `/exercises/bank`), in het
+  weekdocument en de trainingsbladen (`WeekExercises.bank` in `lib/exercises/week.ts`). De staf krijgt `beeld`
+  ("tekening"/"video"/null) per bankoefening; de Tactical Coach tekent bankoefeningen met een beeld niet.
+  **Correcties:** de admin past een oefening aan via "Bewerken" (`/admin/exercise-bank/[nummer]/edit`, alle tekstvelden;
+  gecontroleerd met `parseBank`; `admin_update_bank_exercise`, nieuwe versie, status en beeld blijven). De laatste
+  import staat in `source_title`/`source_content`: een import vergelijkt daarmee, zodat een correctie in de app blijft
+  tot de oefening in de bron zelf wijzigt (label "Aangepast in de app").
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

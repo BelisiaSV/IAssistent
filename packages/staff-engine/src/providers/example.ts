@@ -349,11 +349,13 @@ function fitMatchPrep(example: Example, context: RoleContext, staff: Staff): Exa
 
 /** Tactical Coach drawings: one drawing per part of the approved Assistant Coach planning. */
 function fitDrawings(example: Example, context: RoleContext): Example {
+  // Bank exercises with their own drawing or video need no new drawing.
+  const withPicture = new Set((context.oefenstofbank ?? []).filter((e) => e.beeld).map((e) => e.nummer));
   const planning = context.staf["assistant-coach"] as
     | {
         dagen?: {
           datum: string;
-          onderdelen?: { oefening_id?: string | null; standaardsituaties?: string[]; naam: string; fase: string; organisatie: string; coachingspunten: string[] }[];
+          onderdelen?: { oefening_id?: string | null; bank_nummer?: string | null; standaardsituaties?: string[]; naam: string; fase: string; organisatie: string; coachingspunten: string[] }[];
         }[];
       }
     | undefined;
@@ -363,7 +365,7 @@ function fitDrawings(example: Example, context: RoleContext): Example {
   const drawings = example.oefeningen as (Example & { onderdeel: string; fase: string; tekening: Example })[];
   const counters = new Map<string, number>();
   const oefeningen = planning.dagen.flatMap((day) =>
-    (day.onderdelen ?? []).filter((part) => !part.oefening_id && !part.standaardsituaties?.length).map((part) => {
+    (day.onderdelen ?? []).filter((part) => !part.oefening_id && !part.standaardsituaties?.length && !withPicture.has(part.bank_nummer ?? "")).map((part) => {
       const sameName = drawings.find((d) => d.onderdeel === part.naam);
       const sameFase = drawings.filter((d) => d.fase === part.fase);
       const n = counters.get(part.fase) ?? 0;

@@ -4,7 +4,7 @@ import type { BankExercise } from "@iassistent/staff-engine/content";
 export const BANK_FOR_STAFF = 15;
 
 /** Columns of a bank exercise the staff and the coach pages need. */
-export const BANK_COLUMNS = "number, title, kind, phase, target_group, tags, principles, content";
+export const BANK_COLUMNS = "number, title, kind, phase, target_group, tags, principles, content, media_kind, media_path";
 
 export interface BankRow {
   number: string;
@@ -15,6 +15,9 @@ export interface BankRow {
   tags: string[];
   principles: string[];
   content: unknown;
+  media_kind?: string | null;
+  /** Set when the file of the drawing or video is in the app. */
+  media_path?: string | null;
 }
 
 const text = (v: unknown) => (typeof v === "string" ? v : "");
@@ -44,6 +47,7 @@ export function bankExercise(row: BankRow): BankExercise {
     moeilijker: text(c.moeilijker),
     materiaal: list(c.materiaal),
     tags: row.tags,
+    beeld: row.media_path ? (row.media_kind === "video" ? "video" : "tekening") : null,
   };
 }
 
