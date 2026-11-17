@@ -102,7 +102,7 @@ export default async function MeetingOverviewPage({ params }: { params: Promise<
       {!overview ? (
         <EmptyState text={p.notReady} href={`/teams/${team.id}/staff-room?opdracht=${view.id}`} link={messages.nav.staffRoom} />
       ) : (
-        <OverviewCard overview={overview} roleNames={roleNames} names={names} />
+        <OverviewCard overview={overview} roleNames={roleNames} names={names} withWeekPlan />
       )}
 
       {plan && (

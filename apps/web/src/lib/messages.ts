@@ -446,9 +446,6 @@ export const messages = {
   },
   tasksPage: {
     title: "Taken",
-    intro: "Je eigen taken en de gezamenlijke taken van je staf.",
-    staffTitle: "Taken van de staf",
-    staffIntro: "Bevestig je een voorgestelde taak, dan werkt elke betrokken rol zijn deel uit en bundelt de rol die de taak voorstelde alles tot één voorstel voor jou.",
     mine: {
       title: "Mijn taken",
       intro: "Noteer wat er moet gebeuren. Vink een taak af als ze klaar is, of vraag ze aan de staf: de taak gaat dan als vraag naar de rol die je kiest (namen van spelers worden rugnummers).",

@@ -346,8 +346,8 @@ Regels:
   feedback maakt een nieuwe versie waarin alle rollen opnieuw werken met de vorige versie en de feedback.
   RLS: lezen `can_read_team`, schrijven `can_write_team`, nooit verwijderen; daglimiet echte AI-stappen
   `staff_task_daily_limit()` = 20. Goedgekeurde taken gaan mee in de teamcontext (`goedgekeurde_taken`).
-  Pagina's: **Taken** (`/teams/[id]/tasks`: lopend, voorgesteld, goedgekeurd) en de taak
-  (`/teams/[id]/tasks/[taskId]`: werkverdeling, voorstel, bijdragen, eerdere versies).
+  Ze lopen achter de schermen: de pagina Taken toont ze niet meer (enkel de taken van de coach); de taak zelf
+  blijft bereikbaar via de Staff Room (`/teams/[id]/tasks/[taskId]`: werkverdeling, voorstel, bijdragen, eerdere versies).
 - **Staffkamer (groepschat)** — de **Staff Room** (`/teams/[id]/staff-room?opdracht=&rol=`) is één groepschat:
   de hoofdcoach typt één opdracht (`staff_meetings`), de rollen spreken om beurten in de volgorde van
   `staff/_gedeeld/staffkamer.json` (soorten `opening`, `bijdrage`, `reactie`, `overzicht`; `meetingTurns`)
@@ -372,7 +372,8 @@ Regels:
   naar wie spreekt, CSS `flow-dot`/`glow-pulse` in `globals.css`), midden de chat
   (`components/staff/meeting-feed.tsx`), links "Raadpleeg je staf" (gesprek met één rol), rechts eerdere
   opdrachten en taken op één regel (uitklapbaar). Goedgekeurde overzichten gaan mee in de teamcontext
-  (`goedgekeurde_stafvergaderingen`). Onder het overzicht opent "Stafoverleg – weekplanning en oefenstof" een
+  (`goedgekeurde_stafvergaderingen`). In de chat toont het overzicht enkel de samenvatting en de bijdragen per rol
+  (`OverviewCard` zonder `withWeekPlan`); "Stafoverleg – weekplanning en oefenstof" opent het volledige weekplan in een
   nieuw tabblad (`/teams/[id]/staff-room/[meetingId]`): opdracht, overzicht, weekplan en alle oefeningen van de
   week met hun beeld en een link naar de oefening.
 - **Taken van de coach** — bovenaan Taken staat "Mijn taken" (`coach_tasks`: titel, klaar, rol en tijdstip van de
