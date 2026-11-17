@@ -74,7 +74,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           opdracht-systeem.md + opdracht-gebruiker.md (opdrachtsjablonen AI),
                           gesprek-systeem.md + gesprek-gebruiker.md (gesprek met een rol),
                           samenwerking-systeem.md + samenwerking-gebruiker.md (gezamenlijke taak),
-                          staffkamer.json + staffkamer-systeem.md + staffkamer-gebruiker.md (groepschat)
+                          staffkamer.json + staffkamer-systeem.md + staffkamer-gebruiker.md (groepschat),
+                          taakroutering.json (welke rol een taak van de coach krijgt)
   coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
   player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -281,8 +282,13 @@ Regels:
   onderdelen van een menu staan als **tabbladen** bovenaan de pagina (`components/section-tabs.tsx`), elk
   met het mannetje van de rol die het verzorgt (`member`). Elke rol heeft een eigen mannetje
   (`components/staff/role-avatar.tsx`, kleur per rol). `/teams/[id]/staff` verwijst naar de Staff Room.
-  Belasting en Volgende wedstrijd verwijzen naar de weekpagina (`/load`, `/match`); Periodisering is een
-  eigen pagina. Elk team heeft een **leeftijdscategorie** (`teams.age_category`:
+  Belasting en Volgende wedstrijd verwijzen naar de weekpagina (`/load`, `/match`) met `?menu=load|match`, zodat het
+  juiste menu actief blijft (`WEEK_PAGE_MENUS` in `lib/navigation.ts`); Periodisering is een eigen pagina.
+  **Microcyclus** (`/teams/[id]/microcycle?week=`) toont de week van vandaag (of een andere week, vorige/volgende):
+  het goedgekeurde weekdocument zoals de spelers het zien (`WeekPoster`) en per dag met de oefenstof
+  (`WeekDocumentView`, `findWeekDocument` in `lib/weeks/document.ts`); zonder weekdocument verwijst ze naar de
+  Staff Room. De weekpagina (`/weeks/[weekStart]`: weekinput, staf, belasting, evaluatie) blijft bereikbaar via
+  "Weekinput, belasting en evaluatie". Elk team heeft een **leeftijdscategorie** (`teams.age_category`:
   u15, u16, u17, u19, beloften, b-elftal, senioren; `lib/teams/age-categories.ts`).
   Teamonderdelen openen voor het huidige team of
   het laatst gebruikte (localStorage). Op grote schermen is de zijbalk **inklapbaar** tot enkel de iconen
@@ -340,8 +346,8 @@ Regels:
   feedback maakt een nieuwe versie waarin alle rollen opnieuw werken met de vorige versie en de feedback.
   RLS: lezen `can_read_team`, schrijven `can_write_team`, nooit verwijderen; daglimiet echte AI-stappen
   `staff_task_daily_limit()` = 20. Goedgekeurde taken gaan mee in de teamcontext (`goedgekeurde_taken`).
-  Pagina's: **Taken** (`/teams/[id]/tasks`: lopend, voorgesteld, goedgekeurd) en de taak
-  (`/teams/[id]/tasks/[taskId]`: werkverdeling, voorstel, bijdragen, eerdere versies).
+  Ze lopen achter de schermen: de pagina Taken toont ze niet meer (enkel de taken van de coach); de taak zelf
+  blijft bereikbaar via de Staff Room (`/teams/[id]/tasks/[taskId]`: werkverdeling, voorstel, bijdragen, eerdere versies).
 - **Staffkamer (groepschat)** — de **Staff Room** (`/teams/[id]/staff-room?opdracht=&rol=`) is één groepschat:
   de hoofdcoach typt één opdracht (`staff_meetings`), de rollen spreken om beurten in de volgorde van
   `staff/_gedeeld/staffkamer.json` (soorten `opening`, `bijdrage`, `reactie`, `overzicht`; `meetingTurns`)
@@ -366,7 +372,19 @@ Regels:
   naar wie spreekt, CSS `flow-dot`/`glow-pulse` in `globals.css`), midden de chat
   (`components/staff/meeting-feed.tsx`), links "Raadpleeg je staf" (gesprek met één rol), rechts eerdere
   opdrachten en taken op één regel (uitklapbaar). Goedgekeurde overzichten gaan mee in de teamcontext
-  (`goedgekeurde_stafvergaderingen`).
+  (`goedgekeurde_stafvergaderingen`). In de chat toont het overzicht enkel de samenvatting en de bijdragen per rol
+  (`OverviewCard` zonder `withWeekPlan`); "Stafoverleg – weekplanning en oefenstof" opent het volledige weekplan in een
+  nieuw tabblad (`/teams/[id]/staff-room/[meetingId]`): opdracht, overzicht, weekplan en alle oefeningen van de
+  week met hun beeld en een link naar de oefening.
+- **Taken van de coach** — bovenaan Taken staat "Mijn taken" (`coach_tasks`: titel, klaar, rol en tijdstip van de
+  vraag; lezen `can_read_team`, schrijven `can_write_team`). Afvinken, verwijderen of **"Vraag aan de staf"**: de taak
+  gaat via `sendMessage` als vraag naar de gekozen rol (`askCoachTask` in `lib/staff-room/coach-task-actions.ts`;
+  "Bekijk het antwoord" opent het gesprek). De voorgestelde rol komt uit `staff/_gedeeld/taakroutering.json`
+  (woorden per rol, standaardrol; `routeTask` in de staff-engine).
+- **Namen nooit naar de AI** — teksten van de hoofdcoach (vraag en eerdere berichten in een gesprek, opdracht en
+  feedback in de staffkamer, titel/opdracht/feedback van een taak) gaan door `nameFilter`
+  (`lib/staff-room/privacy.ts`, `withoutNames` in `lib/proposals/names.ts`): spelersnamen worden `#rugnummer`
+  ("een speler" zonder nummer). De app toont de tekst zoals hij geschreven werd.
 - **Kaarten en schorsingen** — `player_cards` (geel/rood per speler per wedstrijd, ingevuld bij de
   wedstrijdevaluatie in de weekpagina, `match-cards.tsx`; ook getoond bij Evaluaties) en de regels per team
   (`teams.yellow_card_limit`, `yellow_card_ban`, `red_card_ban`; Instellingen → Schorsingen).

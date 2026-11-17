@@ -7,6 +7,7 @@ import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { staff } from "@/lib/staff";
+import { nameFilter } from "@/lib/staff-room/privacy";
 import { createClient } from "@/lib/supabase/server";
 import { startOfTodayInBelgium } from "@/lib/weeks/dates";
 
@@ -89,13 +90,18 @@ export async function sendMessage(teamId: string, role: string, text: string): P
         .gte("created_at", startOfTodayInBelgium());
       if (limit && (count ?? 0) >= limit) return { messages: sent, error: e.dailyLimit };
     }
+    // Player names of the head coach become shirt numbers for the AI.
+    const anonymous = await nameFilter(supabase, teamId);
     const result = await runConversation(
       staff,
       role,
       {
         teamcontext: await teamContextForChat(supabase, team, user.id, question),
-        gesprek: (earlier ?? []).toReversed().map((m) => ({ van: m.author === "coach" ? "hoofdcoach" : "rol", tekst: m.content })),
-        vraag: question,
+        gesprek: (earlier ?? []).toReversed().map((m) => ({
+          van: m.author === "coach" ? "hoofdcoach" : "rol",
+          tekst: m.author === "coach" ? anonymous(m.content) : m.content,
+        })),
+        vraag: anonymous(question),
       },
       provider,
     );

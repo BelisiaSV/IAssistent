@@ -8,6 +8,7 @@ import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { staff } from "@/lib/staff";
+import { nameFilter } from "@/lib/staff-room/privacy";
 import { createClient } from "@/lib/supabase/server";
 
 import { teamContextForChat } from "./context";
@@ -171,17 +172,18 @@ async function runStep(
     ]);
     if (!team) throw new Error("team not found");
     const previous = stepOutput(all.find((s) => s.version === task.version - 1 && s.phase === "eindvoorstel")?.output);
+    const anonymous = await nameFilter(supabase, task.team_id);
     const result = await runCollaboration(
       staff,
       step.role,
       {
         teamcontext: await teamContextForChat(supabase, team, coachId, [task.title, task.assignment, task.feedback ?? ""].join(" ")),
         taak: {
-          titel: task.title,
-          opdracht: task.assignment,
+          titel: anonymous(task.title),
+          opdracht: anonymous(task.assignment),
           eigenaar: task.owner_role,
           betrokken_rollen: task.roles,
-          aanleiding: source?.content ?? "",
+          aanleiding: anonymous(source?.content ?? ""),
         },
         fase: step.phase,
         bijdragen: steps
@@ -190,7 +192,7 @@ async function runStep(
             const output = stepOutput(s.output);
             return output ? [{ rol: s.role, ...output }] : [];
           }),
-        feedback: previous && task.feedback ? { vorige_versie: previous, feedback: task.feedback } : null,
+        feedback: previous && task.feedback ? { vorige_versie: previous, feedback: anonymous(task.feedback) } : null,
       },
       getStaffProvider(),
     );

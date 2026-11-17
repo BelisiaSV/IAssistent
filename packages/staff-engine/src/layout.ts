@@ -33,6 +33,7 @@ export const SHARED_FILES = {
   periodization: "periodisering.json",
   tests: "testen.json",
   meeting: "staffkamer.json",
+  taskRouting: "taakroutering.json",
 } as const;
 
 /** Markdown files in _gedeeld that the prompt builder uses. */

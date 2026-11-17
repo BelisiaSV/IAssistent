@@ -7,5 +7,5 @@ import { mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 export default async function LoadPage({ params }: { params: Promise<{ teamId: string }> }) {
   const { teamId } = await params;
   const { team } = await getTeamContext(teamId);
-  redirect(`/teams/${team.id}/weeks/${mondayOf(todayInBelgium())}#belasting`);
+  redirect(`/teams/${team.id}/weeks/${mondayOf(todayInBelgium())}?menu=load#belasting`);
 }

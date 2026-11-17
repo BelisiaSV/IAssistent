@@ -120,6 +120,14 @@ export function MeetingFeed({
       {overview && meeting.status !== "running" && (
         <div className="space-y-3">
           <OverviewCard overview={overview} roleNames={roleNames} names={names} />
+          <a
+            href={`/teams/${meeting.teamId}/staff-room/${meeting.id}`}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-brand ring-1 ring-brand/40 hover:bg-brand/5"
+          >
+            {overview.weekplan ? m.openWeekPlan : m.openOverview} ↗
+          </a>
           {meeting.status === "approved" && meeting.decidedAt && <p className="text-sm font-medium text-green-700">{m.approved(longDate(meeting.decidedAt.slice(0, 10)))}</p>}
           {canWrite && (
             <div className="flex flex-wrap items-center gap-3">
@@ -150,7 +158,7 @@ export function MeetingFeed({
                 </button>
               )}
               {week && (
-                <Link href={`/teams/${meeting.teamId}/weeks/${week}`} className="rounded-lg bg-green-50 px-4 py-2 text-sm font-semibold text-green-800 ring-1 ring-green-200 hover:underline">
+                <Link href={`/teams/${meeting.teamId}/microcycle?week=${week}`} className="rounded-lg bg-green-50 px-4 py-2 text-sm font-semibold text-green-800 ring-1 ring-green-200 hover:underline">
                   ✓ {m.toWeek.done} {m.toWeek.open} →
                 </Link>
               )}
@@ -183,11 +191,14 @@ export function OverviewCard({
   roleNames,
   names,
   muted = false,
+  withWeekPlan = false,
 }: {
   overview: MeetingOverview;
   roleNames: Record<string, string>;
   names: Record<number, string>;
   muted?: boolean;
+  /** The full week plan; in the chat it opens on its own page ("Stafoverleg"). */
+  withWeekPlan?: boolean;
 }) {
   return (
     <section className={`space-y-4 rounded-2xl bg-white p-5 shadow-sm ${muted ? "opacity-70 ring-1 ring-slate-200" : "ring-2 ring-brand/50"}`}>
@@ -208,7 +219,7 @@ export function OverviewCard({
           </div>
         ))}
       </div>
-      {overview.weekplan && <WeekPlanView plan={overview.weekplan} names={names} />}
+      {withWeekPlan && overview.weekplan && <WeekPlanView plan={overview.weekplan} names={names} />}
       {overview.aandachtspunten.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500">{m.attention}</p>

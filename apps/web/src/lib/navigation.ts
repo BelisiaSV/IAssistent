@@ -47,7 +47,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: m.planning,
     icon: "microcycle",
     tabs: [
-      { label: m.microcycle, teamPath: "/weeks", member: "assistant-coach" },
+      { label: m.microcycle, teamPath: "/microcycle", member: "assistant-coach" },
       { label: m.periodization, teamPath: "/periodization", member: "physical-coach" },
       { label: m.load, teamPath: "/load", member: "physical-coach" },
     ],
@@ -116,6 +116,13 @@ export function isTabActive(tab: NavTab, href: string, pathname: string, search:
   });
 }
 
+/** Which menu and tab the week page belongs to, by its "menu" parameter. */
+export const WEEK_PAGE_MENUS: Record<string, { item: string; teamPath: string }> = {
+  planning: { item: "planning", teamPath: "/microcycle" },
+  match: { item: "match-analysis", teamPath: "/match" },
+  load: { item: "planning", teamPath: "/load" },
+};
+
 /** The menu and tab of the current page, if any. */
 export function activeNav(pathname: string, search: URLSearchParams, teamId: string | null) {
   for (const item of NAV_ITEMS) {
@@ -124,10 +131,12 @@ export function activeNav(pathname: string, search: URLSearchParams, teamId: str
       if (href && isTabActive(tab, href, pathname, search, item.tabs)) return { item, tab };
     }
   }
-  // Pages of a team outside the tabs (e.g. a week opened from the dashboard).
+  // The week page serves several menus: "menu" says which one opened it
+  // (Volgende wedstrijd, Belasting); otherwise it belongs to Planning.
   if (teamId && pathname.startsWith(`/teams/${teamId}/weeks`)) {
-    const item = NAV_ITEMS.find((i) => i.key === "planning")!;
-    return { item, tab: item.tabs[0]! };
+    const from = WEEK_PAGE_MENUS[search.get("menu") ?? ""] ?? WEEK_PAGE_MENUS.planning!;
+    const item = NAV_ITEMS.find((i) => i.key === from.item)!;
+    return { item, tab: item.tabs.find((t) => t.teamPath === from.teamPath) ?? item.tabs[0]! };
   }
   return null;
 }

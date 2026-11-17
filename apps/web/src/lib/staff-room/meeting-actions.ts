@@ -9,6 +9,7 @@ import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { staff } from "@/lib/staff";
+import { nameFilter } from "@/lib/staff-room/privacy";
 import { createClient } from "@/lib/supabase/server";
 
 import { teamContextForChat } from "./context";
@@ -122,16 +123,19 @@ export async function advanceMeeting(meetingId: string): Promise<MeetingResult> 
         const { data: team } = await supabase.from("teams").select("*").eq("id", view.teamId).single();
         if (!team) throw new Error("team not found");
         const previous = view.version > 1 ? view.turns.find((t) => t.version === view.version - 1 && t.kind === "overzicht")?.overview : null;
+        const anonymous = await nameFilter(supabase, view.teamId);
         const feedback = view.feedbacks[view.version - 2];
         const result = await runMeetingTurn(
           staff,
           turn.role,
           {
             teamcontext: await teamContextForChat(supabase, team, user.id, [view.assignment, ...view.feedbacks].join(" ")),
-            opdracht: view.assignment,
+            opdracht: anonymous(view.assignment),
             soort: turn.kind,
-            gesprek: meetingConversation(view, view.version, turn.position),
-            feedback: previous && feedback ? { vorig_overzicht: previous, feedback } : null,
+            gesprek: meetingConversation(view, view.version, turn.position).map((x) =>
+              x.van === "hoofdcoach" ? { ...x, bericht: anonymous(x.bericht) } : x,
+            ),
+            feedback: previous && feedback ? { vorig_overzicht: previous, feedback: anonymous(feedback) } : null,
           },
           getStaffProvider(),
         );

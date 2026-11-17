@@ -19,13 +19,23 @@ import type { WeekMatch } from "./validation";
  */
 export async function loadWeekDocument(teamId: string, weekStart: string, version: string | undefined) {
   if (!isIsoDate(weekStart) || isoWeekday(weekStart) !== 1) notFound();
-  const { team, logoUrl } = await getTeamContext(teamId);
+  const found = await findWeekDocument(teamId, weekStart, version);
+  if (!found.document) notFound();
+  return found.document;
+}
+
+/**
+ * The week of a team with its finished week document, if there is one (the
+ * Microcyclus shows the week either way).
+ */
+export async function findWeekDocument(teamId: string, weekStart: string, version?: string) {
+  const { team, logoUrl, canEdit } = await getTeamContext(teamId);
 
   const supabase = await createClient();
   const data = await loadWeek(supabase, team, weekStart);
   const runs = data.runs.filter((x) => x.kind === "week" && ["ready", "approved", "rejected"].includes(x.status));
   const run = runs.find((x) => String(x.version) === version) ?? runs.find((x) => x.status === "approved") ?? runs[0];
-  if (!run) notFound();
+  if (!run) return { team, logoUrl, canEdit, data, document: null };
 
   const outputs = Object.fromEntries(
     data.proposals.filter((x) => x.run_id === run.id && x.output).map((x) => [x.step ?? "", x.output]),
@@ -36,11 +46,17 @@ export async function loadWeekDocument(teamId: string, weekStart: string, versio
   return {
     team,
     logoUrl,
+    canEdit,
     data,
-    run,
-    doc,
-    exercises,
-    names: shirtNames(data.players),
-    matches: (data.week?.matches ?? []) as WeekMatch[],
+    document: {
+      team,
+      logoUrl,
+      data,
+      run,
+      doc,
+      exercises,
+      names: shirtNames(data.players),
+      matches: (data.week?.matches ?? []) as WeekMatch[],
+    },
   };
 }

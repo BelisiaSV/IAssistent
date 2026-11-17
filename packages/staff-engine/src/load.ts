@@ -17,6 +17,7 @@ import { TEMPLATE_PLACEHOLDERS, templatePlaceholders } from "./prompt";
 import { parseMatchDays } from "./shared/matchdays";
 import { parsePeriodization } from "./shared/periodization";
 import { parseMeetingPlan } from "./shared/meeting";
+import { parseTaskRouting } from "./shared/routing";
 import { parseTests } from "./shared/tests";
 import { parseFormations } from "./shared/formations";
 import { parsePositions } from "./shared/positions";
@@ -78,9 +79,12 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
   }
 
   const roles: StaffRole[] = [];
+  // Every role folder, also one with errors (those are reported on their own).
+  const roleDirs = new Set<string>();
   for (const entry of await readdir(root, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     if (entry.name.startsWith("_") || entry.name.startsWith(".")) continue;
+    roleDirs.add(entry.name);
     const role = await readRole(root, entry.name, requiredSections, issues);
     if (role) roles.push(role);
   }
@@ -110,13 +114,19 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
   );
   const tests = collect(parseTests(readSharedJson(shared, SHARED_FILES.tests, issues)), issues);
   const meeting = collect(parseMeetingPlan(readSharedJson(shared, SHARED_FILES.meeting, issues)), issues);
+  const taskRouting = collect(parseTaskRouting(readSharedJson(shared, SHARED_FILES.taskRouting, issues)), issues);
+  if (taskRouting) {
+    for (const id of new Set([taskRouting.standaard, ...taskRouting.rollen.map((r) => r.rol)])) {
+      if (!roleDirs.has(id)) issues.push({ path: `${SHARED_DIR}/${SHARED_FILES.taskRouting}`, message: `onbekende rol "${id}"` });
+    }
+  }
   checkTemplates(shared, issues);
 
-  if (!positions || !formations || !vision || !matchDays || !periodization || !tests || !meeting) {
+  if (!positions || !formations || !vision || !matchDays || !periodization || !tests || !meeting || !taskRouting) {
     return { staff: null, issues };
   }
   return {
-    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays, periodization, tests, meeting },
+    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays, periodization, tests, meeting, taskRouting },
     issues,
   };
 }

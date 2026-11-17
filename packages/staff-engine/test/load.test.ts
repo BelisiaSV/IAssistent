@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { loadStaff, StaffValidationError, validateStaff } from "../src/index";
+import { loadStaff, routeTask, StaffValidationError, validateStaff } from "../src/index";
 
 const REPO_STAFF_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -124,6 +124,7 @@ beforeEach(async () => {
     "_gedeeld/staffkamer.json",
     JSON.stringify({ versie: "1", beurten: [{ rol: "test-role", soort: "bijdrage" }, { rol: "test-role", soort: "overzicht" }] }),
   );
+  await write("_gedeeld/taakroutering.json", JSON.stringify({ versie: "1", standaard: "test-role", rollen: [{ rol: "test-role", woorden: ["video"] }] }));
 });
 
 afterEach(async () => {
@@ -154,6 +155,7 @@ describe("loadStaff", () => {
       "_gedeeld/staffkamer-gebruiker.md",
       "_gedeeld/staffkamer-systeem.md",
       "_gedeeld/staffkamer.json",
+      "_gedeeld/taakroutering.json",
       "_gedeeld/testen.json",
       "_gedeeld/visie-hoofdcoach.md",
       "_gedeeld/visieprofiel.json",
@@ -319,6 +321,7 @@ describe("periodization content", () => {
 
 describe("prompt templates", () => {
   it("reports unknown placeholders", async () => {
+    await writeRole("test-role");
     await write("_gedeeld/opdracht-gebruiker.md", "{{weekinput}} {{onbekend}}\n");
     const issues = await validateStaff(root);
     expect(issues).toHaveLength(1);
@@ -349,5 +352,33 @@ describe("repository /staff", () => {
     ]);
     expect(staff.formations.formaties.length).toBeGreaterThan(0);
     expect(staff.vision.themas.length).toBeGreaterThan(0);
+  });
+});
+
+describe("task routing", () => {
+  const routing = {
+    versie: "1",
+    standaard: "coordinator",
+    rollen: [
+      { rol: "video-analyst", woorden: ["video", "analyse"] },
+      { rol: "tactical-coach", woorden: ["vrije trap", "tegenstander"] },
+      { rol: "player-development", woorden: ["individuele"] },
+    ],
+  };
+
+  it("sends a task to the role with the most words", () => {
+    expect(routeTask(routing, "Maak een individuele videoanalyse van #7")).toBe("video-analyst");
+    expect(routeTask(routing, "Bekijk de vrije trappen van de tegenstander")).toBe("tactical-coach");
+    expect(routeTask(routing, "Plan een individuele bespreking")).toBe("player-development");
+  });
+
+  it("uses the default role without a match", () => {
+    expect(routeTask(routing, "Regel de koffie")).toBe("coordinator");
+  });
+
+  it("rejects routing to an unknown role", async () => {
+    await writeRole("test-role");
+    await write("_gedeeld/taakroutering.json", JSON.stringify({ versie: "1", standaard: "test-role", rollen: [{ rol: "andere-rol", woorden: ["x1"] }] }));
+    await expect(loadStaff(root)).rejects.toThrow(/andere-rol/);
   });
 });
