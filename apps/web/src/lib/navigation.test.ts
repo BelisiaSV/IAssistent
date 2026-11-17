@@ -16,7 +16,8 @@ describe("navigation", () => {
     expect(at("/profile/vision")?.item.key).toBe("team");
     expect(at(`/teams/${team}/reports`)?.tab.teamPath).toBe("/reports");
     expect(at(`/teams/${team}/reports/load`)?.tab.teamPath).toBe("/reports/load");
-    expect(at(`/teams/${team}/weeks/2026-11-16`)?.item.key).toBe("planning");
+    expect(at(`/teams/${team}/weeks/2026-11-16`)?.tab.teamPath).toBe("/microcycle");
+    expect(at(`/teams/${team}/microcycle`)?.tab.teamPath).toBe("/microcycle");
     expect(at("/account")).toBeNull();
   });
 
@@ -26,6 +27,12 @@ describe("navigation", () => {
     expect(at("/exercises/abc")?.tab.href).toBe("/exercises");
     expect(at("/exercises/bank")?.tab.href).toBe("/exercises/bank");
     expect(at("/exercises/bank/OEF-007")?.tab.href).toBe("/exercises/bank");
+  });
+
+  it("keeps the menu that opened the week page", () => {
+    expect(at(`/teams/${team}/weeks/2026-11-16`, "menu=match")?.item.key).toBe("match-analysis");
+    expect(at(`/teams/${team}/weeks/2026-11-16`, "menu=match")?.tab.teamPath).toBe("/match");
+    expect(at(`/teams/${team}/weeks/2026-11-16`, "menu=load")?.tab.teamPath).toBe("/load");
   });
 
   it("only opens team tabs with a team", () => {

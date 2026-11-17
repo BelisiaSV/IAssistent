@@ -84,6 +84,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      coach_tasks: {
+        Row: {
+          id: string;
+          team_id: string;
+          title: string;
+          done: boolean;
+          done_at: string | null;
+          role: string | null;
+          asked_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          title: string;
+          done?: boolean;
+          done_at?: string | null;
+          role?: string | null;
+          asked_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          title?: string;
+          done?: boolean;
+          done_at?: string | null;
+          role?: string | null;
+          asked_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       competition_matches: {
         Row: {
           id: string;

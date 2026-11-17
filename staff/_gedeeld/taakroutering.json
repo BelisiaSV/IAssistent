@@ -1,0 +1,31 @@
+{
+  "versie": "0.1.0",
+  "uitleg": "Naar welke rol een taak van de hoofdcoach gaat bij \"Vraag aan de staf\" (pagina Taken). De rol met de meeste woorden in de taak krijgt de vraag; zonder treffer gaat ze naar de standaardrol. De hoofdcoach kan de rol altijd zelf kiezen. Een woord telt ook als begin van een langer woord (\"analyse\" ~ \"analyseer\").",
+  "standaard": "coordinator",
+  "rollen": [
+    {
+      "rol": "video-analyst",
+      "woorden": ["video", "beelden", "analyse", "analyseer", "montage", "fragment", "presentatie", "clip", "filmen"]
+    },
+    {
+      "rol": "tactical-coach",
+      "woorden": ["tactiek", "tactisch", "tegenstander", "standaardsituatie", "hoekschop", "corner", "vrije trap", "inworp", "pressing", "opbouw", "formatie", "speelwijze", "speelplan", "omschakeling", "wedstrijdplan"]
+    },
+    {
+      "rol": "physical-coach",
+      "woorden": ["belasting", "conditie", "fysiek", "vameval", "test", "herstel", "revalidatie", "sprint", "kracht", "uithouding", "rpe", "blessurepreventie"]
+    },
+    {
+      "rol": "assistant-coach",
+      "woorden": ["training", "oefening", "oefenstof", "weekplanning", "opwarming", "trainingsvorm", "partijvorm", "rondo"]
+    },
+    {
+      "rol": "team-manager",
+      "woorden": ["kaart", "schorsing", "geschorst", "beschikbaar", "afwezig", "selectie", "kalender", "verplaatst", "materiaal", "uitrusting", "vervoer", "afspraak"]
+    },
+    {
+      "rol": "player-development",
+      "woorden": ["individueel", "individuele", "ontwikkeling", "ontwikkelplan", "spelersgesprek", "gesprek met", "talent", "doorgroei", "persoonlijk"]
+    }
+  ]
+}
