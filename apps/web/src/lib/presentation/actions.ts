@@ -129,3 +129,35 @@ export async function saveOpponentShirt(
   revalidatePath(`/teams/${teamId}/presentation`);
   return { ok: true };
 }
+
+const principleSchema = z.object({
+  titel: z.string().trim().min(1).max(120),
+  uitleg: z.string().trim().max(600),
+});
+
+/**
+ * Rewrites the principle of the week for the presentation (null = back to the
+ * principle of the Tactical Coach).
+ */
+export async function savePrinciple(
+  teamId: string,
+  weekPlanId: string,
+  principle: { titel: string; uitleg: string } | null,
+): Promise<MediaResult> {
+  const parsed = principle === null ? null : principleSchema.safeParse(principle);
+  if (!uuid.safeParse(teamId).success || !uuid.safeParse(weekPlanId).success || (parsed && !parsed.success)) return { error: e.principle };
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("week_plans")
+    .update({ principle_override: parsed ? parsed.data! : null })
+    .eq("id", weekPlanId)
+    .eq("team_id", teamId)
+    .select("id");
+  if (error || !data?.length) {
+    if (error) console.error("savePrinciple failed", error);
+    return { error: data && !data.length ? e.readOnly : e.principle };
+  }
+  revalidatePath(`/teams/${teamId}/presentation`);
+  return { ok: true };
+}

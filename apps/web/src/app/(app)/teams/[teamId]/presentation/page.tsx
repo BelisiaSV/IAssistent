@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/card";
 import { LogoManager } from "@/components/presentation/logo-manager";
+import { PrincipleEditor } from "@/components/presentation/principle-editor";
 import { PresentationViewer } from "@/components/presentation/viewer";
 import { documentFonts } from "@/lib/fonts";
 import { messages } from "@/lib/messages";
@@ -51,6 +52,9 @@ export default async function PresentationPage({
             </nav>
           )}
           <PresentationViewer data={data} fileName={`presentatie-${data.match.date}`} />
+          {data.canEdit && data.principleEdit && (
+            <PrincipleEditor key={`${data.principleEdit.weekPlanId}-${data.principle?.title ?? ""}`} teamId={teamId} principle={data.principle} edit={data.principleEdit} />
+          )}
           <LogoManager teamId={teamId} teams={logos} shirt={data.opponent} canEdit={data.canEdit} />
         </>
       )}

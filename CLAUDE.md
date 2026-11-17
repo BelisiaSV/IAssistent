@@ -396,7 +396,9 @@ Regels:
   Selecties, beide als lineup-grafiek (`LineupPitch`: stadion, veld in perspectief met het doel boven, truitjes met
   rugnummer en naam; eigen truitjes in de teamkleuren, die van de tegenstander in `opponents.shirt_color` +
   `shirt_trim_color`, in te stellen op de pagina; de doelman draait de kleuren om), en het **principe** van de
-  Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan).
+  Tactical Coach (`principe { titel, uitleg, tekening }` in zijn weekplan). De hoofdcoach kan titel en uitleg op de
+  pagina herschrijven (`week_plans.principle_override` `{ titel, uitleg }`, `savePrinciple`; de tekening blijft die van
+  de Tactical Coach; "Terug naar het voorstel" zet null).
   Download per dia of alles als PNG (`html-to-image`), of afdrukken als PDF. Data in `loadPresentation`
   (`lib/presentation/load.ts`); namen enkel in de app. Logo's per tegenstander (`opponents.logo_path`, ook voor
   ploegen die het team zelf niet speelt: de fiche wordt aangemaakt) in de privébucket `team-media`
@@ -431,5 +433,9 @@ Regels:
   enkel het bestand van een goedgekeurde oefening. Getoond bij de oefening (admin, `/exercises/bank`), in het
   weekdocument en de trainingsbladen (`WeekExercises.bank` in `lib/exercises/week.ts`). De staf krijgt `beeld`
   ("tekening"/"video"/null) per bankoefening; de Tactical Coach tekent bankoefeningen met een beeld niet.
+  **Correcties:** de admin past een oefening aan via "Bewerken" (`/admin/exercise-bank/[nummer]/edit`, alle tekstvelden;
+  gecontroleerd met `parseBank`; `admin_update_bank_exercise`, nieuwe versie, status en beeld blijven). De laatste
+  import staat in `source_title`/`source_content`: een import vergelijkt daarmee, zodat een correctie in de app blijft
+  tot de oefening in de bron zelf wijzigt (label "Aangepast in de app").
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(9);
+select plan(15);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -71,6 +71,24 @@ select is((select media_path from public.bank_exercises where number = 'OEF-001'
 select public.admin_import_bank_exercises('[{"number": "OEF-003", "title": "Kopie", "kind": "Rondo", "phase": null, "target_group": null,
   "tags": [], "principles": [], "content": {}, "media_kind": "image", "media_key": "k2"}]'::jsonb);
 select is((select media_path from public.bank_exercises where number = 'OEF-003'), 'k2.png', 'a new exercise with a known code gets the file');
+select tests.logout();
+
+-- Corrections in the app.
+select tests.login('coach@test.local');
+select throws_ok($$select public.admin_update_bank_exercise((select id from public.bank_exercises where number = 'OEF-002'),
+  'x', 'Rondo', null, null, '{}', '{}', '{}')$$, '42501', null, 'a coach cannot correct a bank exercise');
+select tests.logout();
+select tests.login('admin@test.local');
+select public.admin_update_bank_exercise((select id from public.bank_exercises where number = 'OEF-002'),
+  'Partijvorm 7v7', 'Partijvorm', 'Balbezit', null, '{breedte}', '{Breedte}', '{"hoofddoel": "Scoren"}');
+select is((select title || ' ' || version || ' ' || (content->>'hoofddoel') from public.bank_exercises where number = 'OEF-002'),
+  'Partijvorm 7v7 2 Scoren', 'the admin corrects a bank exercise (new version)');
+select is(public.admin_import_bank_exercises((select data from batch) - 0), '{"added": 0, "updated": 0, "unchanged": 1}'::jsonb,
+  'an unchanged source does not overwrite the correction');
+select is((select title from public.bank_exercises where number = 'OEF-002'), 'Partijvorm 7v7', 'the correction stays');
+select is(public.admin_import_bank_exercises(jsonb_set((select data from batch) - 0, '{0,title}', '"Partijvorm 8v8"')),
+  '{"added": 0, "updated": 1, "unchanged": 0}'::jsonb, 'a change in the source overwrites');
+select is((select title from public.bank_exercises where number = 'OEF-002'), 'Partijvorm 8v8', 'the source wins after its own change');
 select tests.logout();
 
 select * from finish();

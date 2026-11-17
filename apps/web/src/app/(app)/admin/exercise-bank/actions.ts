@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
-import { BANK_TEXT_MAX, parseBankText } from "@/lib/exercise-bank/import";
+import { BANK_TEXT_MAX, parseBank, parseBankText } from "@/lib/exercise-bank/import";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
@@ -120,4 +120,57 @@ export async function saveBankMedia(key: string, path: string): Promise<{ linked
   }
   revalidatePath("/admin/exercise-bank");
   return { linked: data ?? 0 };
+}
+
+/** Text fields of the edit form; list fields have one item per line. */
+const TEXT_FIELDS = ["titel", "type", "spelfase", "doelgroep", "hoofddoel", "aantal_spelers", "duur", "veldafmeting", "belasting", "belasting_toelichting", "regels", "makkelijker", "moeilijker"] as const;
+const LIST_FIELDS = ["subdoelen", "principes", "organisatie", "verloop", "coachingspunten", "materiaal"] as const;
+
+export type BankEditState = { ok?: true; error?: string };
+
+/**
+ * Saves a correction of a bank exercise. The edited fields are merged into
+ * the exercise and checked with the same rules as an import.
+ */
+export async function updateBankExercise(number: string, _prev: BankEditState, formData: FormData): Promise<BankEditState> {
+  await requireUser();
+  const supabase = await createClient();
+  if (!(await isPlatformAdmin(supabase))) return { error: e.edit };
+  const { data: row } = await supabase
+    .from("bank_exercises")
+    .select("id, number, title, kind, phase, target_group, content, media_kind, media_key")
+    .eq("number", number)
+    .maybeSingle();
+  if (!row) return { error: e.edit };
+  const text = (key: string) => String(formData.get(key) ?? "").trim();
+  const lines = (key: string) => text(key).split("\n").map((l) => l.trim()).filter(Boolean);
+  const record: Record<string, unknown> = {
+    ...(row.content as Record<string, unknown>),
+    nummer: row.number,
+    diagram: row.media_key,
+    diagram_type: row.media_kind,
+    ...Object.fromEntries(TEXT_FIELDS.map((key) => [key, text(key)])),
+    ...Object.fromEntries(LIST_FIELDS.map((key) => [key, lines(key)])),
+    tags: text("tags").split(",").map((t) => t.trim()).filter(Boolean),
+  };
+  const parsed = parseBank([record]);
+  const exercise = parsed?.exercises[0];
+  if (!exercise) return { error: e.editInvalid(parsed?.issues[0]?.field ?? "") };
+  const { error } = await supabase.rpc("admin_update_bank_exercise", {
+    p_id: row.id,
+    p_title: exercise.title,
+    p_kind: exercise.kind,
+    p_phase: exercise.phase,
+    p_target_group: exercise.target_group,
+    p_tags: exercise.tags,
+    p_principles: exercise.principles,
+    p_content: JSON.parse(JSON.stringify(exercise.content)),
+  });
+  if (error) {
+    console.error("updateBankExercise failed", error);
+    return { error: e.edit };
+  }
+  revalidatePath("/admin/exercise-bank");
+  revalidatePath(`/exercises/bank/${row.number}`);
+  return { ok: true };
 }

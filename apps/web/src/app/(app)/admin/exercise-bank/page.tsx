@@ -31,7 +31,7 @@ export default async function AdminExerciseBankPage({
   const { data } = await supabase
     .from("bank_exercises")
     .select(
-      "id, number, title, kind, phase, tags, content, media_kind, media_key, media_path, status, version",
+      "id, number, title, kind, phase, tags, content, media_kind, media_key, media_path, status, version, source_title, source_content",
     )
     .order("number");
   const all = data ?? [];
@@ -104,6 +104,16 @@ export default async function AdminExerciseBankPage({
                       >
                         {m.status[status]}
                       </span>
+                      {x.source_content !== null &&
+                        (x.title !== x.source_title || JSON.stringify(x.content) !== JSON.stringify(x.source_content)) && (
+                          <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">{m.edited}</span>
+                        )}
+                      <Link
+                        href={`/admin/exercise-bank/${x.number}/edit`}
+                        className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100"
+                      >
+                        {m.edit}
+                      </Link>
                       <StatusButton id={x.id} status={status} />
                     </summary>
                     <div className="space-y-3 border-t border-slate-200 px-4 py-3">

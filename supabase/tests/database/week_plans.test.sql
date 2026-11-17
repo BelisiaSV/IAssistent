@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(16);
+select plan(18);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -66,6 +66,13 @@ select throws_ok(
   '42501', null, 'cannot create a week for another team');
 
 insert into ids select 'week_a', id from public.week_plans where week_start = '2026-10-19';
+
+update public.week_plans set principle_override = '{"titel": "Overtal", "uitleg": "Vier tegen drie"}'
+where id = (select id from ids where name = 'week_a');
+select is((select principle_override->>'titel' from public.week_plans where id = (select id from ids where name = 'week_a')), 'Overtal',
+  'head coach rewrites the principle of the week');
+select throws_ok($$update public.week_plans set principle_override = '{"titel": 3}' where id = (select id from ids where name = 'week_a')$$,
+  '23514', null, 'a principle has a title and an explanation');
 
 select lives_ok(
   $$insert into public.staff_proposals (team_id, week_plan_id, role, provider)
