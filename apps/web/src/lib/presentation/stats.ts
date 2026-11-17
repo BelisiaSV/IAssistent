@@ -4,7 +4,7 @@ import {
   opponentOf,
   outcomeFor,
 } from "@/lib/competition/team";
-import type { Outcome } from "@/lib/teams/dashboard";
+import type { Outcome, PlayedMatch } from "@/lib/teams/dashboard";
 
 const POINTS: Record<Outcome, number> = { win: 3, draw: 1, loss: 0 };
 
@@ -53,4 +53,31 @@ export function opponentStats(
 /** The name of a team as in the competition, matched loosely (case, spaces). */
 export function sameTeam(a: string, b: string) {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+/**
+ * The season of a team as running points per played match (for the season
+ * chart), with the goals and the opponent of every match.
+ */
+export function teamSeason(all: readonly CompetitionMatch[], team: string, before?: string): PlayedMatch[] {
+  let points = 0;
+  return matchesOf(all, team)
+    .filter((m) => !before || m.match_date < before)
+    .flatMap((m): PlayedMatch[] => {
+      const outcome = outcomeFor(m, team);
+      if (!outcome) return [];
+      points += POINTS[outcome];
+      const home = m.home === team;
+      return [
+        {
+          date: m.match_date,
+          opponent: opponentOf(m, team),
+          home,
+          goalsFor: (home ? m.home_goals : m.away_goals)!,
+          goalsAgainst: (home ? m.away_goals : m.home_goals)!,
+          outcome,
+          points,
+        },
+      ];
+    });
 }
