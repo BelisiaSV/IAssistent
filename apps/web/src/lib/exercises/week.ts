@@ -1,6 +1,6 @@
 import "server-only";
 
-import { EXERCISE_VIDEOS_BUCKET, type Json, type Tables } from "@iassistent/db";
+import { BANK_MEDIA_BUCKET, EXERCISE_VIDEOS_BUCKET, type Json, type Tables } from "@iassistent/db";
 
 import { type Animation, parseAnimation } from "@/lib/animation/schema";
 import { themeForTeam } from "@/lib/animation/team-theme";
@@ -23,6 +23,8 @@ export interface WeekExercise {
 /** Exercises from the coach's library used in week plannings, with the team's animation look. */
 export interface WeekExercises {
   items: Map<string, WeekExercise>;
+  /** Drawing or video of the bank exercises used, by bank number (signed URL, an hour). */
+  bank: Map<string, { kind: "image" | "video"; url: string }>;
   display: ReturnType<typeof themeForTeam>;
   logoUrl: string | null;
 }
@@ -43,6 +45,16 @@ export function exerciseIds(outputs: (Json | null | undefined)[]): string[] {
     for (const sp of o?.standaardsituaties ?? []) if (sp.standaardsituatie_id) ids.add(sp.standaardsituatie_id);
   }
   return [...ids];
+}
+
+/** Numbers of the exercise bank used in training parts (onderdelen[].bank_nummer). */
+export function bankNumbers(outputs: (Json | null | undefined)[]): string[] {
+  const numbers = new Set<string>();
+  for (const output of outputs) {
+    const o = output as { dagen?: { onderdelen?: { bank_nummer?: string | null }[] }[] } | null;
+    for (const day of o?.dagen ?? []) for (const part of day.onderdelen ?? []) if (part.bank_nummer) numbers.add(part.bank_nummer);
+  }
+  return [...numbers];
 }
 
 /**
@@ -80,5 +92,18 @@ export async function loadWeekExercises(
       },
     ]),
   );
-  return { items, display: themeForTeam(team.animation_settings), logoUrl };
+  // Bank exercises: their drawing or video (only approved ones are readable).
+  const numbers = bankNumbers(outputs);
+  const { data: bankRows } = numbers.length
+    ? await supabase.from("bank_exercises").select("number, media_kind, media_path").in("number", numbers).not("media_path", "is", null)
+    : { data: [] };
+  const bankPaths = (bankRows ?? []).flatMap((b) => (b.media_path ? [b.media_path] : []));
+  const { data: bankSigned } = bankPaths.length ? await supabase.storage.from(BANK_MEDIA_BUCKET).createSignedUrls(bankPaths, 3600) : { data: [] };
+  const bank = new Map(
+    (bankRows ?? []).flatMap((b) => {
+      const url = (bankSigned ?? []).find((s) => s.path === b.media_path)?.signedUrl;
+      return url ? [[b.number, { kind: b.media_kind === "video" ? ("video" as const) : ("image" as const), url }] as const] : [];
+    }),
+  );
+  return { items, bank, display: themeForTeam(team.animation_settings), logoUrl };
 }

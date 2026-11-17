@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 import { BankFields } from "@/components/exercise-bank/bank-fields";
+import { BankMedia } from "@/components/exercise-bank/bank-media";
 import { Alert } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { BANK_COLUMNS, type BankRow } from "@/lib/exercise-bank/staff";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
@@ -50,6 +52,9 @@ export default async function BankExercisePage({ params, searchParams }: { param
             )}
           </header>
           {fout && <Alert tone="error">{m.copyFailed}</Alert>}
+          {row.media_path && (
+            <BankMedia kind={row.media_kind ?? null} url={(await bankMediaUrls(supabase, [row.media_path])).get(row.media_path) ?? null} alt={row.title} className="max-h-[480px]" />
+          )}
           <BankFields content={row.content} omit={["notities", "bron"]} />
           {row.tags.length > 0 && <p className="text-xs text-slate-500">{row.tags.map((t) => `#${t}`).join(" ")}</p>}
         </article>

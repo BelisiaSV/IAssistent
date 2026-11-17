@@ -29,6 +29,9 @@ export type Database = {
           content: Json;
           media_kind: string | null;
           media_key: string | null;
+          media_path: string | null;
+          source_title: string | null;
+          source_content: Json | null;
           status: string;
           version: number;
           imported_by: string | null;
@@ -48,6 +51,9 @@ export type Database = {
           content: Json;
           media_kind?: string | null;
           media_key?: string | null;
+          media_path?: string | null;
+          source_title?: string | null;
+          source_content?: Json | null;
           status?: string;
           version?: number;
           imported_by?: string | null;
@@ -67,6 +73,9 @@ export type Database = {
           content?: Json;
           media_kind?: string | null;
           media_key?: string | null;
+          media_path?: string | null;
+          source_title?: string | null;
+          source_content?: Json | null;
           status?: string;
           version?: number;
           imported_by?: string | null;
@@ -846,6 +855,7 @@ export type Database = {
           created_by: string | null;
           created_at: string;
           updated_at: string;
+          principle_override: Json | null;
         };
         Insert: {
           id?: string;
@@ -858,6 +868,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          principle_override?: Json | null;
         };
         Update: {
           id?: string;
@@ -870,6 +881,7 @@ export type Database = {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
+          principle_override?: Json | null;
         };
         Relationships: [
           {
@@ -1715,6 +1727,20 @@ export type Database = {
         Returns: { id: string; email: string; full_name: string | null; plan_id: string | null }[];
       };
       admin_import_bank_exercises: { Args: { p_exercises: Json }; Returns: Json };
+      admin_update_bank_exercise: {
+        Args: {
+          p_id: string;
+          p_title: string;
+          p_kind: string;
+          p_phase: string | null;
+          p_target_group: string | null;
+          p_tags: string[];
+          p_principles: string[];
+          p_content: Json;
+        };
+        Returns: undefined;
+      };
+      admin_set_bank_media: { Args: { p_media_key: string; p_path: string }; Returns: number };
       admin_set_bank_exercise_status: { Args: { p_id: string; p_status: string }; Returns: undefined };
       admin_set_account_plan: { Args: { p_coach: string; p_plan: string | null }; Returns: undefined };
       admin_teams: {

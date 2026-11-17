@@ -120,6 +120,7 @@ const bankExercise = (nummer: string, titel: string): RoleContext["oefenstofbank
   moeilijker: "",
   materiaal: [],
   tags: [],
+  beeld: null,
 });
 
 const exercise = (over: Partial<RoleContext["bibliotheek"][number]>): RoleContext["bibliotheek"][number] => ({
@@ -324,6 +325,16 @@ describe("tactical coach", () => {
     expect(fromBank.map((p) => p.bank_nummer)).toEqual(["OEF-007", "OEF-008"]);
     expect(fromBank.every((p) => p.fase === "kern" && p.oefening_id === null)).toBe(true);
     expect(fromBank[0]!.naam).toBe("Positiespel door de linie");
+  });
+
+  it("does not draw bank exercises that have their own picture", async () => {
+    const bank = [{ ...bankExercise("OEF-007", "Positiespel door de linie"), beeld: "video" as const }, bankExercise("OEF-008", "Rondo 5v2")];
+    const ctx = { ...context(), oefenstofbank: bank };
+    const planning = (await runRole(staff, "assistant-coach", ctx, exampleProvider)).output;
+    const result = await runRole(staff, "tactical-coach", { ...ctx, staf: { "assistant-coach": planning } }, exampleProvider, "oefenstof");
+    const drawn = (result.output as { oefeningen: { onderdeel: string }[] }).oefeningen.map((o) => o.onderdeel);
+    expect(drawn).not.toContain("Positiespel door de linie");
+    expect(drawn).toContain("Rondo 5v2");
   });
 
   it("does not plan set pieces as training exercises", async () => {

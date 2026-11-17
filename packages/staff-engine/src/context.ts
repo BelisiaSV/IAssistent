@@ -151,6 +151,8 @@ export interface BankExercise {
   moeilijker: string;
   materiaal: string[];
   tags: string[];
+  /** The exercise has its own drawing or video (shown by the app; no new drawing needed). */
+  beeld: "tekening" | "video" | null;
 }
 
 export interface RoleContext {
