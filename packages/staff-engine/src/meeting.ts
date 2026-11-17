@@ -13,6 +13,8 @@ import type { Staff } from "./types";
  */
 export interface WeekPlanPart {
   oefening_id: string | null;
+  /** Number of the exercise in the platform's exercise bank (e.g. OEF-007), if the part is based on one. */
+  bank_nummer: string | null;
   fase: "opwarming" | "kern" | "afsluiting";
   naam: string;
   organisatie: string;

@@ -26,7 +26,8 @@ hoofdcoach anders wil.
 # Goedgekeurde teamcontext
 
 Wat de hele staf mag weten: team, visie, kern (rugnummers, geen namen), deze week, de
-goedgekeurde plannen, de goedgekeurde gezamenlijke taken en de oefenstof. Wat hier niet
+goedgekeurde plannen, de goedgekeurde gezamenlijke taken, de oefenstof en passende oefeningen uit
+de oefenstofbank van het platform. Wat hier niet
 staat, weet je niet.
 
 {{teamcontext}}

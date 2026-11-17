@@ -124,6 +124,35 @@ export interface LibraryExercise {
   } | null;
 }
 
+/**
+ * An approved exercise from the exercise bank of the platform (kept by the
+ * admin), with the Dutch keys of the bank. The staff uses it when the coach's
+ * own library has nothing that fits; a planned part refers to it with
+ * `bank_nummer`. Only the exercises that fit the question best are sent.
+ */
+export interface BankExercise {
+  nummer: string;
+  titel: string;
+  type: string;
+  spelfase: string | null;
+  doelgroep: string | null;
+  hoofddoel: string;
+  subdoelen: string[];
+  principes: string[];
+  aantal_spelers: string;
+  duur: string;
+  veldafmeting: string;
+  belasting: string;
+  organisatie: string[];
+  verloop: string[];
+  regels: string;
+  coachingspunten: string[];
+  makkelijker: string;
+  moeilijker: string;
+  materiaal: string[];
+  tags: string[];
+}
+
 export interface RoleContext {
   weekinput: WeekInput;
   kern: SquadPlayer[];
@@ -134,6 +163,8 @@ export interface RoleContext {
   evaluaties: MatchEvaluation[];
   /** The coach's exercise library (only exercises the coach allows in the planning). */
   bibliotheek: LibraryExercise[];
+  /** Approved exercises of the platform's exercise bank that fit this week best. */
+  oefenstofbank: BankExercise[];
   /** Approved proposals of other roles for this week, by role id. */
   staf: Record<string, unknown>;
   feedback: RoleFeedback | null;

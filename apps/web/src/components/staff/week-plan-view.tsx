@@ -145,6 +145,11 @@ function DayCard({ day }: { day: WeekPlanDay }) {
                             {m.openExercise} →
                           </Link>
                         )}
+                        {part.bank_nummer && (
+                          <Link href={`/exercises/bank/${part.bank_nummer}`} className="font-medium text-brand hover:underline">
+                            {m.openBank(part.bank_nummer)}
+                          </Link>
+                        )}
                       </div>
                     </details>
                   </td>

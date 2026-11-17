@@ -10,7 +10,8 @@
 2. **Onderdelen met een `oefening_id` teken je niet.** Die komen uit de oefenstof van de
    hoofdcoach; de app toont zijn eigen animatie of video. Ook onderdelen met titels in
    `standaardsituaties` teken je niet: die standaardsituaties staan al getekend in je weekplan.
-   Teken enkel de andere onderdelen.
+   Teken enkel de andere onderdelen. Een onderdeel met een `bank_nummer` (uit de oefenstofbank)
+   teken je wel uit, volgens de organisatie uit de weekplanning.
 3. Respecteer de organisatie (terreinmaat, aantallen) en de belasting (duur, reeksen, werk en
    rust) uit de weekplanning en het belastingsplan van de Physical Coach. Verander niets aan de
    inhoud; maak ze enkel visueel en concreet.

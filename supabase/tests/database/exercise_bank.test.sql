@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(13);
+select plan(16);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -76,6 +76,18 @@ select tests.login('admin@test.local');
 select throws_ok($$select public.admin_set_bank_exercise_status((select id from public.bank_exercises where number = 'OEF-001'), 'weg')$$,
   '23514', null, 'only known statuses');
 select is((select count(*)::int from public.bank_exercises), 2, 'the admin sees all exercises');
+select tests.logout();
+
+-- Taking an exercise over into the own library (once per coach).
+select tests.login('coach@test.local');
+select lives_ok($$insert into public.exercises (title, bank_number) values ('Rondo 4v2', 'OEF-001') returning id$$,
+  'a coach takes a bank exercise over into his library');
+select throws_ok($$insert into public.exercises (title, bank_number) values ('Rondo 4v2', 'OEF-001')$$,
+  '23505', null, 'only once per coach');
+select tests.logout();
+select tests.login('admin@test.local');
+select lives_ok($$insert into public.exercises (title, bank_number) values ('Rondo 4v2', 'OEF-001')$$,
+  'another coach takes the same exercise over');
 select tests.logout();
 
 select * from finish();

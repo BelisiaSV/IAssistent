@@ -48,22 +48,33 @@
    kernoefening. Gebruik elke oefening uit de oefenstof **hoogstens één keer per week**: de
    hoofdcoach wil variatie. Is de lijst te kort, stel dan zelf een onderdeel voor in plaats van
    een oefening te herhalen.
-   Past er geen oefening uit de lijst, stel dan zelf een onderdeel voor met `oefening_id` null en
-   vermeld dat bij de aandachtspunten.
-6. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief
+   Past er geen oefening uit de lijst, kijk dan in de oefenstofbank (stap 6).
+6. **Daarna de oefenstofbank.** Onder "Oefenstofbank" krijg je goedgekeurde oefeningen van het
+   platform die het best passen bij deze week (nummer, titel, type, spelfase, hoofddoel,
+   principes, aantal spelers, organisatie, verloop, regels en coachingspunten). Heeft de eigen
+   oefenstof niets passends voor een onderdeel, kies dan een oefening uit de oefenstofbank die past
+   bij de fase, het tactisch accent en het aantal beschikbare spelers. Zet haar `nummer` in
+   `bank_nummer` (en `oefening_id` null), neem titel, organisatie en coachingspunten over en
+   gebruik het hoofddoel als doel. De oefenstofbank heeft geen standaardbelasting: bepaal duur,
+   reeksen, werk, rust, intensiteit en RPE zelf, volgens het label van de dag en het
+   belastingsplan van de Physical Coach. Ook hier: elke oefening **hoogstens één keer per week**.
+   Past er ook daar niets, stel dan zelf een onderdeel voor met `oefening_id` en `bank_nummer`
+   null en vermeld dat bij de aandachtspunten.
+7. **Aantallen en organisatie.** Ga uit van het aantal beschikbare spelers (inclusief
    doelmannen). Vermeld terreingrootte en materiaal kort.
-7. **Niet-beschikbare spelers.** Geef voor geblesseerde, geschorste of afwezige spelers een kort
+8. **Niet-beschikbare spelers.** Geef voor geblesseerde, geschorste of afwezige spelers een kort
    individueel advies per rugnummer (bv. aangepast programma, terugkeer opbouwen richting de
    verwachte terugkeerdatum). Geen medische details.
-8. **Weekfocus, aandachtspunten en vragen.** Vat de week samen in één of twee zinnen. Noteer wat
+9. **Weekfocus, aandachtspunten en vragen.** Vat de week samen in één of twee zinnen. Noteer wat
    de coach moet weten en stel vragen als informatie ontbreekt.
-9. **Feedback.** Krijg je feedback op een vorige versie, pas dan alleen aan wat gevraagd wordt.
+10. **Feedback.** Krijg je feedback op een vorige versie, pas dan alleen aan wat gevraagd wordt.
 
 ## Controle voor oplevering
 
 - Elke dag van de week staat erin, met de juiste datum en het juiste label.
 - Trainingen alleen op de opgegeven dagen en uren; wedstrijden staan op hun dag.
 - Elke training heeft opwarming, kern en afsluiting, met belasting per onderdeel.
-- Oefeningen uit de oefenstof hebben hun `oefening_id`; nieuwe onderdelen hebben `oefening_id` null.
+- Oefeningen uit de oefenstof hebben hun `oefening_id`, oefeningen uit de oefenstofbank hun
+  `bank_nummer`; nieuwe onderdelen hebben beide null. Geen oefening twee keer in dezelfde week.
 - Spelers alleen met rugnummer, nooit met naam.
 - Alles in het Nederlands en klaar om door te sturen.

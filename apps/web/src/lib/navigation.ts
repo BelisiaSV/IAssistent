@@ -73,6 +73,7 @@ export const NAV_ITEMS: NavItem[] = [
     tabs: [
       { label: m.exerciseList, href: "/exercises", member: "assistant-coach" },
       { label: m.setPieces, href: "/exercises?soort=set_piece", member: "tactical-coach" },
+      { label: m.exerciseBank, href: "/exercises/bank", member: "assistant-coach" },
     ],
   },
   {
@@ -102,6 +103,12 @@ export function isTabActive(tab: NavTab, href: string, pathname: string, search:
   const [path, query] = href.split("?");
   const onPath = tab.exact ? pathname === path : pathname === path || pathname.startsWith(`${path}/`);
   if (!onPath) return false;
+  // A tab deeper in the same path (e.g. /exercises/bank under /exercises) wins.
+  const deeper = all.some((other) => {
+    const otherPath = (other.href ?? "").split("?")[0]!;
+    return otherPath.startsWith(`${path}/`) && (pathname === otherPath || pathname.startsWith(`${otherPath}/`));
+  });
+  if (deeper) return false;
   if (query) return [...new URLSearchParams(query)].every(([k, v]) => search.get(k) === v);
   return !all.some((other) => {
     const [otherPath, otherQuery] = (other.href ?? "").split("?");

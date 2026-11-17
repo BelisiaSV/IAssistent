@@ -59,6 +59,16 @@ als de coach nog geen oefenstof heeft.
 
 {{bibliotheek}}
 
+# Oefenstofbank
+
+Goedgekeurde oefeningen uit de centrale oefenstofbank van het platform, die het best passen bij
+deze week (nummer, titel, type, spelfase, doelgroep, hoofddoel, subdoelen, principes, aantal
+spelers, organisatie, verloop, regels, coachingspunten, makkelijker, moeilijker, materiaal).
+Gebruik ze wanneer de eigen oefenstof van de coach niets passends heeft. Leeg als er geen
+passende oefeningen zijn.
+
+{{oefenstofbank}}
+
 # Staf
 
 Het werk van de andere rollen voor deze week, per rol-id: in het weekdocument wat de rollen

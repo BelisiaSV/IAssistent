@@ -1574,6 +1574,7 @@ export type Database = {
           set_piece_type: string | null;
           signal: string | null;
           roles: Json;
+          bank_number: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -1602,6 +1603,7 @@ export type Database = {
           set_piece_type?: string | null;
           signal?: string | null;
           roles?: Json;
+          bank_number?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -1630,6 +1632,7 @@ export type Database = {
           set_piece_type?: string | null;
           signal?: string | null;
           roles?: Json;
+          bank_number?: string | null;
           created_at?: string;
           updated_at?: string;
         };

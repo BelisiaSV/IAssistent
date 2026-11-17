@@ -234,7 +234,7 @@ function PartCard({
   ];
 
   return (
-    <Card number={number} phase={o.phase[part.fase]} title={n(part.naam)} minutes={part.duur_min} badge={part.oefening_id ? x.fromLibrary : null} color={color}>
+    <Card number={number} phase={o.phase[part.fase]} title={n(part.naam)} minutes={part.duur_min} badge={part.oefening_id ? x.fromLibrary : part.bank_nummer ? x.fromBank(part.bank_nummer) : null} color={color}>
       {part.standaardsituaties?.length ? (
         <div className="rounded-lg bg-slate-50 px-3 py-2 ring-1 ring-slate-200/70">
           <SectionList icon="flag" title={s.setPieces} items={part.standaardsituaties} color={color} />

@@ -87,7 +87,7 @@
           "belasting": "matig",
           "onderdelen": [
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "opwarming",
               "naam": "Losmaken en mobiliteit",
               "organisatie": "Halve cirkel rond de middenstip, kegels op 10 m.",
@@ -103,7 +103,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "kern",
               "naam": "Rondo 5 tegen 2 met omschakeling",
               "organisatie": "Twee vakken van 12 × 12 m. Bij balverovering van de twee spelen ze direct naar het andere vak.",
@@ -120,7 +120,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "kern",
               "naam": "Afwerking na korte combinatie",
               "organisatie": "Twee groepen aan de rand van de zestien, golven op groot doel.",
@@ -136,7 +136,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "afsluiting",
               "naam": "Uitlopen",
               "organisatie": "Rond het veld.",
@@ -177,7 +177,7 @@
           "belasting": "hoog",
           "onderdelen": [
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "opwarming",
               "naam": "Positiespel 5 tegen 5 + 2 met kleine doelen",
               "organisatie": "30 × 25 m, vier kleine doelen; na verovering scoren op de kleine doelen.",
@@ -193,7 +193,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "kern",
               "naam": "Medium blok 7 tegen 6 met counter",
               "organisatie": "Half veld; blok met de lijn op 35 m, na verovering counter op groot doel.",
@@ -210,7 +210,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "kern",
               "naam": "Partijvorm 8 tegen 8 op 2/3 veld",
               "organisatie": "Twee grote doelen; doelpunt binnen tien seconden na verovering telt dubbel.",
@@ -227,7 +227,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "afsluiting",
               "naam": "Afwerking in golven na omschakeling",
               "organisatie": "Vanaf de middellijn 3 tegen 2 naar groot doel.",
@@ -243,7 +243,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "afsluiting",
               "naam": "Uitlopen en stretching",
               "organisatie": "",
@@ -271,7 +271,7 @@
           "belasting": "matig",
           "onderdelen": [
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "opwarming",
               "naam": "Coördinatie en korte sprints",
               "organisatie": "Ladder en kegels, sprints over 10 tot 15 m.",
@@ -285,7 +285,7 @@
               "coachingspunten": []
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "kern",
               "naam": "Positiespel 6 tegen 4 + 3",
               "organisatie": "40 × 30 m, korte reeksen.",
@@ -301,7 +301,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "kern",
               "naam": "Standaardsituaties",
               "organisatie": "Hoekschoppen en vrije trappen op de flank, aanvallend en verdedigend.",
@@ -317,7 +317,7 @@
               ]
             },
             {
-              "oefening_id": null,
+              "oefening_id": null, "bank_nummer": null,
               "fase": "afsluiting",
               "naam": "Uitlopen",
               "organisatie": "",
