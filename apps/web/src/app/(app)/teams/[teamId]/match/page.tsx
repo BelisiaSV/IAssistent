@@ -19,5 +19,5 @@ export default async function MatchPage({ params }: { params: Promise<{ teamId: 
     .order("week_start")
     .limit(8);
   const next = nextMatch(weeks ?? [], today);
-  redirect(`/teams/${team.id}/weeks/${next?.weekStart ?? mondayOf(today)}`);
+  redirect(`/teams/${team.id}/weeks/${next?.weekStart ?? mondayOf(today)}?menu=match#match`);
 }

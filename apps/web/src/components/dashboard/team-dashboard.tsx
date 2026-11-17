@@ -109,7 +109,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
               title={next ? next.opponent : m.nextMatch.noneShort}
               sub={next ? [shortDate(next.date), next.home ? m.nextMatch.home : m.nextMatch.away, next.start].filter(Boolean).join(" · ") : m.nextMatch.noneHint}
               badge={next ? countdown(daysUntil(next.date, today)) : undefined}
-              href={next ? `${base}/weeks/${next.weekStart}` : `${base}/weeks`}
+              href={next ? `${base}/weeks/${next.weekStart}?menu=match#match` : `${base}/microcycle`}
             >
               {venue?.address && (
                 <a
@@ -149,7 +149,7 @@ export function TeamDashboard({ team, logoUrl, today, next, venue, form, microcy
               eyebrow={m.microcycle.title}
               title={m.microcycle.week(isoWeek(microcycle.weekStart), microcycle.weekType)}
               sub={sessions.length ? m.microcycle.sessions(sessions.length, minutes) : m.microcycle.none}
-              href={`${base}/weeks/${microcycle.weekStart}`}
+              href={`${base}/microcycle?week=${microcycle.weekStart}`}
             />
           </div>
         </div>

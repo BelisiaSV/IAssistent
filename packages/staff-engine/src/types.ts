@@ -2,6 +2,7 @@ import type { FormationCatalog } from "./shared/formations";
 import type { MatchDayCatalog } from "./shared/matchdays";
 import type { PeriodizationCatalog } from "./shared/periodization";
 import type { MeetingPlan } from "./shared/meeting";
+import type { TaskRouting } from "./shared/routing";
 import type { TestCatalog } from "./shared/tests";
 import type { PositionCatalog } from "./shared/positions";
 import type { VisionQuestionnaire } from "./shared/vision";
@@ -69,6 +70,8 @@ export interface Staff {
   tests: TestCatalog;
   /** _gedeeld/staffkamer.json */
   meeting: MeetingPlan;
+  /** _gedeeld/taakroutering.json */
+  taskRouting: TaskRouting;
 }
 
 export interface StaffIssue {

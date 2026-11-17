@@ -9,6 +9,7 @@ export * from "./shared/periodization";
 export * from "./shared/tests";
 export * from "./shared/positions";
 export * from "./shared/vision";
+export * from "./shared/routing";
 export type { ParseResult } from "./shared/parse";
 export type { Staff, StaffFile, StaffIssue, StaffRole, RoleMeta } from "./types";
 export type { ConversationInput, ConversationReply, ConversationTurn, TaskProposal } from "./conversation";
