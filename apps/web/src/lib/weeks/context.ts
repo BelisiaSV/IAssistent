@@ -1,5 +1,6 @@
 import type { Tables } from "@iassistent/db";
 import {
+  type BankExercise,
   type LibraryExercise,
   type LoadHistoryWeek,
   type MatchEvaluation,
@@ -65,6 +66,8 @@ export function buildRoleContext(input: {
   evaluations: MatchEvaluation[];
   /** The coach's exercise library (already without names of players). */
   library?: LibraryExercise[];
+  /** Approved exercises of the platform's exercise bank that fit best. */
+  bank?: BankExercise[];
   staff: Record<string, unknown>;
   feedback: { previousOutput: unknown; comment: string } | null;
 }): RoleContext {
@@ -142,6 +145,7 @@ export function buildRoleContext(input: {
     tegenstander: input.opponent,
     evaluaties: input.evaluations,
     bibliotheek: input.library ?? [],
+    oefenstofbank: input.bank ?? [],
     staf: input.staff,
     feedback: input.feedback
       ? { vorige_versie: input.feedback.previousOutput, feedback: input.feedback.comment }

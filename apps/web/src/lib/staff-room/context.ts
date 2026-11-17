@@ -3,6 +3,7 @@ import "server-only";
 import type { Tables } from "@iassistent/db";
 import type { VisionAnswers } from "@iassistent/staff-engine/content";
 
+import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
 import { matchEvaluations } from "@/lib/opponents/context";
@@ -33,16 +34,18 @@ const APPROVED_MEETINGS = 3;
  * The approved context of a team that every role in the Staff Room may read:
  * the team, the vision of the head coach, the squad (shirt numbers, no names),
  * this week, the approved plans of this week, the approved joint tasks and
- * staff meetings, suspensions from cards and the exercise library. Built
+ * staff meetings, suspensions from cards, the exercise library and the
+ * exercises of the platform's bank that fit the question best. Built
  * with the same helpers as the week tasks, so the same privacy rules apply.
  */
-export async function teamContextForChat(supabase: Supabase, team: Tables<"teams">, coachId: string) {
+export async function teamContextForChat(supabase: Supabase, team: Tables<"teams">, coachId: string, question = "") {
   const today = todayInBelgium();
   // On Sunday the staff already looks ahead to the next week.
   const weekStart = isoWeekday(today) === 7 ? addDays(mondayOf(today), 7) : mondayOf(today);
   const schedule = trainingScheduleSchema.safeParse(team.training_schedule);
   const divisions = team.federation_team ? team.federation_divisions : [];
-  const [data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
+  const [bank, data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
+    bankForStaff(supabase, question),
     loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", coachId).maybeSingle(),
     supabase
@@ -147,6 +150,7 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
     tegenstander: context.tegenstander,
     evaluaties: context.evaluaties,
     bibliotheek: context.bibliotheek,
+    oefenstofbank: bank,
     goedgekeurd: context.staf,
     goedgekeurde_taken: (tasks ?? []).flatMap((task) => {
       const final = stepOutput(task.staff_task_steps.find((s) => s.version === task.version && s.phase === "eindvoorstel")?.output);

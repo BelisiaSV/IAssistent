@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BankFields } from "@/components/exercise-bank/bank-fields";
 import { isPlatformAdmin } from "@/lib/admin";
 import { hasOpenQuestion } from "@/lib/exercise-bank/import";
 import { requireUser } from "@/lib/auth";
@@ -12,26 +13,6 @@ import { StatusButton } from "./status-button";
 
 const m = messages.exerciseBank.admin;
 const FILTERS = ["all", "review", "approved"] as const;
-/** Fields of an exercise shown in the detail, in this order. */
-const DETAIL_FIELDS = Object.keys(m.fields);
-
-function FieldValue({ value }: { value: unknown }) {
-  if (Array.isArray(value)) {
-    return (
-      <ul className="list-disc pl-5">
-        {value.map((item, i) => (
-          <li key={i}>
-            {typeof item === "object" && item
-              ? String((item as { tekst?: unknown }).tekst ?? "")
-              : String(item)}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-  return <span>{String(value)}</span>;
-}
-
 /** Admin only: the exercise bank of the platform (import, check and approve). */
 export default async function AdminExerciseBankPage({
   searchParams,
@@ -119,28 +100,14 @@ export default async function AdminExerciseBankPage({
                       </span>
                       <StatusButton id={x.id} status={status} />
                     </summary>
-                    <dl className="grid gap-x-6 gap-y-3 border-t border-slate-200 px-4 py-3 text-sm sm:grid-cols-2">
-                      {DETAIL_FIELDS.filter((key) => {
-                        const v = content[key];
-                        return Array.isArray(v)
-                          ? v.length > 0
-                          : v != null && String(v).trim() !== "";
-                      }).map((key) => (
-                        <div key={key}>
-                          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            {m.fields[key]}
-                          </dt>
-                          <dd className="mt-0.5 text-slate-800">
-                            <FieldValue value={content[key]} />
-                          </dd>
-                        </div>
-                      ))}
-                      <p className="text-xs text-slate-500 sm:col-span-2">
+                    <div className="space-y-3 border-t border-slate-200 px-4 py-3">
+                      <BankFields content={content} />
+                      <p className="text-xs text-slate-500">
                         {m.version(x.version)}
                         {x.tags.length > 0 &&
                           ` · ${x.tags.map((t) => `#${t}`).join(" ")}`}
                       </p>
-                    </dl>
+                    </div>
                   </details>
                 </li>
               );

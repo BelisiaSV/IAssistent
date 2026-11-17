@@ -410,7 +410,19 @@ Regels:
   `review`; niets verwijderd; max. 500) en `admin_set_bank_exercise_status`. Admin → **Oefenstofbank**
   (`/admin/exercise-bank`): backup (JSON) opladen, controle in de browser (`parseBank` in
   `lib/exercise-bank/import.ts`, ongeldige of dubbele nummers overgeslagen, open vraagtekens zoals "regels: ?"
-  gemarkeerd), importeren, nakijken en goedkeuren. Nog niet: gebruik door de staf, overnemen naar de eigen
-  oefenstof, media.
+  gemarkeerd), importeren, nakijken en goedkeuren.
+  **Gebruik door de staf:** de staf krijgt `oefenstofbank` (type `BankExercise` in de staff-engine): de
+  goedgekeurde oefeningen die het best passen bij de vraag (`rankBank` in `lib/exercise-bank/staff.ts`: woorden
+  in titel, type/spelfase/tags/principes en doelen; max. 15; `bankForStaff` in `lib/exercise-bank/load.ts`).
+  De vraag is het bericht (gesprek), de opdracht + feedback (staffkamer), titel + opdracht (taak) of de
+  weeknotitie + feedback (weekruns, placeholder `{{oefenstofbank}}` in `opdracht-gebruiker.md`). Volgorde voor
+  een onderdeel: eigen oefenstof (`oefening_id`), dan de oefenstofbank (`bank_nummer`, bv. OEF-007; de
+  belasting bepaalt de staf zelf), dan een eigen voorstel. `bank_nummer` staat in het onderdeel-schema van de
+  Assistent Coach en van het staffkamer-weekplan; het weekdocument, de trainingsbladen en het weekplan tonen
+  "Oefenstofbank OEF-007" met een link. In testmodus vullen de kernonderdelen zich met bankoefeningen.
+  **Voor trainers:** Oefenbibliotheek → **Oefenstofbank** (`/exercises/bank`, zoeken en filteren op type en
+  spelfase; `/exercises/bank/[nummer]`): "Overnemen naar mijn oefenstof" maakt een eigen oefening
+  (`bankToExercise` in `lib/exercise-bank/copy.ts`, `exercises.bank_number`, één keer per coach) die de coach
+  daarna aanpast (fase, spelers, standaardbelasting). Nog niet: media (tekeningen en video's).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

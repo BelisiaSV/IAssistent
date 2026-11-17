@@ -175,7 +175,7 @@ async function runStep(
       staff,
       step.role,
       {
-        teamcontext: await teamContextForChat(supabase, team, coachId),
+        teamcontext: await teamContextForChat(supabase, team, coachId, [task.title, task.assignment, task.feedback ?? ""].join(" ")),
         taak: {
           titel: task.title,
           opdracht: task.assignment,
