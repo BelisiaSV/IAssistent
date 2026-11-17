@@ -15,6 +15,66 @@ export type Database = {
   };
   public: {
     Tables: {
+      bank_exercises: {
+        Row: {
+          id: string;
+          number: string;
+          source_id: string | null;
+          title: string;
+          kind: string;
+          phase: string | null;
+          target_group: string | null;
+          tags: string[];
+          principles: string[];
+          content: Json;
+          media_kind: string | null;
+          media_key: string | null;
+          status: string;
+          version: number;
+          imported_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          number: string;
+          source_id?: string | null;
+          title: string;
+          kind: string;
+          phase?: string | null;
+          target_group?: string | null;
+          tags?: string[];
+          principles?: string[];
+          content: Json;
+          media_kind?: string | null;
+          media_key?: string | null;
+          status?: string;
+          version?: number;
+          imported_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          number?: string;
+          source_id?: string | null;
+          title?: string;
+          kind?: string;
+          phase?: string | null;
+          target_group?: string | null;
+          tags?: string[];
+          principles?: string[];
+          content?: Json;
+          media_kind?: string | null;
+          media_key?: string | null;
+          status?: string;
+          version?: number;
+          imported_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       competition_matches: {
         Row: {
           id: string;
@@ -1651,6 +1711,8 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: { id: string; email: string; full_name: string | null; plan_id: string | null }[];
       };
+      admin_import_bank_exercises: { Args: { p_exercises: Json }; Returns: Json };
+      admin_set_bank_exercise_status: { Args: { p_id: string; p_status: string }; Returns: undefined };
       admin_set_account_plan: { Args: { p_coach: string; p_plan: string | null }; Returns: undefined };
       admin_teams: {
         Args: Record<PropertyKey, never>;
