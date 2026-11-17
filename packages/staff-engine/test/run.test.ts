@@ -93,10 +93,34 @@ function context(): RoleContext {
     },
     evaluaties: [],
     bibliotheek: [],
+    oefenstofbank: [],
     staf: {},
     feedback: null,
   };
 }
+
+const bankExercise = (nummer: string, titel: string): RoleContext["oefenstofbank"][number] => ({
+  nummer,
+  titel,
+  type: "Positiespel",
+  spelfase: "Balbezit",
+  doelgroep: null,
+  hoofddoel: "Door de linie spelen",
+  subdoelen: [],
+  principes: [],
+  aantal_spelers: "10 tegen 8",
+  duur: "",
+  veldafmeting: "",
+  belasting: "Middel",
+  organisatie: ["Twee vakken"],
+  verloop: [],
+  regels: "",
+  coachingspunten: ["Open lichaamshouding"],
+  makkelijker: "",
+  moeilijker: "",
+  materiaal: [],
+  tags: [],
+});
 
 const exercise = (over: Partial<RoleContext["bibliotheek"][number]>): RoleContext["bibliotheek"][number] => ({
   id: "ex",
@@ -288,6 +312,18 @@ describe("tactical coach", () => {
     // The match preparation keeps the id.
     const prep = await runRole(staff, "tactical-coach", { ...ctx, staf: { "tactical-coach": result.output } }, exampleProvider, "wedstrijdvoorbereiding");
     expect((prep.output as { standaardsituaties: { standaardsituatie_id: string | null }[] }).standaardsituaties[0]!.standaardsituatie_id).toBe("corner");
+  });
+
+  it("fills core parts from the exercise bank when the library has none", async () => {
+    const bank = [bankExercise("OEF-007", "Positiespel door de linie"), bankExercise("OEF-008", "Rondo 5v2")];
+    const result = await runRole(staff, "assistant-coach", { ...context(), oefenstofbank: bank }, exampleProvider);
+    const parts = (result.output as { dagen: { onderdelen: { fase: string; naam: string; bank_nummer: string | null; oefening_id: string | null }[] }[] }).dagen.flatMap(
+      (d) => d.onderdelen,
+    );
+    const fromBank = parts.filter((p) => p.bank_nummer);
+    expect(fromBank.map((p) => p.bank_nummer)).toEqual(["OEF-007", "OEF-008"]);
+    expect(fromBank.every((p) => p.fase === "kern" && p.oefening_id === null)).toBe(true);
+    expect(fromBank[0]!.naam).toBe("Positiespel door de linie");
   });
 
   it("does not plan set pieces as training exercises", async () => {
@@ -668,5 +704,21 @@ describe("staff meeting week plan in test mode", () => {
     expect(plan.beschikbaarheid.beschikbaar).toBe(1);
     expect(plan.beschikbaarheid.niet_beschikbaar.map((p) => p.rugnummer)).toEqual([7, 8]);
     expect(plan.spelersplanning).toHaveLength(7);
+  });
+
+  it("takes core exercises of the week from the exercise bank", async () => {
+    const days = ["2026-11-23", "2026-11-24"].map((datum, i) => ({
+      datum,
+      weekdag: ["maandag", "dinsdag"][i]!,
+      md: null,
+      training: { aanvang: "20:00", duur_min: 80 },
+      wedstrijd: null,
+    }));
+    const teamcontext = { week: { week_van: "2026-11-23", dagen: days }, kern: [], oefenstofbank: [bankExercise("OEF-001", "Omschakeling vanuit medium blok")] };
+    const result = await runMeetingTurn(staff, "coordinator", { teamcontext, opdracht: "Omschakeling", soort: "overzicht", gesprek: [], feedback: null }, exampleProvider);
+    const parts = result.output.overzicht!.weekplan!.dagen.flatMap((d) => d.onderdelen);
+    expect(parts.filter((p) => p.bank_nummer === "OEF-001")).toHaveLength(1);
+    expect(parts.find((p) => p.bank_nummer)!.naam).toBe("Omschakeling vanuit medium blok");
+    expect(parts.every((p) => p.bank_nummer === null || p.bank_nummer === "OEF-001")).toBe(true);
   });
 });

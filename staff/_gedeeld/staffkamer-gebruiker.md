@@ -26,6 +26,7 @@ daarop verder.
 # Goedgekeurde teamcontext
 
 Wat de hele staf mag weten: team, visie, kern (rugnummers, status, schorsingen — geen namen),
-deze week, de goedgekeurde plannen en taken, en de oefenstof. Wat hier niet staat, weet je niet.
+deze week, de goedgekeurde plannen en taken, de oefenstof van de hoofdcoach en passende oefeningen
+uit de oefenstofbank van het platform (`oefenstofbank`). Wat hier niet staat, weet je niet.
 
 {{teamcontext}}

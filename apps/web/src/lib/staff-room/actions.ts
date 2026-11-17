@@ -93,7 +93,7 @@ export async function sendMessage(teamId: string, role: string, text: string): P
       staff,
       role,
       {
-        teamcontext: await teamContextForChat(supabase, team, user.id),
+        teamcontext: await teamContextForChat(supabase, team, user.id, question),
         gesprek: (earlier ?? []).toReversed().map((m) => ({ van: m.author === "coach" ? "hoofdcoach" : "rol", tekst: m.content })),
         vraag: question,
       },

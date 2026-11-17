@@ -187,6 +187,14 @@ export function WeekDocumentView({
                             {x.openExercise}
                           </Link>
                         )}
+                        {part.bank_nummer && (
+                          <Link
+                            href={`/exercises/bank/${part.bank_nummer}`}
+                            className="rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-800 hover:underline"
+                          >
+                            {x.fromBank(part.bank_nummer)}
+                          </Link>
+                        )}
                       </p>
                       <h4 className="text-base font-semibold">{n(part.naam)}</h4>
                       <p className="text-slate-600">

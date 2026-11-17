@@ -24,7 +24,7 @@
       "belasting": "matig",
       "onderdelen": [
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "opwarming",
           "naam": "Loopscholing met bal",
           "doel": "Activeren en blessurepreventie.",
@@ -43,7 +43,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "kern",
           "naam": "Rondo 5v2",
           "doel": "Snel combineren en lijnen openhouden.",
@@ -62,7 +62,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "kern",
           "naam": "Positiespel 6v6 + 3 kaatsers",
           "doel": "Opbouw van achteruit volgens de visie.",
@@ -81,7 +81,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "afsluiting",
           "naam": "Uitlopen en stretching",
           "doel": "Afbouwen.",
@@ -124,7 +124,7 @@
       "belasting": "hoog",
       "onderdelen": [
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "opwarming",
           "naam": "Dynamische opwarming + passvorm",
           "doel": "Activeren en technische scherpte.",
@@ -143,7 +143,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "kern",
           "naam": "4v4 + doelmannen, kleine ruimte",
           "doel": "Duels, intensiteit en direct tegendruk na balverlies.",
@@ -162,7 +162,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "kern",
           "naam": "Partijvorm 8v8 met omschakelzones",
           "doel": "Toepassen van de visie op balverlies in grotere ruimte.",
@@ -181,7 +181,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "afsluiting",
           "naam": "Uitlopen en mobiliteit",
           "doel": "Afbouwen.",
@@ -212,7 +212,7 @@
       "belasting": "laag",
       "onderdelen": [
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "opwarming",
           "naam": "Reactiespelletjes",
           "doel": "Activeren en reactiesnelheid.",
@@ -231,7 +231,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "kern",
           "naam": "Sprints met afwerking",
           "doel": "Snelheid op korte afstand.",
@@ -249,7 +249,7 @@
           "standaardsituaties": []
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "kern",
           "naam": "Standaardsituaties",
           "doel": "Afspraken hoekschoppen en vrije trappen.",
@@ -272,7 +272,7 @@
           ]
         },
         {
-          "oefening_id": null,
+          "oefening_id": null, "bank_nummer": null,
           "fase": "afsluiting",
           "naam": "Kort uitlopen",
           "doel": "Afbouwen.",

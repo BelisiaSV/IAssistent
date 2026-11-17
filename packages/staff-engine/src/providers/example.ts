@@ -1,4 +1,4 @@
-import type { LibraryExercise, RoleContext } from "../context";
+import type { BankExercise, LibraryExercise, RoleContext } from "../context";
 import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
 import { COLLABORATION_TASK, CONVERSATION_TASK, MEETING_TASK } from "../layout";
@@ -105,7 +105,42 @@ function setPieceTraining(days: Example[], exampleDays: Day[], context: RoleCont
   return result;
 }
 
-type Part = Record<string, unknown> & { fase: string; duur_min: number; reeksen: number | null; rpe: number | null; oefening_id?: string | null };
+type Part = Record<string, unknown> & {
+  fase: string;
+  duur_min: number;
+  reeksen: number | null;
+  rpe: number | null;
+  oefening_id?: string | null;
+  bank_nummer?: string | null;
+};
+
+/**
+ * A core part based on an exercise of the platform's exercise bank: its name,
+ * goal, organisation and coaching points; the load stays the example's.
+ */
+function bankPart<T extends object>(part: T, exercise: BankExercise): T {
+  const p = part as Record<string, unknown>;
+  return {
+    ...part,
+    oefening_id: null,
+    bank_nummer: exercise.nummer,
+    naam: exercise.titel,
+    ...("doel" in p ? { doel: exercise.hoofddoel || p.doel } : {}),
+    organisatie: exercise.organisatie.length ? exercise.organisatie.join(" ") : p.organisatie,
+    spelers: exercise.aantal_spelers || p.spelers,
+    coachingspunten: exercise.coachingspunten.length ? exercise.coachingspunten : p.coachingspunten,
+  } as T;
+}
+
+/** Picks bank exercises in the given order (best fit first), each at most once. */
+function bankPicker(bank: BankExercise[]) {
+  const used = new Set<string>();
+  return () => {
+    const next = bank.find((e) => !used.has(e.nummer));
+    if (next) used.add(next.nummer);
+    return next;
+  };
+}
 
 /**
  * Assistant Coach: fills the parts of each training with exercises from the
@@ -119,7 +154,8 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
   const usable = context.bibliotheek.filter(
     (e) => e.soort === "oefening" && (!players || e.spelers.min === null || e.spelers.min <= players),
   );
-  if (!usable.length) return days.map((d) => (Array.isArray(d.onderdelen) ? { ...d, onderdelen: (d.onderdelen as Part[]).map((o) => ({ ...o, oefening_id: null })) } : d));
+  // Then the exercise bank of the platform, for core parts the library cannot fill.
+  const fromBank = bankPicker(context.oefenstofbank ?? []);
 
   const weekFactor = context.weekinput.periodisering.weektype?.reeksen_factor ?? 1;
   const physical = context.staf["physical-coach"] as { dagen?: { datum: string; rpe_doel: number | null }[] } | undefined;
@@ -134,9 +170,12 @@ function fromLibrary(days: Example[], context: RoleContext, staff: Staff): Examp
 
     const parts: (Part & { _ex?: LibraryExercise })[] = (d.onderdelen as Part[]).map((part) => {
       // The set-piece part trains the Tactical Coach's set pieces, not a library exercise.
-      if (((part.standaardsituaties as string[] | undefined)?.length ?? 0) > 0) return { ...part, oefening_id: null };
+      if (((part.standaardsituaties as string[] | undefined)?.length ?? 0) > 0) return { ...part, oefening_id: null, bank_nummer: null };
       const exercise = usable.find((e) => (e.fase === part.fase || e.fase === null) && !used.has(e.id));
-      if (!exercise) return { ...part, oefening_id: null };
+      if (!exercise) {
+        const bank = part.fase === "kern" ? fromBank() : undefined;
+        return bank ? bankPart(part, bank) : { ...part, oefening_id: null, bank_nummer: null };
+      }
       used.add(exercise.id);
       return libraryPart(part, exercise, factor, maxRpe);
     });
@@ -162,6 +201,7 @@ function libraryPart(part: Part, exercise: LibraryExercise, factor: number, maxR
   return {
     ...part,
     oefening_id: exercise.id,
+    bank_nummer: null,
     naam: exercise.titel,
     doel: exercise.labels.length ? exercise.labels.join(", ") : part.doel,
     organisatie: exercise.organisatie ?? part.organisatie,
@@ -406,6 +446,16 @@ function fitMeetingWeek(plan: MeetingWeekPlan, teamcontext: Record<string, unkno
   const match = plan.dagen.find((d) => d.soort === "wedstrijd");
   const rest = plan.dagen.find((d) => d.soort === "rust");
   const trainingDays = days.filter((d) => d.training);
+  // Core parts take an exercise of the exercise bank that fits the assignment, each once.
+  const fromBank = bankPicker((teamcontext.oefenstofbank as BankExercise[] | undefined) ?? []);
+  const withBank = (day: WeekPlanDay): WeekPlanDay => ({
+    ...day,
+    onderdelen: day.onderdelen.map((part) => {
+      if (part.oefening_id || part.fase !== "kern") return { ...part, bank_nummer: part.bank_nummer ?? null };
+      const bank = fromBank();
+      return bank ? bankPart(part, bank) : { ...part, bank_nummer: part.bank_nummer ?? null };
+    }),
+  });
   const dagen = days.map((day): WeekPlanDay => {
     const base = { datum: day.datum, weekdag: day.weekdag, md: day.md };
     if (day.wedstrijd && match) return { ...match, ...base, tijdstip: day.wedstrijd.aanvang ?? match.tijdstip };
@@ -413,7 +463,7 @@ function fitMeetingWeek(plan: MeetingWeekPlan, teamcontext: Record<string, unkno
       // Align from the end: the last training of the week gets the last example training.
       const fromEnd = trainingDays.length - 1 - trainingDays.indexOf(day);
       const template = trainings[Math.max(0, trainings.length - 1 - fromEnd)]!;
-      return { ...template, ...base, tijdstip: day.training.aanvang, totale_duur_min: day.training.duur_min };
+      return withBank({ ...template, ...base, tijdstip: day.training.aanvang, totale_duur_min: day.training.duur_min });
     }
     return rest ? { ...rest, ...base } : { ...base, soort: "rust", titel: "", doel: "", tijdstip: null, totale_duur_min: null, belasting: "rust", onderdelen: [], opmerking: null };
   });

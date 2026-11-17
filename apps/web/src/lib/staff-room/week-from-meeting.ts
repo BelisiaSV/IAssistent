@@ -20,6 +20,8 @@ export function weekDocumentFromMeeting(overview: MeetingOverview & { weekplan: 
       belasting: day.belasting,
       onderdelen: day.onderdelen.map((part) => ({
         oefening_id: part.oefening_id,
+        // Older meetings have no bank_nummer yet.
+        bank_nummer: part.bank_nummer ?? null,
         fase: part.fase,
         naam: part.naam,
         doel: "",

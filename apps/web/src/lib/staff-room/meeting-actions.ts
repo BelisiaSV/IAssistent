@@ -127,7 +127,7 @@ export async function advanceMeeting(meetingId: string): Promise<MeetingResult> 
           staff,
           turn.role,
           {
-            teamcontext: await teamContextForChat(supabase, team, user.id),
+            teamcontext: await teamContextForChat(supabase, team, user.id, [view.assignment, ...view.feedbacks].join(" ")),
             opdracht: view.assignment,
             soort: turn.kind,
             gesprek: meetingConversation(view, view.version, turn.position),

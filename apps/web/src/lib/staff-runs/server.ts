@@ -4,6 +4,7 @@ import type { Json, Tables } from "@iassistent/db";
 import { runRole, StaffGenerationError } from "@iassistent/staff-engine";
 
 import { getStaffProvider } from "@/lib/ai";
+import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { isFeatureEnabled } from "@/lib/feature-flags";
 import { activeSteps, MATCH_USES_WEEK_STEPS, nextSteps, RUN_STEPS, type RunKind, type RunStep, runStatus, stepsToRerun } from "@/lib/roles";
@@ -181,6 +182,8 @@ export async function advanceRun(
     ]);
     // Without the library the staff still plans, but the coach should know why.
     if (libraryError) console.error("staff run: exercise library could not be loaded", libraryError);
+    // Exercises of the platform's bank that fit the week note and the coach's feedback.
+    const bank = await bankForStaff(supabase, [data.week?.notes ?? "", ...claimed.map((c) => c.proposal.feedback ?? "")].join(" "));
     const provider = getStaffProvider();
 
     await Promise.all(
@@ -193,6 +196,7 @@ export async function advanceRun(
             vision: profile ? { summary: profile.vision_summary, vision: profile.vision } : null,
             feedback: proposal.feedback && previousOutput ? { previousOutput, comment: proposal.feedback } : null,
             library: (exercises ?? []).map(libraryExercise),
+            bank,
           });
           const result = await runRole(staff, step.role, context, provider, step.task);
           const { error } = await supabase

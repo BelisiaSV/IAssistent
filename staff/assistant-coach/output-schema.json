@@ -143,6 +143,7 @@
       "additionalProperties": false,
       "required": [
         "oefening_id",
+        "bank_nummer",
         "fase",
         "naam",
         "doel",
@@ -164,6 +165,13 @@
             "null"
           ],
           "description": "id van de oefening uit de oefenstof van de coach (zie Oefenstof), of null voor een nieuw voorstel."
+        },
+        "bank_nummer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Nummer uit de oefenstofbank van het platform (bv. OEF-007) als het onderdeel daarop gebaseerd is (zie Oefenstofbank), anders null. Niet samen met oefening_id."
         },
         "fase": {
           "type": "string",

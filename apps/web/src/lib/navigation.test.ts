@@ -23,6 +23,9 @@ describe("navigation", () => {
   it("tells exercises and set pieces apart by the filter", () => {
     expect(at("/exercises")?.tab.href).toBe("/exercises");
     expect(at("/exercises", "soort=set_piece")?.tab.href).toBe("/exercises?soort=set_piece");
+    expect(at("/exercises/abc")?.tab.href).toBe("/exercises");
+    expect(at("/exercises/bank")?.tab.href).toBe("/exercises/bank");
+    expect(at("/exercises/bank/OEF-007")?.tab.href).toBe("/exercises/bank");
   });
 
   it("only opens team tabs with a team", () => {
