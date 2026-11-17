@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { opponentStats, sameTeam } from "./stats";
+import { opponentStats, sameTeam, teamSeason } from "./stats";
 
 const m = (
   match_date: string,
@@ -57,5 +57,17 @@ describe("presentation statistics", () => {
   });
   it("matches names loosely", () => {
     expect(sameTeam(" KFC Merelbeke", "kfc merelbeke ")).toBe(true);
+  });
+});
+
+describe("teamSeason", () => {
+  it("adds up the points of every played match", () => {
+    const all = [m("2026-09-06", "A", "B", 2, 1), m("2026-09-13", "C", "A", 1, 1), m("2026-09-20", "A", "D", 0, 3), m("2026-09-27", "A", "E", null, null)];
+    expect(teamSeason(all, "A").map((x) => [x.opponent, x.home, x.goalsFor, x.goalsAgainst, x.outcome, x.points])).toEqual([
+      ["B", true, 2, 1, "win", 3],
+      ["C", false, 1, 1, "draw", 4],
+      ["D", true, 0, 3, "loss", 4],
+    ]);
+    expect(teamSeason(all, "A", "2026-09-20")).toHaveLength(2);
   });
 });

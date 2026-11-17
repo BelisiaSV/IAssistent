@@ -282,8 +282,13 @@ Regels:
   onderdelen van een menu staan als **tabbladen** bovenaan de pagina (`components/section-tabs.tsx`), elk
   met het mannetje van de rol die het verzorgt (`member`). Elke rol heeft een eigen mannetje
   (`components/staff/role-avatar.tsx`, kleur per rol). `/teams/[id]/staff` verwijst naar de Staff Room.
-  Belasting en Volgende wedstrijd verwijzen naar de weekpagina (`/load`, `/match`) met `?menu=load|match`, zodat het
-  juiste menu actief blijft (`WEEK_PAGE_MENUS` in `lib/navigation.ts`); Periodisering is een eigen pagina.
+  Belasting verwijst naar de weekpagina (`/load`, met `?menu=load`, zodat het juiste menu actief blijft;
+  `WEEK_PAGE_MENUS` in `lib/navigation.ts`); Periodisering is een eigen pagina. **Volgende wedstrijd**
+  (`/teams/[id]/match?datum=`) is een eigen pagina over de tegenstander (`loadNextMatch` in `lib/next-match/load.ts`,
+  bovenop `loadPresentation`): logo, datum, thuis/uit, adres en trainer, klassement (plaats, punten, W-G-V, doelpunten),
+  vorm van de laatste vijf met logo's, seizoensverloop als grafiek (`teamSeason` in `lib/presentation/stats.ts`,
+  `SeasonChart`) en hun laatst ingevulde opstelling in hun formatie (`components/next-match/opponent-pitch.tsx`). De
+  wedstrijdvoorbereiding van de staf staat er enkel als link (weekpagina `?menu=match#match`).
   **Microcyclus** (`/teams/[id]/microcycle?week=`) toont de week van vandaag (of een andere week, vorige/volgende):
   het goedgekeurde weekdocument zoals de spelers het zien (`WeekPoster`) en per dag met de oefenstof
   (`WeekDocumentView`, `findWeekDocument` in `lib/weeks/document.ts`); zonder weekdocument verwijst ze naar de
