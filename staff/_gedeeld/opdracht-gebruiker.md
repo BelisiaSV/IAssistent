@@ -63,7 +63,8 @@ als de coach nog geen oefenstof heeft.
 
 Goedgekeurde oefeningen uit de centrale oefenstofbank van het platform, die het best passen bij
 deze week (nummer, titel, type, spelfase, doelgroep, hoofddoel, subdoelen, principes, aantal
-spelers, organisatie, verloop, regels, coachingspunten, makkelijker, moeilijker, materiaal).
+spelers, organisatie, verloop, regels, coachingspunten, makkelijker, moeilijker, materiaal;
+`beeld` = "tekening" of "video" als de oefening al een eigen beeld heeft, anders null).
 Gebruik ze wanneer de eigen oefenstof van de coach niets passends heeft. Leeg als er geen
 passende oefeningen zijn.
 

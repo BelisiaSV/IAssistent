@@ -29,6 +29,7 @@ export type Database = {
           content: Json;
           media_kind: string | null;
           media_key: string | null;
+          media_path: string | null;
           status: string;
           version: number;
           imported_by: string | null;
@@ -48,6 +49,7 @@ export type Database = {
           content: Json;
           media_kind?: string | null;
           media_key?: string | null;
+          media_path?: string | null;
           status?: string;
           version?: number;
           imported_by?: string | null;
@@ -67,6 +69,7 @@ export type Database = {
           content?: Json;
           media_kind?: string | null;
           media_key?: string | null;
+          media_path?: string | null;
           status?: string;
           version?: number;
           imported_by?: string | null;
@@ -1715,6 +1718,7 @@ export type Database = {
         Returns: { id: string; email: string; full_name: string | null; plan_id: string | null }[];
       };
       admin_import_bank_exercises: { Args: { p_exercises: Json }; Returns: Json };
+      admin_set_bank_media: { Args: { p_media_key: string; p_path: string }; Returns: number };
       admin_set_bank_exercise_status: { Args: { p_id: string; p_status: string }; Returns: undefined };
       admin_set_account_plan: { Args: { p_coach: string; p_plan: string | null }; Returns: undefined };
       admin_teams: {

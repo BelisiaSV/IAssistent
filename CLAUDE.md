@@ -423,6 +423,13 @@ Regels:
   **Voor trainers:** Oefenbibliotheek → **Oefenstofbank** (`/exercises/bank`, zoeken en filteren op type en
   spelfase; `/exercises/bank/[nummer]`): "Overnemen naar mijn oefenstof" maakt een eigen oefening
   (`bankToExercise` in `lib/exercise-bank/copy.ts`, `exercises.bank_number`, één keer per coach) die de coach
-  daarna aanpast (fase, spelers, standaardbelasting). Nog niet: media (tekeningen en video's).
+  daarna aanpast (fase, spelers, standaardbelasting); een video gaat mee (storage-copy naar `exercise-videos`).
+  **Media:** de bestanden staan in de privé bucket `bank-media` (`<media_key>.<ext>`, max. 25 MB, PNG/JPG/WEBP/GIF/
+  MP4/WEBM/MOV), `bank_exercises.media_path`. De admin laadt ze op bij Admin → Oefenstofbank → "Tekeningen en
+  video's" (meerdere tegelijk; bestandsnaam = code uit de backup; signed upload URL, `admin_set_bank_media` koppelt
+  alle oefeningen met die code; een import met een nieuwe code wist de koppeling). Lezen: de admin alles, een coach
+  enkel het bestand van een goedgekeurde oefening. Getoond bij de oefening (admin, `/exercises/bank`), in het
+  weekdocument en de trainingsbladen (`WeekExercises.bank` in `lib/exercises/week.ts`). De staf krijgt `beeld`
+  ("tekening"/"video"/null) per bankoefening; de Tactical Coach tekent bankoefeningen met een beeld niet.
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { BANK_MEDIA_BUCKET } from "@iassistent/db";
 import type { BankExercise } from "@iassistent/staff-engine/content";
 
 import type { createClient } from "@/lib/supabase/server";
@@ -20,4 +21,14 @@ export async function bankForStaff(supabase: Supabase, query: string): Promise<B
     return [];
   }
   return rankBank((data ?? []) as BankRow[], query).map(bankExercise);
+}
+
+/** Signed URLs (an hour) for files of the bank, by path. */
+export async function bankMediaUrls(supabase: Supabase, paths: (string | null)[]): Promise<Map<string, string>> {
+  const wanted = [...new Set(paths.filter((p): p is string => !!p))];
+  const urls = new Map<string, string>();
+  if (!wanted.length) return urls;
+  const { data } = await supabase.storage.from(BANK_MEDIA_BUCKET).createSignedUrls(wanted, 3600);
+  for (const item of data ?? []) if (item.path && item.signedUrl) urls.set(item.path, item.signedUrl);
+  return urls;
 }

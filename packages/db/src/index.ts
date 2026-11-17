@@ -5,6 +5,8 @@ export const TEAM_LOGOS_BUCKET = "team-logos";
 export const EXERCISE_VIDEOS_BUCKET = "exercise-videos";
 /** Opponent logos and team photos for the match presentation: <team_id>/<file>. */
 export const TEAM_MEDIA_BUCKET = "team-media";
+/** Drawings and videos of the exercise bank (private, admin uploads). */
+export const BANK_MEDIA_BUCKET = "bank-media";
 export const TEAM_LOGO_MAX_BYTES = 2 * 1024 * 1024;
 export const TEAM_LOGO_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 

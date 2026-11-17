@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { requireUser } from "@/lib/auth";
+import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { BANK_COLUMNS, bankScore, type BankRow, words } from "@/lib/exercise-bank/staff";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +21,7 @@ export default async function ExerciseBankPage({ searchParams }: { searchParams:
   const copied = new Map((own ?? []).map((x) => [x.bank_number!, x.id]));
   const types = [...new Set(all.map((x) => x.kind))].sort((a, b) => a.localeCompare(b, "nl"));
   const phases = [...new Set(all.flatMap((x) => (x.phase ? [x.phase] : [])))].sort((a, b) => a.localeCompare(b, "nl"));
+  const urls = await bankMediaUrls(supabase, all.filter((x) => x.media_kind !== "video").map((x) => x.media_path ?? null));
   const wanted = words(q);
   const shown = all
     .filter((x) => (!type || x.kind === type) && (!fase || x.phase === fase))
@@ -78,8 +80,15 @@ export default async function ExerciseBankPage({ searchParams }: { searchParams:
                     >
                       <span className="flex items-center justify-between gap-2 text-xs text-slate-500">
                         <span className="font-mono">{x.number}</span>
-                        {copied.has(x.number) && <span className="rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand">{m.inLibrary}</span>}
+                        <span className="flex gap-1">
+                          {x.media_path && x.media_kind === "video" && <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium">{m.video}</span>}
+                          {copied.has(x.number) && <span className="rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand">{m.inLibrary}</span>}
+                        </span>
                       </span>
+                      {x.media_path && x.media_kind !== "video" && urls.get(x.media_path) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={urls.get(x.media_path)} alt="" className="h-32 w-full rounded-lg bg-white object-contain" />
+                      )}
                       <span className="font-semibold">{x.title}</span>
                       <span className="text-xs text-slate-500">{[x.kind, x.phase].filter(Boolean).join(" · ")}</span>
                       {typeof goal === "string" && goal && <span className="line-clamp-3 text-sm text-slate-600">{goal}</span>}

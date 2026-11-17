@@ -1,7 +1,7 @@
 ---
 id: tactical-coach
 naam: Tactical Coach
-versie: 0.5.0
+versie: 0.6.0
 status: concept
 ---
 

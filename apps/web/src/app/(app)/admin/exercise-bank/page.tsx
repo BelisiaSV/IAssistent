@@ -2,13 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BankFields } from "@/components/exercise-bank/bank-fields";
+import { BankMedia } from "@/components/exercise-bank/bank-media";
 import { isPlatformAdmin } from "@/lib/admin";
 import { hasOpenQuestion } from "@/lib/exercise-bank/import";
+import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
 import { BankImport } from "./bank-import";
+import { MediaUpload } from "./media-upload";
 import { StatusButton } from "./status-button";
 
 const m = messages.exerciseBank.admin;
@@ -28,11 +31,14 @@ export default async function AdminExerciseBankPage({
   const { data } = await supabase
     .from("bank_exercises")
     .select(
-      "id, number, title, kind, phase, tags, content, media_kind, media_key, status, version",
+      "id, number, title, kind, phase, tags, content, media_kind, media_key, media_path, status, version",
     )
     .order("number");
   const all = data ?? [];
   const shown = filter === "all" ? all : all.filter((x) => x.status === filter);
+  const keys = [...new Set(all.flatMap((x) => (x.media_key ? [x.media_key] : [])))];
+  const missing = new Set(all.flatMap((x) => (x.media_key && !x.media_path ? [x.media_key] : []))).size;
+  const urls = await bankMediaUrls(supabase, shown.map((x) => x.media_path));
 
   return (
     <div className="space-y-4">
@@ -41,6 +47,7 @@ export default async function AdminExerciseBankPage({
         <p className="text-sm text-slate-600">{m.intro}</p>
       </div>
       <BankImport existing={all.map((x) => x.number)} />
+      {keys.length > 0 && <MediaUpload keys={keys} missing={missing} />}
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -85,8 +92,7 @@ export default async function AdminExerciseBankPage({
                       </span>
                       <span className="text-xs text-slate-500">
                         {[x.kind, x.phase].filter(Boolean).join(" · ")}
-                        {x.media_kind &&
-                          ` · ${m.media[x.media_kind]} (${m.mediaMissing})`}
+                        {x.media_kind && ` · ${m.media[x.media_kind]}${x.media_path ? "" : ` (${m.mediaMissing})`}`}
                       </span>
                       {hasOpenQuestion(content) && (
                         <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
@@ -101,6 +107,9 @@ export default async function AdminExerciseBankPage({
                       <StatusButton id={x.id} status={status} />
                     </summary>
                     <div className="space-y-3 border-t border-slate-200 px-4 py-3">
+                      {x.media_path && (
+                        <BankMedia kind={x.media_kind} url={urls.get(x.media_path) ?? null} alt={x.title} className="max-h-80 max-w-xl" />
+                      )}
                       <BankFields content={content} />
                       <p className="text-xs text-slate-500">
                         {m.version(x.version)}

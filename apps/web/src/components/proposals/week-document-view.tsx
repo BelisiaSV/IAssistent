@@ -160,8 +160,9 @@ export function WeekDocumentView({
 
             {day.onderdelen.map((part, i) => {
               const exercise = part.oefening_id ? exercises?.items.get(part.oefening_id) : undefined;
+              const bank = part.bank_nummer ? exercises?.bank.get(part.bank_nummer) : undefined;
               const drawing =
-                part.oefening_id || part.standaardsituaties?.length
+                part.oefening_id || part.standaardsituaties?.length || bank
                 ? undefined
                 : tco?.oefeningen.find((t) => t.datum === day.datum && t.onderdeel === part.naam);
               const course = exercise?.course ?? drawing?.verloop ?? [];
@@ -263,6 +264,14 @@ export function WeekDocumentView({
                       <video src={exercise.videoUrl} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
                       <VideoStill src={exercise.videoUrl} className="hidden print:block" />
                     </div>
+                  ) : bank?.kind === "video" ? (
+                    <div>
+                      <video src={bank.url} controls preload="metadata" className="w-full rounded-xl bg-black print:hidden" />
+                      <VideoStill src={bank.url} className="hidden print:block" />
+                    </div>
+                  ) : bank ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={bank.url} alt={n(part.naam)} className="w-full rounded-xl bg-white object-contain" />
                   ) : (
                     drawing && <DrawingView drawing={drawing.tekening} />
                   )}
