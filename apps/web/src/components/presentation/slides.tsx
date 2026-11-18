@@ -2,6 +2,11 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { DrawingView } from "@/components/proposals/drawing";
 import { messages } from "@/lib/messages";
+import {
+  layoutLineup,
+  PITCH_TOP,
+  PITCH_UNIT,
+} from "@/lib/presentation/lineup-layout";
 import type { PresentationData, SlideLineup } from "@/lib/presentation/types";
 import { longDate, weekdayName } from "@/lib/weeks/dates";
 
@@ -226,8 +231,7 @@ const LINE = "rgba(255,255,255,0.32)";
 
 /** Screen position of a formation slot (x 0..100 left→right, y 0 = opponent goal, 100 = own goal). */
 function project(width: number, x: number, y: number) {
-  const top = 150;
-  const sy = top + y * 5.7;
+  const sy = PITCH_TOP + y * PITCH_UNIT;
   const half = width * (0.34 + (0.16 * y) / 100);
   return { sx: width / 2 + ((x - 50) / 50) * half, sy, half };
 }
@@ -316,6 +320,9 @@ function LineupPitch({
   const edge = (y: number) => at(y);
   const bands = Array.from({ length: 12 }, (_, i) => i * 10);
   const keeper = { body: kit.trim, trim: kit.body };
+  const layout = layoutLineup(lineup?.players.map((p) => p.y) ?? [], {
+    withDetail: lineup?.players.some((p) => p.detail) ?? false,
+  });
   return (
     <div
       className="absolute inset-y-0 overflow-hidden"
@@ -396,13 +403,18 @@ function LineupPitch({
         {title}
       </div>
       {lineup?.players.map((p, i) => {
-        const { sx, sy } = project(width, p.x, p.y);
+        const { sx, sy } = project(width, p.x, layout.ys[i] ?? p.y);
         const colors = p.goalkeeper ? keeper : kit;
         return (
           <div
             key={i}
             className="absolute flex flex-col items-center"
-            style={{ left: sx, top: sy - 52, transform: "translateX(-50%)" }}
+            style={{
+              left: sx,
+              top: sy - 52,
+              transform: `translateX(-50%) scale(${layout.scale})`,
+              transformOrigin: "50% 52px",
+            }}
           >
             <Shirt body={colors.body} trim={colors.trim} number={p.number} />
             <span
