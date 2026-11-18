@@ -152,6 +152,10 @@ export async function updateBankExercise(number: string, _prev: BankEditState, f
     ...Object.fromEntries(TEXT_FIELDS.map((key) => [key, text(key)])),
     ...Object.fromEntries(LIST_FIELDS.map((key) => [key, lines(key)])),
     tags: text("tags").split(",").map((t) => t.trim()).filter(Boolean),
+    zones: text("zones")
+      .split(",")
+      .map(Number)
+      .filter((z) => Number.isInteger(z) && z >= 1 && z <= 18),
   };
   const parsed = parseBank([record]);
   const exercise = parsed?.exercises[0];
@@ -172,5 +176,49 @@ export async function updateBankExercise(number: string, _prev: BankEditState, f
   }
   revalidatePath("/admin/exercise-bank");
   revalidatePath(`/exercises/bank/${row.number}`);
+  return { ok: true };
+}
+
+const bankNumber = z.string().regex(/^[A-Za-z]{1,10}-[0-9]{1,6}$/);
+
+/** A signed URL to upload a new drawing or video for one exercise (stored as <number>-<time>.<ext>). */
+export async function prepareExerciseMediaUpload(
+  number: string,
+  file: { type: string; size: number },
+): Promise<{ path: string; token: string } | { error: string }> {
+  const ext = MEDIA_TYPES[file.type];
+  if (!bankNumber.safeParse(number).success || !ext) return { error: e.mediaType };
+  if (file.size <= 0 || file.size > MEDIA_MAX_BYTES) return { error: e.mediaSize };
+  await requireUser();
+  const supabase = await createClient();
+  if (!(await isPlatformAdmin(supabase))) return { error: e.media };
+  const path = `${number}-${Date.now()}.${ext}`;
+  const { data, error } = await supabase.storage.from(BANK_MEDIA_BUCKET).createSignedUploadUrl(path);
+  if (error || !data) {
+    console.error("prepareExerciseMediaUpload failed", error);
+    return { error: e.media };
+  }
+  return { path, token: data.token };
+}
+
+/** Links the uploaded file to the exercise, or removes its picture (path null). */
+export async function saveExerciseMedia(number: string, path: string | null): Promise<{ ok?: true; error?: string }> {
+  if (!bankNumber.safeParse(number).success) return { error: e.media };
+  const ext = path?.split(".").pop() ?? "";
+  if (path !== null && (!path.startsWith(`${number}-`) || !Object.values(MEDIA_TYPES).includes(ext))) return { error: e.media };
+  await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_set_bank_exercise_media", {
+    p_number: number,
+    p_path: path,
+    p_kind: path === null ? null : ["mp4", "webm", "mov"].includes(ext) ? "video" : "image",
+  });
+  if (error) {
+    console.error("saveExerciseMedia failed", error);
+    return { error: e.media };
+  }
+  revalidatePath("/admin/exercise-bank");
+  revalidatePath(`/admin/exercise-bank/${number}/edit`);
+  revalidatePath(`/exercises/bank/${number}`);
   return { ok: true };
 }

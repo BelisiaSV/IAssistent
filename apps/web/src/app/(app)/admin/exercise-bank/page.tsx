@@ -2,8 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BankFields } from "@/components/exercise-bank/bank-fields";
+import { BankFilterForm } from "@/components/exercise-bank/bank-filters";
 import { BankMedia } from "@/components/exercise-bank/bank-media";
+import { ZoneMap } from "@/components/exercise-bank/zone-map";
 import { isPlatformAdmin } from "@/lib/admin";
+import { bankFilterOptions, bankFilters, bankZones, filterBank } from "@/lib/exercise-bank/filters";
 import { hasOpenQuestion } from "@/lib/exercise-bank/import";
 import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { requireUser } from "@/lib/auth";
@@ -20,22 +23,25 @@ const FILTERS = ["all", "review", "approved"] as const;
 export default async function AdminExerciseBankPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireUser();
   const supabase = await createClient();
   if (!(await isPlatformAdmin(supabase))) notFound();
-  const { status } = await searchParams;
+  const params = await searchParams;
+  const status = typeof params.status === "string" ? params.status : undefined;
   const filter = FILTERS.find((f) => f === status) ?? "all";
+  const search = bankFilters(params);
 
   const { data } = await supabase
     .from("bank_exercises")
     .select(
-      "id, number, title, kind, phase, tags, content, media_kind, media_key, media_path, status, version, source_title, source_content",
+      "id, number, title, kind, phase, target_group, tags, principles, content, media_kind, media_key, media_path, status, version, source_title, source_content",
     )
     .order("number");
   const all = data ?? [];
-  const shown = filter === "all" ? all : all.filter((x) => x.status === filter);
+  const byStatus = filter === "all" ? all : all.filter((x) => x.status === filter);
+  const shown = filterBank(byStatus, search) as typeof all;
   const keys = [...new Set(all.flatMap((x) => (x.media_key ? [x.media_key] : [])))];
   const missing = new Set(all.flatMap((x) => (x.media_key && !x.media_path ? [x.media_key] : []))).size;
   const urls = await bankMediaUrls(supabase, shown.map((x) => x.media_path));
@@ -68,6 +74,8 @@ export default async function AdminExerciseBankPage({
             ))}
           </nav>
         </div>
+        {all.length > 0 && <BankFilterForm filters={search} options={bankFilterOptions(all)} hidden={filter === "all" ? {} : { status: filter }} />}
+        {all.length > 0 && <p className="text-sm text-slate-500">{messages.exerciseBank.filters.count(shown.length, byStatus.length)}</p>}
         {all.length === 0 ? (
           <p className="rounded-xl bg-white p-5 text-sm text-slate-600 ring-1 ring-slate-200">
             {m.empty}
@@ -120,7 +128,12 @@ export default async function AdminExerciseBankPage({
                       {x.media_path && (
                         <BankMedia kind={x.media_kind} url={urls.get(x.media_path) ?? null} alt={x.title} className="max-h-80 max-w-xl" />
                       )}
-                      <BankFields content={content} />
+                      <div className="flex flex-col gap-6 md:flex-row">
+                        <div className="min-w-0 flex-1">
+                          <BankFields content={content} />
+                        </div>
+                        {bankZones(x).length > 0 && <ZoneMap zones={bankZones(x)} className="w-36 shrink-0" />}
+                      </div>
                       <p className="text-xs text-slate-500">
                         {m.version(x.version)}
                         {x.tags.length > 0 &&

@@ -120,6 +120,7 @@ const bankExercise = (nummer: string, titel: string): RoleContext["oefenstofbank
   moeilijker: "",
   materiaal: [],
   tags: [],
+  zones: [],
   beeld: null,
 });
 

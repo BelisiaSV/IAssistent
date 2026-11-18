@@ -2,8 +2,10 @@ import Link from "next/link";
 
 import { BankFields } from "@/components/exercise-bank/bank-fields";
 import { BankMedia } from "@/components/exercise-bank/bank-media";
+import { ZoneMap } from "@/components/exercise-bank/zone-map";
 import { Alert } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { bankZones } from "@/lib/exercise-bank/filters";
 import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { BANK_COLUMNS, type BankRow } from "@/lib/exercise-bank/staff";
 import { messages } from "@/lib/messages";
@@ -55,7 +57,17 @@ export default async function BankExercisePage({ params, searchParams }: { param
           {row.media_path && (
             <BankMedia kind={row.media_kind ?? null} url={(await bankMediaUrls(supabase, [row.media_path])).get(row.media_path) ?? null} alt={row.title} className="max-h-[480px]" />
           )}
-          <BankFields content={row.content} omit={["notities", "bron"]} />
+          <div className="flex flex-col gap-6 md:flex-row">
+            <div className="min-w-0 flex-1">
+              <BankFields content={row.content} omit={["notities", "bron"]} />
+            </div>
+            {bankZones(row).length > 0 && (
+              <div className="w-44 shrink-0">
+                <p className="mb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{messages.exerciseBank.zonesTitle}</p>
+                <ZoneMap zones={bankZones(row)} className="w-full" />
+              </div>
+            )}
+          </div>
           {row.tags.length > 0 && <p className="text-xs text-slate-500">{row.tags.map((t) => `#${t}`).join(" ")}</p>}
         </article>
       )}
