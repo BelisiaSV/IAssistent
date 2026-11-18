@@ -41,6 +41,12 @@ describe("parseBank", () => {
     expect(result.exercises[0]!.content).not.toHaveProperty("diagram");
   });
 
+  it("takes the picture from media_bestand when there is no code", () => {
+    const [x] = parseBank([exercise({ diagram: "", diagram_type: null, media_bestand: "media/OEF-007.mp4" })])!.exercises;
+    expect(x).toMatchObject({ media_key: "OEF-007", media_kind: "video", media_file: "media/OEF-007.mp4" });
+    expect(x!.content).not.toHaveProperty("media_bestand");
+  });
+
   it("flags open question marks, not coaching questions", () => {
     expect(parseBank([exercise()])!.uncertain).toEqual([]);
     expect(parseBank([exercise({ regels: "?" })])!.uncertain).toEqual([

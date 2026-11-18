@@ -460,5 +460,15 @@ Regels:
   gecontroleerd met `parseBank`; `admin_update_bank_exercise`, nieuwe versie, status en beeld blijven). De laatste
   import staat in `source_title`/`source_content`: een import vergelijkt daarmee, zodat een correctie in de app blijft
   tot de oefening in de bron zelf wijzigt (label "Aangepast in de app").
+  **Zip-import, zones en filters:** de admin laadt de export op als zip (backup + tekeningen en video's, in elke map;
+  `readBankZip` in `lib/exercise-bank/zip.ts`, jszip in de browser) of als .json; na de import worden de bestanden
+  meteen opgeladen en gekoppeld op hun code (`uploadBankMediaFile`): een beeld wordt gevonden via `media_bestand`
+  in de backup (bv. `media/OEF-007.mp4`) of via een bestandsnaam gelijk aan de code (`bankMediaFiles`); zonder code
+  (`diagram`) wordt de bestandsnaam de code. Elke oefening heeft **zones** (`content.zones`,
+  1–18: 1–3 aan het eigen doel tot 16–18 aan het doel van de tegenstander, links-midden-rechts; `bankZones` in
+  `lib/exercise-bank/zones.ts`), getoond als `ZoneMap` en bij "Bewerken" aanklikbaar (`ZonePicker`). De admin vervangt
+  of verwijdert het beeld van één oefening (`admin_set_bank_exercise_media`, pad `<nummer>-<tijd>.<ext>`). Coach en admin
+  zoeken met dezelfde filters (`BankFilterForm`, `filterBank` in `lib/exercise-bank/filters.ts`: tekst in titel, doelen,
+  tags en bron; fase, type, belasting, principe, zone). De staf krijgt de zones mee (`BankExercise.zones`).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.

@@ -1,20 +1,20 @@
 "use client";
 
-import { BANK_MEDIA_BUCKET } from "@iassistent/db";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { messages } from "@/lib/messages";
+import { mediaKeyOf } from "@/lib/exercise-bank/zip";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 
-import { prepareBankMediaUpload, saveBankMedia } from "./actions";
+import { uploadBankMediaFile } from "./upload-media";
 
 const m = messages.exerciseBank.admin;
 
 type Row = { name: string; state: "waiting" | "busy" | "done" | "error"; note: string };
 
 /** The code of a file is its name without extension (as in the exercise database). */
-const keyOf = (name: string) => name.replace(/\.[^.]+$/, "");
+const keyOf = mediaKeyOf;
 
 /**
  * Uploads drawings and videos of the bank: each file goes straight to storage
@@ -42,21 +42,8 @@ export function MediaUpload({ keys, missing }: { keys: string[]; missing: number
     for (const [i, file] of list.entries()) {
       if (initial[i]!.state === "error") continue;
       set(i, { state: "busy", note: m.mediaUploading });
-      const key = keyOf(file.name);
-      const prepared = await prepareBankMediaUpload(key, { type: file.type, size: file.size });
-      if ("error" in prepared) {
-        set(i, { state: "error", note: prepared.error });
-        continue;
-      }
-      const { error } = await supabase.storage
-        .from(BANK_MEDIA_BUCKET)
-        .uploadToSignedUrl(prepared.path, prepared.token, file, { contentType: file.type, upsert: true });
-      if (error) {
-        set(i, { state: "error", note: m.errors.media });
-        continue;
-      }
-      const saved = await saveBankMedia(key, prepared.path);
-      set(i, saved.error ? { state: "error", note: saved.error } : { state: "done", note: m.mediaDone(saved.linked ?? 0) });
+      const saved = await uploadBankMediaFile(supabase, file);
+      set(i, "error" in saved ? { state: "error", note: saved.error } : { state: "done", note: m.mediaDone(saved.linked) });
     }
     setBusy(false);
     router.refresh();

@@ -249,6 +249,19 @@ export const messages = {
     },
   },
   exerciseBank: {
+    filters: {
+      search: "Zoek op titel, doel, tag, bron…",
+      allPhases: "Alle fases",
+      allTypes: "Alle types",
+      allLoads: "Elke belasting",
+      allPrinciples: "Alle principes",
+      allZones: "Alle zones",
+      zone: (n: number) => `Zone ${n}`,
+      apply: "Filteren",
+      clear: "Filters wissen",
+      count: (shown: number, total: number) => (shown === total ? `${total} oefeningen` : `${shown} van ${total} oefeningen`),
+    },
+    zonesTitle: "Zones",
     // Fields of a bank exercise, in the order they are shown.
     fields: {
       hoofddoel: "Hoofddoel",
@@ -292,10 +305,15 @@ export const messages = {
     },
     admin: {
       title: "Oefenstofbank",
-      intro: "De centrale oefenstofbank van het platform. Laad de backup (JSON) van je oefenstofdatabank op: een oefening met hetzelfde nummer (bv. OEF-007) wordt bijgewerkt, een nieuw nummer wordt toegevoegd, niets wordt verwijderd. Nieuwe oefeningen staan op \"Na te kijken\"; enkel goedgekeurde oefeningen zijn zichtbaar voor de trainers en hun staf.",
-      file: "Backup kiezen (.json)",
+      intro: "De centrale oefenstofbank van het platform. Laad de export van je oefenstofdatabank op (zip met de backup en de tekeningen en video's, of enkel de backup .json): een oefening met hetzelfde nummer (bv. OEF-007) wordt bijgewerkt, een nieuw nummer wordt toegevoegd, niets wordt verwijderd. Nieuwe oefeningen staan op \"Na te kijken\"; enkel goedgekeurde oefeningen zijn zichtbaar voor de trainers en hun staf.",
+      file: "Export kiezen (.zip of .json)",
+      zipMedia: (n: number) => `${n} tekening(en) en video('s) in de zip worden meteen gekoppeld.`,
+      zipProgress: (done: number, failed: number, total: number) =>
+        done + failed < total
+          ? `Tekeningen en video's opladen: ${done + failed} van ${total}…`
+          : `Tekeningen en video's: ${done} opgeladen${failed ? `, ${failed} niet (laad ze opnieuw op bij "Tekeningen en video's")` : ""}.`,
       reading: "Bestand lezen…",
-      unreadable: "Dit bestand is geen backup van de oefenstofbank (een JSON-lijst met hoogstens 500 oefeningen).",
+      unreadable: "Dit bestand is geen export van de oefenstofbank: kies de zip of de backup (.json) met hoogstens 500 oefeningen.",
       previewTitle: "Controle",
       summary: (total: number, added: number, existing: number) => `${total} oefeningen: ${added} nieuw, ${existing} al in de bank (worden bijgewerkt als ze gewijzigd zijn).`,
       issuesTitle: (n: number) => `${n} oefening(en) worden overgeslagen`,
@@ -324,6 +342,11 @@ export const messages = {
       mediaDone: (n: number) => `gekoppeld aan ${n} oefening(en)`,
       mediaSummary: (done: number, failed: number) => `${done} opgeladen${failed ? `, ${failed} niet` : ""}.`,
       mediaPresent: "bestand staat in de app",
+      mediaEditTitle: "Tekening of video",
+      mediaNone: "Nog geen tekening of video.",
+      mediaAdd: "Beeld toevoegen",
+      mediaReplace: "Beeld vervangen",
+      mediaRemove: "Beeld verwijderen",
       errors: {
         import: "Importeren mislukt.",
         status: "Wijzigen mislukt.",
@@ -338,7 +361,7 @@ export const messages = {
       edited: "Aangepast in de app",
       editTitle: (number: string) => `Oefening ${number} bewerken`,
       editIntro:
-        "Je correctie wordt een nieuwe versie; de status en de tekening of video blijven. Een volgende import uit je oefenstofdatabank overschrijft deze oefening enkel als ze daar ook gewijzigd is.",
+        "Pas de tekst, de zones en de tekening of video aan voor je de oefening goedkeurt. Elke correctie wordt een nieuwe versie; de status blijft. Een volgende import uit je oefenstofdatabank overschrijft deze oefening enkel als ze daar ook gewijzigd is.",
       editLabels: {
         titel: "Titel",
         type: "Type",
@@ -347,6 +370,7 @@ export const messages = {
         belasting_toelichting: "Toelichting bij de belasting",
       } as Record<string, string>,
       editHints: { lines: "Eén punt per regel.", tags: "Gescheiden door komma's." },
+      zonesHint: "Klik op een zone om ze aan of uit te zetten.",
       save: "Opslaan",
       saving: "Bezig…",
       saved: "Opgeslagen.",

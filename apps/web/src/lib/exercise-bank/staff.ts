@@ -1,5 +1,7 @@
 import type { BankExercise } from "@iassistent/staff-engine/content";
 
+import { bankZones } from "./zones";
+
 /** At most this many exercises of the bank go to the staff per question. */
 export const BANK_FOR_STAFF = 15;
 
@@ -47,6 +49,7 @@ export function bankExercise(row: BankRow): BankExercise {
     moeilijker: text(c.moeilijker),
     materiaal: list(c.materiaal),
     tags: row.tags,
+    zones: bankZones(row),
     beeld: row.media_path ? (row.media_kind === "video" ? "video" : "tekening") : null,
   };
 }

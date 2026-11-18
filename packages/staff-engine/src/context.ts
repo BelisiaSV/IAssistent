@@ -151,6 +151,8 @@ export interface BankExercise {
   moeilijker: string;
   materiaal: string[];
   tags: string[];
+  /** Zones of the pitch the exercise is played in (1–3 at the own goal … 16–18 at the opponent's goal). */
+  zones: number[];
   /** The exercise has its own drawing or video (shown by the app; no new drawing needed). */
   beeld: "tekening" | "video" | null;
 }

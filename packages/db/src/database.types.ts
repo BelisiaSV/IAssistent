@@ -1779,6 +1779,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      admin_set_bank_exercise_media: { Args: { p_number: string; p_path: string | null; p_kind: string | null }; Returns: undefined };
       admin_set_bank_media: { Args: { p_media_key: string; p_path: string }; Returns: number };
       admin_set_bank_exercise_status: { Args: { p_id: string; p_status: string }; Returns: undefined };
       admin_set_account_plan: { Args: { p_coach: string; p_plan: string | null }; Returns: undefined };
