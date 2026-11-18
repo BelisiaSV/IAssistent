@@ -67,6 +67,8 @@ const sourceSchema = z.object({
       .max(50),
   ),
   diagram: optional(120),
+  /** Path of the drawing or video in the export (e.g. "media/OEF-007.mp4"). */
+  media_bestand: optional(300),
   diagram_type: z.preprocess(
     (v) => (v === "" ? null : v),
     z.enum(["image", "video"]).nullable().optional(),
@@ -90,10 +92,9 @@ export interface BankExercise {
   principles: string[];
   media_kind: "image" | "video" | null;
   media_key: string | null;
-  content: Omit<
-    BankSource,
-    "id" | "nummer" | "titel" | "diagram" | "diagram_type"
-  >;
+  content: Omit<BankSource, "id" | "nummer" | "titel" | "diagram" | "diagram_type" | "media_bestand">;
+  /** Path of the drawing or video in a zip export, if any (not stored). */
+  media_file: string | null;
 }
 
 export interface BankIssue {
@@ -154,8 +155,11 @@ export function parseBank(input: unknown): BankParseResult | null {
       });
       return;
     }
-    const { id, nummer, titel, diagram, diagram_type, ...content } =
-      parsed.data;
+    const { id, nummer, titel, diagram, diagram_type, media_bestand, ...content } = parsed.data;
+    // The code of the picture: the code of the source, else the file name in the export.
+    const fileKey = media_bestand ? (media_bestand.split("/").pop() ?? "").replace(/\.[^.]+$/, "") : null;
+    const mediaKey = diagram ?? (fileKey || null);
+    const fileKind = media_bestand && /\.(mp4|webm|mov)$/i.test(media_bestand) ? "video" : media_bestand ? "image" : null;
     const number = nummer.toUpperCase();
     if (seen.has(number)) {
       result.issues.push({
@@ -176,9 +180,10 @@ export function parseBank(input: unknown): BankParseResult | null {
       target_group: content.doelgroep,
       tags: content.tags,
       principles: content.principes,
-      media_kind: diagram ? (diagram_type ?? null) : null,
-      media_key: diagram,
+      media_kind: mediaKey ? (diagram_type ?? fileKind) : null,
+      media_key: mediaKey,
       content,
+      media_file: media_bestand,
     });
     if (hasOpenQuestion(content)) result.uncertain.push(number);
   });

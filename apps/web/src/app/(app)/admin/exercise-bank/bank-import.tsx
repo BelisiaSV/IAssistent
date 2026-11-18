@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { Alert, Button } from "@/components/ui";
 import { BANK_TEXT_MAX, type BankParseResult, parseBankText } from "@/lib/exercise-bank/import";
-import { mediaKeyOf, readBankZip } from "@/lib/exercise-bank/zip";
+import { bankMediaFiles, readBankZip } from "@/lib/exercise-bank/zip";
 import { messages } from "@/lib/messages";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 
@@ -39,12 +39,11 @@ export function BankImport({ existing }: { existing: string[] }) {
       const fromZip = file.name.toLowerCase().endsWith(".zip") ? await readBankZip(file) : null;
       const content = fromZip ? fromZip.text : file.size <= BANK_TEXT_MAX ? await file.text() : null;
       const parsed = content ? parseBankText(content) : null;
-      // Only files with the code of an exercise in the backup.
-      const keys = new Set(parsed?.exercises.flatMap((x) => (x.media_key ? [x.media_key] : [])) ?? []);
       setUnreadable(!parsed);
       setPreview(parsed);
       setText(parsed ? content : null);
-      setMedia((fromZip?.media ?? []).filter((f) => keys.has(mediaKeyOf(f.name))));
+      // Only the pictures of exercises in the backup, named after their code.
+      setMedia(parsed && fromZip ? bankMediaFiles(parsed.exercises, fromZip.media) : []);
     } catch {
       setUnreadable(true);
       setPreview(null);
