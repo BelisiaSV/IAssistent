@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { ZonePicker } from "@/components/exercise-bank/zone-picker";
 import { Alert } from "@/components/ui";
 import { messages } from "@/lib/messages";
 
@@ -34,7 +35,7 @@ const FORM: [string, "text" | "area" | "lines" | "tags"][] = [
   ["tags", "tags"],
 ];
 
-export function BankEditForm({ number, initial }: { number: string; initial: Record<string, string> }) {
+export function BankEditForm({ number, initial, zones }: { number: string; initial: Record<string, string>; zones: number[] }) {
   const [state, action, pending] = useActionState<BankEditState, FormData>(updateBankExercise.bind(null, number), {});
   return (
     <form action={action} className="space-y-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -56,6 +57,13 @@ export function BankEditForm({ number, initial }: { number: string; initial: Rec
             </label>
           );
         })}
+      </div>
+      <div className="space-y-1">
+        <p className="text-sm font-medium">
+          {messages.exerciseBank.zonesTitle}
+          <span className="ml-2 text-xs font-normal text-slate-500">{m.zonesHint}</span>
+        </p>
+        <ZonePicker name="zones" initial={zones} />
       </div>
       {state.error && <Alert tone="error">{state.error}</Alert>}
       {state.ok && <Alert tone="success">{m.saved}</Alert>}

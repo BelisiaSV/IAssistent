@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(15);
+select plan(18);
 
 create schema tests;
 grant usage on schema tests to authenticated;
@@ -89,6 +89,17 @@ select is((select title from public.bank_exercises where number = 'OEF-002'), 'P
 select is(public.admin_import_bank_exercises(jsonb_set((select data from batch) - 0, '{0,title}', '"Partijvorm 8v8"')),
   '{"added": 0, "updated": 1, "unchanged": 0}'::jsonb, 'a change in the source overwrites');
 select is((select title from public.bank_exercises where number = 'OEF-002'), 'Partijvorm 8v8', 'the source wins after its own change');
+select tests.logout();
+
+-- Replacing the picture of one exercise.
+select tests.login('coach@test.local');
+select throws_ok($$select public.admin_set_bank_exercise_media('OEF-002', 'x.png', 'image')$$, '42501', null, 'a coach cannot replace a picture');
+select tests.logout();
+select tests.login('admin@test.local');
+select public.admin_set_bank_exercise_media('OEF-002', 'OEF-002-1.mp4', 'video');
+select is((select media_path || ' ' || media_kind from public.bank_exercises where number = 'OEF-002'), 'OEF-002-1.mp4 video',
+  'the admin replaces the picture of one exercise');
+select throws_ok($$select public.admin_set_bank_exercise_media('OEF-002', 'x.png', 'pdf')$$, '23514', null, 'only an image or a video');
 select tests.logout();
 
 select * from finish();

@@ -2,11 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { isPlatformAdmin } from "@/lib/admin";
+import { bankZones } from "@/lib/exercise-bank/filters";
+import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
 import { BankEditForm } from "./bank-edit-form";
+import { ExerciseMediaForm } from "./media-form";
 
 const m = messages.exerciseBank.admin;
 
@@ -18,7 +21,7 @@ export default async function EditBankExercisePage({ params }: { params: Promise
   if (!(await isPlatformAdmin(supabase))) notFound();
   const { data: row } = await supabase
     .from("bank_exercises")
-    .select("number, title, kind, phase, target_group, tags, content")
+    .select("number, title, kind, phase, target_group, tags, content, media_kind, media_path")
     .eq("number", decodeURIComponent(number))
     .maybeSingle();
   if (!row) notFound();
@@ -35,8 +38,14 @@ export default async function EditBankExercisePage({ params }: { params: Promise
         <h1 className="text-2xl font-semibold">{m.editTitle(row.number)}</h1>
         <p className="text-sm text-slate-600">{m.editIntro}</p>
       </div>
+      <ExerciseMediaForm
+        number={row.number}
+        kind={row.media_kind}
+        url={row.media_path ? ((await bankMediaUrls(supabase, [row.media_path])).get(row.media_path) ?? null) : null}
+      />
       <BankEditForm
         number={row.number}
+        zones={bankZones(row)}
         initial={{
           titel: row.title,
           type: row.kind,
