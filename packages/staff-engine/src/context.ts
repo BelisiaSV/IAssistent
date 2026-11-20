@@ -138,6 +138,7 @@ export interface LibraryExercise {
  * `bank_nummer`. Only the exercises that fit the question best are sent.
  */
 export interface BankExercise {
+  /** OEF-007 for the platform's bank, CLUB-3 for an exercise of the team's club. */
   nummer: string;
   titel: string;
   type: string;
@@ -162,6 +163,8 @@ export interface BankExercise {
   zones: number[];
   /** The exercise has its own drawing or video (shown by the app; no new drawing needed). */
   beeld: "tekening" | "video" | null;
+  /** The team's club recommends this exercise (club exercise or bank exercise the club picked). */
+  club_aanbevolen?: boolean;
 }
 
 export interface RoleContext {
@@ -174,6 +177,8 @@ export interface RoleContext {
   evaluaties: MatchEvaluation[];
   /** The coach's exercise library (only exercises the coach allows in the planning). */
   bibliotheek: LibraryExercise[];
+  /** Approved exercises of the team's club (club team only) that fit this week best. */
+  cluboefenstof?: BankExercise[];
   /** Approved exercises of the platform's exercise bank that fit this week best. */
   oefenstofbank: BankExercise[];
   /** Approved proposals of other roles for this week, by role id. */

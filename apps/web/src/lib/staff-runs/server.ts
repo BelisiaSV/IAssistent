@@ -5,6 +5,7 @@ import { runRole, StaffGenerationError } from "@iassistent/staff-engine";
 
 import { getStaffProvider } from "@/lib/ai";
 import { clubDnaForTeam } from "@/lib/clubs/dna";
+import { clubExercisesForStaff } from "@/lib/clubs/exercises-staff";
 import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -184,10 +185,14 @@ export async function advanceRun(
     // Without the library the staff still plans, but the coach should know why.
     if (libraryError) console.error("staff run: exercise library could not be loaded", libraryError);
     // Exercises of the platform's bank that fit the week note and the coach's feedback.
-    const bank = await bankForStaff(supabase, [data.week?.notes ?? "", ...claimed.map((c) => c.proposal.feedback ?? "")].join(" "));
-    // A club team works within the club's DNA.
+    const question = [data.week?.notes ?? "", ...claimed.map((c) => c.proposal.feedback ?? "")].join(" ");
+    // A club team works within the club's DNA and with the club's exercises.
     const { data: teamRow } = await supabase.from("teams").select("club_id, age_category").eq("id", input.team.id).maybeSingle();
-    const clubDna = teamRow ? await clubDnaForTeam(supabase, teamRow) : null;
+    const [clubDna, club] = await Promise.all([
+      teamRow ? clubDnaForTeam(supabase, teamRow) : null,
+      clubExercisesForStaff(supabase, { club_id: teamRow?.club_id ?? null }, question),
+    ]);
+    const bank = await bankForStaff(supabase, question, club.recommendedBank);
     const provider = getStaffProvider();
 
     await Promise.all(
@@ -201,6 +206,7 @@ export async function advanceRun(
             feedback: proposal.feedback && previousOutput ? { previousOutput, comment: proposal.feedback } : null,
             library: (exercises ?? []).map(libraryExercise),
             bank,
+            clubExercises: club.exercises,
             clubDna,
           });
           const result = await runRole(staff, step.role, context, provider, step.task);

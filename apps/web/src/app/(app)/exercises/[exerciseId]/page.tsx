@@ -11,6 +11,7 @@ import { messages } from "@/lib/messages";
 import { deleteExercise, removeAnimation, removeVideo } from "../actions";
 import { loadExercise } from "./load";
 import { AnimationImportForm, ConfirmButton, VideoUploadForm } from "./media-forms";
+import { ShareWithClub } from "./share-with-club";
 
 const m = messages.exercises;
 
@@ -153,6 +154,8 @@ export default async function ExercisePage({
           </div>
         </div>
       </section>
+
+      <ShareWithClub exerciseId={exercise.id} />
 
       <div className="text-right">
         <ConfirmButton action={deleteExercise} exerciseId={exercise.id} label={m.delete} confirmText={m.deleteConfirm} />
