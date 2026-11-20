@@ -93,6 +93,10 @@ beforeEach(async () => {
   await write("_gedeeld/formaties.json", JSON.stringify(FORMATIONS));
   await write("_gedeeld/visieprofiel.json", JSON.stringify(VISION));
   await write(
+    "_gedeeld/clubdna.json",
+    JSON.stringify({ versie: "1", themas: VISION.themas, leeftijdsdoelen: { titel: "Doelen", vragen: [{ id: "doelen", vraag: "Doelen", type: "tekst" }] } }),
+  );
+  await write(
     "_gedeeld/wedstrijddagen.json",
     JSON.stringify({ versie: "1", dagen: [{ code: "MD", naam: "MD", uitleg: "x", dagen_tot_wedstrijd: 0 }] }),
   );
@@ -142,6 +146,7 @@ describe("loadStaff", () => {
 
     expect(staff.shared.map((f) => f.path)).toEqual([
       "_gedeeld/afspraken.md",
+      "_gedeeld/clubdna.json",
       "_gedeeld/formaties.json",
       "_gedeeld/gesprek-gebruiker.md",
       "_gedeeld/gesprek-systeem.md",

@@ -21,6 +21,7 @@ import { parseTaskRouting } from "./shared/routing";
 import { parseTests } from "./shared/tests";
 import { parseFormations } from "./shared/formations";
 import { parsePositions } from "./shared/positions";
+import { parseClubDnaQuestionnaire } from "./shared/club-dna";
 import { parseVisionQuestionnaire } from "./shared/vision";
 import {
   ROLE_STATUSES,
@@ -104,6 +105,11 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
     issues,
   );
 
+  const clubDna = collect(
+    parseClubDnaQuestionnaire(readSharedJson(shared, SHARED_FILES.clubDna, issues)),
+    issues,
+  );
+
   const matchDays = collect(
     parseMatchDays(readSharedJson(shared, SHARED_FILES.matchDays, issues)),
     issues,
@@ -122,11 +128,11 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
   }
   checkTemplates(shared, issues);
 
-  if (!positions || !formations || !vision || !matchDays || !periodization || !tests || !meeting || !taskRouting) {
+  if (!positions || !formations || !vision || !clubDna || !matchDays || !periodization || !tests || !meeting || !taskRouting) {
     return { staff: null, issues };
   }
   return {
-    staff: { rootDir: root, shared, roles, positions, formations, vision, matchDays, periodization, tests, meeting, taskRouting },
+    staff: { rootDir: root, shared, roles, positions, formations, vision, clubDna, matchDays, periodization, tests, meeting, taskRouting },
     issues,
   };
 }

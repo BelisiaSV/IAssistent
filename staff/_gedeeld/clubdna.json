@@ -1,0 +1,109 @@
+{
+  "versie": "0.1.0",
+  "uitleg": "Vragenlijst voor het Club DNA: de voetbalidentiteit van een club. De technisch directeur (of de owner) vult ze in en duidt per antwoord aan of het een verplicht clubprincipe of een aanbevolen principe is. De AI-staf van elk clubteam krijgt de gepubliceerde versie mee, apart van de visie van de trainer. Types zoals in visieprofiel.json. Antwoorden worden bewaard onder '<thema-id>.<vraag-id>'; doelen per leeftijdscategorie onder '<categorie>.<vraag-id>'.",
+  "themas": [
+    {
+      "id": "filosofie",
+      "titel": "Clubfilosofie",
+      "uitleg": "Waar staat de club voor, op en naast het veld?",
+      "vragen": [
+        { "id": "in_een_zin", "vraag": "Hoe omschrijf je de voetbalidentiteit van de club in één zin?", "type": "kort_antwoord" },
+        { "id": "kernwaarden", "vraag": "Welke waarden staan centraal?", "type": "tekst" },
+        {
+          "id": "opleiding_of_resultaat",
+          "vraag": "Waar ligt het accent bij de jeugd?",
+          "type": "schaal",
+          "min": 1,
+          "max": 5,
+          "label_min": "Opleiden van spelers",
+          "label_max": "Resultaat behalen"
+        }
+      ]
+    },
+    {
+      "id": "formaties",
+      "titel": "Formaties en speelwijze",
+      "vragen": [
+        { "id": "basisformatie", "vraag": "Wat is de voorkeursformatie van de club?", "type": "formatie" },
+        { "id": "andere_formaties", "vraag": "Welke formaties mogen daarnaast?", "type": "formatie", "meerdere": true },
+        { "id": "tactische_uitgangspunten", "vraag": "Welke tactische uitgangspunten gelden voor alle teams?", "type": "tekst" }
+      ]
+    },
+    {
+      "id": "balbezit",
+      "titel": "Balbezit",
+      "vragen": [
+        { "id": "principes", "vraag": "Welke basisprincipes gelden in balbezit?", "type": "tekst" },
+        {
+          "id": "opbouw",
+          "vraag": "Hoe bouwt de club op?",
+          "type": "schaal",
+          "min": 1,
+          "max": 5,
+          "label_min": "Verzorgd van achteruit",
+          "label_max": "Snel en direct"
+        },
+        { "id": "opbouwprincipes", "vraag": "Welke opbouwprincipes hanteert de club?", "type": "tekst" }
+      ]
+    },
+    {
+      "id": "balverlies",
+      "titel": "Balverlies",
+      "vragen": [
+        { "id": "principes", "vraag": "Welke basisprincipes gelden bij balverlies?", "type": "tekst" },
+        {
+          "id": "pressingstructuur",
+          "vraag": "Wat is de gewenste pressingstructuur?",
+          "type": "keuze",
+          "opties": ["Hoge pressing", "Middenblok", "Laag blok", "Afhankelijk van de tegenstander"]
+        },
+        { "id": "pressingprincipes", "vraag": "Welke pressingprincipes moet elke speler kennen?", "type": "tekst" }
+      ]
+    },
+    {
+      "id": "omschakeling",
+      "titel": "Omschakelingen",
+      "vragen": [
+        { "id": "b_plus", "vraag": "Wat doen we bij balverovering (omschakeling B+)?", "type": "tekst" },
+        { "id": "b_min", "vraag": "Wat doen we bij balverlies (omschakeling B-)?", "type": "tekst" },
+        {
+          "id": "na_balverlies",
+          "vraag": "Wat is de eerste reflex na balverlies?",
+          "type": "keuze",
+          "opties": ["Direct terugveroveren", "Eerst organiseren en terugzakken", "Afhankelijk van de zone"]
+        }
+      ]
+    },
+    {
+      "id": "coaching",
+      "titel": "Coaching",
+      "vragen": [
+        {
+          "id": "stijl",
+          "vraag": "Welke coachingstijl wil de club?",
+          "type": "meerkeuze",
+          "opties": ["Vragend en begeleidend", "Sturend en duidelijk", "Positief bevestigend", "Veel individuele feedback", "Spelers laten ontdekken"]
+        },
+        { "id": "principes", "vraag": "Welke coachingprincipes gelden voor alle trainers?", "type": "tekst" }
+      ]
+    },
+    {
+      "id": "methodologie",
+      "titel": "Methodologie en afspraken",
+      "vragen": [
+        { "id": "trainingsopbouw", "vraag": "Hoe is een training bij de club opgebouwd?", "type": "tekst" },
+        { "id": "afspraken", "vraag": "Welke methodologische afspraken gelden voor alle teams?", "type": "tekst" },
+        { "id": "terminologie", "vraag": "Welke termen gebruiken alle trainers op dezelfde manier?", "type": "tekst", "uitleg": "Bv. 'diepte zoeken', 'tweede bal', 'kantelen'. Eén term per regel met de betekenis." }
+      ]
+    }
+  ],
+  "leeftijdsdoelen": {
+    "titel": "Ontwikkelingsdoelen per leeftijdscategorie",
+    "uitleg": "Wat moet een speler in deze categorie leren? De AI-staf van een team krijgt enkel de doelen van de eigen categorie.",
+    "vragen": [
+      { "id": "doelen", "vraag": "Ontwikkelingsdoelen", "type": "tekst" },
+      { "id": "accenten", "vraag": "Accenten in de training", "type": "tekst" },
+      { "id": "speelwijze", "vraag": "Speelwijze of formaat in deze categorie", "type": "kort_antwoord" }
+    ]
+  }
+}

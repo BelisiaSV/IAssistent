@@ -1,3 +1,4 @@
+import type { ClubDnaContext } from "./shared/club-dna";
 import type { WeekPeriodization } from "./shared/periodization";
 
 /**
@@ -52,6 +53,12 @@ export interface TestStatus {
 export interface VisionContext {
   samenvatting: string | null;
   antwoorden: { thema: string; vraag: string; antwoord: string | string[] | number }[];
+  /**
+   * The club's DNA for a club team (published version): its principles by
+   * level and the goals of the team's age category. Kept apart from the
+   * coach's own vision so conflicts stay visible. Null for a personal team.
+   */
+  club?: ClubDnaContext | null;
 }
 
 export interface RoleFeedback {
