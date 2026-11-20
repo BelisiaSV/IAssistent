@@ -2232,6 +2232,23 @@ export type Database = {
       };
       assign_team_staff: { Args: { p_team_id: string; p_coach_id: string; p_role: string }; Returns: string };
       cancel_club_team_link: { Args: { p_link_id: string }; Returns: undefined };
+      club_people: {
+        Args: { p_club_id: string };
+        Returns: {
+          coach_id: string;
+          name: string | null;
+          email: string;
+          roles: string[] | null;
+          license_id: string | null;
+          license_status: string | null;
+          active: boolean;
+          since: string;
+        }[];
+      };
+      club_pending_links: {
+        Args: { p_club_id: string };
+        Returns: { id: string; team_name: string; team_club_name: string; requester: string; requested_at: string }[];
+      };
       club_has_module: { Args: { p_club_id: string; p_module: string }; Returns: boolean };
       club_is_active: { Args: { p_club_id: string }; Returns: boolean };
       club_module_codes: { Args: Record<PropertyKey, never>; Returns: string[] };

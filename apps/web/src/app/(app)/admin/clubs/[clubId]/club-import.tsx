@@ -7,7 +7,7 @@ import { hasErrors } from "@/lib/clubs/import";
 import { messages } from "@/lib/messages";
 
 import { checkClubImport, type ImportState, runClubImport } from "../actions";
-import { CopyButton } from "./club-forms";
+import { CopyButton } from "@/components/clubs/forms";
 
 const m = messages.clubAdmin;
 const x = m.excel;

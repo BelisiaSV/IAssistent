@@ -10,6 +10,8 @@ export interface SwitcherTeam {
   id: string;
   name: string;
   clubName: string;
+  /** The club this team belongs to (club environment), or null for a personal team. */
+  clubId: string | null;
   logoUrl: string | null;
   primaryColor: string;
   archived: boolean;
@@ -79,6 +81,9 @@ export function TeamSwitcher({ teams, currentId }: { teams: SwitcherTeam[]; curr
                     <span className="block truncate">{t.clubName}</span>
                     <span className="block truncate text-xs text-slate-500">{t.name}</span>
                   </span>
+                  {t.clubId && (
+                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800">{messages.club.clubTeamBadge}</span>
+                  )}
                 </Link>
               </li>
             ))}

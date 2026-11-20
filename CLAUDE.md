@@ -517,6 +517,26 @@ Regels:
   intrekken), **leden en licenties** (`admin_club_members`, licentie intrekken), **teams** (`admin_club_teams`,
   team toevoegen via `create_club_team`, dat nu ook de platformadmin mag en de clubkleuren overneemt) en
   **historiek** (`club_audit_log`). De platformadmin leest zelf geen teamdata (spelers, weken) van clubs.
+- **Clubomgeving, deel 3: schermen van de club** (migratie `club_screens`: `club_people()` voor owner/admin/TD/
+  coördinator, `club_pending_links()` voor owner/admin met team- en aanvragernaam, `club_seats_used()` enkel voor leden
+  en de platformadmin). **Club koppelen** (`/clubs/join?code=`, link in de zijbalk): iedereen die ingelogd is wisselt
+  een code in (`redeemCode` in `lib/clubs/actions.ts`, foutmeldingen per `error` van de database) en komt in de club.
+  De zijbalk toont onder de teams **Mijn clubs** (`loadMyClubs` in `lib/clubs/load.ts`) en "Club koppelen"; de
+  teamkiezer markeert clubteams ("Club"); op teampagina's toont `EnvironmentBar` (`components/environment-bar.tsx`)
+  of je in je **persoonlijke omgeving** of in de **clubomgeving** werkt (enkel voor wie een clubteam heeft).
+  Clubpagina's `/clubs/[clubId]` (`getClubContext`: 404 voor wie geen lid is; rollen, abonnement, `canManage` =
+  owner/admin, `seesAll` = owner/admin/TD, `seesPeople` = alle rollen behalve coach/assistent): **Dashboard**
+  (`loadClubDashboard` in `lib/clubs/dashboard.ts`: licenties, actieve teams, trainers, modules; per team staf,
+  goedgekeurde weekplanning deze week, laatste wedstrijdevaluatie, sessies van 28 dagen; aandachtspunten: geen
+  hoofdtrainer, geen weekplanning, wachtende koppelingen; recent), **Structuur** (teams per leeftijdscategorie met
+  staf; owner/admin: staf toevoegen/weghalen, team toevoegen, koppelaanvragen goedkeuren of weigeren; mensen van de
+  club) en **Licenties en codes** (owner/admin: codes maken — een admin enkel TD, coördinator, coach en assistent —
+  en intrekken, licenties intrekken, rollen zonder licentie beëindigen, historiek). Alles wat schrijft gaat via de
+  databasefuncties, die de rol zelf controleren. Gedeelde bouwstenen voor admin en club: `components/clubs/forms.tsx`
+  (`CodeForm`, `TeamForm`, `StaffForm`, `ConfirmButton`, `CopyButton`; actie als prop) en `components/clubs/tables.tsx`
+  (`CodesTable`, `PeopleTable`, `HistoryList`); de code maken zelf in `createCodeFromForm` (`lib/clubs/code.ts`).
+  **Eigen team koppelen**: Instellingen van een persoonlijk team → Club (`ClubLink`): kies een club waar je coach bent
+  en vraag aan, of trek de aanvraag in; bij een clubteam staat welke club.
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  schermen van de clubomgeving voor de club zelf (code inwisselen, clubdashboard, structuur, licenties en codes
-  door de club, team koppelen) en de clubmodules, visie delen; oefeningen handmatig wijzigen; videodienst.
+  de clubmodules (Club DNA, gedeelde oefenstof, clubplanning, evaluaties, kennis, rapportage) en de clubcontext
+  voor de AI-staf, visie delen; oefeningen handmatig wijzigen; videodienst.
