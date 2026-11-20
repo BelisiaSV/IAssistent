@@ -57,18 +57,22 @@ export const messages = {
         feedback: "Bijsturing",
         notReady: "Het overzicht is nog niet klaar.",
         exercisesTitle: "Oefenstof van deze week",
-        exercisesIntro: "Alle oefeningen uit het weekplan, met hun beeld. Open een oefening voor de volledige uitwerking.",
-        noExercises: "Het weekplan gebruikt nog geen oefeningen uit je oefenstof of de oefenstofbank.",
+        exercisesIntro:
+          "Alle oefeningen uit het weekplan, met hun beeld. Open een oefening voor de volledige uitwerking.",
+        noExercises:
+          "Het weekplan gebruikt nog geen oefeningen uit je oefenstof of de oefenstofbank.",
         own: "Eigen oefenstof",
         bank: (number: string) => `Oefenstofbank ${number}`,
         open: "Oefening openen",
         print: "Afdrukken",
       },
-      placeholder: "Geef je staf een opdracht, bv. Ik wil deze week trainen op omschakeling vanuit een medium blok richting de final third, met afwerking.",
+      placeholder:
+        "Geef je staf een opdracht, bv. Ik wil deze week trainen op omschakeling vanuit een medium blok richting de final third, met afwerking.",
       send: "Start",
       starting: "Bezig…",
       label: "Opdracht voor je staf",
-      intro: "Typ één opdracht. De staf bespreekt ze samen: beschikbaarheid, belasting, spelprincipes en oefeningen. Jij krijgt één gezamenlijk overzicht.",
+      intro:
+        "Typ één opdracht. De staf bespreekt ze samen: beschikbaarheid, belasting, spelprincipes en oefeningen. Jij krijgt één gezamenlijk overzicht.",
       typing: (name: string) => `${name} typt…`,
       to: (name: string) => `aan ${name}`,
       you: "Jij",
@@ -77,9 +81,11 @@ export const messages = {
       by: (name: string) => `Ingebracht door ${name}`,
       attention: "Aandachtspunten",
       approve: "Goedkeuren",
-      approved: (date: string) => `Goedgekeurd op ${date}. De hele staf kent dit voorstel nu.`,
+      approved: (date: string) =>
+        `Goedgekeurd op ${date}. De hele staf kent dit voorstel nu.`,
       adjust: "Aanpassen",
-      adjustPlaceholder: "Wat moet er anders? Bv. Hou de partijvorm op het volledige veld.",
+      adjustPlaceholder:
+        "Wat moet er anders? Bv. Hou de partijvorm op het volledige veld.",
       adjustSend: "Stuur naar de staf",
       cancel: "Annuleren",
       retry: "Opnieuw proberen",
@@ -105,7 +111,11 @@ export const messages = {
         coaching: "Coachingspunten",
         openExercise: "Oefening openen",
         openBank: (number: string) => `Oefenstofbank ${number} →`,
-        phases: { opwarming: "Opwarming", kern: "Kern", afsluiting: "Afsluiting" } as Record<string, string>,
+        phases: {
+          opwarming: "Opwarming",
+          kern: "Kern",
+          afsluiting: "Afsluiting",
+        } as Record<string, string>,
         total: (n: number) => `${n} min in totaal`,
       },
       toWeek: {
@@ -118,9 +128,11 @@ export const messages = {
         failed: "De weekplanning kon niet in de Microcyclus gezet worden.",
         match: "Wedstrijd",
       },
-      replyPlaceholder: "Reageer op de staf, bv. Maak de partijvorm van donderdag korter en voeg meer afwerking toe.",
+      replyPlaceholder:
+        "Reageer op de staf, bv. Maak de partijvorm van donderdag korter en voeg meer afwerking toe.",
       reply: "Stuur",
-      replyHint: "Wil je iets anders? Schrijf het hieronder in de chat; de staf werkt verder.",
+      replyHint:
+        "Wil je iets anders? Schrijf het hieronder in de chat; de staf werkt verder.",
       close: "Nieuwe opdracht",
       closeHint: "Sluit deze bespreking en begin een nieuwe.",
       flowDone: "Overzicht",
@@ -129,7 +141,12 @@ export const messages = {
       newMeeting: "Nieuwe opdracht",
       consult: "Raadpleeg je staf",
       consultHint: "Spreek één rol apart aan.",
-      status: { running: "Bezig", ready: "Ter goedkeuring", failed: "Mislukt", approved: "Goedgekeurd" } as Record<string, string>,
+      status: {
+        running: "Bezig",
+        ready: "Ter goedkeuring",
+        failed: "Mislukt",
+        approved: "Goedgekeurd",
+      } as Record<string, string>,
       errors: {
         load: "De bespreking kon niet geladen worden.",
         start: "De opdracht kon niet gestart worden.",
@@ -137,41 +154,59 @@ export const messages = {
         tooLong: (max: number) => `Een opdracht is hoogstens ${max} tekens.`,
         readOnly: "Je kunt in dit team geen opdrachten geven (alleen-lezen).",
         save: "Opslaan mislukt. Vernieuw de pagina en probeer opnieuw.",
-        dailyLimit: "De daglimiet van AI-antwoorden in de staffkamer is bereikt. Morgen kan het weer.",
+        dailyLimit:
+          "De daglimiet van AI-antwoorden in de staffkamer is bereikt. Morgen kan het weer.",
       },
     },
-    flowState: { waiting: "Wacht", active: "Spreekt", done: "Klaar" } as Record<string, string>,
+    flowState: { waiting: "Wacht", active: "Spreekt", done: "Klaar" } as Record<
+      string,
+      string
+    >,
     title: "AI Staff Room",
-    intro: "Je digitale staffkamer. Elke rol heeft een eigen gesprek met jou en kent de goedgekeurde teamcontext: je visie, de kern (rugnummers), de goedgekeurde plannen van deze week en je oefenstof.",
+    intro:
+      "Je digitale staffkamer. Elke rol heeft een eigen gesprek met jou en kent de goedgekeurde teamcontext: je visie, de kern (rugnummers), de goedgekeurde plannen van deze week en je oefenstof.",
     roles: "Staf",
     newTask: "Nieuwe opdracht",
-    newTaskPlaceholder: "Bv. Werk de training van donderdag uit met de nadruk op omschakeling.",
+    newTaskPlaceholder:
+      "Bv. Werk de training van donderdag uit met de nadruk op omschakeling.",
     newTaskSend: "Start opdracht",
-    newTaskHint: "De AI Staff Coordinator verdeelt je opdracht over de juiste rollen.",
+    newTaskHint:
+      "De AI Staff Coordinator verdeelt je opdracht over de juiste rollen.",
     placeholder: (name: string) => `Bericht aan ${name}…`,
     send: "Versturen",
     sending: "Bezig…",
     thinking: (name: string) => `${name} denkt na…`,
-    empty: (name: string) => `Nog geen gesprek met ${name}. Stel een vraag of geef een opdracht.`,
+    empty: (name: string) =>
+      `Nog geen gesprek met ${name}. Stel een vraag of geef een opdracht.`,
     noMessages: "Nog geen berichten",
     you: "Jij",
     testMode: "Testmodus",
-    testModeHint: "Testmodus: de rollen antwoorden met voorbeelden uit /staff, zonder AI.",
+    testModeHint:
+      "Testmodus: de rollen antwoorden met voorbeelden uit /staff, zonder AI.",
     readOnly: "Je kunt dit gesprek lezen, maar niet schrijven.",
     openRoom: "Open in Staff Room",
     close: "Sluiten",
     dock: "Je staf",
     openChat: (name: string) => `Praat met ${name}`,
     tasks: "Taken",
-    tasksHint: "Gezamenlijke taken die een rol voorstelt. Jij bevestigt ze, de staf werkt ze uit en jij keurt het voorstel goed.",
-    noTasks: "Nog geen taken. Een rol stelt een taak voor als ze een andere rol nodig heeft.",
+    tasksHint:
+      "Gezamenlijke taken die een rol voorstelt. Jij bevestigt ze, de staf werkt ze uit en jij keurt het voorstel goed.",
+    noTasks:
+      "Nog geen taken. Een rol stelt een taak voor als ze een andere rol nodig heeft.",
     involved: "Betrokken",
     proposedBy: (name: string) => `Voorgesteld door ${name}`,
     confirm: "Bevestig taak",
     confirming: "Bezig…",
-    confirmHint: "Na je bevestiging werkt elke betrokken rol zijn deel uit; jij krijgt één voorstel.",
+    confirmHint:
+      "Na je bevestiging werkt elke betrokken rol zijn deel uit; jij krijgt één voorstel.",
     progress: "Voortgang",
-    steps: ["Voorgesteld", "Bevestigd", "In uitvoering", "Ter goedkeuring", "Goedgekeurd"],
+    steps: [
+      "Voorgesteld",
+      "Bevestigd",
+      "In uitvoering",
+      "Ter goedkeuring",
+      "Goedgekeurd",
+    ],
     taglines: {
       coordinator: "Verdeelt opdrachten en bundelt de voorstellen",
       "assistant-coach": "Training en oefenstof",
@@ -187,14 +222,18 @@ export const messages = {
       empty: "Typ eerst een bericht.",
       tooLong: (max: number) => `Een bericht is hoogstens ${max} tekens.`,
       readOnly: "Je kunt in dit team geen berichten sturen (alleen-lezen).",
-      answer: "Je bericht is bewaard, maar de rol kon nu niet antwoorden. Probeer het later opnieuw.",
-      dailyLimit: "De daglimiet van AI-antwoorden is bereikt. Morgen kan het weer.",
+      answer:
+        "Je bericht is bewaard, maar de rol kon nu niet antwoorden. Probeer het later opnieuw.",
+      dailyLimit:
+        "De daglimiet van AI-antwoorden is bereikt. Morgen kan het weer.",
     },
   },
   presentation: {
     title: "Presentatie",
-    intro: "De wedstrijdpresentatie van de Video Analist, automatisch ingevuld: tegenstander, vorm en klassement, opstellingen en het principe van de Tactical Coach. Download elke dia als afbeelding of druk alles af als PDF.",
-    noMatch: "Geen komende wedstrijd in de weekinput. Vul een wedstrijd in bij de Microcyclus (of laat de competitie importeren).",
+    intro:
+      "De wedstrijdpresentatie van de Video Analist, automatisch ingevuld: tegenstander, vorm en klassement, opstellingen en het principe van de Tactical Coach. Download elke dia als afbeelding of druk alles af als PDF.",
+    noMatch:
+      "Geen komende wedstrijd in de weekinput. Vul een wedstrijd in bij de Microcyclus (of laat de competitie importeren).",
     match: "Wedstrijd",
     downloadAll: "Alle dia's downloaden",
     downloadOne: "Download",
@@ -203,19 +242,23 @@ export const messages = {
     failed: "Downloaden mislukt.",
     slide: (n: number) => `Dia ${n}`,
     logosTitle: "Logo's",
-    logosIntro: "De logo's van de tegenstander en van zijn laatste vijf tegenstanders. Je laadt ze één keer op; ze worden bij de fiche van die ploeg bewaard (PNG, JPG of WEBP, max. 2 MB).",
+    logosIntro:
+      "De logo's van de tegenstander en van zijn laatste vijf tegenstanders. Je laadt ze één keer op; ze worden bij de fiche van die ploeg bewaard (PNG, JPG of WEBP, max. 2 MB).",
     logoMissing: "Nog geen logo",
     principleTitle: "Principe van de week",
-    principleIntro: "Pas de titel en de uitleg aan voor de dia's. De tekening blijft die van de Tactical Coach.",
+    principleIntro:
+      "Pas de titel en de uitleg aan voor de dia's. De tekening blijft die van de Tactical Coach.",
     principleCustom: "Eigen tekst van de hoofdcoach.",
-    principleFromCoach: (title: string) => `Voorstel van de Tactical Coach: ${title}`,
+    principleFromCoach: (title: string) =>
+      `Voorstel van de Tactical Coach: ${title}`,
     principleName: "Titel",
     principleExplanation: "Uitleg",
     principleSave: "Principe bewaren",
     principleReset: "Terug naar het voorstel van de Tactical Coach",
     principleSaved: "Bewaard",
     shirtTitle: "Truitjes van de tegenstander",
-    shirtIntro: (name: string) => `De kleuren van ${name} op de dia met hun opstelling.`,
+    shirtIntro: (name: string) =>
+      `De kleuren van ${name} op de dia met hun opstelling.`,
     shirtColor: "Truitje",
     shirtTrim: "Kraag en mouwen",
     shirtSave: "Kleuren bewaren",
@@ -224,10 +267,13 @@ export const messages = {
     logoReplace: "Vervangen",
     uploading: "Bezig…",
     missing: {
-      opponentLineup: "Vul de opstelling van de tegenstander in bij Tegenstanders.",
+      opponentLineup:
+        "Vul de opstelling van de tegenstander in bij Tegenstanders.",
       ownLineup: "Maak een selectie voor deze wedstrijd bij Selecties.",
-      principle: "Nog geen principe: vraag het tactisch weekplan aan bij de Microcyclus.",
-      stats: "Koppel het team aan de competitie om vorm en klassement te tonen.",
+      principle:
+        "Nog geen principe: vraag het tactisch weekplan aan bij de Microcyclus.",
+      stats:
+        "Koppel het team aan de competitie om vorm en klassement te tonen.",
     },
     // Labels on the slides (from the template of the club).
     slides: {
@@ -237,14 +283,16 @@ export const messages = {
       position: "POSITION",
       record: "RECORD",
       lastFive: "LAST FIVE GAMES",
-      pointsFrom: (points: number, matches: number) => `${points} POINTS FROM ${matches} MATCHES`,
+      pointsFrom: (points: number, matches: number) =>
+        `${points} POINTS FROM ${matches} MATCHES`,
       letters: { win: "W", draw: "D", loss: "L" } as Record<string, string>,
       analysis: ["OPPONENT", "ANALYSIS"],
     },
     errors: {
       logo: "Het logo kon niet opgeladen worden.",
       shirt: "De kleuren konden niet bewaard worden.",
-      principle: "Het principe kon niet bewaard worden (titel 1–120 tekens, uitleg hoogstens 600).",
+      principle:
+        "Het principe kon niet bewaard worden (titel 1–120 tekens, uitleg hoogstens 600).",
       readOnly: "Je kunt in dit team niets opladen (alleen-lezen).",
     },
   },
@@ -259,7 +307,10 @@ export const messages = {
       zone: (n: number) => `Zone ${n}`,
       apply: "Filteren",
       clear: "Filters wissen",
-      count: (shown: number, total: number) => (shown === total ? `${total} oefeningen` : `${shown} van ${total} oefeningen`),
+      count: (shown: number, total: number) =>
+        shown === total
+          ? `${total} oefeningen`
+          : `${shown} van ${total} oefeningen`,
     },
     zonesTitle: "Zones",
     // Fields of a bank exercise, in the order they are shown.
@@ -284,7 +335,8 @@ export const messages = {
     } as Record<string, string>,
     coach: {
       title: "Oefenstofbank",
-      intro: "Goedgekeurde oefeningen van het platform. Je staf gebruikt ze in de weekplanning als je eigen oefenstof niets passends heeft. Neem een oefening over om ze in je eigen oefenstof aan te passen.",
+      intro:
+        "Goedgekeurde oefeningen van het platform. Je staf gebruikt ze in de weekplanning als je eigen oefenstof niets passends heeft. Neem een oefening over om ze in je eigen oefenstof aan te passen.",
       search: "Zoek op titel, principe of label",
       allTypes: "Alle types",
       allPhases: "Alle spelfases",
@@ -305,28 +357,48 @@ export const messages = {
     },
     admin: {
       title: "Oefenstofbank",
-      intro: "De centrale oefenstofbank van het platform. Laad de export van je oefenstofdatabank op (zip met de backup en de tekeningen en video's, of enkel de backup .json): een oefening met hetzelfde nummer (bv. OEF-007) wordt bijgewerkt, een nieuw nummer wordt toegevoegd, niets wordt verwijderd. Nieuwe oefeningen staan op \"Na te kijken\"; enkel goedgekeurde oefeningen zijn zichtbaar voor de trainers en hun staf.",
+      intro:
+        'De centrale oefenstofbank van het platform. Laad de export van je oefenstofdatabank op (zip met de backup en de tekeningen en video\'s, of enkel de backup .json): een oefening met hetzelfde nummer (bv. OEF-007) wordt bijgewerkt, een nieuw nummer wordt toegevoegd, niets wordt verwijderd. Nieuwe oefeningen staan op "Na te kijken"; enkel goedgekeurde oefeningen zijn zichtbaar voor de trainers en hun staf.',
       file: "Export kiezen (.zip of .json)",
-      zipMedia: (n: number) => `${n} tekening(en) en video('s) in de zip worden meteen gekoppeld.`,
+      zipMedia: (n: number) =>
+        `${n} tekening(en) en video('s) in de zip worden meteen gekoppeld.`,
       zipProgress: (done: number, failed: number, total: number) =>
         done + failed < total
           ? `Tekeningen en video's opladen: ${done + failed} van ${total}…`
           : `Tekeningen en video's: ${done} opgeladen${failed ? `, ${failed} niet (laad ze opnieuw op bij "Tekeningen en video's")` : ""}.`,
       reading: "Bestand lezen…",
-      unreadable: "Dit bestand is geen export van de oefenstofbank: kies de zip of de backup (.json) met hoogstens 500 oefeningen.",
+      unreadable:
+        "Dit bestand is geen export van de oefenstofbank: kies de zip of de backup (.json) met hoogstens 500 oefeningen.",
       previewTitle: "Controle",
-      summary: (total: number, added: number, existing: number) => `${total} oefeningen: ${added} nieuw, ${existing} al in de bank (worden bijgewerkt als ze gewijzigd zijn).`,
+      summary: (total: number, added: number, existing: number) =>
+        `${total} oefeningen: ${added} nieuw, ${existing} al in de bank (worden bijgewerkt als ze gewijzigd zijn).`,
       issuesTitle: (n: number) => `${n} oefening(en) worden overgeslagen`,
-      issue: (field: string, duplicate: boolean) => (duplicate ? "Dit nummer staat al eerder in het bestand." : `Ongeldig veld: ${field || "onbekend"}.`),
-      uncertainNote: (n: number) => `${n} oefening(en) bevatten nog een open vraagteken (bv. "regels: ?"). Kijk ze na voor je ze goedkeurt.`,
+      issue: (field: string, duplicate: boolean) =>
+        duplicate
+          ? "Dit nummer staat al eerder in het bestand."
+          : `Ongeldig veld: ${field || "onbekend"}.`,
+      uncertainNote: (n: number) =>
+        `${n} oefening(en) bevatten nog een open vraagteken (bv. "regels: ?"). Kijk ze na voor je ze goedkeurt.`,
       import: "Importeren",
       importing: "Bezig met importeren…",
-      done: (r: { added: number; updated: number; unchanged: number; skipped: number }) =>
+      done: (r: {
+        added: number;
+        updated: number;
+        unchanged: number;
+        skipped: number;
+      }) =>
         `Geïmporteerd: ${r.added} nieuw, ${r.updated} bijgewerkt, ${r.unchanged} ongewijzigd${r.skipped ? `, ${r.skipped} overgeslagen` : ""}.`,
       listTitle: (n: number) => `Oefeningen in de bank (${n})`,
       empty: "Nog geen oefeningen. Laad hierboven een backup op.",
-      filters: { all: "Alle", review: "Na te kijken", approved: "Goedgekeurd" } as Record<string, string>,
-      status: { review: "Na te kijken", approved: "Goedgekeurd" } as Record<string, string>,
+      filters: {
+        all: "Alle",
+        review: "Na te kijken",
+        approved: "Goedgekeurd",
+      } as Record<string, string>,
+      status: { review: "Na te kijken", approved: "Goedgekeurd" } as Record<
+        string,
+        string
+      >,
       approve: "Goedkeuren",
       unapprove: "Terug naar nakijken",
       uncertain: "Open vraagteken",
@@ -340,7 +412,8 @@ export const messages = {
       mediaUnknown: "geen oefening met deze code",
       mediaUploading: "bezig…",
       mediaDone: (n: number) => `gekoppeld aan ${n} oefening(en)`,
-      mediaSummary: (done: number, failed: number) => `${done} opgeladen${failed ? `, ${failed} niet` : ""}.`,
+      mediaSummary: (done: number, failed: number) =>
+        `${done} opgeladen${failed ? `, ${failed} niet` : ""}.`,
       mediaPresent: "bestand staat in de app",
       mediaEditTitle: "Tekening of video",
       mediaNone: "Nog geen tekening of video.",
@@ -355,7 +428,8 @@ export const messages = {
         mediaType: "Enkel PNG, JPG, WEBP, GIF, MP4, WEBM of MOV.",
         mediaSize: "Een bestand is hoogstens 25 MB.",
         edit: "Opslaan mislukt.",
-        editInvalid: (field: string) => `Kijk het veld ${field || "dat je wijzigde"} na (te lang of leeg).`,
+        editInvalid: (field: string) =>
+          `Kijk het veld ${field || "dat je wijzigde"} na (te lang of leeg).`,
       },
       edit: "Bewerken",
       edited: "Aangepast in de app",
@@ -369,7 +443,10 @@ export const messages = {
         tags: "Labels",
         belasting_toelichting: "Toelichting bij de belasting",
       } as Record<string, string>,
-      editHints: { lines: "Eén punt per regel.", tags: "Gescheiden door komma's." },
+      editHints: {
+        lines: "Eén punt per regel.",
+        tags: "Gescheiden door komma's.",
+      },
       zonesHint: "Klik op een zone om ze aan of uit te zetten.",
       save: "Opslaan",
       saving: "Bezig…",
@@ -380,14 +457,23 @@ export const messages = {
   competition: {
     admin: {
       title: "Competitie importeren",
-      intro: "Laad de exports van voetbalvlaanderen.be op: uitslagen en kalender (vvlresdown), klassementen (vvlcltdown) en scheidsrechters (vvldesdown). Enkel de reeksen die aan een team gekoppeld zijn, worden bewaard. De wedstrijden komen in de weekinput van de teams en de uitslagen in hun evaluaties; wat een coach zelf invulde, blijft staan.",
+      intro:
+        "Laad de exports van voetbalvlaanderen.be op: uitslagen en kalender (vvlresdown), klassementen (vvlcltdown) en scheidsrechters (vvldesdown). Enkel de reeksen die aan een team gekoppeld zijn, worden bewaard. De wedstrijden komen in de weekinput van de teams en de uitslagen in hun evaluaties; wat een coach zelf invulde, blijft staan.",
       files: "Bestanden kiezen",
       reading: "Bestanden lezen…",
-      found: { results: "Uitslagen en kalender", standings: "Klassementen", referees: "Scheidsrechters" } as Record<string, string>,
+      found: {
+        results: "Uitslagen en kalender",
+        standings: "Klassementen",
+        referees: "Scheidsrechters",
+      } as Record<string, string>,
       rows: (n: number) => `${n.toLocaleString("nl-BE")} rijen`,
-      unknown: (name: string) => `${name}: geen export van Voetbal Vlaanderen herkend.`,
+      clubsSaved: (n: number) =>
+        `${n} clubs uit de kalender bijgewerkt in de clublijst (Admin → Clubs).`,
+      unknown: (name: string) =>
+        `${name}: geen export van Voetbal Vlaanderen herkend.`,
       linksTitle: "Teams koppelen",
-      linksIntro: "Kies per team de ploegnaam zoals in de export en de reeksen die bij dit team horen (bv. de competitie en de beker). Laad eerst de bestanden op om de ploegen en reeksen te zien.",
+      linksIntro:
+        "Kies per team de ploegnaam zoals in de export en de reeksen die bij dit team horen (bv. de competitie en de beker). Laad eerst de bestanden op om de ploegen en reeksen te zien.",
       teamName: "Ploeg in de export",
       teamPlaceholder: "Typ om te zoeken, bv. Belisia Bilzen SV A",
       divisions: "Reeksen",
@@ -399,22 +485,43 @@ export const messages = {
       importTitle: "Importeren",
       importIntro: (divisions: string) => `Gekoppelde reeksen: ${divisions}.`,
       noLinks: "Nog geen team gekoppeld.",
-      summary: (matches: number, standings: number, referees: number) => `${matches} wedstrijden, ${standings} rijen in de klassementen, ${referees} scheidsrechtersaanduidingen.`,
+      summary: (matches: number, standings: number, referees: number) =>
+        `${matches} wedstrijden, ${standings} rijen in de klassementen, ${referees} scheidsrechtersaanduidingen.`,
       import: "Importeren",
       importing: "Bezig met importeren…",
-      done: (r: { matches: number; standings: number; referees: number; weeks: number; reports: number }) =>
+      done: (r: {
+        matches: number;
+        standings: number;
+        referees: number;
+        weeks: number;
+        reports: number;
+      }) =>
         `Geïmporteerd: ${r.matches} wedstrijden, ${r.standings} klassementsrijen, ${r.referees} scheidsrechtersaanduidingen. ${r.weeks} wedstrijden toegevoegd aan de weekinput, ${r.reports} uitslagen in de evaluaties.`,
-      errors: { save: "Opslaan mislukt.", import: "Importeren mislukt.", noFiles: "Kies eerst de bestanden." },
+      errors: {
+        save: "Opslaan mislukt.",
+        import: "Importeren mislukt.",
+        noFiles: "Kies eerst de bestanden.",
+      },
     },
     page: {
       title: "Competitie",
-      notLinked: "Dit team is nog niet gekoppeld aan de competitie. De admin koppelt het team en laadt de exports van Voetbal Vlaanderen elke week op.",
+      notLinked:
+        "Dit team is nog niet gekoppeld aan de competitie. De admin koppelt het team en laadt de exports van Voetbal Vlaanderen elke week op.",
       noData: "Nog geen gegevens geïmporteerd voor deze reeks.",
       standings: "Klassement",
       period: "Periode",
       periods: (p: number) => (p === 0 ? "Volledig seizoen" : `Periode ${p}`),
       division: (code: string) => `Reeks ${code}`,
-      columns: { pos: "#", team: "Ploeg", played: "M", won: "W", drawn: "G", lost: "V", goals: "Doelsaldo", points: "Ptn" },
+      columns: {
+        pos: "#",
+        team: "Ploeg",
+        played: "M",
+        won: "W",
+        drawn: "G",
+        lost: "V",
+        goals: "Doelsaldo",
+        points: "Ptn",
+      },
       calendar: "Kalender en uitslagen",
       upcoming: "Komende wedstrijden",
       played: "Gespeeld",
@@ -436,7 +543,11 @@ export const messages = {
         FI: "Forfait (identiteitskaart, 1 ploeg)",
         FF: "Forfait (identiteitskaart, 2 ploegen)",
       } as Record<string, string>,
-      matchType: { CHP: "Kampioenschap", CUP: "Beker", FRG: "Vriendschappelijk" } as Record<string, string>,
+      matchType: {
+        CHP: "Kampioenschap",
+        CUP: "Beker",
+        FRG: "Vriendschappelijk",
+      } as Record<string, string>,
       assignment: {
         TRN: "Aanduiding door het Provinciaal Scheidsrechters Comité",
         CRC: "Aanduiding door het Centraal Scheidsrechters Comité",
@@ -456,7 +567,8 @@ export const messages = {
     add: "Kaart toevoegen",
     remove: "Verwijderen",
     none: "Geen kaarten.",
-    suspended: (n: number) => `Geschorst: nog ${n} ${n === 1 ? "wedstrijd" : "wedstrijden"}`,
+    suspended: (n: number) =>
+      `Geschorst: nog ${n} ${n === 1 ? "wedstrijd" : "wedstrijden"}`,
     rules: {
       title: "Schorsingen",
       hint: "Hoe kaarten tot een schorsing leiden. Elke n-de gele kaart van het seizoen (vanaf de eerste competitiewedstrijd) en elke rode kaart.",
@@ -472,7 +584,8 @@ export const messages = {
     title: "Taken",
     mine: {
       title: "Mijn taken",
-      intro: "Noteer wat er moet gebeuren. Vink een taak af als ze klaar is, of vraag ze aan de staf: de taak gaat dan als vraag naar de rol die je kiest (namen van spelers worden rugnummers).",
+      intro:
+        "Noteer wat er moet gebeuren. Vink een taak af als ze klaar is, of vraag ze aan de staf: de taak gaat dan als vraag naar de rol die je kiest (namen van spelers worden rugnummers).",
       placeholder: "Bv. Maak een individuele videoanalyse van speler X",
       add: "Toevoegen",
       empty: "Nog geen taken.",
@@ -493,7 +606,11 @@ export const messages = {
     },
     open: "Bekijk het gesprek",
     view: "Bekijk de taak",
-    sections: { active: "Lopend en ter goedkeuring", proposed: "Voorgesteld", approved: "Goedgekeurd" },
+    sections: {
+      active: "Lopend en ter goedkeuring",
+      proposed: "Voorgesteld",
+      approved: "Goedgekeurd",
+    },
     status: {
       proposed: "Wacht op bevestiging",
       running: "De staf werkt eraan",
@@ -501,8 +618,16 @@ export const messages = {
       failed: "Mislukt",
       approved: "Goedgekeurd",
     } as Record<string, string>,
-    stepStatus: { pending: "Wacht", generating: "Werkt eraan…", ready: "Klaar", failed: "Mislukt" } as Record<string, string>,
-    phase: { bijdrage: "Bijdrage", eindvoorstel: "Eindvoorstel" } as Record<string, string>,
+    stepStatus: {
+      pending: "Wacht",
+      generating: "Werkt eraan…",
+      ready: "Klaar",
+      failed: "Mislukt",
+    } as Record<string, string>,
+    phase: { bijdrage: "Bijdrage", eindvoorstel: "Eindvoorstel" } as Record<
+      string,
+      string
+    >,
     assignment: "Opdracht",
     steps: "Werkverdeling",
     proposal: "Voorstel voor jou",
@@ -531,11 +656,13 @@ export const messages = {
       save: "Opslaan mislukt. Vernieuw de pagina en probeer opnieuw.",
       feedback: "Schrijf eerst wat er anders moet.",
       feedbackTooLong: "Je feedback is hoogstens 2000 tekens.",
-      dailyLimit: "De daglimiet van AI-stappen voor taken is bereikt. Morgen kan het weer.",
+      dailyLimit:
+        "De daglimiet van AI-stappen voor taken is bereikt. Morgen kan het weer.",
     },
   },
   evaluationsPage: {
-    intro: "De evaluaties van de gespeelde wedstrijden. Je vult ze in bij de weekplanning, na de wedstrijd.",
+    intro:
+      "De evaluaties van de gespeelde wedstrijden. Je vult ze in bij de weekplanning, na de wedstrijd.",
     none: "Nog geen evaluaties. Vul na een wedstrijd de evaluatie in bij de weekplanning.",
     home: "thuis",
     away: "uit",
@@ -551,7 +678,8 @@ export const messages = {
       points: "Punten",
       goals: "Doelsaldo",
       played: "Gespeeld",
-      tooltip: (points: number) => `${points} ${points === 1 ? "punt" : "punten"}`,
+      tooltip: (points: number) =>
+        `${points} ${points === 1 ? "punt" : "punten"}`,
       date: "Datum",
       opponent: "Tegenstander",
       score: "Uitslag",
@@ -569,24 +697,37 @@ export const messages = {
     },
   },
   plans: {
-    adminTabs: { players: "Spelersimport", plans: "Prijsplannen", accounts: "Accounts", competition: "Competitie", exerciseBank: "Oefenstofbank" },
+    adminTabs: {
+      players: "Spelersimport",
+      plans: "Prijsplannen",
+      accounts: "Accounts",
+      competition: "Competitie",
+      exerciseBank: "Oefenstofbank",
+      clubs: "Clubs",
+    },
     adminTitle: "Prijsplannen",
-    adminIntro: "Deze plannen ziet een klant bij Mijn abonnement. Pas namen, prijzen en kenmerken aan; een inactief plan zie enkel jij. Online betalen komt later.",
+    adminIntro:
+      "Deze plannen ziet een klant bij Mijn abonnement. Pas namen, prijzen en kenmerken aan; een inactief plan zie enkel jij. Online betalen komt later.",
     newPlan: "Nieuw plan",
     edit: "Bewerken",
     save: "Plan opslaan",
     saved: "Plan opgeslagen.",
     delete: "Verwijderen",
-    deleteConfirm: "Dit plan verwijderen? Accounts met dit plan houden dan geen plan.",
+    deleteConfirm:
+      "Dit plan verwijderen? Accounts met dit plan houden dan geen plan.",
     inactive: "Inactief",
     recommended: "Aanbevolen",
     priceOnRequest: "Offerte op maat",
     perMonth: "/ maand",
     perYear: "/ jaar",
     yearly: (price: string) => `Jaarbetaling: ${price}`,
-    upToCoaches: (n: number) => (n === 1 ? "1 hoofdtrainer" : `Tot ${n} hoofdtrainers`),
+    upToCoaches: (n: number) =>
+      n === 1 ? "1 hoofdtrainer" : `Tot ${n} hoofdtrainers`,
     upToTeams: (n: number) => (n === 1 ? "1 team" : `Max. ${n} teams`),
-    audience: { individual: "Individueel", club: "Voor clubs" } as Record<string, string>,
+    audience: { individual: "Individueel", club: "Voor clubs" } as Record<
+      string,
+      string
+    >,
     fields: {
       code: "Code",
       codeHint: "Kleine letters, cijfers en streepjes; uniek.",
@@ -624,7 +765,8 @@ export const messages = {
     },
     accounts: {
       title: "Accounts",
-      intro: "Koppel een plan aan een account. Koppel een plan aan je eigen account om te zien wat de klant ziet bij Mijn abonnement.",
+      intro:
+        "Koppel een plan aan een account. Koppel een plan aan je eigen account om te zien wat de klant ziet bij Mijn abonnement.",
       email: "E-mail",
       name: "Naam",
       plan: "Plan",
@@ -641,6 +783,431 @@ export const messages = {
       all: "Alle plannen",
       yourPlan: "Jouw plan",
       contact: "Contact opnemen",
+    },
+  },
+  club: {
+    environment: "Clubomgeving",
+    personal: "Persoonlijke omgeving",
+    personalHint: "Je werkt in je eigen omgeving. Alleen jij ziet dit team.",
+    clubHint: (club: string) => `Je werkt in de clubomgeving van ${club}. De club ziet de trainingen, planningen en evaluaties van dit team.`,
+    clubTeamBadge: "Club",
+    nav: { section: "Mijn clubs", join: "Club koppelen" },
+    tabs: { dashboard: "Dashboard", structure: "Structuur", dna: "Club DNA", licenses: "Licenties en codes" },
+    yourRoles: (roles: string) => `Jouw rol: ${roles}`,
+    inactive: "Het pakket van de club loopt niet. Neem contact op met IAssistent.",
+    join: {
+      title: "Club koppelen",
+      intro:
+        "Kreeg je een activatiecode van je club? Vul ze hier in. Je account, je visie en je eigen oefenstof blijven van jou; de club voegt haar omgeving toe.",
+      code: "Activatiecode",
+      placeholder: "XXXX-XXXX-XXXX",
+      submit: "Koppel aan de club",
+      errors: {
+        invalid: "Deze code bestaat niet of werd al gebruikt.",
+        expired: "Deze code is vervallen. Vraag je club om een nieuwe.",
+        club_inactive: "Het pakket van deze club loopt niet.",
+        already_member: "Je hebt deze rol al in de club.",
+        no_seats: "De club heeft geen vrije licentie meer.",
+        too_many_attempts: "Te veel foute codes. Probeer het over een uur opnieuw.",
+        failed: "Koppelen mislukt. Probeer opnieuw.",
+      } as Record<string, string>,
+      yourClubs: "Je clubs",
+    },
+    dashboard: {
+      title: "Clubdashboard",
+      licenses: "Licenties",
+      licensesValue: (used: number, seats: number) => `${used} / ${seats}`,
+      teams: "Actieve teams",
+      trainers: "Trainers",
+      modules: "Modules",
+      noModules: "Geen extra modules",
+      teamsTitle: "Teams",
+      columns: { team: "Team", category: "Categorie", staff: "Staf", week: "Weekplanning deze week", evaluation: "Laatste evaluatie", sessions: "Sessies (28 d.)" },
+      weekApproved: "Goedgekeurd",
+      weekOpen: "Nog niet",
+      noStaff: "Geen staf",
+      noTeams: "Je ziet nog geen teams van de club.",
+      attention: "Aandachtspunten",
+      noAttention: "Geen aandachtspunten.",
+      noHeadCoach: (team: string) => `${team}: nog geen hoofdtrainer.`,
+      noWeek: (team: string) => `${team}: nog geen goedgekeurde weekplanning voor deze week.`,
+      pendingLinks: (n: number) => (n === 1 ? "1 team wacht op koppeling." : `${n} teams wachten op koppeling.`),
+      recent: "Recent",
+      recentWeek: (team: string, date: string) => `${team} — weekplanning goedgekeurd (week van ${date})`,
+      recentEvaluation: (team: string, date: string) => `${team} — wedstrijdevaluatie ${date}`,
+      noRecent: "Nog geen activiteit.",
+    },
+    structure: {
+      title: "Structuur",
+      intro: "Teams per leeftijdscategorie met hun staf. Een trainer kan bij meerdere teams staan, een team kan meerdere trainers hebben.",
+      newTeam: "Nieuw team",
+      staffTitle: "Staf toevoegen",
+      person: "Persoon",
+      teamRole: "Rol in het team",
+      team: "Team",
+      add: "Toevoegen",
+      remove: "Weghalen",
+      removeConfirm: "Deze persoon van het team halen? De historiek blijft.",
+      archived: "Gearchiveerd",
+      people: "Mensen in de club",
+      linksTitle: "Teams die gekoppeld willen worden",
+      linksIntro: "Een trainer van de club wil zijn eigen team in de club brengen. Na goedkeuring is het team definitief een clubteam.",
+      approve: "Goedkeuren",
+      reject: "Weigeren",
+      approveConfirm: "Dit team definitief in de club opnemen?",
+      requestedBy: (who: string) => `aangevraagd door ${who}`,
+      errors: {
+        failed: "Dat lukte niet.",
+        noRole: "Deze persoon heeft geen passende rol in de club.",
+        maxTeams: "Het pakket laat geen extra team toe.",
+      },
+    },
+    dna: {
+      title: "Club DNA",
+      intro:
+        "De voetbalidentiteit van de club. De AI-staf van elk clubteam krijgt de gepubliceerde versie mee, apart van de visie van de trainer: verplichte clubprincipes zijn het kader, aanbevolen principes volgt de staf tenzij de trainer anders wil. Tegenstrijdigheden meldt de staf.",
+      none: "De club heeft nog geen gepubliceerd Club DNA.",
+      noneEditor: "Nog geen gepubliceerd Club DNA. Begin een concept: je kan het stap voor stap invullen.",
+      published: (version: number, date: string) => `Versie ${version} · gepubliceerd op ${date}`,
+      draft: (version: number) => `Concept voor versie ${version} staat klaar.`,
+      edit: "Bewerken",
+      startDraft: "Concept beginnen",
+      continueDraft: "Concept verder bewerken",
+      summary: "Het Club DNA in een paar zinnen",
+      summaryHint: "De kern van de voetbalidentiteit; de staf leest dit eerst.",
+      verplicht: "Verplicht",
+      aanbevolen: "Aanbevolen",
+      levelLabel: "Niveau",
+      levelHint: "Verplicht = clubprincipe dat elk team volgt. Aanbevolen = de staf volgt het, tenzij de trainer anders wil.",
+      ageGoals: "Ontwikkelingsdoelen per leeftijdscategorie",
+      noAnswer: "—",
+      history: "Versies",
+      archived: "Vervangen",
+      current: "Huidig",
+      note: "Wat is er gewijzigd?",
+      saveDraft: "Concept opslaan",
+      saved: "Concept opgeslagen.",
+      publish: "Goedkeuren en publiceren",
+      publishHint: "Na publicatie werkt de AI-staf van elk clubteam met deze versie. De vorige versie blijft bewaard.",
+      publishConfirm: "Dit concept publiceren voor alle teams van de club?",
+      published_ok: "Club DNA gepubliceerd.",
+      onlyApprovers: "Enkel de owner of de technisch directeur publiceert.",
+      discard: "Concept weggooien",
+      discardConfirm: "Het concept weggooien? De gepubliceerde versie blijft.",
+      back: "← Club DNA",
+      moduleOff: "Het pakket van de club bevat de module Club DNA niet.",
+      errors: {
+        fixErrors: "Pas de gemarkeerde antwoorden aan.",
+        failed: "Opslaan mislukt.",
+        noDraft: "Er is geen concept om te publiceren.",
+        summaryTooLong: "Maximaal 2000 tekens.",
+      },
+    },
+    licenses: {
+      title: "Licenties en codes",
+      intro: "Maak een persoonlijke code voor elke trainer of stafmedewerker. Wie een code gebruikt, krijgt een licentie. Trek een licentie in als iemand de club verlaat; de historiek blijft bij de club.",
+      usage: (used: number, seats: number) => `${used} van ${seats} licenties in gebruik (inclusief open codes)`,
+      history: "Historiek",
+      endRole: "Rol beëindigen",
+      endRoleConfirm: "Deze rol beëindigen?",
+    },
+    link: {
+      title: "Club",
+      intro: "Breng dit team in de clubomgeving van een club waar je trainer bent. De club keurt goed; daarna is het team definitief een clubteam en ziet de club de trainingen, planningen en evaluaties.",
+      club: "Club",
+      request: "Vraag koppeling aan",
+      pending: (club: string) => `Koppeling aangevraagd bij ${club}. De club moet nog goedkeuren.`,
+      cancel: "Aanvraag intrekken",
+      clubTeam: (club: string) => `Dit team hoort bij ${club}.`,
+      noClubs: "Je bent nog geen trainer in een club. Heb je een activatiecode? Gebruik Club koppelen.",
+      failed: "De aanvraag lukte niet.",
+    },
+  },
+  clubAdmin: {
+    title: "Clubs",
+    intro:
+      "Clubomgevingen van IAssistent. Je maakt een club aan uit de competitie-export, zet het pakket en laadt het Excel-bestand in dat de club invulde. Iedereen van de club komt erin met een persoonlijke activatiecode.",
+    columns: {
+      club: "Club",
+      number: "Stamnummer",
+      plan: "Pakket",
+      licenses: "Licenties",
+      teams: "Teams",
+      members: "Leden",
+      status: "Status",
+    },
+    active: "Actief",
+    inactive: "Niet actief",
+    until: (date: string) => `tot ${date}`,
+    noPlan: "Geen pakket",
+    unlimited: "onbeperkt",
+    empty: "Nog geen clubs.",
+    newClub: {
+      title: "Nieuwe club",
+      intro:
+        "Kies de club uit de competitie-export. Het stamnummer koppelt de club aan haar ploegen in de competitie.",
+      pick: "Club uit de export",
+      pickPlaceholder: "Kies een club…",
+      noFederation:
+        "Nog geen clubs uit de export. Laad eerst de uitslagen en kalender op bij Competitie: de clubs uit dat bestand verschijnen hier.",
+      alreadyMade: "al aangemaakt",
+      name: "Naam",
+      number: "Stamnummer",
+      create: "Club aanmaken",
+    },
+    back: "← Alle clubs",
+    numberLabel: (n: string) => `Stamnummer ${n}`,
+    sections: {
+      details: "Clubgegevens",
+      subscription: "Pakket en licenties",
+      excel: "Excel van de club",
+      codes: "Activatiecodes",
+      members: "Leden en licenties",
+      teams: "Teams",
+      history: "Historiek",
+    },
+    details: {
+      name: "Clubnaam",
+      number: "Stamnummer",
+      primaryColor: "Hoofdkleur",
+      secondaryColor: "Tweede kleur",
+      address: "Adres",
+      contactName: "Contactpersoon",
+      contactEmail: "E-mail",
+      contactPhone: "Telefoon",
+      save: "Gegevens opslaan",
+      saved: "Gegevens opgeslagen.",
+    },
+    subscription: {
+      intro:
+        "Wat de club aankocht. Zonder lopend pakket is de club niet actief: dan kunnen er geen codes of teams bij komen. Licenties gelden voor Club Owner, Technisch directeur, Coach en Assistent-coach.",
+      plan: "Pakket",
+      noPlan: "Geen pakket",
+      seats: "Licenties",
+      maxTeams: "Max. teams",
+      maxTeamsHint: "Leeg = onbeperkt",
+      modules: "Modules",
+      modulesHint:
+        "Dashboard, structuur en licenties zitten altijd in de clubomgeving. Zonder keuze gelden de modules van het pakket.",
+      startsOn: "Start",
+      endsOn: "Einde",
+      endsOnHint: "Leeg = loopt door",
+      save: "Pakket opslaan",
+      saved: "Pakket opgeslagen.",
+      usage: (used: number, seats: number) =>
+        `${used} van ${seats} licenties in gebruik (inclusief open codes)`,
+    },
+    modules: {
+      dna: "Club DNA",
+      exercises: "Gedeelde oefenstof",
+      planning: "Clubplanning",
+      evaluations: "Evaluaties & ontwikkeling",
+      knowledge: "Kennis & samenwerking",
+      reports: "Rapportage",
+    } as Record<string, string>,
+    roles: {
+      owner: "Club Owner",
+      admin: "Club Admin",
+      technical_director: "Technisch directeur",
+      team_coordinator: "Teamcoördinator",
+      coach: "Coach",
+      assistant_coach: "Assistent-coach",
+    } as Record<string, string>,
+    teamRoles: {
+      head_coach: "Hoofdtrainer",
+      assistant_coach: "Assistent-trainer",
+      coordinator: "Coördinator",
+    } as Record<string, string>,
+    excel: {
+      intro:
+        "Download het sjabloon (met de club en haar ploegen uit de competitie al ingevuld), laat de club het invullen en laad het hier op. Elke persoon op het blad Staf krijgt een eigen activatiecode.",
+      download: "Download sjabloon",
+      file: "Ingevuld Excel-bestand (.xlsx)",
+      check: "Controleer",
+      import: "Importeer",
+      checking: "Bezig…",
+      preview: "Controle",
+      clubRow: "Clubgegevens",
+      newTeam: "nieuw",
+      existingTeam: "bestaat",
+      seatsNeeded: (needed: number, free: number) =>
+        `${needed} licenties nodig, ${free} vrij.`,
+      notEnoughSeats:
+        "Niet genoeg vrije licenties. Verhoog het aantal licenties bij Pakket en licenties of haal mensen van het blad Staf.",
+      tooManyTeams: "Het pakket laat niet zoveel teams toe.",
+      inactive: "De club heeft nog geen lopend pakket. Zet eerst het pakket.",
+      fixErrors: "Pas de fouten aan in het bestand en controleer opnieuw.",
+      done: (created: number, updated: number) =>
+        `Import klaar: ${created} nieuwe teams, ${updated} bijgewerkt.`,
+      codesTitle: "Activatiecodes",
+      codesIntro:
+        "Deze codes zie je maar één keer. Download ze en bezorg elke persoon zijn eigen code.",
+      downloadCodes: "Download codes (CSV)",
+      sheets: {
+        club: "Club",
+        teams: "Teams",
+        staff: "Staf",
+        lists: "Lijsten",
+        help: "Uitleg",
+      },
+      columns: {
+        name: "Clubnaam",
+        number: "Stamnummer",
+        address: "Adres",
+        contactName: "Contactpersoon",
+        contactEmail: "E-mail",
+        contactPhone: "Telefoon",
+        primaryColor: "Hoofdkleur (#RRGGBB)",
+        secondaryColor: "Tweede kleur (#RRGGBB)",
+        teamName: "Teamnaam",
+        ageCategory: "Leeftijdscategorie",
+        season: "Seizoen",
+        federationTeam: "Ploeg in de competitie",
+        divisions: "Reeksen",
+        staffName: "Naam",
+        role: "Clubrol",
+        team: "Team",
+        teamRole: "Teamrol",
+      },
+      help: [
+        "Vul de bladen Club, Teams en Staf in. Kolommen met een keuzelijst: kies een waarde uit de lijst.",
+        "Club: de gegevens van de club. Kleuren als #RRGGBB, bv. #6CB4EE. Het stamnummer niet wijzigen.",
+        "Teams: één rij per team. De ploegen uit de competitie staan er al; pas de teamnaam aan zoals jullie het team noemen. Reeksen gescheiden door komma's.",
+        "Staf: één rij per persoon die IAssistent gebruikt. Clubrol bepaalt wat iemand ziet. Team en Teamrol enkel voor trainers en coördinatoren.",
+        "Owner, Technisch directeur, Coach en Assistent-coach gebruiken elk een licentie. Club Admin en Teamcoördinator niet.",
+        "Vul enkel in wat nodig is: namen van trainers en stafleden, geen gegevens van spelers.",
+      ],
+      errors: {
+        file: "Kies een ingevuld .xlsx-bestand van max. 2 MB.",
+        unreadable:
+          "Het bestand kon niet gelezen worden. Gebruik het sjabloon.",
+        noSheets:
+          "De bladen Club, Teams en Staf ontbreken. Gebruik het sjabloon.",
+        failed: "De import is mislukt.",
+        missingColumn: (sheet: string, col: string) =>
+          `Blad ${sheet}: de kolom "${col}" ontbreekt.`,
+        required: (col: string) => `${col} is verplicht.`,
+        tooLong: (col: string) => `${col} is te lang.`,
+        color: (col: string) => `${col} moet een kleurcode zijn zoals #6CB4EE.`,
+        email: "Geen geldig e-mailadres.",
+        ageCategory: "Onbekende leeftijdscategorie.",
+        duplicateTeam: "Deze teamnaam staat er twee keer.",
+        role: "Onbekende clubrol.",
+        teamRole: "Onbekende teamrol.",
+        teamUnknown:
+          "Dit team staat niet op het blad Teams en bestaat nog niet.",
+        teamRoleWithoutTeam: "Een teamrol hoort bij een team.",
+        teamRoleMismatch: "Deze teamrol past niet bij de clubrol.",
+        tooManyRows: (max: number) => `Maximaal ${max} rijen.`,
+      },
+      line: (sheet: string, n: number) => `${sheet}, rij ${n}`,
+    },
+    codes: {
+      intro:
+        "Een code is eenmalig en enkel nu zichtbaar. Een open code houdt al een licentie vast.",
+      role: "Clubrol",
+      team: "Team (optioneel)",
+      noTeam: "Geen team",
+      teamRole: "Teamrol",
+      expires: "Vervalt op (optioneel)",
+      note: "Voor wie (optioneel)",
+      create: "Maak code",
+      newCode: "Nieuwe code — enkel nu zichtbaar:",
+      copy: "Kopieer",
+      copied: "Gekopieerd",
+      empty: "Nog geen codes.",
+      revoke: "Intrekken",
+      revokeConfirm: "Deze code intrekken? Ze werkt dan niet meer.",
+      columns: {
+        code: "Code",
+        role: "Rol",
+        team: "Team",
+        note: "Voor",
+        status: "Status",
+        created: "Gemaakt",
+      },
+      status: {
+        open: "Open",
+        used: "Gebruikt",
+        revoked: "Ingetrokken",
+        expired: "Vervallen",
+      } as Record<string, string>,
+      endsWith: (hint: string) => `…${hint}`,
+      errors: {
+        failed: "De code kon niet gemaakt worden.",
+        noSeats:
+          "Geen vrije licentie meer. Verhoog het aantal licenties of trek een code of licentie in.",
+        inactive: "De club heeft geen lopend pakket.",
+        teamRole: "Kies een teamrol die past bij de clubrol.",
+      },
+    },
+    members: {
+      empty: "Nog niemand heeft een code gebruikt.",
+      columns: {
+        name: "Naam",
+        email: "E-mail",
+        roles: "Rollen",
+        license: "Licentie",
+        since: "Sinds",
+      },
+      licenseActive: "Actief",
+      licenseRevoked: "Ingetrokken",
+      noLicense: "Geen",
+      former: "Vertrokken",
+      revoke: "Licentie intrekken",
+      revokeConfirm:
+        "De licentie intrekken? Deze persoon verliest meteen alle toegang tot de club. De historiek blijft bij de club.",
+      endRole: "Rol beëindigen",
+    },
+    teams: {
+      empty: "Nog geen teams.",
+      columns: {
+        name: "Team",
+        category: "Categorie",
+        season: "Seizoen",
+        competition: "Competitie",
+        staff: "Staf",
+      },
+      archived: "Gearchiveerd",
+      noStaff: "Nog geen staf",
+      create: "Team toevoegen",
+      name: "Teamnaam",
+      category: "Leeftijdscategorie",
+      season: "Seizoen",
+    },
+    history: {
+      empty: "Nog niets gebeurd.",
+      actions: {
+        "club.created": "Club aangemaakt",
+        "club.updated": "Clubgegevens gewijzigd",
+        "club.imported": "Excel ingeladen",
+        "subscription.set": "Pakket gewijzigd",
+        "code.created": "Code gemaakt",
+        "code.revoked": "Code ingetrokken",
+        "code.redeemed": "Code gebruikt",
+        "license.activated": "Licentie geactiveerd",
+        "license.revoked": "Licentie ingetrokken",
+        "role.ended": "Rol beëindigd",
+        "team.created": "Team aangemaakt",
+        "staff.assigned": "Aan team gekoppeld",
+        "staff.ended": "Van team gehaald",
+        "team_link.requested": "Team koppelen aangevraagd",
+        "team_link.approved": "Team gekoppeld",
+        "team_link.rejected": "Team koppelen geweigerd",
+        "team_link.cancelled": "Aanvraag ingetrokken",
+        "dna.published": "Club DNA gepubliceerd",
+      } as Record<string, string>,
+    },
+    errors: {
+      save: "Opslaan mislukt.",
+      duplicateNumber: "Er bestaat al een club met dit stamnummer.",
+      name: "Geef een naam van 1 tot 120 tekens.",
+      color: "Een kleur is een code zoals #6CB4EE.",
+      email: "Geen geldig e-mailadres.",
+      period: "De einddatum ligt vóór de start.",
+      inactive: "De club heeft geen lopend pakket.",
+      maxTeams: "Het pakket laat geen extra team toe.",
+      notAllowed: "Dat mag niet.",
     },
   },
   ageCategories: {
@@ -688,13 +1255,16 @@ export const messages = {
     form: {
       title: "Vorm",
       noneShort: "Nog geen uitslagen",
-      season: (points: number, played: number) => `${points} ${points === 1 ? "punt" : "punten"} uit ${played} ${played === 1 ? "wedstrijd" : "wedstrijden"} dit seizoen`,
+      season: (points: number, played: number) =>
+        `${points} ${points === 1 ? "punt" : "punten"} uit ${played} ${played === 1 ? "wedstrijd" : "wedstrijden"} dit seizoen`,
       letter: { win: "W", draw: "G", loss: "V" },
     },
     microcycle: {
       title: "Microcyclus",
-      week: (n: number, type: string | null) => `Week ${n}${type ? ` — ${type}` : ""}`,
-      sessions: (n: number, minutes: number) => `${n === 1 ? "1 training" : `${n} trainingen`} · ${minutes} min gepland`,
+      week: (n: number, type: string | null) =>
+        `Week ${n}${type ? ` — ${type}` : ""}`,
+      sessions: (n: number, minutes: number) =>
+        `${n === 1 ? "1 training" : `${n} trainingen`} · ${minutes} min gepland`,
       none: "Nog geen trainingen ingepland",
       today: "Vandaag",
       next: "Volgende dagen",
@@ -704,7 +1274,8 @@ export const messages = {
       minutes: (n: number) => `${n} min`,
       match: (opponent: string) => `Wedstrijd · ${opponent}`,
       training: "Training",
-      trainingAt: (start: string, minutes: number) => `Training om ${start} · ${minutes} min`,
+      trainingAt: (start: string, minutes: number) =>
+        `Training om ${start} · ${minutes} min`,
       rest: "Geen training",
       noTraining: "Rust of vrij",
     },
@@ -719,10 +1290,13 @@ export const messages = {
     title: "Mijn visie",
     intro:
       "Je visie hoort bij jou, niet bij een team: ze verhuist mee als je van club verandert. Alle AI-rollen volgen deze visie. Je kunt alles stap voor stap invullen; niets is verplicht.",
-    private: "Je visie is privé. Niemand anders ziet ze, tenzij je ze later zelf deelt.",
+    private:
+      "Je visie is privé. Niemand anders ziet ze, tenzij je ze later zelf deelt.",
     summary: "Mijn visie in een paar zinnen",
-    summaryHint: "Dit krijgt elke rol van je staf als eerste mee. Maximaal 2000 tekens.",
-    progress: (answered: number, total: number) => `${answered} van ${total} vragen ingevuld`,
+    summaryHint:
+      "Dit krijgt elke rol van je staf als eerste mee. Maximaal 2000 tekens.",
+    progress: (answered: number, total: number) =>
+      `${answered} van ${total} vragen ingevuld`,
     notDecided: "Nog niet bepaald",
     saved: "Je visie is opgeslagen.",
     errors: {
@@ -743,21 +1317,37 @@ export const messages = {
     back: "Terug",
     delete: "Verwijderen",
     saved: "Opgeslagen.",
-    readOnlyArchived: "Dit team is gearchiveerd: je kunt alles bekijken, maar niets meer wijzigen.",
+    readOnlyArchived:
+      "Dit team is gearchiveerd: je kunt alles bekijken, maar niets meer wijzigen.",
     readOnlyAssistant: "Je hebt leestoegang tot dit team.",
   },
   exercises: {
     title: "Oefenstof",
-    intro: "Je eigen bibliotheek met oefeningen. Ze horen bij jou, niet bij een team: bij een transfer neem je ze mee.",
+    intro:
+      "Je eigen bibliotheek met oefeningen. Ze horen bij jou, niet bij een team: bij een transfer neem je ze mee.",
     new: "Nieuwe oefening",
-    empty: "Nog geen oefeningen. Maak er een en voeg een animatie of video toe.",
+    empty:
+      "Nog geen oefeningen. Maak er een en voeg een animatie of video toe.",
     search: "Zoeken",
     allPhases: "Alle fases",
     phase: { opwarming: "Opwarming", kern: "Kern", afsluiting: "Afsluiting" },
     players: (min: number | null, max: number | null) =>
-      min && max ? (min === max ? `${min} spelers` : `${min}–${max} spelers`) : min ? `vanaf ${min} spelers` : max ? `tot ${max} spelers` : null,
+      min && max
+        ? min === max
+          ? `${min} spelers`
+          : `${min}–${max} spelers`
+        : min
+          ? `vanaf ${min} spelers`
+          : max
+            ? `tot ${max} spelers`
+            : null,
     minutes: (n: number) => `${String(n).replace(".", ",")} min`,
-    intensity: { laag: "Laag", matig: "Matig", hoog: "Hoog", maximaal: "Maximaal" },
+    intensity: {
+      laag: "Laag",
+      matig: "Matig",
+      hoog: "Hoog",
+      maximaal: "Maximaal",
+    },
     load: (sets: number | null, work: number | null, rest: number | null) =>
       sets && work
         ? `${sets} × ${String(work).replace(".", ",")} min${rest ? `, ${String(rest).replace(".", ",")} min rust` : ""}`
@@ -787,7 +1377,8 @@ export const messages = {
       phase: "Fase",
       noPhase: "— geen —",
       labels: "Labels",
-      labelsHint: "Gescheiden door komma's, bv. rondo, balbezit, opbouw, middenzone.",
+      labelsHint:
+        "Gescheiden door komma's, bv. rondo, balbezit, opbouw, middenzone.",
       minPlayers: "Min. spelers",
       maxPlayers: "Max. spelers",
       duration: "Duur (min)",
@@ -811,16 +1402,19 @@ export const messages = {
       signal: "Teken",
       signalHint: "Bv. twee vingers omhoog of een codewoord.",
       roles: "Rollen",
-      rolesHint: "Eén rol per regel, met de vereiste na een streepje, bv. Nemer – linksvoetig. De staf kiest elke week de spelers.",
+      rolesHint:
+        "Eén rol per regel, met de vereiste na een streepje, bv. Nemer – linksvoetig. De staf kiest elke week de spelers.",
       agreements: "Afspraken",
-      useSetPiece: "De staf mag deze standaardsituatie gebruiken in het weekplan",
+      useSetPiece:
+        "De staf mag deze standaardsituatie gebruiken in het weekplan",
       save: "Oefening opslaan",
       saved: "Oefening opgeslagen.",
     },
     media: {
       title: "Animatie en video",
       animation: "Animatie",
-      animationHint: "Importeer een animatiebestand (.json), bv. een omgezette LiveTagPro-video.",
+      animationHint:
+        "Importeer een animatiebestand (.json), bv. een omgezette LiveTagPro-video.",
       animationImport: "Animatie importeren",
       animationRemove: "Animatie verwijderen",
       animationInvalid: "Dit bestand is geen geldige animatie.",
@@ -835,7 +1429,12 @@ export const messages = {
       none: "Nog geen animatie of video.",
       viewAs: "Weergave volgens team",
     },
-    player: { play: "Afspelen", pause: "Pauze", restart: "Opnieuw", speed: "Snelheid" },
+    player: {
+      play: "Afspelen",
+      pause: "Pauze",
+      restart: "Opnieuw",
+      speed: "Snelheid",
+    },
     errors: {
       title: "Geef de oefening een naam (max. 120 tekens).",
       players: "Aantal spelers tussen 1 en 40; min. niet groter dan max.",
@@ -849,7 +1448,8 @@ export const messages = {
     },
   },
   settings: {
-    seasonMoved: "De seizoensplanning en de periodisering staan nu bij de Physical Coach.",
+    seasonMoved:
+      "De seizoensplanning en de periodisering staan nu bij de Physical Coach.",
     intro: (team: string) =>
       `Vaste instellingen van ${team}. Elke nieuwe week neemt de trainingsdagen over; de periodisering bepaalt het weektype voor je staf.`,
     venue: {
@@ -864,30 +1464,36 @@ export const messages = {
     schedule: {
       title: "Trainingsdagen",
       hint: "Vink de vaste trainingsdagen aan. Wijkt een week af, dan pas je dat enkel in die week aan.",
-      count: (n: number) => (n === 1 ? "1 trainingsdag per week" : `${n} trainingsdagen per week`),
+      count: (n: number) =>
+        n === 1 ? "1 trainingsdag per week" : `${n} trainingsdagen per week`,
       start: "Aanvang",
       duration: "Duur (min)",
-      applyToOpenWeeks: "Ook toepassen op de weken vanaf deze week die al openstaan maar nog geen weekdocument hebben.",
+      applyToOpenWeeks:
+        "Ook toepassen op de weken vanaf deze week die al openstaan maar nog geen weekdocument hebben.",
       saved: "Trainingsdagen opgeslagen.",
-      savedWithWeeks: (n: number) => `Trainingsdagen opgeslagen en toegepast op ${n === 1 ? "1 open week" : `${n} open weken`}.`,
+      savedWithWeeks: (n: number) =>
+        `Trainingsdagen opgeslagen en toegepast op ${n === 1 ? "1 open week" : `${n} open weken`}.`,
     },
     season: {
       title: "Seizoensplanning en periodisering",
       hint: "De voorbereiding en de competitie hebben elk hun eigen cyclus. Het weektype van elke week volgt daaruit.",
       preparation: "Voorbereiding",
-      preparationHint: "Vanaf de eerste training van de voorbereiding tot de eerste competitiewedstrijd.",
+      preparationHint:
+        "Vanaf de eerste training van de voorbereiding tot de eerste competitiewedstrijd.",
       preparationStart: "Start voorbereiding",
       competition: "Competitie",
       competitionHint: "Vanaf de week van de eerste competitiewedstrijd.",
       competitionStart: "Eerste competitiewedstrijd",
       cycle: "Cyclus",
       cycleWeeks: (n: number) => `${n} weken`,
-      order: "De voorbereiding moet vóór de eerste competitiewedstrijd starten.",
+      order:
+        "De voorbereiding moet vóór de eerste competitiewedstrijd starten.",
       saved: "Seizoensplanning opgeslagen.",
     },
     preview: {
       title: "Planning van de komende weken",
-      empty: "Vul de start van de voorbereiding of de eerste competitiewedstrijd in om de planning te zien.",
+      empty:
+        "Vul de start van de voorbereiding of de eerste competitiewedstrijd in om de planning te zien.",
       week: "Week",
       phase: "Fase",
       type: "Weektype",
@@ -906,15 +1512,21 @@ export const messages = {
       keeperOwn: "Eigen doelman",
       keeperOpponent: "Doelman tegenstander",
       logo: "Logo op de schijfjes",
-      logoOptions: { geen: "Geen logo", eigen: "Op de eigen ploeg", alle: "Op alle schijfjes" },
+      logoOptions: {
+        geen: "Geen logo",
+        eigen: "Op de eigen ploeg",
+        alle: "Op alle schijfjes",
+      },
       logoMissing: "Dit team heeft nog geen logo.",
       saved: "Weergave opgeslagen.",
     },
-    missing: "Stel eerst de vaste trainingsdagen en de seizoensplanning in bij Instellingen.",
+    missing:
+      "Stel eerst de vaste trainingsdagen en de seizoensplanning in bij Instellingen.",
     open: "Naar Instellingen",
   },
   nextMatchPage: {
-    noMatch: "Geen komende wedstrijd in de weekinput. Laat de competitie importeren of plan de week in de Staff Room.",
+    noMatch:
+      "Geen komende wedstrijd in de weekinput. Laat de competitie importeren of plan de week in de Staff Room.",
     home: "Thuis",
     away: "Uit",
     coach: (name: string) => `Trainer: ${name}`,
@@ -931,7 +1543,8 @@ export const messages = {
     seasonHint: "Punten na elke wedstrijd",
     lineupTitle: "Opstelling van de tegenstander",
     lineupHint: (formation: string) => `In ${formation}, zoals laatst ingevuld`,
-    noCompetition: "Koppel het team aan de competitie om klassement, vorm en seizoensverloop te zien.",
+    noCompetition:
+      "Koppel het team aan de competitie om klassement, vorm en seizoensverloop te zien.",
     noLineup: "Nog geen opstelling van deze tegenstander.",
     fillLineup: "Opstelling invullen",
     logoMissing: "Nog geen logo: laad het op bij Presentatie.",
@@ -947,7 +1560,8 @@ export const messages = {
     next: "Volgende week",
     today: "Deze week",
     notApproved: "Deze weekplanning is nog niet goedgekeurd.",
-    empty: "Nog geen weekplanning voor deze week. Bespreek de week met je staf in de Staff Room en kies daar \"Zet in de Microcyclus\".",
+    empty:
+      'Nog geen weekplanning voor deze week. Bespreek de week met je staf in de Staff Room en kies daar "Zet in de Microcyclus".',
     openStaffRoom: "Naar de Staff Room",
     playersTitle: "Zo zien de spelers de week",
     detailTitle: "De week per dag, met de oefenstof",
@@ -958,7 +1572,8 @@ export const messages = {
   },
   weeks: {
     title: "Weekplanning",
-    intro: "Geef per week je trainingen en wedstrijden in. Je staf maakt er een uitgewerkte weekplanning van.",
+    intro:
+      "Geef per week je trainingen en wedstrijden in. Je staf maakt er een uitgewerkte weekplanning van.",
     empty: "Nog geen weken. Kies hieronder een week om te plannen.",
     plan: "Week plannen",
     chooseWeek: "Week",
@@ -979,11 +1594,14 @@ export const messages = {
       home: "Thuis",
       away: "Uit",
       previousMatch: "Vorige wedstrijd",
-      previousMatchHint: "Voor de labels MD+1 en MD+2 aan het begin van de week.",
+      previousMatchHint:
+        "Voor de labels MD+1 en MD+2 aan het begin van de week.",
       notes: "Notitie voor je staf",
-      notesHint: "Bv. focus van de week, een zware wedstrijd achter de rug, terreinbeperkingen.",
+      notesHint:
+        "Bv. focus van de week, een zware wedstrijd achter de rug, terreinbeperkingen.",
       saved: "Weekinput opgeslagen.",
-      unsaved: "Je hebt niet-opgeslagen wijzigingen. Sla eerst op voor je een voorstel vraagt.",
+      unsaved:
+        "Je hebt niet-opgeslagen wijzigingen. Sla eerst op voor je een voorstel vraagt.",
     },
     errors: {
       time: "Vul een geldig uur in (UU:MM).",
@@ -1001,11 +1619,13 @@ export const messages = {
       rpe: "RPE tussen 0 en 10.",
     },
     periodization: {
-      notSet: "Geen periodisering voor deze week: stel de seizoensplanning in bij Instellingen.",
+      notSet:
+        "Geen periodisering voor deze week: stel de seizoensplanning in bij Instellingen.",
       phase: { voorbereiding: "Voorbereiding", competitie: "Competitie" },
       phaseWeek: (n: number) => `week ${n}`,
       week: (n: number, of: number) => `week ${n}/${of}`,
-      load: (min: number, max: number) => (min === max ? `${min}% belasting` : `${min}–${max}% belasting`),
+      load: (min: number, max: number) =>
+        min === max ? `${min}% belasting` : `${min}–${max}% belasting`,
       km: (min: number, max: number) => `${min}–${max} km`,
     },
     load: {
@@ -1034,14 +1654,22 @@ export const messages = {
     away: "Uit",
     legend: "hoe meer balkjes, hoe zwaarder",
     keyMessage: "Kernboodschap",
-    rows: { goal: "Doel", content: "Inhoud", focus: "Focus", time: "Uur", intensity: "Intensiteit" },
+    rows: {
+      goal: "Doel",
+      content: "Inhoud",
+      focus: "Focus",
+      time: "Uur",
+      intensity: "Intensiteit",
+    },
     rest: "Rust",
     match: "Wedstrijd",
-    opponent: (name: string, home: boolean) => (home ? `Thuis tegen ${name}` : `Uit bij ${name}`),
+    opponent: (name: string, home: boolean) =>
+      home ? `Thuis tegen ${name}` : `Uit bij ${name}`,
     duration: (min: number) => `${min} min`,
     download: "Download als afbeelding (PNG)",
     downloading: "Afbeelding maken…",
-    downloadFailed: "De afbeelding kon niet gemaakt worden. Probeer het opnieuw of druk af als PDF.",
+    downloadFailed:
+      "De afbeelding kon niet gemaakt worden. Probeer het opnieuw of druk af als PDF.",
     print: "Afdrukken",
     hint: "Liggend A4 op één pagina. Download de afbeelding en deel ze met je spelers.",
     back: "Terug naar de week",
@@ -1088,7 +1716,8 @@ export const messages = {
       print: "Weekdocument afdrukken",
     },
     deleteVersion: "Deze versie verwijderen",
-    deleteConfirm: "Deze versie definitief verwijderen? Dit kan niet ongedaan gemaakt worden.",
+    deleteConfirm:
+      "Deze versie definitief verwijderen? Dit kan niet ongedaan gemaakt worden.",
     match: {
       title: "Wedstrijdvoorbereiding",
       intro:
@@ -1097,7 +1726,8 @@ export const messages = {
       generating: "De Tactical Coach maakt de wedstrijdvoorbereiding…",
       needsWeek: "Keur eerst het weekdocument goed.",
       noMatch: "Er staat deze week geen wedstrijd in de weekinput.",
-      from: (date: string) => `Beschikbaar na de laatste training (vanaf ${date}).`,
+      from: (date: string) =>
+        `Beschikbaar na de laatste training (vanaf ${date}).`,
     },
     stepNames: {
       pc: "Physical Coach — belasting",
@@ -1119,10 +1749,13 @@ export const messages = {
     adjustTitle: "Wat moet er anders?",
     adjustFor: "Voor wie",
     wholeStaff: "De hele staf",
-    adjustPlaceholder: "Bv. dinsdag lichter, meer afwerking op donderdag, de rondo in een groter vak.",
-    adjustHint: "Enkel die rol en de rollen die op zijn werk verder bouwen, werken opnieuw.",
+    adjustPlaceholder:
+      "Bv. dinsdag lichter, meer afwerking op donderdag, de rondo in een groter vak.",
+    adjustHint:
+      "Enkel die rol en de rollen die op zijn werk verder bouwen, werken opnieuw.",
     retry: "Opnieuw proberen",
-    failed: "Niet alles kon gemaakt worden. Probeer opnieuw: wat al klaar is, blijft behouden.",
+    failed:
+      "Niet alles kon gemaakt worden. Probeer opnieuw: wat al klaar is, blijft behouden.",
     flagOff: "De AI-staf is nog niet geactiveerd voor je account.",
     none: "Nog niets aangevraagd voor deze week.",
     missing: (name: string) => `${name} ontbreekt in dit document.`,
@@ -1166,7 +1799,8 @@ export const messages = {
     talk: "Wedstrijdbespreking",
     printTalk: "Wedstrijdbespreking afdrukken",
     printSetPieces: "Standaardsituaties afdrukken (kleedkamer)",
-    printHint: "Tip: kies liggend of staand A4 en zet 'achtergrondafbeeldingen' aan voor de kleuren.",
+    printHint:
+      "Tip: kies liggend of staand A4 en zet 'achtergrondafbeeldingen' aan voor de kleuren.",
     back: "Terug naar de week",
     setPieceKind: {
       hoekschop_aanvallend: "Hoekschop aanvallend",
@@ -1184,12 +1818,22 @@ export const messages = {
     course: "Verloop",
     variations: "Variaties",
     coaching: "Coachingspunten",
-    legend: { own: "Eigen ploeg", opponent: "Tegenstander", neutral: "Neutraal", pass: "Pass", run: "Loopweg", dribble: "Dribbel", shot: "Schot" },
+    legend: {
+      own: "Eigen ploeg",
+      opponent: "Tegenstander",
+      neutral: "Neutraal",
+      pass: "Pass",
+      run: "Loopweg",
+      dribble: "Dribbel",
+      shot: "Schot",
+    },
   },
   opponents: {
     title: "Tegenstanders",
-    intro: "Houd per tegenstander een fiche bij en vul hun opstelling in (bv. uit de RBFA-app). Namen blijven in de app; je staf krijgt enkel rugnummers en posities.",
-    empty: "Nog geen tegenstanders. Ze worden ook aangemaakt wanneer je een wedstrijd ingeeft in de weekplanning.",
+    intro:
+      "Houd per tegenstander een fiche bij en vul hun opstelling in (bv. uit de RBFA-app). Namen blijven in de app; je staf krijgt enkel rugnummers en posities.",
+    empty:
+      "Nog geen tegenstanders. Ze worden ook aangemaakt wanneer je een wedstrijd ingeeft in de weekplanning.",
     add: "Tegenstander toevoegen",
     name: "Naam",
     fiche: "Fiche",
@@ -1202,23 +1846,31 @@ export const messages = {
     address: "Adres terrein",
     addressPlaceholder: "Straat nr, postcode gemeente",
     lineup: "Opstelling",
-    lineupHint: "Vul per post het rugnummer en de naam in. De Video Analist zal dit later automatisch kunnen invullen.",
+    lineupHint:
+      "Vul per post het rugnummer en de naam in. De Video Analist zal dit later automatisch kunnen invullen.",
     formation: "Formatie",
     matchDate: "Wedstrijddatum (optioneel)",
     number: "Nr.",
     playerName: "Naam",
     bench: "Bank",
-    source: { coach: "ingevuld door de coach", video: "ingevuld door de Video Analist" },
+    source: {
+      coach: "ingevuld door de coach",
+      video: "ingevuld door de Video Analist",
+    },
     reports: "Wedstrijdevaluaties",
-    noReports: "Nog geen evaluaties tegen deze tegenstander. Je vult ze in op de weekplanning na de wedstrijd.",
-    lastMatch: (date: string, score: string | null) => `Laatst: ${date}${score ? ` (${score})` : ""}`,
-    lastLineup: (date: string, source: string) => `Laatst opgeslagen opstelling: ${date}, ${source}.`,
+    noReports:
+      "Nog geen evaluaties tegen deze tegenstander. Je vult ze in op de weekplanning na de wedstrijd.",
+    lastMatch: (date: string, score: string | null) =>
+      `Laatst: ${date}${score ? ` (${score})` : ""}`,
+    lastLineup: (date: string, source: string) =>
+      `Laatst opgeslagen opstelling: ${date}, ${source}.`,
     saveFiche: "Fiche opslaan",
     saveLineup: "Opstelling opslaan",
     addBench: "Wisselspeler toevoegen",
     preview: "Voorbeeld",
     delete: "Tegenstander verwijderen",
-    deleteConfirm: "Deze tegenstander met fiche en opstellingen verwijderen? Evaluaties blijven bewaard.",
+    deleteConfirm:
+      "Deze tegenstander met fiche en opstellingen verwijderen? Evaluaties blijven bewaard.",
     back: "Alle tegenstanders",
     playStylePlaceholder: "Bv. direct spel op de spitsen, hoog druk zetten.",
     saved: "Opgeslagen.",
@@ -1245,7 +1897,11 @@ export const messages = {
     saved: "Evaluatie opgeslagen.",
     none: "Nog geen wedstrijd gespeeld in deze week.",
     choose: "— kies —",
-    errors: { score: "Doelpunten tussen 0 en 50.", tooLong: "Een tekst is te lang.", saveFailed: "Opslaan mislukt." },
+    errors: {
+      score: "Doelpunten tussen 0 en 50.",
+      tooLong: "Een tekst is te lang.",
+      saveFailed: "Opslaan mislukt.",
+    },
   },
   loadPlan: {
     weektype: "Weektype",
@@ -1261,13 +1917,15 @@ export const messages = {
     au: (n: number) => `${n} AU`,
     km: (n: number) => `${n.toLocaleString("nl-BE")} km`,
     pct: (n: number) => `${n}%`,
-    masDistances: (pct: number, sec: number) => `Afstand per herhaling (${pct}% MAS, ${sec} s)`,
+    masDistances: (pct: number, sec: number) =>
+      `Afstand per herhaling (${pct}% MAS, ${sec} s)`,
     meters: (m: number) => `${m} m`,
     noMas: "Nog geen MAS gekend: vul de VAMEVAL in bij Testen.",
   },
   tests: {
     title: "Testen",
-    intro: "Vul per speler het resultaat in. De Physical Coach gebruikt de laatste MAS voor individuele looptempo's.",
+    intro:
+      "Vul per speler het resultaat in. De Physical Coach gebruikt de laatste MAS voor individuele looptempo's.",
     newSession: "Nieuwe test",
     date: "Datum",
     result: (unit: string) => `Resultaat (${unit})`,
@@ -1281,7 +1939,8 @@ export const messages = {
     deleteConfirm: "Alle resultaten van deze testdatum verwijderen?",
     noPlayers: "Voeg eerst spelers toe aan de kern.",
     errors: {
-      range: (min: number, max: number, unit: string) => `Resultaat tussen ${min} en ${max} ${unit}.`,
+      range: (min: number, max: number, unit: string) =>
+        `Resultaat tussen ${min} en ${max} ${unit}.`,
       date: "Kies een geldige datum.",
       empty: "Vul minstens één resultaat in.",
       saveFailed: "Opslaan mislukt.",
@@ -1296,8 +1955,10 @@ export const messages = {
     print: "Afdrukken / versturen",
     version: (n: number) => `Versie ${n}`,
     feedbackGiven: "Gevraagde aanpassing",
-    testMode: "Testmodus: dit voorstel is samengesteld uit de voorbeelden in /staff, zonder AI.",
-    fromStaffRoom: "Deze versie komt uit de staffkamer (het goedgekeurde weekplan).",
+    testMode:
+      "Testmodus: dit voorstel is samengesteld uit de voorbeelden in /staff, zonder AI.",
+    fromStaffRoom:
+      "Deze versie komt uit de staffkamer (het goedgekeurde weekplan).",
     noProposals: "Nog geen voorstel voor deze week.",
     status: {
       pending: "Wacht",
@@ -1335,9 +1996,11 @@ export const messages = {
     },
     errors: {
       noWeek: "Sla eerst de weekinput op.",
-      dailyLimit: "Je hebt het maximum aantal AI-voorstellen voor vandaag bereikt.",
+      dailyLimit:
+        "Je hebt het maximum aantal AI-voorstellen voor vandaag bereikt.",
       requestFailed: "Het voorstel kon niet aangevraagd worden.",
-      generationFailed: "Het voorstel kon niet gemaakt worden. Probeer opnieuw.",
+      generationFailed:
+        "Het voorstel kon niet gemaakt worden. Probeer opnieuw.",
       feedbackRequired: "Beschrijf wat er moet veranderen.",
       feedbackTooLong: "De feedback mag maximaal 2000 tekens zijn.",
     },
@@ -1350,9 +2013,11 @@ export const messages = {
     noPosition: "Zonder positie",
     archived: "Niet meer in de kern",
     archive: "Uit de kern halen",
-    archiveConfirm: "Deze speler uit de kern halen? Je kunt dit later ongedaan maken.",
+    archiveConfirm:
+      "Deze speler uit de kern halen? Je kunt dit later ongedaan maken.",
     restore: "Terugzetten",
-    seasonsAtClub: (n: number) => (n === 1 ? "1e seizoen bij de club" : `${n} seizoenen bij de club`),
+    seasonsAtClub: (n: number) =>
+      n === 1 ? "1e seizoen bij de club" : `${n} seizoenen bij de club`,
     returnExpected: (date: string) => `terug verwacht: ${date}`,
     count: (n: number) => (n === 1 ? "1 speler" : `${n} spelers`),
     squad: "Kern",
@@ -1417,15 +2082,20 @@ export const messages = {
     file: "Ingevuld Excel-bestand (.xlsx)",
     check: "Bestand controleren",
     checking: "Controleren…",
-    import: (n: number) => `${n === 1 ? "1 speler" : `${n} spelers`} importeren`,
+    import: (n: number) =>
+      `${n === 1 ? "1 speler" : `${n} spelers`} importeren`,
     importing: "Importeren…",
     preview: "Voorbeeld",
     line: "Rij",
     action: "Actie",
     actionNew: "Nieuw",
     actionUpdate: "Bijwerken",
-    errorsFound: (n: number) => (n === 1 ? "1 rij heeft een fout. Pas het bestand aan en controleer opnieuw." : `${n} rijen hebben een fout. Pas het bestand aan en controleer opnieuw.`),
-    done: (inserted: number, updated: number) => `Klaar: ${inserted} nieuw, ${updated} bijgewerkt.`,
+    errorsFound: (n: number) =>
+      n === 1
+        ? "1 rij heeft een fout. Pas het bestand aan en controleer opnieuw."
+        : `${n} rijen hebben een fout. Pas het bestand aan en controleer opnieuw.`,
+    done: (inserted: number, updated: number) =>
+      `Klaar: ${inserted} nieuw, ${updated} bijgewerkt.`,
     toTeam: "Naar de spelers van dit team",
     columns: {
       shirtNumber: "Rugnummer",
@@ -1440,7 +2110,12 @@ export const messages = {
       expectedReturnDate: "Verwachte terugkeer",
       notes: "Notitie",
     },
-    sheets: { players: "Spelers", positions: "Posities", lists: "Lijsten", help: "Uitleg" },
+    sheets: {
+      players: "Spelers",
+      positions: "Posities",
+      lists: "Lijsten",
+      help: "Uitleg",
+    },
     help: [
       "Vul één speler per rij in op het blad Spelers. Laat de kolomtitels staan.",
       "Voornaam en achternaam zijn verplicht. Rugnummer 1 tot 99: een bestaand rugnummer werkt die speler bij.",
@@ -1451,11 +2126,14 @@ export const messages = {
     ],
     errors: {
       file: "Kies een Excel-bestand (.xlsx) van max. 2 MB.",
-      unreadable: "Dit bestand kon niet gelezen worden. Gebruik het sjabloon (.xlsx).",
-      headers: (missing: string) => `Kolommen ontbreken: ${missing}. Gebruik het sjabloon.`,
+      unreadable:
+        "Dit bestand kon niet gelezen worden. Gebruik het sjabloon (.xlsx).",
+      headers: (missing: string) =>
+        `Kolommen ontbreken: ${missing}. Gebruik het sjabloon.`,
       empty: "Er staan geen spelers in het bestand.",
       tooMany: "Maximaal 200 spelers per import.",
-      duplicateNumber: (n: number) => `Rugnummer ${n} staat meer dan één keer in het bestand.`,
+      duplicateNumber: (n: number) =>
+        `Rugnummer ${n} staat meer dan één keer in het bestand.`,
       foot: "Kies links, rechts of beide.",
       status: "Kies een geldige status.",
       team: "Kies een team.",
@@ -1503,7 +2181,8 @@ export const messages = {
     signup: "Account aanmaken",
     or: "of",
     sendMagicLink: "Stuur me een aanmeldlink",
-    magicLinkSent: "Check je mailbox: we stuurden je een link om aan te melden.",
+    magicLinkSent:
+      "Check je mailbox: we stuurden je een link om aan te melden.",
     signupCheckEmail:
       "Je account is aangemaakt. Bevestig je e-mailadres via de link in je mailbox.",
     noAccount: "Nog geen account?",
@@ -1513,7 +2192,8 @@ export const messages = {
     passwordHint: "Minstens 8 tekens.",
     errors: {
       invalidCredentials: "E-mailadres of wachtwoord klopt niet.",
-      emailNotConfirmed: "Bevestig eerst je e-mailadres via de link in je mailbox.",
+      emailNotConfirmed:
+        "Bevestig eerst je e-mailadres via de link in je mailbox.",
       userExists: "Er bestaat al een account met dit e-mailadres.",
       weakPassword: "Kies een sterker wachtwoord (minstens 8 tekens).",
       rateLimited: "Even geduld: probeer het over een minuut opnieuw.",
@@ -1529,16 +2209,19 @@ export const messages = {
     new: "Nieuw team",
     active: "Actieve teams",
     archived: "Gearchiveerde teams",
-    archivedHint: "Gearchiveerde teams blijven leesbaar, maar kunnen niet meer gewijzigd worden.",
+    archivedHint:
+      "Gearchiveerde teams blijven leesbaar, maar kunnen niet meer gewijzigd worden.",
     archive: "Archiveren",
     restore: "Terugzetten",
     readOnlyAccess: "Leestoegang",
     created: "Team aangemaakt.",
-    createdWithoutLogo: "Team aangemaakt, maar het logo kon niet opgeladen worden. Probeer later opnieuw.",
+    createdWithoutLogo:
+      "Team aangemaakt, maar het logo kon niet opgeladen worden. Probeer later opnieuw.",
     errors: {
       archiveFailed: "Het team kon niet gearchiveerd worden.",
       restoreFailed: "Het team kon niet teruggezet worden.",
-      noLicenseSeats: "Je club heeft geen vrije licentie meer voor een actief team.",
+      noLicenseSeats:
+        "Je club heeft geen vrije plaats meer voor een actief team.",
     },
   },
   teamForm: {

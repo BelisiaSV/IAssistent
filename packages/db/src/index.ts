@@ -20,3 +20,25 @@ export const FEATURE_FLAGS = {
   tacticalCoach: "staff.tactical_coach",
 } as const satisfies Record<string, string>;
 export type FeatureFlagKey = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
+
+/** Modules a club can have on top of the core (same codes as club_module_codes() in the database). */
+export const CLUB_MODULES = ["dna", "exercises", "planning", "evaluations", "knowledge", "reports"] as const;
+export type ClubModule = (typeof CLUB_MODULES)[number];
+
+/** Club roles, from most to least rights (enum club_role). */
+export const CLUB_ROLES = [
+  "owner",
+  "admin",
+  "technical_director",
+  "team_coordinator",
+  "coach",
+  "assistant_coach",
+] as const;
+export type ClubRole = (typeof CLUB_ROLES)[number];
+
+/** Roles that use a licence seat (club_role_uses_license() in the database). */
+export const CLUB_ROLES_WITH_LICENSE: readonly ClubRole[] = ["owner", "technical_director", "coach", "assistant_coach"];
+
+/** Roles of a person on the staff of a club team (team_staff.role). */
+export const TEAM_STAFF_ROLES = ["head_coach", "assistant_coach", "coordinator"] as const;
+export type TeamStaffRole = (typeof TEAM_STAFF_ROLES)[number];

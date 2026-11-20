@@ -21,12 +21,14 @@ const m = messages.nav;
  */
 export function Sidebar({
   teams,
+  clubs,
   admin,
   email,
   collapsed,
   onToggle,
 }: {
   teams: SwitcherTeam[];
+  clubs: { id: string; name: string }[];
   admin: boolean;
   email: string;
   /** Large screens: only the icons. */
@@ -90,6 +92,40 @@ export function Sidebar({
           );
         })}
       </ul>
+
+      {/* The club environments: separate from the coach's own teams above. */}
+      <div className={`space-y-1 border-t border-white/10 pt-3 ${compact ? "flex w-full flex-col items-center" : ""}`}>
+        {!compact && clubs.length > 0 && <p className="px-3 text-[11px] font-bold tracking-wider text-slate-500 uppercase">{messages.club.nav.section}</p>}
+        {clubs.map((club) => {
+          const isCurrent = pathname.startsWith(`/clubs/${club.id}`);
+          return (
+            <Link
+              key={club.id}
+              href={`/clubs/${club.id}`}
+              onClick={() => setOpen(false)}
+              title={compact ? club.name : undefined}
+              aria-current={isCurrent ? "page" : undefined}
+              className={`flex items-center rounded-lg py-2 text-sm font-medium ${compact ? "w-full justify-center" : "gap-3 px-3"} ${
+                isCurrent ? "bg-sky-500/20 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <NavIcon name="club" />
+              {!compact && <span className="truncate">{club.name}</span>}
+            </Link>
+          );
+        })}
+        <Link
+          href="/clubs/join"
+          onClick={() => setOpen(false)}
+          title={compact ? messages.club.nav.join : undefined}
+          className={`flex items-center rounded-lg py-2 text-sm font-medium ${compact ? "w-full justify-center" : "gap-3 px-3"} ${
+            pathname === "/clubs/join" ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <NavIcon name="link" />
+          {!compact && messages.club.nav.join}
+        </Link>
+      </div>
 
       <div className={`mt-auto space-y-1 border-t border-white/10 pt-3 ${compact ? "flex w-full flex-col items-center" : ""}`}>
         {admin && (

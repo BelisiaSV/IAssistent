@@ -3,14 +3,29 @@
 import { useMemo, useState, useTransition } from "react";
 
 import { Alert, Button } from "@/components/ui";
-import { decodeExport, forDivisions, type ParsedExport, parseExport, teamDivisions } from "@/lib/competition/parse";
+import { federationClubs } from "@/lib/clubs/federation";
+import {
+  decodeExport,
+  forDivisions,
+  type ParsedExport,
+  parseExport,
+  teamDivisions,
+} from "@/lib/competition/parse";
 import { messages } from "@/lib/messages";
 
+import { saveFederationClubs } from "../clubs/actions";
 import { importCompetition, type ImportResult, linkTeam } from "./actions";
 
 const m = messages.competition.admin;
 
-type Team = { id: string; name: string; clubName: string; archived: boolean; federationTeam: string; divisions: string[] };
+type Team = {
+  id: string;
+  name: string;
+  clubName: string;
+  archived: boolean;
+  federationTeam: string;
+  divisions: string[];
+};
 type Exports = Partial<Record<ParsedExport["kind"], ParsedExport>>;
 
 /**
@@ -23,12 +38,22 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
   const [unknown, setUnknown] = useState<string[]>([]);
   const [reading, setReading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [clubCount, setClubCount] = useState<number | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const parsed = useMemo(() => Object.values(exports).filter((e): e is ParsedExport => !!e), [exports]);
+  const parsed = useMemo(
+    () => Object.values(exports).filter((e): e is ParsedExport => !!e),
+    [exports],
+  );
   const catalog = useMemo(() => teamDivisions(parsed), [parsed]);
-  const names = useMemo(() => [...catalog.keys()].sort((a, b) => a.localeCompare(b, "nl")), [catalog]);
-  const linked = useMemo(() => new Set(teams.filter((t) => !t.archived).flatMap((t) => t.divisions)), [teams]);
+  const names = useMemo(
+    () => [...catalog.keys()].sort((a, b) => a.localeCompare(b, "nl")),
+    [catalog],
+  );
+  const linked = useMemo(
+    () => new Set(teams.filter((t) => !t.archived).flatMap((t) => t.divisions)),
+    [teams],
+  );
 
   async function readFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -43,15 +68,31 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
     }
     setExports(next);
     setUnknown(bad);
+    // The clubs in the calendar go to the club list (Admin → Clubs).
+    if (next.results?.kind === "results" && next.results !== exports.results) {
+      const saved = await saveFederationClubs(
+        federationClubs(next.results.rows),
+      );
+      setClubCount(saved.count ?? null);
+    }
     setReading(false);
   }
 
   const payload = useMemo(
     () => ({
       divisions: [...linked],
-      matches: exports.results?.kind === "results" ? forDivisions(exports.results.rows, linked) : [],
-      standings: exports.standings?.kind === "standings" ? forDivisions(exports.standings.rows, linked) : [],
-      referees: exports.referees?.kind === "referees" ? forDivisions(exports.referees.rows, linked) : [],
+      matches:
+        exports.results?.kind === "results"
+          ? forDivisions(exports.results.rows, linked)
+          : [],
+      standings:
+        exports.standings?.kind === "standings"
+          ? forDivisions(exports.standings.rows, linked)
+          : [],
+      referees:
+        exports.referees?.kind === "referees"
+          ? forDivisions(exports.referees.rows, linked)
+          : [],
     }),
     [exports, linked],
   );
@@ -61,13 +102,24 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
       <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
           {reading ? m.reading : m.files}
-          <input type="file" accept=".csv,text/csv" multiple className="sr-only" onChange={(event) => readFiles(event.target.files)} />
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            multiple
+            className="sr-only"
+            onChange={(event) => readFiles(event.target.files)}
+          />
         </label>
         <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {(["results", "standings", "referees"] as const).map((kind) => (
-            <li key={kind} className={`rounded-lg px-3 py-2 text-sm ring-1 ${exports[kind] ? "bg-green-50 ring-green-200" : "bg-slate-50 ring-slate-200"}`}>
+            <li
+              key={kind}
+              className={`rounded-lg px-3 py-2 text-sm ring-1 ${exports[kind] ? "bg-green-50 ring-green-200" : "bg-slate-50 ring-slate-200"}`}
+            >
               <span className="font-medium">{m.found[kind]}</span>
-              <span className="block text-xs text-slate-500">{exports[kind] ? m.rows(exports[kind]!.rows.length) : "—"}</span>
+              <span className="block text-xs text-slate-500">
+                {exports[kind] ? m.rows(exports[kind]!.rows.length) : "—"}
+              </span>
             </li>
           ))}
         </ul>
@@ -76,6 +128,9 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
             {m.unknown(name)}
           </Alert>
         ))}
+        {clubCount !== null && (
+          <p className="text-xs text-slate-500">{m.clubsSaved(clubCount)}</p>
+        )}
       </section>
 
       <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -94,7 +149,9 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
               key={team.id}
               team={team}
               divisionsOf={(name) => catalog.get(name.trim())}
-              onSaved={(next) => setTeams((all) => all.map((t) => (t.id === next.id ? next : t)))}
+              onSaved={(next) =>
+                setTeams((all) => all.map((t) => (t.id === next.id ? next : t)))
+              }
             />
           ))}
         </ul>
@@ -104,8 +161,16 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
         <h2 className="font-semibold">{m.importTitle}</h2>
         {linked.size ? (
           <>
-            <p className="text-sm text-slate-600">{m.importIntro([...linked].sort().join(", "))}</p>
-            <p className="text-sm">{m.summary(payload.matches.length, payload.standings.length, payload.referees.length)}</p>
+            <p className="text-sm text-slate-600">
+              {m.importIntro([...linked].sort().join(", "))}
+            </p>
+            <p className="text-sm">
+              {m.summary(
+                payload.matches.length,
+                payload.standings.length,
+                payload.referees.length,
+              )}
+            </p>
             <Button
               type="button"
               disabled={pending || !parsed.length}
@@ -122,7 +187,9 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
           <p className="text-sm text-slate-500">{m.noLinks}</p>
         )}
         {result?.error && <Alert tone="error">{result.error}</Alert>}
-        {result?.counts && <Alert tone="success">{m.done(result.counts)}</Alert>}
+        {result?.counts && (
+          <Alert tone="success">{m.done(result.counts)}</Alert>
+        )}
       </section>
     </div>
   );
@@ -143,8 +210,12 @@ function TeamLink({
   const [pending, startTransition] = useTransition();
   const found = divisionsOf(name);
   // Divisions in the files for this name, plus the ones already linked.
-  const options = [...new Set([...(found ? [...found.keys()] : []), ...team.divisions])].sort();
-  const changed = name.trim() !== team.federationTeam || [...divisions].sort().join() !== [...team.divisions].sort().join();
+  const options = [
+    ...new Set([...(found ? [...found.keys()] : []), ...team.divisions]),
+  ].sort();
+  const changed =
+    name.trim() !== team.federationTeam ||
+    [...divisions].sort().join() !== [...team.divisions].sort().join();
 
   return (
     <li className="grid gap-3 py-3 lg:grid-cols-[14rem_18rem_minmax(0,1fr)_auto] lg:items-start">
@@ -166,7 +237,10 @@ function TeamLink({
       <div className="flex flex-wrap gap-1.5" aria-label={m.divisions}>
         {options.length ? (
           options.map((code) => (
-            <label key={code} className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs ring-1 ${divisions.has(code) ? "bg-brand/15 ring-brand" : "bg-slate-50 ring-slate-200"}`}>
+            <label
+              key={code}
+              className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs ring-1 ${divisions.has(code) ? "bg-brand/15 ring-brand" : "bg-slate-50 ring-slate-200"}`}
+            >
               <input
                 type="checkbox"
                 checked={divisions.has(code)}
@@ -180,7 +254,11 @@ function TeamLink({
                 }
               />
               <span className="font-semibold">{code}</span>
-              {found?.get(code) ? <span className="text-slate-500">{m.matches(found.get(code)!)}</span> : null}
+              {found?.get(code) ? (
+                <span className="text-slate-500">
+                  {m.matches(found.get(code)!)}
+                </span>
+              ) : null}
             </label>
           ))
         ) : (
@@ -195,14 +273,23 @@ function TeamLink({
             startTransition(async () => {
               const result = await linkTeam(team.id, name, [...divisions]);
               setState(result);
-              if (result.ok) onSaved({ ...team, federationTeam: name.trim(), divisions: [...divisions] });
+              if (result.ok)
+                onSaved({
+                  ...team,
+                  federationTeam: name.trim(),
+                  divisions: [...divisions],
+                });
             })
           }
         >
           {m.save}
         </Button>
-        {state.ok && !changed && <span className="text-xs text-green-700">{m.saved}</span>}
-        {state.error && <span className="text-xs text-red-700">{state.error}</span>}
+        {state.ok && !changed && (
+          <span className="text-xs text-green-700">{m.saved}</span>
+        )}
+        {state.error && (
+          <span className="text-xs text-red-700">{state.error}</span>
+        )}
       </div>
     </li>
   );

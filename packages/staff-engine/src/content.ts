@@ -8,6 +8,7 @@ export * from "./shared/matchdays";
 export * from "./shared/periodization";
 export * from "./shared/tests";
 export * from "./shared/positions";
+export * from "./shared/club-dna";
 export * from "./shared/vision";
 export * from "./shared/routing";
 export type { ParseResult } from "./shared/parse";

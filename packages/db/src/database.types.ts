@@ -340,7 +340,13 @@ export type Database = {
         Row: {
           id: string;
           name: string;
-          license_seats: number;
+          federation_number: string | null;
+          primary_color: string | null;
+          secondary_color: string | null;
+          address: string | null;
+          contact_name: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
           created_by: string;
           created_at: string;
           updated_at: string;
@@ -348,7 +354,13 @@ export type Database = {
         Insert: {
           id?: string;
           name: string;
-          license_seats?: number;
+          federation_number?: string | null;
+          primary_color?: string | null;
+          secondary_color?: string | null;
+          address?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
           created_by?: string;
           created_at?: string;
           updated_at?: string;
@@ -356,7 +368,13 @@ export type Database = {
         Update: {
           id?: string;
           name?: string;
-          license_seats?: number;
+          federation_number?: string | null;
+          primary_color?: string | null;
+          secondary_color?: string | null;
+          address?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
           created_by?: string;
           created_at?: string;
           updated_at?: string;
@@ -367,6 +385,406 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_subscriptions: {
+        Row: {
+          club_id: string;
+          plan_id: string | null;
+          license_seats: number;
+          max_teams: number | null;
+          modules: string[];
+          starts_on: string;
+          ends_on: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          club_id: string;
+          plan_id?: string | null;
+          license_seats?: number;
+          max_teams?: number | null;
+          modules?: string[];
+          starts_on?: string;
+          ends_on?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          club_id?: string;
+          plan_id?: string | null;
+          license_seats?: number;
+          max_teams?: number | null;
+          modules?: string[];
+          starts_on?: string;
+          ends_on?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_subscriptions_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: true;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "club_subscriptions_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_licenses: {
+        Row: {
+          id: string;
+          club_id: string;
+          coach_id: string;
+          status: string;
+          activated_at: string;
+          revoked_at: string | null;
+          revoked_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          coach_id: string;
+          status?: string;
+          activated_at?: string;
+          revoked_at?: string | null;
+          revoked_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          coach_id?: string;
+          status?: string;
+          activated_at?: string;
+          revoked_at?: string | null;
+          revoked_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_licenses_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "club_licenses_coach_id_fkey";
+            columns: ["coach_id"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_members: {
+        Row: {
+          id: string;
+          club_id: string;
+          coach_id: string;
+          role: Database["public"]["Enums"]["club_role"];
+          license_id: string | null;
+          started_at: string;
+          ended_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          coach_id: string;
+          role: Database["public"]["Enums"]["club_role"];
+          license_id?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          coach_id?: string;
+          role?: Database["public"]["Enums"]["club_role"];
+          license_id?: string | null;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "club_members_coach_id_fkey";
+            columns: ["coach_id"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_activation_codes: {
+        Row: {
+          id: string;
+          club_id: string;
+          code_hash: string;
+          code_hint: string;
+          role: Database["public"]["Enums"]["club_role"];
+          team_id: string | null;
+          team_role: string | null;
+          note: string | null;
+          expires_at: string | null;
+          status: string;
+          created_by: string | null;
+          created_at: string;
+          used_by: string | null;
+          used_at: string | null;
+          license_id: string | null;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          code_hash: string;
+          code_hint: string;
+          role: Database["public"]["Enums"]["club_role"];
+          team_id?: string | null;
+          team_role?: string | null;
+          note?: string | null;
+          expires_at?: string | null;
+          status?: string;
+          created_by?: string | null;
+          created_at?: string;
+          used_by?: string | null;
+          used_at?: string | null;
+          license_id?: string | null;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          code_hash?: string;
+          code_hint?: string;
+          role?: Database["public"]["Enums"]["club_role"];
+          team_id?: string | null;
+          team_role?: string | null;
+          note?: string | null;
+          expires_at?: string | null;
+          status?: string;
+          created_by?: string | null;
+          created_at?: string;
+          used_by?: string | null;
+          used_at?: string | null;
+          license_id?: string | null;
+          revoked_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_activation_codes_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      team_staff: {
+        Row: {
+          id: string;
+          team_id: string;
+          club_id: string;
+          coach_id: string;
+          role: string;
+          started_at: string;
+          ended_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          club_id: string;
+          coach_id: string;
+          role: string;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          club_id?: string;
+          coach_id?: string;
+          role?: string;
+          started_at?: string;
+          ended_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "team_staff_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "team_staff_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "team_staff_coach_id_fkey";
+            columns: ["coach_id"];
+            isOneToOne: false;
+            referencedRelation: "coaches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_team_links: {
+        Row: {
+          id: string;
+          club_id: string;
+          team_id: string;
+          requested_by: string;
+          status: string;
+          requested_at: string;
+          decided_by: string | null;
+          decided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          team_id: string;
+          requested_by: string;
+          status?: string;
+          requested_at?: string;
+          decided_by?: string | null;
+          decided_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          team_id?: string;
+          requested_by?: string;
+          status?: string;
+          requested_at?: string;
+          decided_by?: string | null;
+          decided_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_team_links_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "club_team_links_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_audit_log: {
+        Row: {
+          id: number;
+          club_id: string;
+          actor_id: string | null;
+          action: string;
+          coach_id: string | null;
+          team_id: string | null;
+          details: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          club_id: string;
+          actor_id?: string | null;
+          action: string;
+          coach_id?: string | null;
+          team_id?: string | null;
+          details?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          club_id?: string;
+          actor_id?: string | null;
+          action?: string;
+          coach_id?: string | null;
+          team_id?: string | null;
+          details?: Json;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_audit_log_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_dna: {
+        Row: {
+          id: string;
+          club_id: string;
+          version: number;
+          status: string;
+          content: Json;
+          note: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_by: string | null;
+          updated_at: string;
+          published_by: string | null;
+          published_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          version: number;
+          status?: string;
+          content?: Json;
+          note?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_by?: string | null;
+          updated_at?: string;
+          published_by?: string | null;
+          published_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          version?: number;
+          status?: string;
+          content?: Json;
+          note?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_by?: string | null;
+          updated_at?: string;
+          published_by?: string | null;
+          published_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_dna_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
             referencedColumns: ["id"];
           },
         ];
@@ -1367,6 +1785,7 @@ export type Database = {
           max_coaches: number | null;
           max_teams: number | null;
           features: Json;
+          modules: string[];
           recommended: boolean;
           active: boolean;
           sort_order: number;
@@ -1385,6 +1804,7 @@ export type Database = {
           max_coaches?: number | null;
           max_teams?: number | null;
           features?: Json;
+          modules?: string[];
           recommended?: boolean;
           active?: boolean;
           sort_order?: number;
@@ -1403,6 +1823,7 @@ export type Database = {
           max_coaches?: number | null;
           max_teams?: number | null;
           features?: Json;
+          modules?: string[];
           recommended?: boolean;
           active?: boolean;
           sort_order?: number;
@@ -1787,6 +2208,132 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: { id: string; name: string; club_name: string; head_coach_email: string; archived: boolean }[];
       };
+      admin_create_club: { Args: { p_name: string; p_federation_number?: string | null }; Returns: string };
+      admin_club_members: {
+        Args: { p_club_id: string };
+        Returns: {
+          coach_id: string;
+          name: string | null;
+          email: string;
+          roles: string[] | null;
+          license_id: string | null;
+          license_status: string | null;
+          active: boolean;
+          since: string;
+        }[];
+      };
+      admin_club_teams: {
+        Args: { p_club_id: string };
+        Returns: {
+          id: string;
+          name: string;
+          age_category: string;
+          season: string | null;
+          archived: boolean;
+          federation_team: string | null;
+          federation_divisions: string[];
+          staff: Json;
+        }[];
+      };
+      admin_clubs: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          id: string;
+          name: string;
+          federation_number: string | null;
+          active: boolean;
+          plan_name: string | null;
+          license_seats: number;
+          seats_used: number;
+          max_teams: number | null;
+          active_teams: number;
+          members: number;
+          ends_on: string | null;
+        }[];
+      };
+      admin_federation_clubs: {
+        Args: Record<PropertyKey, never>;
+        Returns: { number: string; name: string; teams: Json; club_id: string | null }[];
+      };
+      admin_import_club: { Args: { p_club_id: string; p_data: Json }; Returns: Json };
+      admin_save_federation_clubs: { Args: { p_clubs: Json }; Returns: number };
+      admin_update_club: {
+        Args: {
+          p_club_id: string;
+          p_name: string;
+          p_federation_number: string | null;
+          p_primary_color: string | null;
+          p_secondary_color: string | null;
+          p_address: string | null;
+          p_contact_name: string | null;
+          p_contact_email: string | null;
+          p_contact_phone: string | null;
+        };
+        Returns: undefined;
+      };
+      admin_set_club_subscription: {
+        Args: {
+          p_club_id: string;
+          p_plan_id: string | null;
+          p_license_seats: number;
+          p_max_teams: number | null;
+          p_modules: string[] | null;
+          p_starts_on: string | null;
+          p_ends_on: string | null;
+        };
+        Returns: undefined;
+      };
+      assign_team_staff: { Args: { p_team_id: string; p_coach_id: string; p_role: string }; Returns: string };
+      cancel_club_team_link: { Args: { p_link_id: string }; Returns: undefined };
+      discard_club_dna_draft: { Args: { p_club_id: string }; Returns: undefined };
+      publish_club_dna: { Args: { p_club_id: string; p_note?: string | null }; Returns: undefined };
+      save_club_dna_draft: { Args: { p_club_id: string; p_content: Json }; Returns: string };
+      club_people: {
+        Args: { p_club_id: string };
+        Returns: {
+          coach_id: string;
+          name: string | null;
+          email: string;
+          roles: string[] | null;
+          license_id: string | null;
+          license_status: string | null;
+          active: boolean;
+          since: string;
+        }[];
+      };
+      club_pending_links: {
+        Args: { p_club_id: string };
+        Returns: { id: string; team_name: string; team_club_name: string; requester: string; requested_at: string }[];
+      };
+      club_has_module: { Args: { p_club_id: string; p_module: string }; Returns: boolean };
+      club_is_active: { Args: { p_club_id: string }; Returns: boolean };
+      club_module_codes: { Args: Record<PropertyKey, never>; Returns: string[] };
+      club_seats_used: { Args: { p_club_id: string }; Returns: number };
+      create_club_activation_code: {
+        Args: {
+          p_club_id: string;
+          p_role: Database["public"]["Enums"]["club_role"];
+          p_expires_at?: string | null;
+          p_team_id?: string | null;
+          p_team_role?: string | null;
+          p_note?: string | null;
+        };
+        Returns: { id: string; code: string }[];
+      };
+      create_club_team: {
+        Args: { p_club_id: string; p_name: string; p_club_name: string; p_age_category?: string | null; p_season?: string | null };
+        Returns: string;
+      };
+      decide_club_team_link: { Args: { p_link_id: string; p_approve: boolean }; Returns: undefined };
+      end_club_role: { Args: { p_member_id: string }; Returns: undefined };
+      end_team_staff: { Args: { p_staff_id: string }; Returns: undefined };
+      has_club_role: { Args: { p_club_id: string; p_roles: Database["public"]["Enums"]["club_role"][] }; Returns: boolean };
+      has_team_staff_role: { Args: { p_team_id: string; p_roles: string[] }; Returns: boolean };
+      is_club_member: { Args: { p_club_id: string }; Returns: boolean };
+      redeem_club_activation_code: { Args: { p_code: string }; Returns: Json };
+      request_club_team_link: { Args: { p_team_id: string; p_club_id: string }; Returns: string };
+      revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
+      revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };
       can_read_coach_profile: { Args: { p_coach_id: string }; Returns: boolean };
       can_read_team: { Args: { p_team_id: string }; Returns: boolean };
       can_see_club: { Args: { p_club_id: string }; Returns: boolean };
@@ -1805,6 +2352,7 @@ export type Database = {
       team_id_from_storage_path: { Args: { p_name: string }; Returns: string };
     };
     Enums: {
+      club_role: "owner" | "admin" | "technical_director" | "team_coordinator" | "coach" | "assistant_coach";
       membership_role: "club_owner" | "assistant_coach";
       player_status: "available" | "injured" | "suspended" | "unavailable";
       preferred_foot: "left" | "right" | "both";

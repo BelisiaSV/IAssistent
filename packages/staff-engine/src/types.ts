@@ -5,6 +5,7 @@ import type { MeetingPlan } from "./shared/meeting";
 import type { TaskRouting } from "./shared/routing";
 import type { TestCatalog } from "./shared/tests";
 import type { PositionCatalog } from "./shared/positions";
+import type { ClubDnaQuestionnaire } from "./shared/club-dna";
 import type { VisionQuestionnaire } from "./shared/vision";
 
 export const ROLE_STATUSES = ["placeholder", "concept", "actief"] as const;
@@ -62,6 +63,8 @@ export interface Staff {
   formations: FormationCatalog;
   /** _gedeeld/visieprofiel.json */
   vision: VisionQuestionnaire;
+  /** _gedeeld/clubdna.json */
+  clubDna: ClubDnaQuestionnaire;
   /** _gedeeld/wedstrijddagen.json */
   matchDays: MatchDayCatalog;
   /** _gedeeld/periodisering.json */

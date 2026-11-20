@@ -4,6 +4,7 @@ import type { Json, Tables } from "@iassistent/db";
 import { runRole, StaffGenerationError } from "@iassistent/staff-engine";
 
 import { getStaffProvider } from "@/lib/ai";
+import { clubDnaForTeam } from "@/lib/clubs/dna";
 import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -184,6 +185,9 @@ export async function advanceRun(
     if (libraryError) console.error("staff run: exercise library could not be loaded", libraryError);
     // Exercises of the platform's bank that fit the week note and the coach's feedback.
     const bank = await bankForStaff(supabase, [data.week?.notes ?? "", ...claimed.map((c) => c.proposal.feedback ?? "")].join(" "));
+    // A club team works within the club's DNA.
+    const { data: teamRow } = await supabase.from("teams").select("club_id, age_category").eq("id", input.team.id).maybeSingle();
+    const clubDna = teamRow ? await clubDnaForTeam(supabase, teamRow) : null;
     const provider = getStaffProvider();
 
     await Promise.all(
@@ -197,6 +201,7 @@ export async function advanceRun(
             feedback: proposal.feedback && previousOutput ? { previousOutput, comment: proposal.feedback } : null,
             library: (exercises ?? []).map(libraryExercise),
             bank,
+            clubDna,
           });
           const result = await runRole(staff, step.role, context, provider, step.task);
           const { error } = await supabase
