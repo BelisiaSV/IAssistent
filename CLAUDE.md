@@ -502,6 +502,21 @@ Regels:
   `cancel_club_team_link`. Alles wat telt staat in `club_audit_log` (leesbaar voor owner/admin). Alle tabellen
   zijn read-only voor gebruikers; schrijven enkel via deze functies. Clubs maken kan niet meer door
   gebruikers; `clubs.license_seats` en de oude rol `club_owner` in `memberships` zijn vervangen.
+- **Clubomgeving, deel 2: admin** (migratie `club_admin`) — **Admin → Clubs** (`/admin/clubs`). Bij het opladen
+  van de kalender (Admin → Competitie) bewaart de browser de **clublijst** uit de export (`federationClubs` in
+  `lib/clubs/federation.ts`: stamnummer, clubnaam uit de ploegnamen, ploegen met reeksen; `admin_save_federation_clubs`
+  → `federation_clubs`, enkel leesbaar via `admin_federation_clubs()`). Een club maak je uit die lijst
+  (`admin_create_club(naam, stamnummer)`; `clubs.federation_number` uniek, plus kleuren, adres en contact,
+  `admin_update_club`). Per club (`/admin/clubs/[clubId]`): **pakket en licenties** (`admin_set_club_subscription`;
+  geen module aangevinkt = die van het plan), **Excel van de club** (sjabloon `/admin/clubs/[clubId]/template`,
+  `clubTemplate` in `lib/clubs/template.ts`: bladen Club, Teams (eigen teams + ploegen uit de export), Staf, met
+  keuzelijsten; controleren met `parseClubImport` in `lib/clubs/import.ts`, voorbeeld met fouten per rij en
+  controle van licenties, max. teams en actief pakket; `admin_import_club`: club bijwerken, teams op naam
+  bijwerken of aanmaken, competitiekoppeling zetten, en **per staflid een activatiecode** met de naam als notitie;
+  de codes zie je één keer, download als CSV), **activatiecodes** (één code maken, lijst met laatste 4 tekens,
+  intrekken), **leden en licenties** (`admin_club_members`, licentie intrekken), **teams** (`admin_club_teams`,
+  team toevoegen via `create_club_team`, dat nu ook de platformadmin mag en de clubkleuren overneemt) en
+  **historiek** (`club_audit_log`). De platformadmin leest zelf geen teamdata (spelers, weken) van clubs.
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  schermen van de clubomgeving (admin, licenties en codes, clubdashboard, structuur, team koppelen) en de
-  clubmodules, visie delen; oefeningen handmatig wijzigen; videodienst.
+  schermen van de clubomgeving voor de club zelf (code inwisselen, clubdashboard, structuur, licenties en codes
+  door de club, team koppelen) en de clubmodules, visie delen; oefeningen handmatig wijzigen; videodienst.
