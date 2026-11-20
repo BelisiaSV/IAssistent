@@ -13,7 +13,7 @@ const id = z.string().regex(/^[a-z][a-z0-9_]*$/, "id: kleine letters, cijfers en
 const base = { id, vraag: z.string().min(1), uitleg: z.string().optional() };
 const options = z.array(z.string().min(1)).min(2);
 
-const question = z.discriminatedUnion("type", [
+export const visionQuestionSchema = z.discriminatedUnion("type", [
   z.object({ ...base, type: z.literal("kort_antwoord"), max_lengte: z.int().min(1).max(VISION_SHORT_MAX).optional() }),
   z.object({ ...base, type: z.literal("tekst"), max_lengte: z.int().min(1).max(VISION_TEXT_MAX).optional() }),
   z.object({ ...base, type: z.literal("keuze"), opties: options }),
@@ -29,19 +29,17 @@ const question = z.discriminatedUnion("type", [
   z.object({ ...base, type: z.literal("formatie"), meerdere: z.boolean().optional() }),
 ]);
 
+export const visionThemeSchema = z.object({
+  id,
+  titel: z.string().min(1),
+  uitleg: z.string().optional(),
+  vragen: z.array(visionQuestionSchema).min(1),
+});
+
 const schema = z.object({
   versie: z.string().min(1),
   uitleg: z.string().optional(),
-  themas: z
-    .array(
-      z.object({
-        id,
-        titel: z.string().min(1),
-        uitleg: z.string().optional(),
-        vragen: z.array(question).min(1),
-      }),
-    )
-    .min(1),
+  themas: z.array(visionThemeSchema).min(1),
 });
 
 export type VisionQuestionnaire = z.infer<typeof schema>;
@@ -54,8 +52,14 @@ export function parseVisionQuestionnaire(data: unknown): ParseResult<VisionQuest
   if (!parsed.value) return parsed;
   const q = parsed.value;
 
-  const errors = duplicates(q.themas.map((t) => t.id)).map((t) => `thema "${t}" komt dubbel voor`);
-  for (const theme of q.themas) {
+  const errors = themeErrors(q.themas);
+  return errors.length ? fail(FILE, errors) : parsed;
+}
+
+/** Duplicate themes, questions and options, and scales that run the wrong way. */
+export function themeErrors(themas: VisionTheme[]): string[] {
+  const errors = duplicates(themas.map((t) => t.id)).map((t) => `thema "${t}" komt dubbel voor`);
+  for (const theme of themas) {
     for (const dup of duplicates(theme.vragen.map((v) => v.id))) {
       errors.push(`thema "${theme.id}": vraag "${dup}" komt dubbel voor`);
     }
@@ -68,7 +72,7 @@ export function parseVisionQuestionnaire(data: unknown): ParseResult<VisionQuest
       }
     }
   }
-  return errors.length ? fail(FILE, errors) : parsed;
+  return errors;
 }
 
 // --- Answers -------------------------------------------------------------------

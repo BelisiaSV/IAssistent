@@ -8,6 +8,7 @@ import {
   type MatchDayCatalog,
   type OpponentContext,
   type PeriodizationCatalog,
+  type ClubDnaContext,
   type RoleContext,
   type SeasonPlan,
   type TestCatalog,
@@ -70,6 +71,8 @@ export function buildRoleContext(input: {
   bank?: BankExercise[];
   staff: Record<string, unknown>;
   feedback: { previousOutput: unknown; comment: string } | null;
+  /** The club's DNA for a club team, or null. */
+  clubDna?: ClubDnaContext | null;
 }): RoleContext {
   const labels = weekLabels(
     input.weekStart,
@@ -139,7 +142,7 @@ export function buildRoleContext(input: {
       dagen,
     },
     kern,
-    visie: { samenvatting: input.visionSummary, antwoorden },
+    visie: { samenvatting: input.visionSummary, antwoorden, club: input.clubDna ?? null },
     belastingshistoriek: input.history,
     testen,
     tegenstander: input.opponent,

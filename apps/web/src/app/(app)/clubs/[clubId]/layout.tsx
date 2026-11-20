@@ -41,7 +41,11 @@ export default async function ClubLayout({
         </p>
       </div>
       {!ctx.active && <Alert tone="error">{m.inactive}</Alert>}
-      <ClubTabs clubId={clubId} manage={ctx.canManage} />
+      <ClubTabs
+        clubId={clubId}
+        manage={ctx.canManage}
+        dna={(ctx.subscription?.modules ?? []).includes("dna")}
+      />
       {children}
     </div>
   );

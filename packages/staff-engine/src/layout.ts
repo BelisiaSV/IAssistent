@@ -29,6 +29,7 @@ export const SHARED_FILES = {
   positions: "posities.json",
   formations: "formaties.json",
   vision: "visieprofiel.json",
+  clubDna: "clubdna.json",
   matchDays: "wedstrijddagen.json",
   periodization: "periodisering.json",
   tests: "testen.json",

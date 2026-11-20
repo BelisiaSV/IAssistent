@@ -736,6 +736,59 @@ export type Database = {
           },
         ];
       };
+      club_dna: {
+        Row: {
+          id: string;
+          club_id: string;
+          version: number;
+          status: string;
+          content: Json;
+          note: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_by: string | null;
+          updated_at: string;
+          published_by: string | null;
+          published_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          version: number;
+          status?: string;
+          content?: Json;
+          note?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_by?: string | null;
+          updated_at?: string;
+          published_by?: string | null;
+          published_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          version?: number;
+          status?: string;
+          content?: Json;
+          note?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_by?: string | null;
+          updated_at?: string;
+          published_by?: string | null;
+          published_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_dna_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       session_loads: {
         Row: {
           id: string;
@@ -2232,6 +2285,9 @@ export type Database = {
       };
       assign_team_staff: { Args: { p_team_id: string; p_coach_id: string; p_role: string }; Returns: string };
       cancel_club_team_link: { Args: { p_link_id: string }; Returns: undefined };
+      discard_club_dna_draft: { Args: { p_club_id: string }; Returns: undefined };
+      publish_club_dna: { Args: { p_club_id: string; p_note?: string | null }; Returns: undefined };
+      save_club_dna_draft: { Args: { p_club_id: string; p_content: Json }; Returns: string };
       club_people: {
         Args: { p_club_id: string };
         Returns: {

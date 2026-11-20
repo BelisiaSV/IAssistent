@@ -10,15 +10,19 @@ const t = messages.club.tabs;
 export function ClubTabs({
   clubId,
   manage,
+  dna,
 }: {
   clubId: string;
   manage: boolean;
+  /** The club has the Club DNA module. */
+  dna: boolean;
 }) {
   const pathname = usePathname();
   const base = `/clubs/${clubId}`;
   const tabs = [
     { href: base, label: t.dashboard, exact: true },
     { href: `${base}/structure`, label: t.structure, exact: false },
+    ...(dna ? [{ href: `${base}/dna`, label: t.dna, exact: false }] : []),
     ...(manage
       ? [{ href: `${base}/licenses`, label: t.licenses, exact: false }]
       : []),

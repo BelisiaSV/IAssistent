@@ -3,6 +3,7 @@ import "server-only";
 import type { Tables } from "@iassistent/db";
 import type { VisionAnswers } from "@iassistent/staff-engine/content";
 
+import { clubDnaForTeam } from "@/lib/clubs/dna";
 import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
@@ -44,7 +45,8 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
   const weekStart = isoWeekday(today) === 7 ? addDays(mondayOf(today), 7) : mondayOf(today);
   const schedule = trainingScheduleSchema.safeParse(team.training_schedule);
   const divisions = team.federation_team ? team.federation_divisions : [];
-  const [bank, data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
+  const [clubDna, bank, data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
+    clubDnaForTeam(supabase, team),
     bankForStaff(supabase, question),
     loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", coachId).maybeSingle(),
@@ -89,7 +91,7 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
   const library = (exercises ?? []).map(libraryExercise);
 
   const context = data.week
-    ? contextForRole(data, weekStart, { staff: approved, vision, feedback: null, library })
+    ? contextForRole(data, weekStart, { staff: approved, vision, feedback: null, library, clubDna })
     : buildRoleContext({
         weekStart,
         // No week input yet: the fixed training days of the team.
@@ -116,6 +118,7 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
         library,
         staff: approved,
         feedback: null,
+        clubDna,
       });
 
   // Cards: yellow cards this season and who is suspended for the next match.

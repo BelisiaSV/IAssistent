@@ -1,6 +1,12 @@
 import "server-only";
 
-import { type BankExercise, type LibraryExercise, type VisionAnswers, weekPeriodization } from "@iassistent/staff-engine/content";
+import {
+  type BankExercise,
+  type ClubDnaContext,
+  type LibraryExercise,
+  type VisionAnswers,
+  weekPeriodization,
+} from "@iassistent/staff-engine/content";
 
 import { matchEvaluations, opponentContext, opponentKey } from "@/lib/opponents/context";
 import { matchDayCatalog, periodizationCatalog, testCatalog, visionQuestionnaire } from "@/lib/staff";
@@ -148,6 +154,7 @@ export function contextForRole(
     feedback: { previousOutput: unknown; comment: string } | null;
     library?: LibraryExercise[];
     bank?: BankExercise[];
+    clubDna?: ClubDnaContext | null;
   },
 ) {
   if (!data.week) throw new Error("week plan missing");
@@ -192,6 +199,7 @@ export function contextForRole(
     bank: options.bank,
     staff: options.staff,
     feedback: options.feedback,
+    clubDna: options.clubDna ?? null,
   });
 }
 
