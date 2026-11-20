@@ -10,6 +10,7 @@ import { getTeamContext } from "@/lib/teams/queries";
 import { trainingScheduleSchema } from "@/lib/weeks/validation";
 
 import { CardRulesForm } from "./card-rules-form";
+import { ClubLink } from "./club-link";
 import { ScheduleForm } from "./schedule-form";
 import { DisplayForm } from "./display-form";
 import { VenueForm } from "./venue-form";
@@ -50,6 +51,7 @@ export default async function TeamSettingsPage({ params }: { params: Promise<{ t
       />
       </div>
 
+      <ClubLink team={team} canEdit={canEdit} />
     </div>
   );
 }

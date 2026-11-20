@@ -32,7 +32,9 @@ export type NavIconName =
   | "tasks"
   | "reports"
   | "send"
-  | "chat";
+  | "chat"
+  | "club"
+  | "link";
 
 const PATHS: Record<NavIconName, ReactNode> = {
   animations: (
@@ -125,6 +127,18 @@ const PATHS: Record<NavIconName, ReactNode> = {
     </>
   ),
   load: <path d="M3 12h4l3-7 4 14 3-7h4" />,
+  club: (
+    <>
+      <path d="M12 3 4.5 6v5.5c0 4.5 3.2 8 7.5 9.5 4.3-1.5 7.5-5 7.5-9.5V6L12 3Z" />
+      <path d="M9 12h6M12 9v6" />
+    </>
+  ),
+  link: (
+    <>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </>
+  ),
   tasks: (
     <>
       <path d="M4 6.5l1.5 1.5L8.5 5M4 12.5l1.5 1.5 3-3M4 18.5l1.5 1.5 3-3" />

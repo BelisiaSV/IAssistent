@@ -6,6 +6,7 @@ import type { SwitcherTeam } from "@/components/team-switcher";
 import { isPlatformAdmin } from "@/lib/admin";
 import { getStaffProvider } from "@/lib/ai";
 import { requireUser } from "@/lib/auth";
+import { loadMyClubs } from "@/lib/clubs/load";
 import { SIDEBAR_COOKIE } from "@/lib/sidebar";
 import { staff } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
@@ -13,9 +14,10 @@ import { createClient } from "@/lib/supabase/server";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const supabase = await createClient();
-  const [admin, { data: teams }] = await Promise.all([
+  const [admin, clubs, { data: teams }] = await Promise.all([
     isPlatformAdmin(supabase),
-    supabase.from("teams").select("id, name, club_name, logo_path, primary_color, archived_at").order("created_at", { ascending: false }),
+    loadMyClubs(),
+    supabase.from("teams").select("id, name, club_name, club_id, logo_path, primary_color, archived_at").order("created_at", { ascending: false }),
   ]);
 
   const logoPaths = (teams ?? []).flatMap((t) => (t.logo_path ? [t.logo_path] : []));
@@ -28,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     id: t.id,
     name: t.name,
     clubName: t.club_name,
+    clubId: t.club_id,
     logoUrl: t.logo_path ? (logoUrls.get(t.logo_path) ?? null) : null,
     primaryColor: t.primary_color,
     archived: !!t.archived_at,
@@ -38,6 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       teams={switcherTeams}
+      clubs={clubs.map((c) => ({ id: c.id, name: c.name }))}
       admin={admin}
       email={user.email ?? ""}
       roleNames={Object.fromEntries(staff.roles.map((r) => [r.id, r.meta.naam]))}

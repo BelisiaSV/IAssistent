@@ -1,24 +1,20 @@
 "use server";
 
-import {
-  CLUB_MODULES,
-  CLUB_ROLES,
-  type Json,
-  TEAM_STAFF_ROLES,
-} from "@iassistent/db";
+import { CLUB_MODULES, type Json } from "@iassistent/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
+import { createCodeFromForm } from "@/lib/clubs/code";
 import type { FederationClub } from "@/lib/clubs/federation";
+import type { CodeState, FormState } from "@/lib/clubs/form-state";
 import {
   type ClubImport,
   hasErrors,
   parseClubImport,
   seatsNeeded,
-  teamRoleFits,
   toImportPayload,
 } from "@/lib/clubs/import";
 import { readClubFile } from "@/lib/clubs/template";
@@ -28,9 +24,8 @@ import { AGE_CATEGORIES } from "@/lib/teams/age-categories";
 
 const e = messages.clubAdmin.errors;
 const x = messages.clubAdmin.excel;
-const c = messages.clubAdmin.codes;
 
-export type FormState = { error?: string; ok?: string };
+export type { CodeState, FormState };
 
 async function admin() {
   await requireUser();
@@ -97,12 +92,10 @@ export async function createClub(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const parsed = z
-    .object({ name: text(120).min(1), number })
-    .safeParse({
-      name: formData.get("name") ?? "",
-      number: formData.get("number") ?? "",
-    });
+  const parsed = z.object({ name: text(120).min(1), number }).safeParse({
+    name: formData.get("name") ?? "",
+    number: formData.get("number") ?? "",
+  });
   if (!parsed.success) return { error: e.name };
   const supabase = await admin();
   if (!supabase) return { error: e.notAllowed };
@@ -235,58 +228,16 @@ export async function setSubscription(
   return { ok: messages.clubAdmin.subscription.saved };
 }
 
-export type CodeState = { error?: string; code?: string };
-
 export async function createCode(
   clubId: string,
   _prev: CodeState,
   formData: FormData,
 ): Promise<CodeState> {
-  const parsed = z
-    .object({
-      role: z.enum(CLUB_ROLES),
-      teamId: z.union([z.literal(""), z.uuid()]),
-      teamRole: z.union([z.literal(""), z.enum(TEAM_STAFF_ROLES)]),
-      expires: z.union([z.literal(""), z.iso.date()]),
-      note: text(120),
-    })
-    .safeParse({
-      role: formData.get("role"),
-      teamId: formData.get("teamId") ?? "",
-      teamRole: formData.get("teamRole") ?? "",
-      expires: formData.get("expires") ?? "",
-      note: formData.get("note") ?? "",
-    });
-  if (!parsed.success) return { error: c.errors.failed };
-  const d = parsed.data;
-  if (d.teamId && (!d.teamRole || !teamRoleFits(d.role, d.teamRole)))
-    return { error: c.errors.teamRole };
   const supabase = await admin();
-  if (!supabase || !z.uuid().safeParse(clubId).success)
-    return { error: e.notAllowed };
-  const { data, error } = await supabase.rpc("create_club_activation_code", {
-    p_club_id: clubId,
-    p_role: d.role,
-    // End of the chosen day.
-    p_expires_at: d.expires ? `${d.expires}T23:59:59` : null,
-    p_team_id: d.teamId || null,
-    p_team_role: d.teamId ? d.teamRole || null : null,
-    p_note: d.note || null,
-  });
-  const code = data?.[0]?.code;
-  if (error || !code) {
-    console.error("createCode failed", error);
-    return {
-      error:
-        error?.hint === "license_seats_exhausted"
-          ? c.errors.noSeats
-          : error?.hint === "club_inactive"
-            ? c.errors.inactive
-            : c.errors.failed,
-    };
-  }
-  revalidatePath(`/admin/clubs/${clubId}`);
-  return { code };
+  if (!supabase) return { error: e.notAllowed };
+  const result = await createCodeFromForm(supabase, clubId, formData);
+  if (result.code) revalidatePath(`/admin/clubs/${clubId}`);
+  return result;
 }
 
 /** Small actions from buttons in a list; the form posts the ids. */

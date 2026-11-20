@@ -7,16 +7,16 @@ import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
-import { longDate } from "@/lib/weeks/dates";
 
-import { revokeCode, revokeLicense } from "../actions";
+import { createCode, createTeam, revokeCode, revokeLicense } from "../actions";
+import { CodeForm, TeamForm } from "@/components/clubs/forms";
 import {
-  CodeForm,
-  ConfirmButton,
-  DetailsForm,
-  SubscriptionForm,
-  TeamForm,
-} from "./club-forms";
+  CodesTable,
+  HistoryList,
+  PeopleTable,
+} from "@/components/clubs/tables";
+
+import { DetailsForm, SubscriptionForm } from "./club-forms";
 import { ClubImport } from "./club-import";
 
 const m = messages.clubAdmin;
@@ -29,17 +29,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
     </section>
   );
 }
-
-/** An expiry moment that has passed (read at request time). */
-function isPast(iso: string | null): boolean {
-  return iso !== null && new Date(iso).getTime() <= Date.now();
-}
-
-const dateTime = new Intl.DateTimeFormat("nl-BE", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Europe/Brussels",
-});
 
 /** Admin only: one club — details, subscription, Excel, codes, members, teams and history. */
 export default async function AdminClubPage({
@@ -154,153 +143,23 @@ export default async function AdminClubPage({
 
       <Section title={m.sections.codes}>
         <CodeForm
-          clubId={clubId}
+          action={createCode.bind(null, clubId)}
           teams={activeTeams.map((t) => ({ id: t.id, name: t.name }))}
         />
-        {codes?.length ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs text-slate-500">
-                <tr>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.codes.columns.code}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.codes.columns.role}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.codes.columns.team}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.codes.columns.note}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.codes.columns.status}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.codes.columns.created}
-                  </th>
-                  <th className="py-2 font-medium" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {codes.map((code) => {
-                  const expired = code.status === "open" && isPast(code.expires_at);
-                  const status = expired ? "expired" : code.status;
-                  return (
-                    <tr key={code.id}>
-                      <td className="py-2 pr-3 font-mono">
-                        {m.codes.endsWith(code.code_hint)}
-                      </td>
-                      <td className="py-2 pr-3">{m.roles[code.role]}</td>
-                      <td className="py-2 pr-3">
-                        {code.team_id
-                          ? `${teamName.get(code.team_id) ?? "—"} · ${m.teamRoles[code.team_role ?? ""] ?? ""}`
-                          : "—"}
-                      </td>
-                      <td className="py-2 pr-3">{code.note ?? "—"}</td>
-                      <td className="py-2 pr-3">{m.codes.status[status]}</td>
-                      <td className="py-2 pr-3 text-slate-500">
-                        {dateTime.format(new Date(code.created_at))}
-                      </td>
-                      <td className="py-2 text-right">
-                        {status === "open" && (
-                          <form action={revokeCode}>
-                            <input type="hidden" name="clubId" value={clubId} />
-                            <input
-                              type="hidden"
-                              name="codeId"
-                              value={code.id}
-                            />
-                            <ConfirmButton
-                              label={m.codes.revoke}
-                              confirmText={m.codes.revokeConfirm}
-                            />
-                          </form>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-sm text-slate-600">{m.codes.empty}</p>
-        )}
+        <CodesTable
+          clubId={clubId}
+          codes={codes ?? []}
+          teamName={teamName}
+          revoke={revokeCode}
+        />
       </Section>
 
       <Section title={m.sections.members}>
-        {members?.length ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-xs text-slate-500">
-                <tr>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.members.columns.name}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.members.columns.email}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.members.columns.roles}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.members.columns.license}
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {m.members.columns.since}
-                  </th>
-                  <th className="py-2 font-medium" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {members.map((p) => (
-                  <tr
-                    key={p.coach_id}
-                    className={p.active ? "" : "text-slate-400"}
-                  >
-                    <td className="py-2 pr-3 font-medium">{p.name ?? "—"}</td>
-                    <td className="py-2 pr-3">{p.email}</td>
-                    <td className="py-2 pr-3">
-                      {p.active
-                        ? (p.roles ?? []).map((r) => m.roles[r]).join(", ")
-                        : m.members.former}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {p.license_status === "active"
-                        ? m.members.licenseActive
-                        : p.license_status === "revoked"
-                          ? m.members.licenseRevoked
-                          : m.members.noLicense}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {longDate(p.since.slice(0, 10))}
-                    </td>
-                    <td className="py-2 text-right">
-                      {p.license_status === "active" && p.license_id && (
-                        <form action={revokeLicense}>
-                          <input type="hidden" name="clubId" value={clubId} />
-                          <input
-                            type="hidden"
-                            name="licenseId"
-                            value={p.license_id}
-                          />
-                          <ConfirmButton
-                            label={m.members.revoke}
-                            confirmText={m.members.revokeConfirm}
-                          />
-                        </form>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-sm text-slate-600">{m.members.empty}</p>
-        )}
+        <PeopleTable
+          clubId={clubId}
+          people={members ?? []}
+          revokeLicense={revokeLicense}
+        />
       </Section>
 
       <Section title={m.sections.teams}>
@@ -373,7 +232,7 @@ export default async function AdminClubPage({
         ) : (
           <p className="text-sm text-slate-600">{m.teams.empty}</p>
         )}
-        <TeamForm clubId={clubId} />
+        <TeamForm action={createTeam.bind(null, clubId)} />
       </Section>
 
       <Section title={m.sections.details}>
@@ -381,32 +240,11 @@ export default async function AdminClubPage({
       </Section>
 
       <Section title={m.sections.history}>
-        {history?.length ? (
-          <ul className="divide-y divide-slate-100 text-sm">
-            {history.map((h) => (
-              <li key={h.id} className="flex flex-wrap gap-x-3 py-2">
-                <span className="w-40 shrink-0 text-slate-500">
-                  {dateTime.format(new Date(h.created_at))}
-                </span>
-                <span className="font-medium">
-                  {m.history.actions[h.action] ?? h.action}
-                </span>
-                {h.coach_id && (
-                  <span className="text-slate-600">
-                    {personName.get(h.coach_id) ?? ""}
-                  </span>
-                )}
-                {h.team_id && (
-                  <span className="text-slate-600">
-                    {teamName.get(h.team_id) ?? ""}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-slate-600">{m.history.empty}</p>
-        )}
+        <HistoryList
+          entries={history ?? []}
+          personName={personName}
+          teamName={teamName}
+        />
       </Section>
     </div>
   );

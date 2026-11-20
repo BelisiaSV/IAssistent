@@ -5,6 +5,7 @@ import { type ReactNode, useState } from "react";
 
 import { SIDEBAR_COOKIE } from "@/lib/sidebar";
 
+import { EnvironmentBar } from "./environment-bar";
 import { SectionTabs } from "./section-tabs";
 import { Sidebar } from "./sidebar";
 import { StaffDock } from "./staff/staff-dock";
@@ -17,6 +18,7 @@ import { useCurrentTeam } from "./use-current-team";
  */
 export function AppShell({
   teams,
+  clubs,
   admin,
   email,
   roleNames,
@@ -25,6 +27,8 @@ export function AppShell({
   children,
 }: {
   teams: SwitcherTeam[];
+  /** Clubs the user is a member of (club environment). */
+  clubs: { id: string; name: string }[];
   admin: boolean;
   email: string;
   roleNames: Record<string, string>;
@@ -48,12 +52,13 @@ export function AppShell({
 
   return (
     <div className={`min-h-screen transition-[padding] print:pl-0 ${collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64"} ${print ? "" : "bg-[#0b1220]"}`}>
-      <Sidebar teams={teams} admin={admin} email={email} collapsed={collapsed} onToggle={toggle} />
+      <Sidebar teams={teams} clubs={clubs} admin={admin} email={email} collapsed={collapsed} onToggle={toggle} />
       <main
         className={`mx-auto max-w-[1760px] px-4 py-6 sm:px-6 sm:py-8 lg:pr-24 lg:pl-8 print:max-w-none print:p-0 ${
           print || dashboard ? "" : "app-dark min-h-screen text-slate-900"
         }`}
       >
+        {!print && <EnvironmentBar teams={teams} />}
         {!print && <SectionTabs teamId={teamId} roleNames={roleNames} />}
         {children}
       </main>
