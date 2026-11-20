@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { type BankFilters, ZONE_COUNT } from "@/lib/exercise-bank/filters";
 import { messages } from "@/lib/messages";
@@ -10,11 +11,14 @@ export function BankFilterForm({
   filters,
   options,
   hidden = {},
+  extra,
 }: {
   filters: BankFilters;
   options: { fase: string[]; type: string[]; belasting: string[]; principe: string[] };
   /** Other parameters to keep, e.g. the status filter of the admin. */
   hidden?: Record<string, string>;
+  /** More filters in the same grid (e.g. age and level of club exercises). */
+  extra?: ReactNode;
 }) {
   const select = "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm";
   const choice = (name: keyof typeof options, all: string) => (
@@ -47,6 +51,7 @@ export function BankFilterForm({
             </option>
           ))}
         </select>
+        {extra}
       </div>
       <div className="flex items-center gap-3">
         <button className="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">{m.apply}</button>

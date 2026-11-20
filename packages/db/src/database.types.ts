@@ -789,6 +789,131 @@ export type Database = {
           },
         ];
       };
+      club_exercises: {
+        Row: {
+          id: string;
+          club_id: string;
+          number: string;
+          title: string;
+          kind: string;
+          phase: string | null;
+          target_group: string | null;
+          tags: string[];
+          principles: string[];
+          content: Json;
+          age_categories: string[];
+          level: string | null;
+          origin: string;
+          base_bank_number: string | null;
+          source_exercise_id: string | null;
+          status: string;
+          recommended: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          approved_by: string | null;
+          approved_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          number: string;
+          title: string;
+          kind: string;
+          phase?: string | null;
+          target_group?: string | null;
+          tags?: string[];
+          principles?: string[];
+          content?: Json;
+          age_categories?: string[];
+          level?: string | null;
+          origin?: string;
+          base_bank_number?: string | null;
+          source_exercise_id?: string | null;
+          status?: string;
+          recommended?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          approved_by?: string | null;
+          approved_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          number?: string;
+          title?: string;
+          kind?: string;
+          phase?: string | null;
+          target_group?: string | null;
+          tags?: string[];
+          principles?: string[];
+          content?: Json;
+          age_categories?: string[];
+          level?: string | null;
+          origin?: string;
+          base_bank_number?: string | null;
+          source_exercise_id?: string | null;
+          status?: string;
+          recommended?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          approved_by?: string | null;
+          approved_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_exercises_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      club_bank_picks: {
+        Row: {
+          club_id: string;
+          bank_number: string;
+          recommended: boolean;
+          note: string | null;
+          picked_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          club_id: string;
+          bank_number: string;
+          recommended?: boolean;
+          note?: string | null;
+          picked_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          club_id?: string;
+          bank_number?: string;
+          recommended?: boolean;
+          note?: string | null;
+          picked_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_bank_picks_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "club_bank_picks_bank_number_fkey";
+            columns: ["bank_number"];
+            isOneToOne: false;
+            referencedRelation: "bank_exercises";
+            referencedColumns: ["number"];
+          },
+        ];
+      };
       session_loads: {
         Row: {
           id: string;
@@ -2288,6 +2413,13 @@ export type Database = {
       discard_club_dna_draft: { Args: { p_club_id: string }; Returns: undefined };
       publish_club_dna: { Args: { p_club_id: string; p_note?: string | null }; Returns: undefined };
       save_club_dna_draft: { Args: { p_club_id: string; p_content: Json }; Returns: string };
+      save_club_exercise: { Args: { p_club_id: string; p_id: string | null; p_data: Json }; Returns: string };
+      set_club_bank_pick: {
+        Args: { p_club_id: string; p_bank_number: string; p_pick: boolean; p_recommended?: boolean };
+        Returns: undefined;
+      };
+      set_club_exercise_recommended: { Args: { p_id: string; p_recommended: boolean }; Returns: undefined };
+      set_club_exercise_status: { Args: { p_id: string; p_status: string }; Returns: undefined };
       club_people: {
         Args: { p_club_id: string };
         Returns: {

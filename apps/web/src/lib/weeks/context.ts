@@ -73,6 +73,8 @@ export function buildRoleContext(input: {
   feedback: { previousOutput: unknown; comment: string } | null;
   /** The club's DNA for a club team, or null. */
   clubDna?: ClubDnaContext | null;
+  /** Approved exercises of the team's club that fit best (club team only). */
+  clubExercises?: BankExercise[];
 }): RoleContext {
   const labels = weekLabels(
     input.weekStart,
@@ -148,6 +150,7 @@ export function buildRoleContext(input: {
     tegenstander: input.opponent,
     evaluaties: input.evaluations,
     bibliotheek: input.library ?? [],
+    cluboefenstof: input.clubExercises ?? [],
     oefenstofbank: input.bank ?? [],
     staf: input.staff,
     feedback: input.feedback

@@ -8,7 +8,7 @@ Gaat de opdracht over de training of de week, vul dan `weekplan` volledig in:
   het wedstrijddag-label. Trainingsdagen krijgen alle onderdelen met fase (opwarming, kern,
   afsluiting), duur, reeksen, werk en rust per reeks, intensiteit en RPE, zoals de Assistent Coach
   en de Physical Coach ze voorstelden. Neem `oefening_id` (oefenstof van de hoofdcoach) en
-  `bank_nummer` (oefenstofbank, bv. OEF-007) over zoals de Assistent Coach ze koos; anders null.
+  `bank_nummer` (oefenstofbank, bv. OEF-007, of cluboefenstof, bv. CLUB-3) over zoals de Assistent Coach ze koos; anders null.
   Wedstrijd- en rustdagen zonder onderdelen.
 - `beschikbaarheid`: het aantal beschikbare spelers en wie niet beschikbaar is (geblesseerd,
   geschorst, afwezig) met de aanpassing voor deze week, zoals de Team Manager meldde.
