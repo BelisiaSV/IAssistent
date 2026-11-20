@@ -1538,7 +1538,7 @@ export const messages = {
     errors: {
       archiveFailed: "Het team kon niet gearchiveerd worden.",
       restoreFailed: "Het team kon niet teruggezet worden.",
-      noLicenseSeats: "Je club heeft geen vrije licentie meer voor een actief team.",
+      noLicenseSeats: "Je club heeft geen vrije plaats meer voor een actief team.",
     },
   },
   teamForm: {

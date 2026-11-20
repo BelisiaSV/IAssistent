@@ -14,7 +14,11 @@ export const getTeamContext = cache(async (teamId: string) => {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const { data: team } = await supabase.from("teams").select("*").eq("id", teamId).maybeSingle();
+  const { data: team } = await supabase
+    .from("teams")
+    .select("*")
+    .eq("id", teamId)
+    .maybeSingle();
   if (!team) notFound();
 
   let logoUrl: string | null = null;
@@ -25,6 +29,17 @@ export const getTeamContext = cache(async (teamId: string) => {
     logoUrl = data?.signedUrl ?? null;
   }
 
-  const isHeadCoach = team.head_coach_id === user.id;
-  return { team, logoUrl, isHeadCoach, canEdit: isHeadCoach && !team.archived_at };
+  // A club team is coached by its head coaches on the staff (team_staff), as
+  // long as they are in the club; a personal team by the coach who made it.
+  const isHeadCoach = team.club_id
+    ? Boolean(
+        (await supabase.rpc("is_team_head_coach", { p_team_id: team.id })).data,
+      )
+    : team.head_coach_id === user.id;
+  return {
+    team,
+    logoUrl,
+    isHeadCoach,
+    canEdit: isHeadCoach && !team.archived_at,
+  };
 });

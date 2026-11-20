@@ -31,20 +31,35 @@ export default async function TeamsPage({
     .select("*")
     .order("created_at", { ascending: false });
 
-  const logoPaths = (teams ?? []).flatMap((t) => (t.logo_path ? [t.logo_path] : []));
+  const logoPaths = (teams ?? []).flatMap((t) =>
+    t.logo_path ? [t.logo_path] : [],
+  );
   const logoUrls = new Map<string, string>();
   if (logoPaths.length > 0) {
-    const { data } = await supabase.storage.from(TEAM_LOGOS_BUCKET).createSignedUrls(logoPaths, 3600);
+    const { data } = await supabase.storage
+      .from(TEAM_LOGOS_BUCKET)
+      .createSignedUrls(logoPaths, 3600);
     for (const item of data ?? []) {
       if (item.path && item.signedUrl) logoUrls.set(item.path, item.signedUrl);
     }
   }
 
+  // Club teams the user coaches as head coach (personal teams: head_coach_id).
+  const { data: staff } = await supabase
+    .from("team_staff")
+    .select("team_id")
+    .eq("coach_id", user.id)
+    .eq("role", "head_coach")
+    .is("ended_at", null);
+  const clubHeadCoach = new Set((staff ?? []).map((s) => s.team_id));
+
   const active = (teams ?? []).filter((t) => !t.archived_at);
   const archived = (teams ?? []).filter((t) => t.archived_at);
 
   const card = (team: Tables<"teams">) => {
-    const isHeadCoach = team.head_coach_id === user.id;
+    const isHeadCoach = team.club_id
+      ? clubHeadCoach.has(team.id)
+      : team.head_coach_id === user.id;
     const action = team.archived_at ? restoreTeam : archiveTeam;
     return (
       <TeamCard
@@ -58,10 +73,15 @@ export default async function TeamsPage({
         badge={isHeadCoach ? undefined : m.readOnlyAccess}
         href={`/teams/${team.id}`}
         actions={
-          isHeadCoach && (
+          // A club team is archived by the club, not by its coach.
+          isHeadCoach &&
+          !team.club_id && (
             <form action={action}>
               <input type="hidden" name="teamId" value={team.id} />
-              <button type="submit" className="text-sm text-slate-600 hover:text-brand">
+              <button
+                type="submit"
+                className="text-sm text-slate-600 hover:text-brand"
+              >
                 {team.archived_at ? m.restore : m.archive}
               </button>
             </form>
@@ -84,21 +104,27 @@ export default async function TeamsPage({
       </div>
 
       {created === "1" && <Alert tone="success">{m.created}</Alert>}
-      {created === "no-logo" && <Alert tone="error">{m.createdWithoutLogo}</Alert>}
+      {created === "no-logo" && (
+        <Alert tone="error">{m.createdWithoutLogo}</Alert>
+      )}
       {error && ERRORS[error] && <Alert tone="error">{ERRORS[error]}</Alert>}
 
       {active.length === 0 && archived.length === 0 ? (
         <p className="text-slate-600">{m.empty}</p>
       ) : (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">{m.active}</h2>
+          <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">
+            {m.active}
+          </h2>
           <ul className="space-y-3">{active.map(card)}</ul>
         </section>
       )}
 
       {archived.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">{m.archived}</h2>
+          <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">
+            {m.archived}
+          </h2>
           <p className="text-sm text-slate-500">{m.archivedHint}</p>
           <ul className="space-y-3 opacity-75">{archived.map(card)}</ul>
         </section>

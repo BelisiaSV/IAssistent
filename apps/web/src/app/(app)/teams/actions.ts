@@ -14,7 +14,7 @@ export type TeamFormState = {
   fieldErrors?: Partial<Record<"name" | "season" | "clubName" | "primaryColor" | "secondaryColor" | "ageCategory" | "logo", string>>;
 };
 
-const LICENSE_HINT = "license_seats_exhausted";
+const LICENSE_HINT = "club_max_teams";
 
 export async function createTeam(_prev: TeamFormState, formData: FormData): Promise<TeamFormState> {
   const parsed = teamInputSchema.safeParse({

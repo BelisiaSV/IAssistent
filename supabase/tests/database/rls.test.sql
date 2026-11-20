@@ -64,11 +64,22 @@ select (select id from ids where name = 'team_a'), tests.id('a@test.local'), 'Te
 insert into public.teams (id, head_coach_id, name, club_name)
 select (select id from ids where name = 'team_b'), tests.id('b@test.local'), 'Team B', 'Club B';
 
-insert into public.clubs (id, name, license_seats, created_by)
-select (select id from ids where name = 'club_c'), 'Club C', 2, tests.id('owner@test.local');
+insert into public.clubs (id, name, created_by)
+select (select id from ids where name = 'club_c'), 'Club C', tests.id('owner@test.local');
+insert into public.club_subscriptions (club_id, license_seats, max_teams)
+select id, 5, 2 from ids where name = 'club_c';
+insert into public.club_licenses (club_id, coach_id)
+select (select id from ids where name = 'club_c'), tests.id(e)
+from unnest(array['owner@test.local', 'd@test.local']) e;
+insert into public.club_members (club_id, coach_id, role, license_id)
+select l.club_id, l.coach_id, case when l.coach_id = tests.id('owner@test.local') then 'owner' else 'coach' end::public.club_role, l.id
+from public.club_licenses l;
 insert into public.teams (id, head_coach_id, club_id, name, club_name)
 select (select id from ids where name = 'team_c1'), tests.id('d@test.local'),
        (select id from ids where name = 'club_c'), 'Team C1', 'Club C';
+insert into public.team_staff (team_id, club_id, coach_id, role)
+select (select id from ids where name = 'team_c1'), (select id from ids where name = 'club_c'),
+       tests.id('d@test.local'), 'head_coach';
 
 insert into public.players (team_id, first_name, last_name)
 select id, 'Speler', name from ids where name in ('team_a', 'team_b', 'team_c1');
@@ -89,9 +100,8 @@ select is((select count(*)::int from public.teams where head_coach_id = '1111111
   'seed: test team exists');
 select is((select count(*)::int from public.coach_profiles where coach_id = tests.id('a@test.local')), 1,
   'new auth user gets an empty vision profile');
-select is((select count(*)::int from public.memberships
-           where club_id = (select id from ids where name = 'club_c') and role = 'club_owner'), 1,
-  'club creator becomes club owner');
+select ok(not exists (select 1 from public.memberships where role = 'club_owner'),
+  'club owners live in club_members, not in memberships');
 
 -- -----------------------------------------------------------------------------
 -- Anonymous
@@ -116,9 +126,9 @@ select lives_ok(
   $$insert into public.teams (head_coach_id, name, club_name)
     values (tests.id('a@test.local'), 'Tweede ploeg', 'Club A') returning id$$,
   'coach creates a team and reads it back in the same statement (insert ... returning)');
-select lives_ok(
+select throws_ok(
   $$insert into public.clubs (name) values ('Eigen club') returning id$$,
-  'coach creates a club and reads it back in the same statement (insert ... returning)');
+  '42501', null, 'coaches cannot create clubs (only the platform admin)');
 select throws_ok(
   $$insert into public.players (team_id, first_name, last_name)
     select id, 'X', 'Y' from ids where name = 'team_b'$$,
@@ -195,16 +205,14 @@ select is((select count(*)::int from public.players), 1, 'club owner sees the cl
 select is((select count(*)::int from public.coach_profiles where coach_id = tests.id('d@test.local')), 0,
   'club owner does not see the coach''s vision without consent');
 select throws_ok(
-  $$update public.clubs set license_seats = 99$$,
+  $$update public.club_subscriptions set license_seats = 99$$,
   '42501', null, 'club owner cannot change licence seats');
 select lives_ok(
-  $$insert into public.teams (head_coach_id, club_id, name, club_name)
-    select tests.id('d@test.local'), id, 'Team C2', 'Club C' from ids where name = 'club_c'$$,
-  'club owner creates a team within licence seats');
+  $$select public.create_club_team(id, 'Team C2', 'Club C') from ids where name = 'club_c'$$,
+  'club owner creates a team within the team places');
 select throws_ok(
-  $$insert into public.teams (head_coach_id, club_id, name, club_name)
-    select tests.id('d@test.local'), id, 'Team C3', 'Club C' from ids where name = 'club_c'$$,
-  '23514', 'club has no free license seats', 'licence seats are enforced');
+  $$select public.create_club_team(id, 'Team C3', 'Club C') from ids where name = 'club_c'$$,
+  '23514', 'club has no free team places', 'max. teams of the club is enforced');
 select tests.logout();
 
 -- Vision sharing with consent
@@ -260,7 +268,7 @@ select throws_ok(
 select tests.logout();
 
 select tests.login('d@test.local');
-select ok(public.is_feature_enabled('video.analysis'), 'club flag applies to the club''s head coach');
+select ok(public.is_feature_enabled('video.analysis'), 'club flag applies to the club''s members');
 select ok(not public.is_feature_enabled('staff.meeting'), 'coach flag of someone else does not apply');
 select tests.logout();
 
