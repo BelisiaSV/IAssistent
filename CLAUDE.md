@@ -24,10 +24,12 @@ Video Analist**.
 - **Transfer**: de coach archiveert zijn team en maakt een nieuw team met nieuwe branding.
   Een gearchiveerd team blijft leesbaar voor de coach (inclusief alle oefenstof die toen
   gemaakt is), maar is read-only. Teams worden nooit verwijderd door gebruikers.
-- Eén ingelogde **hoofdcoach per team**. Hij kan een menselijke **T2 tijdelijke leestoegang**
-  geven (verplichte einddatum).
-- Optioneel: een **club** koopt licenties (`clubs.license_seats` = max. aantal actieve teams)
-  en maakt teams aan voor coaches. De **clubowner ziet de teams en spelers** van de club.
+- Een **persoonlijk team** heeft één ingelogde hoofdcoach (`head_coach_id`). Hij kan een menselijke
+  **T2 tijdelijke leestoegang** geven (verplichte einddatum).
+- Een **club** (clubomgeving, zie fase "Clubomgeving") koopt een pakket met licenties en modules. De
+  platformadmin maakt de club aan; mensen komen erin met een persoonlijke activatiecode. Clubteams
+  hebben een staf (`team_staff`: meerdere hoofd- en assistent-trainers, coördinatoren). De trainer
+  behoudt zijn persoonlijke account en omgeving.
 - Het **visieprofiel is persoonlijk**. Delen gebeurt alleen met expliciete toestemming van de
   coach (`coach_profile_shares`, met een coach of met een club).
 - Strikte scheiding van data per coach/club via **Row Level Security**.
@@ -116,8 +118,11 @@ voorstelt, staat in `/staff` (markdown/JSON) of in de database (bv. de visie van
 
 - Elke tabel heeft RLS aan. Nieuwe tabellen: RLS aan + policies + pgTAP-tests in dezelfde PR.
 - Toegang loopt via `security definer`-helpers in de migratie:
-  `can_read_team(team_id)` (hoofdcoach, actieve T2, clubowner — óók voor gearchiveerde teams),
-  `can_write_team(team_id)` (alleen hoofdcoach en alleen als het team niet gearchiveerd is),
+  `can_read_team(team_id)` (hoofdcoach, actieve T2, staf van een clubteam, owner/admin/technisch
+  directeur van de club — óók voor gearchiveerde teams),
+  `can_write_team(team_id)` (alleen de hoofdcoach — `is_team_head_coach`: bij een persoonlijk team
+  `head_coach_id`, bij een clubteam een hoofdcoach in `team_staff` die nog clublid is — en alleen als
+  het team niet gearchiveerd is), `has_club_role(club, rollen)`, `is_club_member`, `club_has_module`,
   `is_club_owner`, `can_read_coach_profile`, `is_feature_enabled`.
 - **Nieuwe teamgebonden data** (trainingen, oefenstof, weekplanningen, …) krijgt een `team_id`
   en gebruikt `can_read_team` voor lezen en `can_write_team` voor schrijven. Zo blijft
@@ -127,7 +132,10 @@ voorstelt, staat in `/staff` (markdown/JSON) of in de database (bv. de visie van
   uit hetzelfde statement niet → "new row violates row-level security policy". Laat de
   SELECT-policy daarom eerst de eigen kolommen van de rij controleren (bv. `head_coach_id = auth.uid()`)
   en test elke insert die de app doet mét `returning` in pgTAP.
-- `teams.head_coach_id` en `teams.club_id` zijn onveranderlijk (trigger).
+- `teams.head_coach_id` is onveranderlijk (trigger). `teams.club_id` ook, behalve één keer van null naar
+  een club via een goedgekeurde koppeling (`decide_club_team_link`); een clubteam verlaat zijn club nooit.
+- In de app: of iemand een team mag bewerken komt van `is_team_head_coach`/`can_write_team`, niet van
+  `head_coach_id === user.id` (dat klopt enkel voor persoonlijke teams).
 - `anon` heeft geen toegang tot `public`. Nieuwe functies: `revoke execute ... from anon, public`.
 - Migraties: nieuwe file in `supabase/migrations/` (`YYYYMMDDHHMMSS_beschrijving.sql`),
   nooit een bestaande migratie wijzigen die al op staging/productie staat.
@@ -470,5 +478,30 @@ Regels:
   of verwijdert het beeld van één oefening (`admin_set_bank_exercise_media`, pad `<nummer>-<tijd>.<ext>`). Coach en admin
   zoeken met dezelfde filters (`BankFilterForm`, `filterBank` in `lib/exercise-bank/filters.ts`: tekst in titel, doelen,
   tags en bron; fase, type, belasting, principe, zone). De staf krijgt de zones mee (`BankExercise.zones`).
+- **Clubomgeving, deel 1: datamodel en rechten** (nog zonder schermen) — migratie `club_environment`.
+  De **platformadmin** maakt een club (`admin_create_club`) en zet het abonnement
+  (`club_subscriptions`: plan, `license_seats`, `max_teams` (null = onbeperkt), `modules`, `starts_on`/`ends_on`;
+  `admin_set_club_subscription`, modules standaard die van het plan, `plans.modules`). Modulecodes:
+  `club_module_codes()` = `CLUB_MODULES` in `packages/db` (dna, exercises, planning, evaluations, knowledge,
+  reports); dashboard, structuur en licenties zijn de kern. Een club is actief zolang het abonnement loopt
+  (`club_is_active`). **Rollen** in `club_members` (enum `club_role`: owner, admin, technical_director,
+  team_coordinator, coach, assistant_coach; beëindigde rijen blijven als historiek). **Licenties**
+  (`club_licenses`, één actieve per persoon per club) enkel voor owner, technisch directeur, coach en
+  assistent-coach (`club_role_uses_license`). **Activatiecodes** (`club_activation_codes`): 12 tekens
+  (`XXXX-XXXX-XXXX`), enkel de sha256-hash bewaard (kolom niet leesbaar), eenmalig, optioneel vervaldatum,
+  team en teamrol; een open code reserveert een licentieplaats (`club_seats_used`). Aanmaken
+  `create_club_activation_code` (platformadmin en owner alles, admin alles behalve owner/admin), intrekken
+  `revoke_club_activation_code`, inwisselen `redeem_club_activation_code` (geeft `{ok, club_id}` of
+  `{ok:false, error}`: invalid, expired, club_inactive, already_member, no_seats, too_many_attempts = 10
+  foute codes per uur). **Licentie intrekken** (`revoke_club_license`) beëindigt alle rollen en teamplaatsen
+  van die persoon in de club; niets wordt verwijderd, de club leest de historiek van haar teams. Rollen zonder
+  licentie: `end_club_role`. **Clubteams**: `create_club_team` (owner/admin, telt tegen `max_teams`),
+  staf `assign_team_staff`/`end_team_staff`. **Eigen team koppelen**: `request_club_team_link` (hoofdcoach
+  van een actief persoonlijk team die coach is in de club), `decide_club_team_link` (owner/admin; het team
+  wordt definitief een clubteam, de aanvrager hoofdcoach in de staf, T2-toegang vervalt),
+  `cancel_club_team_link`. Alles wat telt staat in `club_audit_log` (leesbaar voor owner/admin). Alle tabellen
+  zijn read-only voor gebruikers; schrijven enkel via deze functies. Clubs maken kan niet meer door
+  gebruikers; `clubs.license_seats` en de oude rol `club_owner` in `memberships` zijn vervangen.
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  clubbeheer, visie delen; oefeningen handmatig wijzigen; videodienst.
+  schermen van de clubomgeving (admin, licenties en codes, clubdashboard, structuur, team koppelen) en de
+  clubmodules, visie delen; oefeningen handmatig wijzigen; videodienst.
