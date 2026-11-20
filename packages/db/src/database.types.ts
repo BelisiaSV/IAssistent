@@ -340,6 +340,13 @@ export type Database = {
         Row: {
           id: string;
           name: string;
+          federation_number: string | null;
+          primary_color: string | null;
+          secondary_color: string | null;
+          address: string | null;
+          contact_name: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
           created_by: string;
           created_at: string;
           updated_at: string;
@@ -347,6 +354,13 @@ export type Database = {
         Insert: {
           id?: string;
           name: string;
+          federation_number?: string | null;
+          primary_color?: string | null;
+          secondary_color?: string | null;
+          address?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
           created_by?: string;
           created_at?: string;
           updated_at?: string;
@@ -354,6 +368,13 @@ export type Database = {
         Update: {
           id?: string;
           name?: string;
+          federation_number?: string | null;
+          primary_color?: string | null;
+          secondary_color?: string | null;
+          address?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
           created_by?: string;
           created_at?: string;
           updated_at?: string;
@@ -2134,7 +2155,69 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: { id: string; name: string; club_name: string; head_coach_email: string; archived: boolean }[];
       };
-      admin_create_club: { Args: { p_name: string }; Returns: string };
+      admin_create_club: { Args: { p_name: string; p_federation_number?: string | null }; Returns: string };
+      admin_club_members: {
+        Args: { p_club_id: string };
+        Returns: {
+          coach_id: string;
+          name: string | null;
+          email: string;
+          roles: string[] | null;
+          license_id: string | null;
+          license_status: string | null;
+          active: boolean;
+          since: string;
+        }[];
+      };
+      admin_club_teams: {
+        Args: { p_club_id: string };
+        Returns: {
+          id: string;
+          name: string;
+          age_category: string;
+          season: string | null;
+          archived: boolean;
+          federation_team: string | null;
+          federation_divisions: string[];
+          staff: Json;
+        }[];
+      };
+      admin_clubs: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          id: string;
+          name: string;
+          federation_number: string | null;
+          active: boolean;
+          plan_name: string | null;
+          license_seats: number;
+          seats_used: number;
+          max_teams: number | null;
+          active_teams: number;
+          members: number;
+          ends_on: string | null;
+        }[];
+      };
+      admin_federation_clubs: {
+        Args: Record<PropertyKey, never>;
+        Returns: { number: string; name: string; teams: Json; club_id: string | null }[];
+      };
+      admin_import_club: { Args: { p_club_id: string; p_data: Json }; Returns: Json };
+      admin_save_federation_clubs: { Args: { p_clubs: Json }; Returns: number };
+      admin_update_club: {
+        Args: {
+          p_club_id: string;
+          p_name: string;
+          p_federation_number: string | null;
+          p_primary_color: string | null;
+          p_secondary_color: string | null;
+          p_address: string | null;
+          p_contact_name: string | null;
+          p_contact_email: string | null;
+          p_contact_phone: string | null;
+        };
+        Returns: undefined;
+      };
       admin_set_club_subscription: {
         Args: {
           p_club_id: string;
