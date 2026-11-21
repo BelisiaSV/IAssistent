@@ -12,7 +12,7 @@ const m = messages.clubAdmin;
 export const selectClass =
   "block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm";
 
-export function CopyButton({ text }: { text: string }) {
+export function CopyButton({ text, label }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -27,8 +27,79 @@ export function CopyButton({ text }: { text: string }) {
         }
       }}
     >
-      {copied ? m.codes.copied : m.codes.copy}
+      {copied ? m.codes.copied : (label ?? m.codes.copy)}
     </button>
+  );
+}
+
+/** A code just made: shown once, with buttons to copy it or an invitation with a link that fills it in. */
+export function CodeReveal({
+  code,
+  clubName,
+  label,
+}: {
+  code: string;
+  clubName: string;
+  label: string;
+}) {
+  const link =
+    typeof window === "undefined"
+      ? ""
+      : `${window.location.origin}/clubs/join?code=${encodeURIComponent(code)}`;
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 ring-1 ring-emerald-200">
+      <span className="text-sm text-emerald-700">{label}</span>
+      <code className="rounded bg-white px-2 py-1 font-mono text-lg font-bold tracking-wider text-slate-900 select-all">
+        {code}
+      </code>
+      <CopyButton text={code} />
+      <CopyButton
+        text={m.codes.invite(clubName, code, link)}
+        label={m.codes.copyInvite}
+      />
+    </div>
+  );
+}
+
+/** Replace an open code that got lost by a new one (same role, team and note); the new code is shown once. */
+export function ReissueButton({
+  codeId,
+  clubName,
+  action: submit,
+}: {
+  codeId: string;
+  clubName: string;
+  action: FormAction<CodeState>;
+}) {
+  const [state, action, pending] = useActionState<CodeState, FormData>(
+    submit,
+    {},
+  );
+  if (state.code)
+    return (
+      <CodeReveal
+        code={state.code}
+        clubName={clubName}
+        label={m.codes.reissued}
+      />
+    );
+  return (
+    <form action={action} className="inline">
+      <input type="hidden" name="codeId" value={codeId} />
+      <button
+        type="submit"
+        disabled={pending}
+        onClick={(ev) => {
+          if (!confirm(m.codes.reissueConfirm)) ev.preventDefault();
+        }}
+        className="text-sm font-medium text-brand hover:underline disabled:opacity-50"
+      >
+        {m.codes.reissue}
+      </button>
+      {state.error && (
+        <span className="ml-2 text-xs text-red-600">{state.error}</span>
+      )}
+    </form>
   );
 }
 
@@ -39,9 +110,12 @@ export function CopyButton({ text }: { text: string }) {
 export function CodeForm({
   action: submit,
   teams,
+  clubName,
   roles = CLUB_ROLES,
 }: {
   action: FormAction<CodeState>;
+  /** For the invitation text. */
+  clubName: string;
   teams: { id: string; name: string }[];
   roles?: readonly (typeof CLUB_ROLES)[number][];
 }) {
@@ -53,7 +127,9 @@ export function CodeForm({
   const c = m.codes;
   return (
     <form action={action} className="space-y-4">
-      <p className="text-sm text-slate-600">{c.intro}</p>
+      <p className="text-sm text-slate-600">
+        {c.intro} {c.lostHint}
+      </p>
       <div className="grid gap-4 sm:grid-cols-4">
         <Field label={c.role}>
           <select name="role" defaultValue="coach" className={selectClass}>
@@ -102,13 +178,7 @@ export function CodeForm({
       </Field>
       {state.error && <Alert tone="error">{state.error}</Alert>}
       {state.code && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 ring-1 ring-emerald-200">
-          <span className="text-sm text-emerald-900">{c.newCode}</span>
-          <code className="rounded bg-white px-2 py-1 font-mono text-lg font-bold tracking-wider text-slate-900">
-            {state.code}
-          </code>
-          <CopyButton text={state.code} />
-        </div>
+        <CodeReveal code={state.code} clubName={clubName} label={c.newCode} />
       )}
       <Button type="submit" disabled={pending}>
         {c.create}

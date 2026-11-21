@@ -2464,6 +2464,7 @@ export type Database = {
       is_club_member: { Args: { p_club_id: string }; Returns: boolean };
       redeem_club_activation_code: { Args: { p_code: string }; Returns: Json };
       request_club_team_link: { Args: { p_team_id: string; p_club_id: string }; Returns: string };
+      reissue_club_activation_code: { Args: { p_code_id: string }; Returns: { id: string; code: string }[] };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };
       can_read_coach_profile: { Args: { p_coach_id: string }; Returns: boolean };

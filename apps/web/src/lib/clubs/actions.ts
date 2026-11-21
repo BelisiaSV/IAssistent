@@ -10,7 +10,7 @@ import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 import { AGE_CATEGORIES } from "@/lib/teams/age-categories";
 
-import { createCodeFromForm } from "./code";
+import { createCodeFromForm, reissueCode } from "./code";
 import type { CodeState, FormState } from "./form-state";
 
 const j = messages.club.join.errors;
@@ -60,6 +60,21 @@ export async function createClubCode(
 ): Promise<CodeState> {
   const supabase = await client();
   const result = await createCodeFromForm(supabase, clubId, formData);
+  if (result.code) revalidatePath(`/clubs/${clubId}/licenses`);
+  return result;
+}
+
+/** A new code for an open code that got lost. */
+export async function reissueClubCode(
+  clubId: string,
+  _prev: CodeState,
+  formData: FormData,
+): Promise<CodeState> {
+  const supabase = await client();
+  const result = await reissueCode(
+    supabase,
+    String(formData.get("codeId") ?? ""),
+  );
   if (result.code) revalidatePath(`/clubs/${clubId}/licenses`);
   return result;
 }

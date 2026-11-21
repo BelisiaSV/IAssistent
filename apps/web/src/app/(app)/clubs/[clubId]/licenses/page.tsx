@@ -10,6 +10,7 @@ import {
 import {
   createClubCode,
   endClubRole,
+  reissueClubCode,
   revokeClubCode,
   revokeClubLicense,
 } from "@/lib/clubs/actions";
@@ -82,6 +83,7 @@ export default async function ClubLicensesPage({
           {ctx.active && (
             <CodeForm
               action={createClubCode.bind(null, clubId)}
+              clubName={ctx.club.name}
               teams={(teams ?? [])
                 .filter((t) => !t.archived_at)
                 .map((t) => ({ id: t.id, name: t.name }))}
@@ -102,6 +104,8 @@ export default async function ClubLicensesPage({
             codes={codes ?? []}
             teamName={teamName}
             revoke={revokeClubCode}
+            reissue={reissueClubCode.bind(null, clubId)}
+            clubName={ctx.club.name}
           />
         </div>
       </Card>
