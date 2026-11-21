@@ -2074,6 +2074,24 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      club_periods: {
+        Row: {
+          id: string;
+          club_id: string;
+          title: string;
+          starts_on: string;
+          ends_on: string;
+          age_categories: string[];
+          goals: string[];
+          focus: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       platform_admins: {
         Row: { coach_id: string; created_at: string };
         Insert: { coach_id: string; created_at?: string };
@@ -2513,6 +2531,8 @@ export type Database = {
       reissue_club_activation_code: { Args: { p_code_id: string }; Returns: { id: string; code: string }[] };
       staff_quality_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
       staff_quality_remaining_today: { Args: Record<PropertyKey, never>; Returns: number };
+      save_club_period: { Args: { p_club_id: string; p_id: string | null; p_data: Json }; Returns: string };
+      delete_club_period: { Args: { p_id: string }; Returns: undefined };
       reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };

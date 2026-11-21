@@ -56,7 +56,7 @@ export async function checkRunQuality(
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", input.coachId).maybeSingle(),
     supabase.from("teams").select("club_id, age_category").eq("id", input.team.id).maybeSingle(),
   ]);
-  const clubDna = teamRow ? await clubDnaForTeam(supabase, teamRow) : null;
+  const clubDna = teamRow ? await clubDnaForTeam(supabase, teamRow, input.weekStart) : null;
 
   const base = { team_id: input.team.id, run_id: run.id, provider: provider.id };
   try {
