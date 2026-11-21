@@ -1306,6 +1306,8 @@ export const messages = {
         "code.created": "Code gemaakt",
         "code.revoked": "Code ingetrokken",
         "code.revealed": "Code bekeken",
+        "period.saved": "Periode opgeslagen",
+        "period.deleted": "Periode verwijderd",
         "code.redeemed": "Code gebruikt",
         "license.activated": "Licentie geactiveerd",
         "license.revoked": "Licentie ingetrokken",
