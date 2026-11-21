@@ -20,7 +20,7 @@ const count = z.number().int().min(0).max(999);
 
 // The rows are read in the browser: check them again here.
 const importSchema = z.object({
-  divisions: z.array(division).min(1).max(200),
+  divisions: z.array(division).min(1).max(1000),
   matches: z
     .array(
       z.object({

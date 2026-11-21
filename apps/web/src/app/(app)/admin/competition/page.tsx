@@ -14,7 +14,12 @@ export default async function AdminCompetitionPage() {
   await requireUser();
   const supabase = await createClient();
   if (!(await isPlatformAdmin(supabase))) notFound();
-  const { data: teams } = await supabase.rpc("admin_competition_teams");
+  const [{ data: teams }, { data: federation }] = await Promise.all([
+    supabase.rpc("admin_competition_teams"),
+    supabase.rpc("admin_federation_clubs"),
+  ]);
+  // Clubs on the platform: their divisions are kept, so a team that joins later has its data at once.
+  const platformClubs = (federation ?? []).filter((f) => f.club_id);
 
   return (
     <div className="space-y-4">
@@ -23,6 +28,14 @@ export default async function AdminCompetitionPage() {
         <p className="text-sm text-slate-600">{m.intro}</p>
       </div>
       <CompetitionImport
+        clubNumbers={platformClubs.map((f) => f.number)}
+        clubDivisions={platformClubs.flatMap((f) =>
+          Array.isArray(f.teams)
+            ? (f.teams as { divisions?: string[] }[]).flatMap(
+                (t) => t.divisions ?? [],
+              )
+            : [],
+        )}
         teams={(teams ?? []).map((t) => ({
           id: t.id,
           name: t.name,

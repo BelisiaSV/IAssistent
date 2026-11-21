@@ -45,13 +45,26 @@ export async function ClubLink({
     .eq("team_id", team.id)
     .eq("status", "pending")
     .maybeSingle();
+  // The teams of each club in the competition export, to pick one.
+  const federation = await Promise.all(
+    coachClubs.map(async (c) => {
+      const { data } = await supabase.rpc("club_federation_teams", {
+        p_club_id: c.id,
+      });
+      return (data ?? []).map((t) => t.name);
+    }),
+  );
   return (
     <section className="space-y-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
       <h2 className="text-lg font-semibold">{m.title}</h2>
       <p className="text-sm text-slate-600">{m.intro}</p>
       <ClubLinkForm
         teamId={team.id}
-        clubs={coachClubs.map((c) => ({ id: c.id, name: c.name }))}
+        clubs={coachClubs.map((c, i) => ({
+          id: c.id,
+          name: c.name,
+          federationTeams: federation[i] ?? [],
+        }))}
         pending={
           pending
             ? {
