@@ -35,6 +35,7 @@ export const SHARED_FILES = {
   tests: "testen.json",
   meeting: "staffkamer.json",
   taskRouting: "taakroutering.json",
+  quality: "kwaliteit.json",
 } as const;
 
 /** Markdown files in _gedeeld that the prompt builder uses. */
@@ -49,6 +50,8 @@ export const SHARED_TEXT_FILES = {
   collaborationUserTemplate: "samenwerking-gebruiker.md",
   meetingSystemTemplate: "staffkamer-systeem.md",
   meetingUserTemplate: "staffkamer-gebruiker.md",
+  qualitySystemTemplate: "kwaliteit-systeem.md",
+  qualityUserTemplate: "kwaliteit-gebruiker.md",
 } as const;
 
 /** The conversation with a role (Staff Room): task taken/gesprek of every role. */
@@ -59,3 +62,6 @@ export const COLLABORATION_TASK = "samenwerking";
 
 /** A turn of a role in the staff meeting (Staff Room group chat): task taken/staffkamer. */
 export const MEETING_TASK = "staffkamer";
+
+/** The quality check of a week proposal (Training Quality Engine): task taken/kwaliteitscontrole. */
+export const QUALITY_TASK = "kwaliteitscontrole";

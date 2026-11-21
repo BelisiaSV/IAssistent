@@ -1,0 +1,20 @@
+{
+  "samenvatting": "Een degelijke week die goed aansluit bij de opdracht en de belasting netjes afbouwt naar de wedstrijd. Het leerdoel van de tweede training is minder scherp en de afsluiting van MD-2 mag korter.",
+  "criteria": [
+    { "code": "opdracht", "score": 4, "toelichting": "De gevraagde focus op druk zetten na balverlies komt terug op MD-4 en MD-2." },
+    { "code": "leerdoel", "score": 3, "toelichting": "MD-4 heeft een helder leerdoel; op MD-2 sluit het positiespel niet duidelijk aan bij het thema van de week." },
+    { "code": "clubprincipes", "score": 4, "toelichting": "Opbouw van achteruit en snelle omschakeling zitten erin; het pressingsignaal uit de visie wordt niet benoemd." },
+    { "code": "niveau", "score": 4, "toelichting": "Vormen en aantallen passen bij de beschikbare kern; de geblesseerde spelers hebben een aangepast programma." },
+    { "code": "belasting", "score": 4, "toelichting": "Volgt het weektype en de MD-labels; MD-2 zit met 75 minuten aan de bovengrens." },
+    { "code": "opbouw", "score": 3, "toelichting": "Opwarming en kern zijn logisch; de afsluiting van MD-2 is een tweede intensieve vorm in plaats van een rustige afbouw." }
+  ],
+  "sterke_punten": [
+    "Duidelijke rode draad van de opdracht van de hoofdcoach doorheen de week.",
+    "De belasting bouwt netjes af naar de wedstrijd."
+  ],
+  "verbeterpunten": [
+    { "criterium": "leerdoel", "punt": "Koppel het positiespel op MD-2 aan het thema van de week (druk na balverlies), bv. met een omschakelregel." },
+    { "criterium": "opbouw", "punt": "Vervang de afsluitende vorm op MD-2 door een korte, rustige afbouw." },
+    { "criterium": "clubprincipes", "punt": "Benoem het pressingsignaal uit de visie als coachingspunt in de kern van MD-4." }
+  ]
+}

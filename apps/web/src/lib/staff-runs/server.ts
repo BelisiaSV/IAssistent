@@ -9,6 +9,7 @@ import { clubExercisesForStaff } from "@/lib/clubs/exercises-staff";
 import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { checkRunQuality } from "@/lib/quality/server";
 import { activeSteps, MATCH_USES_WEEK_STEPS, nextSteps, RUN_STEPS, type RunKind, type RunStep, runStatus, stepsToRerun } from "@/lib/roles";
 import { staff } from "@/lib/staff";
 import type { createClient } from "@/lib/supabase/server";
@@ -236,6 +237,16 @@ export async function advanceRun(
     const { data: after } = await supabase.from("staff_proposals").select("step, status").eq("run_id", run.id);
     const final = runStatus((after ?? []).map((p) => ({ step: p.step ?? "", status: p.status })));
     if (final !== "generating") {
+      // Training Quality Engine: a finished week proposal is checked before the coach sees it.
+      if (final === "ready" && run.kind === "week") {
+        await checkRunQuality(supabase, {
+          team: input.team,
+          weekStart: input.weekStart,
+          runId: run.id,
+          coachId: input.coachId,
+          finishing: true,
+        });
+      }
       await supabase.from("staff_runs").update({ status: final }).eq("id", run.id).eq("status", "generating");
     }
   };

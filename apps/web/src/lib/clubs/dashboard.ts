@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { QualityReviewRow } from "@/components/quality/quality-review";
 import { addDays, mondayOf, todayInBelgium } from "@/lib/weeks/dates";
 
 import type { getClubContext } from "./load";
@@ -13,6 +14,8 @@ export interface DashboardTeam {
   archived: boolean;
   staff: { id: string; coachId: string; name: string; role: string }[];
   weekApproved: boolean;
+  /** Training Quality Engine: the latest check of this week's approved version. */
+  quality: QualityReviewRow | null;
   lastEvaluation: string | null;
   sessions28: number;
 }
@@ -104,12 +107,12 @@ export async function loadClubDashboard(ctx: Ctx): Promise<DashboardData> {
   const { data: runs } = weekIds.length
     ? await supabase
         .from("staff_runs")
-        .select("week_plan_id, decided_at")
+        .select("id, week_plan_id, decided_at")
         .in("week_plan_id", weekIds)
         .eq("kind", "week")
         .eq("status", "approved")
         .is("deleted_at", null)
-    : { data: [] as { week_plan_id: string; decided_at: string | null }[] };
+    : { data: [] as { id: string; week_plan_id: string; decided_at: string | null }[] };
 
   const coachIds = [...new Set((staff ?? []).map((s) => s.coach_id))];
   const { data: coaches } = coachIds.length
@@ -123,6 +126,16 @@ export async function loadClubDashboard(ctx: Ctx): Promise<DashboardData> {
   );
 
   const weekById = new Map((weeks ?? []).map((w) => [w.id, w]));
+  // The quality check of each approved version of this week.
+  const thisWeekRuns = (runs ?? []).filter((r) => weekById.get(r.week_plan_id)?.week_start === monday);
+  const { data: reviews } = thisWeekRuns.length
+    ? await supabase
+        .from("training_quality_reviews")
+        .select("run_id, team_id, status, output, average, verdict, created_at")
+        .in("run_id", thisWeekRuns.map((r) => r.id))
+        .eq("status", "ready")
+        .order("created_at", { ascending: false })
+    : { data: [] };
   const approvedThisWeek = new Set(
     (runs ?? [])
       .map((r) => weekById.get(r.week_plan_id))
@@ -145,6 +158,7 @@ export async function loadClubDashboard(ctx: Ctx): Promise<DashboardData> {
       }))
       .sort((a, b) => a.role.localeCompare(b.role)),
     weekApproved: approvedThisWeek.has(t.id),
+    quality: (reviews ?? []).find((q) => q.team_id === t.id) ?? null,
     lastEvaluation:
       (reports ?? []).find((r) => r.team_id === t.id)?.match_date ?? null,
     sessions28: (loads ?? []).filter((l) => l.team_id === t.id).length,

@@ -1,0 +1,53 @@
+{
+  "versie": "1.0.0",
+  "uitleg": "Training Quality Engine: de criteria waarmee een rol elk weekvoorstel van de staf nakijkt voor de hoofdcoach het goedkeurt. De score per criterium loopt van 1 tot 5; het eindoordeel volgt uit het gemiddelde.",
+  "rol": "coordinator",
+  "schaal": {
+    "min": 1,
+    "max": 5,
+    "labels": {
+      "1": "Onvoldoende",
+      "2": "Zwak",
+      "3": "Voldoende",
+      "4": "Goed",
+      "5": "Uitstekend"
+    }
+  },
+  "oordelen": [
+    { "code": "goed", "label": "Goed", "vanaf": 4 },
+    { "code": "voldoende", "label": "Voldoende", "vanaf": 3 },
+    { "code": "aandacht", "label": "Aandacht nodig", "vanaf": 1 }
+  ],
+  "criteria": [
+    {
+      "code": "opdracht",
+      "naam": "Opdracht van de trainer",
+      "controle": "Sluit de week aan bij wat de hoofdcoach vroeg: de weeknotitie, de feedback op een vorige versie en de trainings- en wedstrijddagen van de weekinput?"
+    },
+    {
+      "code": "leerdoel",
+      "naam": "Leerdoel",
+      "controle": "Heeft elke training een duidelijk leerdoel (thema, tactische accenten van de Tactical Coach) en werken de oefeningen daar echt aan?"
+    },
+    {
+      "code": "clubprincipes",
+      "naam": "Visie en clubprincipes",
+      "controle": "Past de inhoud bij de visie van de hoofdcoach en, bij een clubteam, bij de verplichte en aanbevolen principes van het Club DNA en de doelen van de leeftijdscategorie? Een verplicht principe dat ontbreekt of tegengesproken wordt, weegt zwaar."
+    },
+    {
+      "code": "niveau",
+      "naam": "Niveau en context",
+      "controle": "Past de moeilijkheid bij de leeftijdscategorie, het niveau en de beschikbare spelers (aantal, posities, blessures en schorsingen)?"
+    },
+    {
+      "code": "belasting",
+      "naam": "Fysieke belasting",
+      "controle": "Volgt de belasting het weektype van de periodisering, de wedstrijddagen (MD-labels) en het belastingsplan van de Physical Coach? Geen zware prikkel vlak voor de wedstrijd, voldoende herstel erna."
+    },
+    {
+      "code": "opbouw",
+      "naam": "Methodische opbouw",
+      "controle": "Is elke training logisch opgebouwd (opwarming, kern van eenvoudig naar complex, afsluiting) en bouwt de week op naar de wedstrijd?"
+    }
+  ]
+}

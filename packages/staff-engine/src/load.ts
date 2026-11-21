@@ -5,6 +5,7 @@ import {
   ROLE_DIRS,
   ROLE_FILES,
   ROLE_ID_PATTERN,
+  QUALITY_TASK,
   ROLE_TASKS_DIR,
   ROLE_TEMPLATE_FILE,
   SHARED_DIR,
@@ -17,6 +18,7 @@ import { TEMPLATE_PLACEHOLDERS, templatePlaceholders } from "./prompt";
 import { parseMatchDays } from "./shared/matchdays";
 import { parsePeriodization } from "./shared/periodization";
 import { parseMeetingPlan } from "./shared/meeting";
+import { parseQualityCriteria } from "./shared/quality";
 import { parseTaskRouting } from "./shared/routing";
 import { parseTests } from "./shared/tests";
 import { parseFormations } from "./shared/formations";
@@ -126,13 +128,21 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
       if (!roleDirs.has(id)) issues.push({ path: `${SHARED_DIR}/${SHARED_FILES.taskRouting}`, message: `onbekende rol "${id}"` });
     }
   }
+  const quality = collect(parseQualityCriteria(readSharedJson(shared, SHARED_FILES.quality, issues)), issues);
+  if (quality) {
+    const checker = roles.find((r) => r.id === quality.rol);
+    // A role folder with its own problems is reported there already.
+    if (!roleDirs.has(quality.rol)) issues.push({ path: `${SHARED_DIR}/${SHARED_FILES.quality}`, message: `onbekende rol "${quality.rol}"` });
+    else if (checker && !checker.tasks.some((t) => t.id === QUALITY_TASK))
+      issues.push({ path: `${SHARED_DIR}/${SHARED_FILES.quality}`, message: `rol "${quality.rol}" heeft geen taak ${ROLE_TASKS_DIR}/${QUALITY_TASK}` });
+  }
   checkTemplates(shared, issues);
 
-  if (!positions || !formations || !vision || !clubDna || !matchDays || !periodization || !tests || !meeting || !taskRouting) {
+  if (!positions || !formations || !vision || !clubDna || !matchDays || !periodization || !tests || !meeting || !taskRouting || !quality) {
     return { staff: null, issues };
   }
   return {
-    staff: { rootDir: root, shared, roles, positions, formations, vision, clubDna, matchDays, periodization, tests, meeting, taskRouting },
+    staff: { rootDir: root, shared, roles, positions, formations, vision, clubDna, matchDays, periodization, tests, meeting, taskRouting, quality },
     issues,
   };
 }
@@ -155,6 +165,8 @@ function checkTemplates(shared: StaffFile[], issues: StaffIssue[]) {
       [SHARED_TEXT_FILES.collaborationUserTemplate]: TEMPLATE_PLACEHOLDERS.collaborationUser,
       [SHARED_TEXT_FILES.meetingSystemTemplate]: TEMPLATE_PLACEHOLDERS.meetingSystem,
       [SHARED_TEXT_FILES.meetingUserTemplate]: TEMPLATE_PLACEHOLDERS.meetingUser,
+      [SHARED_TEXT_FILES.qualitySystemTemplate]: TEMPLATE_PLACEHOLDERS.qualitySystem,
+      [SHARED_TEXT_FILES.qualityUserTemplate]: TEMPLATE_PLACEHOLDERS.qualityUser,
     };
     const allowed = templates[fileName];
     if (!allowed) continue;
