@@ -190,7 +190,7 @@ export async function advanceRun(
     // A club team works within the club's DNA and with the club's exercises.
     const { data: teamRow } = await supabase.from("teams").select("club_id, age_category").eq("id", input.team.id).maybeSingle();
     const [clubDna, club] = await Promise.all([
-      teamRow ? clubDnaForTeam(supabase, teamRow) : null,
+      teamRow ? clubDnaForTeam(supabase, teamRow, input.weekStart) : null,
       clubExercisesForStaff(supabase, { club_id: teamRow?.club_id ?? null }, question),
     ]);
     const bank = await bankForStaff(supabase, question, club.recommendedBank);

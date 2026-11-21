@@ -594,6 +594,18 @@ Regels:
   teamcontext) en de bankoefeningen die de club aanbeveelt bovenaan `oefenstofbank` met `club_aanbevolen`
   (`bankForStaff(…, clubRecommended)`). Volgorde voor een onderdeel: eigen oefenstof, cluboefenstof, oefenstofbank;
   een cluboefening gaat als `CLUB-3` in `bank_nummer` (weekdocument en trainingsbladen tonen "Cluboefenstof CLUB-3").
+- **Clubplanning** (clubmodule `planning`, migratie `club_planning`) — `/clubs/[clubId]/planning` (tabblad Planning),
+  drie weergaven: **Week** (per leeftijdscategorie één regel per team: hoofdtrainer, de 7 dagen met T/W en MD-label,
+  groen = uitgevoerd (RPE ingevuld in `session_loads`), uitgevoerde/geplande trainingen en minuten, goedgekeurde
+  weekplanning en het oordeel van de Training Quality Engine, link naar de weekpagina), **Maand** (per team per week
+  uitgevoerd/gepland, groen = goedgekeurd) en **Seizoen** (periodes). Gebouwd op de bestaande weekinput, weekruns,
+  belasting en kwaliteitscontroles (`loadClubPlanning` in `lib/clubs/planning.ts`, `dayPlans`); RLS toont enkel de
+  teams die de gebruiker mag lezen. Nieuw: **periodes met trainingsdoelen** (`club_periods`: titel, van–tot,
+  leeftijdscategorieën (leeg = alle), doelen, focus; lezen elk lid; schrijven owner/admin/TD via `save_club_period` en
+  `delete_club_period`, enkel met de module; `PeriodForm`). **AI:** `clubDnaForTeam(supabase, team, datum)` voegt de
+  lopende periode van de leeftijdscategorie toe als `visie.club.periode` (`periodFor` in `lib/clubs/periods.ts`: eerst
+  een periode voor de categorie, dan een voor alle); zonder gepubliceerd Club DNA staat enkel de periode erin. Hoe de
+  staf ermee omgaat staat in `staff/_gedeeld/visie-hoofdcoach.md`.
 - **Training Quality Engine** (migratie `training_quality`) — elk weekvoorstel (run `week`) wordt nagekeken voordat de
   hoofdcoach beslist. Criteria, schaal en oordelen in `staff/_gedeeld/kwaliteit.json` (rol die controleert: `rol`,
   standaard de AI Staff Coordinator), de opdracht in `kwaliteit-systeem.md`/`kwaliteit-gebruiker.md` en de taak
@@ -608,5 +620,5 @@ Regels:
   Getoond als `QualityReview` boven het weekdocument en als `QualityBadge` per team in het clubdashboard (goedgekeurde
   versie van deze week, verbeterpunten als tooltip; het laagste oordeel komt bij de aandachtspunten).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  de overige clubmodules (clubplanning, evaluaties, kennis, rapportage), visie delen;
+  de overige clubmodules (evaluaties, kennis, rapportage), visie delen;
   oefeningen handmatig wijzigen; videodienst.

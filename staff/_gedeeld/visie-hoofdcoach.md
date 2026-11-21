@@ -31,3 +31,12 @@ van het team. De visie van de hoofdcoach blijft apart staan: dat zijn zijn perso
 - **Doelen van de leeftijdscategorie**: koppel de leerdoelen van de week en de oefeningen eraan. Bij een
   jeugdteam gaan de ontwikkelingsdoelen voor op het resultaat, tenzij het Club DNA anders zegt.
 - Gebruik de termen van de club (terminologie in het Club DNA) in je voorstellen.
+
+## Periode van de clubplanning (enkel bij een clubteam)
+Staat in `club` ook een `periode`, dan is dat de lopende periode van de clubplanning voor de
+leeftijdscategorie van het team (titel, van–tot, `trainingsdoelen` en `focus`). Zonder gepubliceerd
+Club DNA zijn `verplicht`, `aanbevolen` en `doelen` leeg en staat enkel de periode erin.
+
+- Leg het leerdoel van de week en de keuze van de oefeningen bij de trainingsdoelen van de periode.
+- Wijk je ervan af omdat de week of de hoofdcoach iets anders vraagt, zeg dan kort welk doel je deze week
+  laat liggen en waarom.
