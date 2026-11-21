@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { Card, CardHeader, EmptyState, StatTile } from "@/components/card";
+import { QualityBadge } from "@/components/quality/quality-review";
 import { loadClubDashboard } from "@/lib/clubs/dashboard";
 import { getClubContext } from "@/lib/clubs/load";
 import { messages } from "@/lib/messages";
+import { qualityLabels } from "@/lib/quality/labels";
 import { longDate } from "@/lib/weeks/dates";
 
 const m = messages.club.dashboard;
@@ -21,6 +23,9 @@ export default async function ClubDashboardPage({
   const data = await loadClubDashboard(ctx);
   const active = data.teams.filter((t) => !t.archived);
   const modules = ctx.subscription?.modules ?? [];
+  const labels = qualityLabels();
+  // The lowest verdict of the Training Quality Engine asks for attention.
+  const lowest = labelsLowest(labels);
 
   const attention = [
     ...active
@@ -31,6 +36,9 @@ export default async function ClubDashboardPage({
         (t) => t.staff.some((s) => s.role === "head_coach") && !t.weekApproved,
       )
       .map((t) => m.noWeek(t.name)),
+    ...active
+      .filter((t) => t.quality?.verdict && t.quality.verdict === lowest)
+      .map((t) => m.lowQuality(t.name)),
     ...(data.pendingLinks ? [m.pendingLinks(data.pendingLinks)] : []),
   ];
 
@@ -110,6 +118,18 @@ export default async function ClubDashboardPage({
                         >
                           {t.weekApproved ? m.weekApproved : m.weekOpen}
                         </span>
+                        {t.quality && (
+                          <span
+                            className="ml-1.5"
+                            title={
+                              ((t.quality.output as { verbeterpunten?: { punt: string }[] } | null)?.verbeterpunten ?? [])
+                                .map((v) => `• ${v.punt}`)
+                                .join("\n") || undefined
+                            }
+                          >
+                            <QualityBadge review={t.quality} labels={labels} />
+                          </span>
+                        )}
                       </td>
                       <td className="py-2 pr-3">
                         {t.lastEvaluation ? longDate(t.lastEvaluation) : "—"}
@@ -162,4 +182,10 @@ export default async function ClubDashboardPage({
       </div>
     </div>
   );
+}
+
+/** The verdict code of the lowest band (e.g. "aandacht"). */
+function labelsLowest(labels: { verdicts: Record<string, string> }): string | null {
+  const codes = Object.keys(labels.verdicts);
+  return codes[codes.length - 1] ?? null;
 }

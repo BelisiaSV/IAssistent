@@ -1,3 +1,4 @@
+import type { QualityCriteria } from "./shared/quality";
 import type { FormationCatalog } from "./shared/formations";
 import type { MatchDayCatalog } from "./shared/matchdays";
 import type { PeriodizationCatalog } from "./shared/periodization";
@@ -75,6 +76,8 @@ export interface Staff {
   meeting: MeetingPlan;
   /** _gedeeld/taakroutering.json */
   taskRouting: TaskRouting;
+  /** _gedeeld/kwaliteit.json */
+  quality: QualityCriteria;
 }
 
 export interface StaffIssue {

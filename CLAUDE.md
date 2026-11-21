@@ -78,7 +78,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           samenwerking-systeem.md + samenwerking-gebruiker.md (gezamenlijke taak),
                           staffkamer.json + staffkamer-systeem.md + staffkamer-gebruiker.md (groepschat),
                           taakroutering.json (welke rol een taak van de coach krijgt),
-                          clubdna.json (vragenlijst Club DNA van een club)
+                          clubdna.json (vragenlijst Club DNA van een club),
+                          kwaliteit.json + kwaliteit-systeem.md + kwaliteit-gebruiker.md (Training Quality Engine)
   coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
   player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -593,6 +594,19 @@ Regels:
   teamcontext) en de bankoefeningen die de club aanbeveelt bovenaan `oefenstofbank` met `club_aanbevolen`
   (`bankForStaff(…, clubRecommended)`). Volgorde voor een onderdeel: eigen oefenstof, cluboefenstof, oefenstofbank;
   een cluboefening gaat als `CLUB-3` in `bank_nummer` (weekdocument en trainingsbladen tonen "Cluboefenstof CLUB-3").
+- **Training Quality Engine** (migratie `training_quality`) — elk weekvoorstel (run `week`) wordt nagekeken voordat de
+  hoofdcoach beslist. Criteria, schaal en oordelen in `staff/_gedeeld/kwaliteit.json` (rol die controleert: `rol`,
+  standaard de AI Staff Coordinator), de opdracht in `kwaliteit-systeem.md`/`kwaliteit-gebruiker.md` en de taak
+  `coordinator/taken/kwaliteitscontrole` (schema `{ samenvatting, criteria[{code, score, toelichting}], sterke_punten,
+  verbeterpunten[{criterium, punt}] }`). `runQualityCheck` in de staff-engine controleert dat elk criterium precies één
+  score heeft en berekent gemiddelde en oordeel (`qualityVerdict`). De app (`checkRunQuality` in `lib/quality/server.ts`)
+  geeft visie met Club DNA, weekinput, kern zonder namen en het werk van Physical Coach, Tactical Coach en Assistent
+  Coach (niet de tekeningen) mee; automatisch wanneer de laatste stap van een weekrun klaar is (in `advanceRun`, vóór de
+  run `ready` wordt), en opnieuw met "Opnieuw controleren" op de weekpagina (`checkQualityAction`). Opslag in
+  `training_quality_reviews` (per run, ook mislukte controles; lezen `can_read_team`, schrijven `can_write_team`, nooit
+  wijzigen of verwijderen; daglimiet echte AI `staff_quality_daily_limit()` = 20, `staff_quality_remaining_today()`).
+  Getoond als `QualityReview` boven het weekdocument en als `QualityBadge` per team in het clubdashboard (goedgekeurde
+  versie van deze week, verbeterpunten als tooltip; het laagste oordeel komt bij de aandachtspunten).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  de overige clubmodules (clubplanning, evaluaties, kennis, rapportage) en de Training Quality Engine, visie delen;
+  de overige clubmodules (clubplanning, evaluaties, kennis, rapportage), visie delen;
   oefeningen handmatig wijzigen; videodienst.

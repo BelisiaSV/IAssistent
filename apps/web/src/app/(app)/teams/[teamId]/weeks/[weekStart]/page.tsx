@@ -4,12 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LoadChart } from "@/components/proposals/load-chart";
+import { QualityCheckButton } from "@/components/quality/check-button";
+import { QualityReview } from "@/components/quality/quality-review";
 import { MatchPrepView } from "@/components/proposals/tactical-views";
 import { type WeekDocument, WeekDocumentView } from "@/components/proposals/week-document-view";
 import { Alert, Button } from "@/components/ui";
 import { getStaffProvider } from "@/lib/ai";
 import { loadWeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
+import { qualityLabels } from "@/lib/quality/labels";
 import { opponentNames } from "@/lib/opponents/context";
 import { shirtNames } from "@/lib/proposals/names";
 import type { LoadPlanOutput, MatchPrepOutput } from "@/lib/proposals/types";
@@ -87,6 +90,17 @@ export default async function WeekPage({
   const weekOutputs = outputsOf(weekRun.selected);
   const approvedWeekRun = data.runs.find((x) => x.kind === "week" && x.status === "approved") ?? null;
   const approvedWeek = outputsOf(approvedWeekRun);
+  // Training Quality Engine: the latest check per week version.
+  const weekRunIds = data.runs.filter((x) => x.kind === "week").map((x) => x.id);
+  const { data: reviews } = weekRunIds.length
+    ? await supabase
+        .from("training_quality_reviews")
+        .select("run_id, status, output, average, verdict, created_at")
+        .in("run_id", weekRunIds)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+  const latestReview = (runId: string) => (reviews ?? []).find((x) => x.run_id === runId) ?? null;
+  const labels = qualityLabels();
   const theirNames = opponentNames(data.opponentLineup);
   const exercises = await loadWeekExercises(
     supabase,
@@ -268,6 +282,18 @@ export default async function WeekPage({
           { href: `${basePath}/print/overview?week=${run.version}`, label: messages.poster.link },
           { href: `${basePath}/print/days?week=${run.version}`, label: messages.sheet.link },
         ]}
+        quality={(run) => (
+          <QualityReview
+            review={latestReview(run.id)}
+            labels={labels}
+            action={
+              canEdit &&
+              run.status !== "rejected" && (
+                <QualityCheckButton teamId={team.id} weekStart={weekStart} runId={run.id} again={!!latestReview(run.id)} />
+              )
+            }
+          />
+        )}
         render={(run) => {
           const out = outputsOf(run);
           return (
@@ -352,6 +378,7 @@ function RunSection({
   testMode,
   blockedReason,
   links,
+  quality,
   render,
 }: {
   kind: RunKind;
@@ -370,6 +397,8 @@ function RunSection({
   testMode: boolean;
   blockedReason: string | null;
   links: (run: Run) => { href: string; label: string }[];
+  /** Training Quality Engine: the check of a version (week document only). */
+  quality?: (run: Run) => ReactNode;
   render: (run: Run) => ReactNode;
 }) {
   const busy = list.some((x) => x.status === "generating");
@@ -473,6 +502,7 @@ function RunSection({
               <AdjustRunForm teamId={teamId} weekStart={weekStart} kind={kind} runId={selected.id} steps={adjustable} />
             )}
           </div>
+          {quality?.(selected)}
           {render(selected)}
         </>
       )}

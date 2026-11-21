@@ -2,6 +2,7 @@ import type { RoleContext } from "../context";
 import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
 import type { MeetingInput } from "../meeting";
+import type { QualityInput } from "../quality";
 import type { Staff, StaffRole } from "../types";
 
 export interface GenerateRequest {
@@ -13,7 +14,7 @@ export interface GenerateRequest {
   system: string;
   user: string;
   /** The week context of a role task, the conversation (task "gesprek") or a joint task ("samenwerking"). */
-  context: RoleContext | ConversationInput | CollaborationInput | MeetingInput;
+  context: RoleContext | ConversationInput | CollaborationInput | MeetingInput | QualityInput;
 }
 
 export interface GenerateResult {
