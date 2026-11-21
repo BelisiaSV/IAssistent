@@ -358,6 +358,7 @@ export const messages = {
     },
     admin: {
       title: "Oefenstofbank",
+      importButton: "Backup importeren",
       intro:
         'De centrale oefenstofbank van het platform. Laad de export van je oefenstofdatabank op (zip met de backup en de tekeningen en video\'s, of enkel de backup .json): een oefening met hetzelfde nummer (bv. OEF-007) wordt bijgewerkt, een nieuw nummer wordt toegevoegd, niets wordt verwijderd. Nieuwe oefeningen staan op "Na te kijken"; enkel goedgekeurde oefeningen zijn zichtbaar voor de trainers en hun staf.',
       file: "Export kiezen (.zip of .json)",
@@ -709,6 +710,8 @@ export const messages = {
       clubs: "Clubs",
     },
     adminTitle: "Prijsplannen",
+    view: "Bekijken",
+    noPlans: "Nog geen prijsplannen.",
     adminIntro:
       "Deze plannen ziet een klant bij Mijn abonnement. Pas namen, prijzen en kenmerken aan; een inactief plan zie enkel jij. Online betalen komt later.",
     newPlan: "Nieuw plan",
@@ -986,6 +989,7 @@ export const messages = {
   },
   clubAdmin: {
     title: "Clubs",
+    open: "Openen",
     intro:
       "Clubomgevingen van IAssistent. Je maakt een club aan uit de competitie-export, zet het pakket en laadt het Excel-bestand in dat de club invulde. Iedereen van de club komt erin met een persoonlijke activatiecode.",
     columns: {
@@ -2152,9 +2156,11 @@ export const messages = {
       "Download het sjabloon en stuur het naar de coach. De coach vult het in en stuurt het terug; jij laadt het hier op in het juiste team. Een speler met hetzelfde rugnummer wordt bijgewerkt, andere rijen worden nieuwe spelers. Niemand wordt verwijderd.",
     team: "Team",
     chooseTeam: "— kies een team —",
-    archived: "(gearchiveerd)",
-    templateEmpty: "Leeg sjabloon downloaden",
-    templateFilled: "Sjabloon met huidige kern downloaden",
+    archived: "gearchiveerd",
+    templateEmpty: "Leeg sjabloon",
+    templateFilled: "Sjabloon met kern",
+    importButton: "Importeren",
+    noTeams: "Nog geen teams.",
     file: "Ingevuld Excel-bestand (.xlsx)",
     check: "Bestand controleren",
     checking: "Controleren…",

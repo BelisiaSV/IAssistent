@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 
+import { Badge, rowButton, Rows } from "@/components/admin/rows";
 import { Alert, Button } from "@/components/ui";
 import { federationClubs } from "@/lib/clubs/federation";
 import {
@@ -123,9 +124,10 @@ export function CompetitionImport({
   );
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+    <div className="space-y-4">
+      {/* One line: the files, what was found, and the import. */}
+      <div className="flex flex-wrap items-center gap-2 rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">
+        <label className={`${rowButton(true)} cursor-pointer`}>
           {reading ? m.reading : m.files}
           <input
             type="file"
@@ -135,94 +137,65 @@ export function CompetitionImport({
             onChange={(event) => readFiles(event.target.files)}
           />
         </label>
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {(["results", "standings", "referees"] as const).map((kind) => (
-            <li
-              key={kind}
-              className={`rounded-lg px-3 py-2 text-sm ring-1 ${exports[kind] ? "bg-green-50 ring-green-200" : "bg-slate-50 ring-slate-200"}`}
-            >
-              <span className="font-medium">{m.found[kind]}</span>
-              <span className="block text-xs text-slate-500">
-                {exports[kind] ? m.rows(exports[kind]!.rows.length) : "—"}
-              </span>
-            </li>
-          ))}
-        </ul>
-        {unknown.map((name) => (
-          <Alert key={name} tone="error">
-            {m.unknown(name)}
-          </Alert>
+        {(["results", "standings", "referees"] as const).map((kind) => (
+          <Badge key={kind} tone={exports[kind] ? "green" : "slate"}>
+            {m.found[kind]}:{" "}
+            {exports[kind] ? m.rows(exports[kind]!.rows.length) : "—"}
+          </Badge>
         ))}
-        {clubCount !== null && (
-          <p className="text-xs text-slate-500">{m.clubsSaved(clubCount)}</p>
-        )}
-      </section>
-
-      <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <div>
-          <h2 className="font-semibold">{m.linksTitle}</h2>
-          <p className="text-sm text-slate-600">{m.linksIntro}</p>
-        </div>
-        <datalist id="federation-teams">
-          {names.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
-        <ul className="divide-y divide-slate-100">
-          {teams.map((team) => (
-            <TeamLink
-              key={team.id}
-              team={team}
-              divisionsOf={(name) => catalog.get(name.trim())}
-              onSaved={(next) =>
-                setTeams((all) => all.map((t) => (t.id === next.id ? next : t)))
-              }
-            />
-          ))}
-        </ul>
-      </section>
-
-      <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 className="font-semibold">{m.importTitle}</h2>
-        {divisions.size ? (
-          <>
-            <p className="text-sm text-slate-600">
-              {m.importIntro([...linked].sort().join(", ") || "—")}
-            </p>
-            {clubs.size > 0 && (
-              <p className="text-sm text-slate-600">
-                {m.clubDivisions(
-                  [...clubs].filter((d) => !linked.has(d)).length,
-                )}
-              </p>
-            )}
-            <p className="text-sm">
-              {m.summary(
+        <span className="min-w-0 flex-1 text-xs text-slate-500">
+          {divisions.size
+            ? m.summary(
                 payload.matches.length,
                 payload.standings.length,
                 payload.referees.length,
-              )}
-            </p>
-            <Button
-              type="button"
-              disabled={pending || !parsed.length}
-              onClick={() =>
-                startTransition(async () => {
-                  setResult(await importCompetition(payload));
-                })
-              }
-            >
-              {pending ? m.importing : m.import}
-            </Button>
-          </>
-        ) : (
-          <p className="text-sm text-slate-500">{m.noLinks}</p>
-        )}
-        {result?.error && <Alert tone="error">{result.error}</Alert>}
-        {result?.counts && (
-          <Alert tone="success">{m.done(result.counts)}</Alert>
-        )}
-      </section>
+              )
+            : m.noLinks}
+        </span>
+        <Button
+          type="button"
+          className="px-3 py-1 text-xs"
+          disabled={pending || !parsed.length || !divisions.size}
+          onClick={() =>
+            startTransition(async () => {
+              setResult(await importCompetition(payload));
+            })
+          }
+        >
+          {pending ? m.importing : m.import}
+        </Button>
+      </div>
+      {unknown.map((name) => (
+        <Alert key={name} tone="error">
+          {m.unknown(name)}
+        </Alert>
+      ))}
+      {result?.error && <Alert tone="error">{result.error}</Alert>}
+      {result?.counts && <Alert tone="success">{m.done(result.counts)}</Alert>}
+      <p className="text-xs text-slate-500">
+        {m.importIntro([...linked].sort().join(", ") || "—")}{" "}
+        {clubs.size > 0 &&
+          m.clubDivisions([...clubs].filter((d) => !linked.has(d)).length)}{" "}
+        {clubCount !== null && m.clubsSaved(clubCount)}
+      </p>
+
+      <Rows title={<span title={m.linksIntro}>{m.linksTitle}</span>}>
+        {teams.map((team) => (
+          <TeamLink
+            key={team.id}
+            team={team}
+            divisionsOf={(name) => catalog.get(name.trim())}
+            onSaved={(next) =>
+              setTeams((all) => all.map((t) => (t.id === next.id ? next : t)))
+            }
+          />
+        ))}
+      </Rows>
+      <datalist id="federation-teams">
+        {names.map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
     </div>
   );
 }
@@ -250,28 +223,33 @@ function TeamLink({
     [...divisions].sort().join() !== [...team.divisions].sort().join();
 
   return (
-    <li className="grid gap-3 py-3 lg:grid-cols-[14rem_18rem_minmax(0,1fr)_auto] lg:items-start">
-      <div>
-        <p className="font-medium">{team.clubName}</p>
-        <p className="text-sm text-slate-500">
-          {team.name}
-          {team.archived && ` · ${m.archived}`}
-        </p>
-      </div>
+    <li
+      className={`flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2 text-sm ${team.archived ? "text-slate-400" : ""}`}
+    >
+      <span
+        className="w-56 min-w-0 truncate font-medium"
+        title={`${team.clubName} – ${team.name}`}
+      >
+        {team.clubName} – {team.name}
+        {team.archived && ` · ${m.archived}`}
+      </span>
       <input
         list="federation-teams"
         value={name}
         onChange={(event) => setName(event.target.value)}
         aria-label={`${m.teamName} — ${team.clubName} ${team.name}`}
         placeholder={m.teamPlaceholder}
-        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+        className="w-64 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
       />
-      <div className="flex flex-wrap gap-1.5" aria-label={m.divisions}>
+      <div
+        className="flex min-w-0 flex-1 flex-wrap gap-1"
+        aria-label={m.divisions}
+      >
         {options.length ? (
           options.map((code) => (
             <label
               key={code}
-              className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs ring-1 ${divisions.has(code) ? "bg-brand/15 ring-brand" : "bg-slate-50 ring-slate-200"}`}
+              className={`flex cursor-pointer items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ring-1 ${divisions.has(code) ? "bg-brand/15 ring-brand" : "bg-slate-50 ring-slate-200"}`}
             >
               <input
                 type="checkbox"
@@ -300,6 +278,7 @@ function TeamLink({
       <div className="flex items-center gap-2">
         <Button
           type="button"
+          className="px-3 py-1 text-xs"
           disabled={!changed || pending}
           onClick={() =>
             startTransition(async () => {

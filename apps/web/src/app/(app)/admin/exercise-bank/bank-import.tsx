@@ -84,7 +84,7 @@ export function BankImport({ existing }: { existing: string[] }) {
   const added = preview?.exercises.filter((x) => !known.has(x.number)).length ?? 0;
 
   return (
-    <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <section className="space-y-3">
       <label
         className={`inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark ${reading || busy ? "pointer-events-none opacity-50" : ""}`}
       >

@@ -140,3 +140,13 @@ export function activeNav(pathname: string, search: URLSearchParams, teamId: str
   }
   return null;
 }
+
+/** The side bar of a platform admin: the admin pages instead of the coach's menus. */
+export const ADMIN_NAV: { href: string; label: string; icon: NavIconName }[] = [
+  { href: "/admin/clubs", label: messages.plans.adminTabs.clubs, icon: "club" },
+  { href: "/admin/competition", label: messages.plans.adminTabs.competition, icon: "matchday" },
+  { href: "/admin/exercise-bank", label: messages.plans.adminTabs.exerciseBank, icon: "exercises" },
+  { href: "/admin/players", label: messages.plans.adminTabs.players, icon: "players" },
+  { href: "/admin/plans", label: messages.plans.adminTabs.plans, icon: "goals" },
+  { href: "/admin/accounts", label: messages.plans.adminTabs.accounts, icon: "staff" },
+];

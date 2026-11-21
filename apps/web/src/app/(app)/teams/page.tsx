@@ -1,8 +1,10 @@
 import { type Tables, TEAM_LOGOS_BUCKET } from "@iassistent/db";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { TeamCard } from "@/components/team-card";
 import { Alert } from "@/components/ui";
+import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
@@ -25,6 +27,8 @@ export default async function TeamsPage({
   const { created, error } = await searchParams;
   const user = await requireUser();
   const supabase = await createClient();
+  // A platform admin works in the admin pages, not with teams.
+  if (await isPlatformAdmin(supabase)) redirect("/admin/clubs");
 
   const { data: teams } = await supabase
     .from("teams")
