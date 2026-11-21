@@ -541,7 +541,13 @@ Regels:
   (`CodeForm`, `TeamForm`, `StaffForm`, `ConfirmButton`, `CopyButton`; actie als prop) en `components/clubs/tables.tsx`
   (`CodesTable`, `PeopleTable`, `HistoryList`); de code maken zelf in `createCodeFromForm` (`lib/clubs/code.ts`).
   **Eigen team koppelen**: Instellingen van een persoonlijk team → Club (`ClubLink`): kies een club waar je coach bent
-  en vraag aan, of trek de aanvraag in; bij een clubteam staat welke club.
+  en je ploeg in de competitie (`club_federation_teams`: de ploegen van de club in de export, voor leden;
+  `club_team_links.federation_team`), en vraag aan, of trek de aanvraag in; bij een clubteam staat welke club.
+  **Competitie meteen klaar** (migratie `club_competition_sync`): de competitie-import bewaart naast de gekoppelde
+  reeksen ook alle reeksen van de ploegen van de clubs op het platform; bij goedkeuring krijgt het team de gekozen
+  ploeg en haar reeksen (trigger op `club_team_links`, vlag `iassistent.federation_link`), en elke nieuwe koppeling
+  (admin, club-Excel of aanvraag) zet de bewaarde wedstrijden meteen in de weekinput en de scores in de
+  wedstrijdevaluaties (`sync_team_competition`, trigger op `teams`; ook gebruikt door `admin_import_competition`).
 - **Club DNA** (clubmodule `dna`, migratie `club_dna`) — de voetbalidentiteit van een club. Vragenlijst in
   `staff/_gedeeld/clubdna.json` (zelfde vraagtypes als het visieprofiel, plus `leeftijdsdoelen` per
   leeftijdscategorie; `parseClubDnaQuestionnaire`, `validateClubDna`, `readClubDna` en `clubDnaContext` in

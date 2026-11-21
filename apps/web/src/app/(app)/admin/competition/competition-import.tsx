@@ -32,7 +32,17 @@ type Exports = Partial<Record<ParsedExport["kind"], ParsedExport>>;
  * The files are read in the browser (they hold every division of every club);
  * only the rows of the linked divisions go to the server.
  */
-export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
+export function CompetitionImport({
+  teams: initial,
+  clubNumbers,
+  clubDivisions,
+}: {
+  teams: Team[];
+  /** Registration numbers of the clubs on the platform. */
+  clubNumbers: string[];
+  /** Divisions of their teams, as last saved. */
+  clubDivisions: string[];
+}) {
   const [teams, setTeams] = useState(initial);
   const [exports, setExports] = useState<Exports>({});
   const [unknown, setUnknown] = useState<string[]>([]);
@@ -53,6 +63,21 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
   const linked = useMemo(
     () => new Set(teams.filter((t) => !t.archived).flatMap((t) => t.divisions)),
     [teams],
+  );
+  // Divisions of every team of the clubs on the platform (from the files when there, else as saved).
+  const clubs = useMemo(() => {
+    const numbers = new Set(clubNumbers);
+    const fresh =
+      exports.results?.kind === "results"
+        ? federationClubs(exports.results.rows)
+            .filter((c) => numbers.has(c.number))
+            .flatMap((c) => c.teams.flatMap((t) => t.divisions))
+        : [];
+    return new Set([...clubDivisions, ...fresh]);
+  }, [clubNumbers, clubDivisions, exports]);
+  const divisions = useMemo(
+    () => new Set([...linked, ...clubs]),
+    [linked, clubs],
   );
 
   async function readFiles(files: FileList | null) {
@@ -80,21 +105,21 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
 
   const payload = useMemo(
     () => ({
-      divisions: [...linked],
+      divisions: [...divisions],
       matches:
         exports.results?.kind === "results"
-          ? forDivisions(exports.results.rows, linked)
+          ? forDivisions(exports.results.rows, divisions)
           : [],
       standings:
         exports.standings?.kind === "standings"
-          ? forDivisions(exports.standings.rows, linked)
+          ? forDivisions(exports.standings.rows, divisions)
           : [],
       referees:
         exports.referees?.kind === "referees"
-          ? forDivisions(exports.referees.rows, linked)
+          ? forDivisions(exports.referees.rows, divisions)
           : [],
     }),
-    [exports, linked],
+    [exports, divisions],
   );
 
   return (
@@ -159,11 +184,18 @@ export function CompetitionImport({ teams: initial }: { teams: Team[] }) {
 
       <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="font-semibold">{m.importTitle}</h2>
-        {linked.size ? (
+        {divisions.size ? (
           <>
             <p className="text-sm text-slate-600">
-              {m.importIntro([...linked].sort().join(", "))}
+              {m.importIntro([...linked].sort().join(", ") || "—")}
             </p>
+            {clubs.size > 0 && (
+              <p className="text-sm text-slate-600">
+                {m.clubDivisions(
+                  [...clubs].filter((d) => !linked.has(d)).length,
+                )}
+              </p>
+            )}
             <p className="text-sm">
               {m.summary(
                 payload.matches.length,
