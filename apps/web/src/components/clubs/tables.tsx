@@ -3,7 +3,7 @@ import { longDate } from "@/lib/weeks/dates";
 
 import type { CodeState, FormAction } from "@/lib/clubs/form-state";
 
-import { ConfirmButton, ReissueButton } from "./forms";
+import { ConfirmButton, ReissueButton, RevealCode } from "./forms";
 
 const m = messages.clubAdmin;
 const dateTime = new Intl.DateTimeFormat("nl-BE", {
@@ -70,8 +70,13 @@ export function CodesTable({
                 : code.status;
             return (
               <tr key={code.id}>
-                <td className="py-2 pr-3 font-mono">
-                  {m.codes.endsWith(code.code_hint)}
+                <td className="py-2 pr-3">
+                  <RevealCode
+                    codeId={code.id}
+                    hint={code.code_hint}
+                    clubName={clubName}
+                    canReveal={status === "open"}
+                  />
                 </td>
                 <td className="py-2 pr-3">{m.roles[code.role]}</td>
                 <td className="py-2 pr-3">

@@ -79,6 +79,25 @@ export async function reissueClubCode(
   return result;
 }
 
+/**
+ * The full code of an open activation code (the eye in the codes table), for
+ * those who may revoke it; the database checks it and logs it.
+ */
+export async function revealClubCode(codeId: string): Promise<CodeState> {
+  if (!uuid.safeParse(codeId).success)
+    return { error: messages.clubAdmin.codes.errors.failed };
+  const supabase = await client();
+  const { data, error } = await supabase.rpc("reveal_club_activation_code", {
+    p_code_id: codeId,
+  });
+  if (error) {
+    console.error("reveal_club_activation_code failed", error);
+    return { error: messages.clubAdmin.codes.errors.failed };
+  }
+  if (!data) return { error: messages.clubAdmin.codes.notKept };
+  return { code: data };
+}
+
 /** Small list actions; the form posts the ids. */
 export async function revokeClubCode(formData: FormData) {
   const clubId = String(formData.get("clubId"));
