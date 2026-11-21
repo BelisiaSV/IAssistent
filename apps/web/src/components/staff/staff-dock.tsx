@@ -37,6 +37,7 @@ export function StaffDock({
   if (
     !teamId ||
     pathname.includes("/print") ||
+    pathname.startsWith("/admin") ||
     pathname.endsWith("/staff-room")
   )
     return null;

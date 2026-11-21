@@ -282,6 +282,12 @@ Regels:
   downloaden (leeg of met de huidige kern, `lib/players/template.ts`, exceljs, keuzelijsten), bestand
   controleren (voorbeeld met fouten per rij, `parseImportRows` in `lib/players/import.ts`) en
   importeren: zelfde rugnummer = bijwerken, anders nieuw, niemand verwijderd, max. 200 rijen.
+  **Admin-omgeving:** een platformadmin ziet in de zijbalk enkel de adminpagina's (`ADMIN_NAV` in
+  `lib/navigation.ts`: Clubs, Competitie, Oefenstofbank, Spelersimport, Prijsplannen, Accounts), geen teamkiezer,
+  teammenu's of clubs; `/teams` en `/admin` sturen hem naar `/admin/clubs`, de staf-kolom verschijnt niet op `/admin`.
+  Adminpagina's zijn compact: één regel per club, team, plan of account met knoppen (`components/admin/rows.tsx`:
+  `AdminHeader`, `Rows`, `Row`, `Badge`, `rowButton`); nieuw maken met een + en formulieren in een venster
+  (`components/admin/modal.tsx`, `<dialog>`).
 - **Teamdashboard en navigatie** — links een donkere **zijbalk** (`components/sidebar.tsx`; op mobiel
   een menu) met de **teamkiezer** (`components/team-switcher.tsx`, opent een ander team op hetzelfde
   onderdeel) en enkel de **8 menu's van de hoofdcoach** (`NAV_ITEMS` in `lib/navigation.ts`): Dashboard,

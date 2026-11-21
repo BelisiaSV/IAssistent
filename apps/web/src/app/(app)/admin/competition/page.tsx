@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { AdminHeader } from "@/components/admin/rows";
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
@@ -23,10 +24,7 @@ export default async function AdminCompetitionPage() {
 
   return (
     <div className="space-y-4">
-      <div className="max-w-3xl space-y-1">
-        <h1 className="text-2xl font-semibold">{m.title}</h1>
-        <p className="text-sm text-slate-600">{m.intro}</p>
-      </div>
+      <AdminHeader title={m.title} intro={m.intro} />
       <CompetitionImport
         clubNumbers={platformClubs.map((f) => f.number)}
         clubDivisions={platformClubs.flatMap((f) =>
