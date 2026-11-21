@@ -657,6 +657,7 @@ export type Database = {
           requested_at: string;
           decided_by: string | null;
           decided_at: string | null;
+          federation_team: string | null;
         };
         Insert: {
           id?: string;
@@ -667,6 +668,7 @@ export type Database = {
           requested_at?: string;
           decided_by?: string | null;
           decided_at?: string | null;
+          federation_team?: string | null;
         };
         Update: {
           id?: string;
@@ -677,6 +679,7 @@ export type Database = {
           requested_at?: string;
           decided_by?: string | null;
           decided_at?: string | null;
+          federation_team?: string | null;
         };
         Relationships: [
           {
@@ -2469,7 +2472,8 @@ export type Database = {
       has_team_staff_role: { Args: { p_team_id: string; p_roles: string[] }; Returns: boolean };
       is_club_member: { Args: { p_club_id: string }; Returns: boolean };
       redeem_club_activation_code: { Args: { p_code: string }; Returns: Json };
-      request_club_team_link: { Args: { p_team_id: string; p_club_id: string }; Returns: string };
+      request_club_team_link: { Args: { p_team_id: string; p_club_id: string; p_federation_team?: string | null }; Returns: string };
+      club_federation_teams: { Args: { p_club_id: string }; Returns: { name: string; divisions: string[] }[] };
       reissue_club_activation_code: { Args: { p_code_id: string }; Returns: { id: string; code: string }[] };
       reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };

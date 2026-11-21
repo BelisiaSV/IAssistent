@@ -485,6 +485,8 @@ export const messages = {
       archived: "gearchiveerd",
       importTitle: "Importeren",
       importIntro: (divisions: string) => `Gekoppelde reeksen: ${divisions}.`,
+      clubDivisions: (n: number) =>
+        `Ook ${n} andere reeksen van de clubs op het platform worden bewaard, zodat een trainer die zijn team aan de club koppelt meteen alle wedstrijden, uitslagen en scheidsrechters heeft.`,
       noLinks: "Nog geen team gekoppeld.",
       summary: (matches: number, standings: number, referees: number) =>
         `${matches} wedstrijden, ${standings} rijen in de klassementen, ${referees} scheidsrechtersaanduidingen.`,
@@ -971,6 +973,10 @@ export const messages = {
       intro: "Breng dit team in de clubomgeving van een club waar je trainer bent. De club keurt goed; daarna is het team definitief een clubteam en ziet de club de trainingen, planningen en evaluaties.",
       club: "Club",
       request: "Vraag koppeling aan",
+      federationTeam: "Ploeg in de competitie",
+      federationNone: "Weet ik niet / geen competitie",
+      federationHint:
+        "Kies je ploeg zoals bij Voetbal Vlaanderen. Na goedkeuring staan de kalender, uitslagen, klassementen, scheidsrechters en je volgende wedstrijden meteen klaar.",
       pending: (club: string) => `Koppeling aangevraagd bij ${club}. De club moet nog goedkeuren.`,
       cancel: "Aanvraag intrekken",
       clubTeam: (club: string) => `Dit team hoort bij ${club}.`,

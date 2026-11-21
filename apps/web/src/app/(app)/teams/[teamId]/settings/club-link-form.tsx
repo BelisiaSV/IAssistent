@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { selectClass } from "@/components/clubs/forms";
 import { Alert, Button, Field } from "@/components/ui";
@@ -17,13 +17,16 @@ export function ClubLinkForm({
   pending,
 }: {
   teamId: string;
-  clubs: { id: string; name: string }[];
+  clubs: { id: string; name: string; federationTeams: string[] }[];
   pending: { id: string; clubName: string } | null;
 }) {
   const [state, action, busy] = useActionState<FormState, FormData>(
     requestLink.bind(null, teamId),
     {},
   );
+  const [clubId, setClubId] = useState(clubs[0]?.id ?? "");
+  const federationTeams =
+    clubs.find((c) => c.id === clubId)?.federationTeams ?? [];
   if (pending) {
     return (
       <form
@@ -56,19 +59,47 @@ export function ClubLinkForm({
     );
   }
   return (
-    <form action={action} className="flex flex-wrap items-end gap-3">
-      <Field label={m.club}>
-        <select name="clubId" required className={selectClass}>
-          {clubs.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Button type="submit" disabled={busy} variant="secondary">
-        {m.request}
-      </Button>
+    <form action={action} className="space-y-3">
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label={m.club}>
+          <select
+            name="clubId"
+            required
+            className={selectClass}
+            value={clubId}
+            onChange={(event) => setClubId(event.target.value)}
+          >
+            {clubs.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        {federationTeams.length > 0 && (
+          <Field label={m.federationTeam}>
+            <select
+              key={clubId}
+              name="federationTeam"
+              defaultValue=""
+              className={selectClass}
+            >
+              <option value="">{m.federationNone}</option>
+              {federationTeams.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
+        <Button type="submit" disabled={busy} variant="secondary">
+          {m.request}
+        </Button>
+      </div>
+      {federationTeams.length > 0 && (
+        <p className="text-xs text-slate-500">{m.federationHint}</p>
+      )}
       {state.error && <Alert tone="error">{state.error}</Alert>}
     </form>
   );

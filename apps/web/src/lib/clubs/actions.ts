@@ -223,9 +223,13 @@ export async function requestLink(
   if (!uuid.safeParse(teamId).success || !uuid.safeParse(clubId).success)
     return { error: messages.club.link.failed };
   const supabase = await client();
+  const federationTeam = String(formData.get("federationTeam") ?? "")
+    .trim()
+    .slice(0, 120);
   const { error } = await supabase.rpc("request_club_team_link", {
     p_team_id: teamId,
     p_club_id: clubId,
+    p_federation_team: federationTeam || null,
   });
   if (error) {
     console.error("requestLink failed", error);
