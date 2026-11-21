@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 
+import { Modal } from "@/components/admin/modal";
+import { AdminHeader, Badge, Row, Rows } from "@/components/admin/rows";
 import { PlanCard } from "@/components/plans/plan-card";
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
+import { formatPrice } from "@/lib/plans/plans";
 import { createClient } from "@/lib/supabase/server";
 
 import { deletePlan } from "./actions";
@@ -12,48 +15,66 @@ import { PlanForm } from "./plan-form";
 
 const m = messages.plans;
 
-/** Admin only: the price plans, as the customer sees them, each with its edit form. */
+/** Admin only: the price plans, one row each; view, edit and add in a window. */
 export default async function AdminPlansPage() {
   await requireUser();
   const supabase = await createClient();
   if (!(await isPlatformAdmin(supabase))) notFound();
-  const { data: plans } = await supabase.from("plans").select("*").order("sort_order").order("name");
+  const { data: plans } = await supabase
+    .from("plans")
+    .select("*")
+    .order("sort_order")
+    .order("name");
 
   return (
-    <div className="space-y-5">
-      <div className="max-w-3xl space-y-1">
-        <h1 className="text-2xl font-semibold">{m.adminTitle}</h1>
-        <p className="text-sm text-slate-600">{m.adminIntro}</p>
-      </div>
-
-      <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="space-y-4">
+      <AdminHeader
+        title={m.adminTitle}
+        intro={m.adminIntro}
+        actions={
+          <Modal label={m.newPlan} plus wide>
+            <PlanForm plan={null} />
+          </Modal>
+        }
+      />
+      <Rows empty={m.noPlans}>
         {(plans ?? []).map((plan) => (
-          <li key={plan.id}>
-            <PlanCard
-              plan={plan}
-              footer={
-                <details className="group rounded-xl bg-slate-50 ring-1 ring-slate-200">
-                  <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-semibold text-slate-700">{m.edit}</summary>
-                  <div className="space-y-4 border-t border-slate-200 p-4">
-                    <PlanForm plan={plan} />
-                    <form action={deletePlan} className="text-right">
-                      <input type="hidden" name="planId" value={plan.id} />
-                      <DeleteButton />
-                    </form>
-                  </div>
-                </details>
-              }
-            />
-          </li>
+          <Row
+            key={plan.id}
+            muted={!plan.active}
+            meta={
+              <>
+                <span>{m.audience[plan.audience] ?? plan.audience}</span>
+                <span className="tabular-nums">
+                  {plan.price_cents === null
+                    ? m.priceOnRequest
+                    : `${formatPrice(plan.price_cents)} ${plan.billing_period === "month" ? m.perMonth : m.perYear}`}
+                </span>
+                {plan.recommended && (
+                  <Badge tone="brand">{m.recommended}</Badge>
+                )}
+                {!plan.active && <Badge>{m.inactive}</Badge>}
+              </>
+            }
+            actions={
+              <>
+                <Modal label={m.view} title={plan.name}>
+                  <PlanCard plan={plan} />
+                </Modal>
+                <Modal label={m.edit} title={plan.name} wide>
+                  <PlanForm plan={plan} />
+                </Modal>
+                <form action={deletePlan}>
+                  <input type="hidden" name="planId" value={plan.id} />
+                  <DeleteButton />
+                </form>
+              </>
+            }
+          >
+            {plan.name}
+          </Row>
         ))}
-      </ul>
-
-      <details className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <summary className="cursor-pointer list-none px-5 py-4 text-sm font-bold text-slate-800">+ {m.newPlan}</summary>
-        <div className="border-t border-slate-200 p-5">
-          <PlanForm plan={null} />
-        </div>
-      </details>
+      </Rows>
     </div>
   );
 }

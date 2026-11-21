@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { messages } from "@/lib/messages";
-import { activeNav, NAV_ITEMS, tabHref } from "@/lib/navigation";
+import { activeNav, ADMIN_NAV, NAV_ITEMS, tabHref } from "@/lib/navigation";
 
 import { NavIcon } from "./nav-icons";
 import { type SwitcherTeam, TeamCrest, TeamSwitcher } from "./team-switcher";
@@ -18,6 +18,7 @@ const m = messages.nav;
  * (team menus open for the current team, or the last one used) and the
  * account. The parts of a menu are tabs on the page itself. On small screens
  * it opens as a drawer from the top bar; collapsed, it shows only the icons.
+ * A platform admin sees the admin pages instead of the coach's menus.
  */
 export function Sidebar({
   teams,
@@ -45,7 +46,7 @@ export function Sidebar({
   const nav = (compact: boolean) => (
     <nav className={`flex h-full flex-col gap-4 overflow-y-auto py-4 ${compact ? "items-center px-2" : "px-3"}`}>
       <Link
-        href="/teams"
+        href={admin ? ADMIN_NAV[0]!.href : "/teams"}
         title={compact ? messages.app.name : undefined}
         className={`flex items-center gap-2.5 text-lg font-bold tracking-tight text-white ${compact ? "" : "px-2"}`}
         onClick={() => setOpen(false)}
@@ -56,6 +57,30 @@ export function Sidebar({
         {!compact && messages.app.name}
       </Link>
 
+      {admin ? (
+        <ul className={`space-y-1 ${compact ? "flex w-full flex-col items-center" : ""}`}>
+          {ADMIN_NAV.map((item) => {
+            const isCurrent = pathname.startsWith(item.href);
+            return (
+              <li key={item.href} className={compact ? "w-full" : ""}>
+                <Link
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  title={compact ? item.label : undefined}
+                  aria-current={isCurrent ? "page" : undefined}
+                  className={`flex items-center rounded-lg py-2 text-sm font-medium transition ${compact ? "justify-center px-2.5" : "gap-3 px-3"} ${
+                    isCurrent ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <NavIcon name={item.icon} />
+                  {!compact && item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <>
       {compact ? (
         <button type="button" onClick={onToggle} title={current ? `${current.clubName} · ${current.name}` : m.chooseTeam} className="rounded-xl p-1 hover:bg-white/10">
           <TeamCrest team={current} />
@@ -127,20 +152,10 @@ export function Sidebar({
         </Link>
       </div>
 
+        </>
+      )}
+
       <div className={`mt-auto space-y-1 border-t border-white/10 pt-3 ${compact ? "flex w-full flex-col items-center" : ""}`}>
-        {admin && (
-          <Link
-            href="/admin/players"
-            title={compact ? messages.playerImport.nav : undefined}
-            onClick={() => setOpen(false)}
-            className={`flex items-center rounded-lg py-2 text-sm font-medium ${compact ? "w-full justify-center" : "gap-3 px-3"} ${
-              pathname.startsWith("/admin") ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            <NavIcon name="admin" />
-            {!compact && messages.playerImport.nav}
-          </Link>
-        )}
         <Link
           href="/account"
           onClick={() => setOpen(false)}

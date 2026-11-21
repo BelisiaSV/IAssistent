@@ -52,7 +52,7 @@ export function MediaUpload({ keys, missing }: { keys: string[]; missing: number
   const done = rows.filter((r) => r.state === "done").length;
   const failed = rows.filter((r) => r.state === "error").length;
   return (
-    <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <section className="space-y-3">
       <div>
         <h2 className="font-semibold">{m.mediaTitle}</h2>
         <p className="text-sm text-slate-600">{m.mediaIntro(missing, keys.length)}</p>
