@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
-import { createCodeFromForm } from "@/lib/clubs/code";
+import { createCodeFromForm, reissueCode } from "@/lib/clubs/code";
 import type { FederationClub } from "@/lib/clubs/federation";
 import type { CodeState, FormState } from "@/lib/clubs/form-state";
 import {
@@ -236,6 +236,22 @@ export async function createCode(
   const supabase = await admin();
   if (!supabase) return { error: e.notAllowed };
   const result = await createCodeFromForm(supabase, clubId, formData);
+  if (result.code) revalidatePath(`/admin/clubs/${clubId}`);
+  return result;
+}
+
+/** A new code for an open code that got lost. */
+export async function reissueAdminCode(
+  clubId: string,
+  _prev: CodeState,
+  formData: FormData,
+): Promise<CodeState> {
+  const supabase = await admin();
+  if (!supabase) return { error: e.notAllowed };
+  const result = await reissueCode(
+    supabase,
+    String(formData.get("codeId") ?? ""),
+  );
   if (result.code) revalidatePath(`/admin/clubs/${clubId}`);
   return result;
 }

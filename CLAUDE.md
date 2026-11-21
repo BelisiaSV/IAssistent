@@ -492,7 +492,9 @@ Regels:
   (`XXXX-XXXX-XXXX`), enkel de sha256-hash bewaard (kolom niet leesbaar), eenmalig, optioneel vervaldatum,
   team en teamrol; een open code reserveert een licentieplaats (`club_seats_used`). Aanmaken
   `create_club_activation_code` (platformadmin en owner alles, admin alles behalve owner/admin), intrekken
-  `revoke_club_activation_code`, inwisselen `redeem_club_activation_code` (geeft `{ok, club_id}` of
+  `revoke_club_activation_code`, een verloren open code vervangen door een nieuwe met dezelfde rol, team en notitie
+  `reissue_club_activation_code` (knop "Nieuwe code"; de code zelf blijft enkel bij het maken zichtbaar, met "Kopieer"
+  en "Kopieer uitnodiging" = tekst met link `/clubs/join?code=…`, `CodeReveal`), inwisselen `redeem_club_activation_code` (geeft `{ok, club_id}` of
   `{ok:false, error}`: invalid, expired, club_inactive, already_member, no_seats, too_many_attempts = 10
   foute codes per uur). **Licentie intrekken** (`revoke_club_license`) beëindigt alle rollen en teamplaatsen
   van die persoon in de club; niets wordt verwijderd, de club leest de historiek van haar teams. Rollen zonder

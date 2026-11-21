@@ -8,7 +8,13 @@ import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
-import { createCode, createTeam, revokeCode, revokeLicense } from "../actions";
+import {
+  createCode,
+  createTeam,
+  reissueAdminCode,
+  revokeCode,
+  revokeLicense,
+} from "../actions";
 import { CodeForm, TeamForm } from "@/components/clubs/forms";
 import {
   CodesTable,
@@ -144,6 +150,7 @@ export default async function AdminClubPage({
       <Section title={m.sections.codes}>
         <CodeForm
           action={createCode.bind(null, clubId)}
+          clubName={club.name}
           teams={activeTeams.map((t) => ({ id: t.id, name: t.name }))}
         />
         <CodesTable
@@ -151,6 +158,8 @@ export default async function AdminClubPage({
           codes={codes ?? []}
           teamName={teamName}
           revoke={revokeCode}
+          reissue={reissueAdminCode.bind(null, clubId)}
+          clubName={club.name}
         />
       </Section>
 

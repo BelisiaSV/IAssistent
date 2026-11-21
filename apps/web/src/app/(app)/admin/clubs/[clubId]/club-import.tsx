@@ -229,8 +229,8 @@ export function ClubImport({
           </Alert>
           {done.codes.length > 0 && (
             <>
-              <h3 className="font-semibold text-emerald-950">{x.codesTitle}</h3>
-              <p className="text-sm text-emerald-900">{x.codesIntro}</p>
+              <h3 className="font-semibold text-emerald-700">{x.codesTitle}</h3>
+              <p className="text-sm text-emerald-700">{x.codesIntro}</p>
               <button
                 type="button"
                 onClick={() => downloadCodes(clubName, done.codes)}
@@ -250,8 +250,16 @@ export function ClubImport({
                       <td className="py-1.5 pr-3 font-mono font-bold tracking-wider">
                         {c.code}
                       </td>
-                      <td className="py-1.5">
+                      <td className="space-x-3 py-1.5">
                         <CopyButton text={c.code} />
+                        <CopyButton
+                          text={m.codes.invite(
+                            clubName,
+                            c.code,
+                            `${window.location.origin}/clubs/join?code=${encodeURIComponent(c.code)}`,
+                          )}
+                          label={m.codes.copyInvite}
+                        />
                       </td>
                     </tr>
                   ))}

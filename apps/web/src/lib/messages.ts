@@ -1170,6 +1170,13 @@ export const messages = {
       newCode: "Nieuwe code — enkel nu zichtbaar:",
       copy: "Kopieer",
       copied: "Gekopieerd",
+      copyInvite: "Kopieer uitnodiging",
+      invite: (club: string, code: string, link: string) =>
+        `Je bent uitgenodigd voor de clubomgeving van ${club} op IAssistent. Meld je aan (of maak een account) en vul je persoonlijke code in: ${code}\nRechtstreeks: ${link}`,
+      reissue: "Nieuwe code",
+      reissueConfirm: "Een nieuwe code maken? De oude code werkt dan niet meer. Rol, team en naam blijven hetzelfde.",
+      reissued: "Nieuwe code — enkel nu zichtbaar:",
+      lostHint: "Code kwijt? Een code is enkel zichtbaar wanneer je ze maakt. Gebruik \"Nieuwe code\" bij een open code.",
       empty: "Nog geen codes.",
       revoke: "Intrekken",
       revokeConfirm: "Deze code intrekken? Ze werkt dan niet meer.",
