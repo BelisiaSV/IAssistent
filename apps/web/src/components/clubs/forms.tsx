@@ -6,6 +6,7 @@ import { useActionState, useState } from "react";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import type { CodeState, FormAction, FormState } from "@/lib/clubs/form-state";
 import { messages } from "@/lib/messages";
+import { revealClubCode } from "@/lib/clubs/actions";
 import { AGE_CATEGORIES } from "@/lib/teams/age-categories";
 
 const m = messages.clubAdmin;
@@ -58,6 +59,98 @@ export function CodeReveal({
         label={m.codes.copyInvite}
       />
     </div>
+  );
+}
+
+function EyeIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+      {!open && <path d="M3 3l18 18" />}
+    </svg>
+  );
+}
+
+/**
+ * An open code in the codes table: the last characters, and an eye that shows
+ * the full code (fetched on click; the database checks and logs it) with
+ * buttons to copy it or an invitation.
+ */
+export function RevealCode({
+  codeId,
+  hint,
+  clubName,
+  canReveal,
+}: {
+  codeId: string;
+  hint: string;
+  clubName: string;
+  /** Only for open codes. */
+  canReveal: boolean;
+}) {
+  const [code, setCode] = useState<string | null>(null);
+  const [shown, setShown] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const link =
+    code && typeof window !== "undefined"
+      ? `${window.location.origin}/clubs/join?code=${encodeURIComponent(code)}`
+      : "";
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <span className="font-mono">
+        {shown && code ? (
+          <span className="font-semibold tracking-wider text-slate-900 select-all">
+            {code}
+          </span>
+        ) : (
+          m.codes.endsWith(hint)
+        )}
+      </span>
+      {canReveal && (
+        <button
+          type="button"
+          disabled={pending}
+          title={shown ? m.codes.hide : m.codes.show}
+          aria-label={shown ? m.codes.hide : m.codes.show}
+          className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+          onClick={async () => {
+            if (shown) return setShown(false);
+            if (code) return setShown(true);
+            setPending(true);
+            const result = await revealClubCode(codeId);
+            setPending(false);
+            if (result.code) {
+              setCode(result.code);
+              setShown(true);
+              setError(null);
+            } else setError(result.error ?? null);
+          }}
+        >
+          <EyeIcon open={!shown} />
+        </button>
+      )}
+      {shown && code && (
+        <>
+          <CopyButton text={code} />
+          <CopyButton
+            text={m.codes.invite(clubName, code, link)}
+            label={m.codes.copyInvite}
+          />
+        </>
+      )}
+      {error && <span className="text-xs text-red-600">{error}</span>}
+    </span>
   );
 }
 

@@ -2029,6 +2029,12 @@ export type Database = {
           },
         ];
       };
+      club_activation_code_secrets: {
+        Row: { code_id: string; code: string };
+        Insert: { code_id: string; code: string };
+        Update: { code_id?: string; code?: string };
+        Relationships: [];
+      };
       platform_admins: {
         Row: { coach_id: string; created_at: string };
         Insert: { coach_id: string; created_at?: string };
@@ -2465,6 +2471,7 @@ export type Database = {
       redeem_club_activation_code: { Args: { p_code: string }; Returns: Json };
       request_club_team_link: { Args: { p_team_id: string; p_club_id: string }; Returns: string };
       reissue_club_activation_code: { Args: { p_code_id: string }; Returns: { id: string; code: string }[] };
+      reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };
       can_read_coach_profile: { Args: { p_coach_id: string }; Returns: boolean };
