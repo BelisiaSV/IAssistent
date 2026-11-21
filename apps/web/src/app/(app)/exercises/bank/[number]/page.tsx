@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { BankFields } from "@/components/exercise-bank/bank-fields";
 import { BankMedia } from "@/components/exercise-bank/bank-media";
@@ -12,6 +13,7 @@ import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 
 import { copyBankExercise } from "../actions";
+import { ClubBankSection } from "./club-section";
 import { CopyButton } from "./copy-button";
 
 const m = messages.exerciseBank.coach;
@@ -21,6 +23,11 @@ export default async function BankExercisePage({ params, searchParams }: { param
   const [{ number }, { fout }] = await Promise.all([params, searchParams]);
   await requireUser();
   const supabase = await createClient();
+  // A club exercise (CLUB-…) used by the staff: open it in the coach's club.
+  if (decodeURIComponent(number).startsWith("CLUB-")) {
+    const { data: club } = await supabase.from("club_exercises").select("id, club_id").eq("number", decodeURIComponent(number)).limit(1).maybeSingle();
+    if (club) redirect(`/clubs/${club.club_id}/exercises/${club.id}`);
+  }
   const [{ data }, { data: own }] = await Promise.all([
     supabase.from("bank_exercises").select(BANK_COLUMNS).eq("number", decodeURIComponent(number)).maybeSingle(),
     supabase.from("exercises").select("id").eq("bank_number", decodeURIComponent(number)).maybeSingle(),
@@ -71,6 +78,7 @@ export default async function BankExercisePage({ params, searchParams }: { param
           {row.tags.length > 0 && <p className="text-xs text-slate-500">{row.tags.map((t) => `#${t}`).join(" ")}</p>}
         </article>
       )}
+      {row && <ClubBankSection number={row.number} />}
     </div>
   );
 }

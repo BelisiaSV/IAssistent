@@ -6,7 +6,7 @@ import type { Staff, StaffFile, StaffRole } from "./types";
 /** Placeholders the prompt templates in _gedeeld may use. */
 export const TEMPLATE_PLACEHOLDERS = {
   system: ["afspraken", "visie_afspraken", "wedstrijddagen", "periodisering", "rol", "instructies", "referentie", "voorbeeld"],
-  user: ["visie", "weekinput", "kern", "tegenstander", "evaluaties", "belastingshistoriek", "testen", "bibliotheek", "oefenstofbank", "staf", "feedback"],
+  user: ["visie", "weekinput", "kern", "tegenstander", "evaluaties", "belastingshistoriek", "testen", "bibliotheek", "cluboefenstof", "oefenstofbank", "staf", "feedback"],
   conversationSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
   conversationUser: ["teamcontext", "gesprek", "vraag"],
   collaborationSystem: ["afspraken", "visie_afspraken", "rol", "instructies", "rollen", "voorbeeld"],
@@ -84,6 +84,7 @@ export function buildRolePrompt(staff: Staff, role: StaffRole, context: RoleCont
     belastingshistoriek: json(context.belastingshistoriek),
     testen: json(context.testen),
     bibliotheek: json(context.bibliotheek),
+    cluboefenstof: json(context.cluboefenstof ?? []),
     oefenstofbank: json(context.oefenstofbank),
     staf: json(Object.keys(context.staf).length ? context.staf : null),
     feedback: json(context.feedback),

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { isPlatformAdmin } from "@/lib/admin";
 import { bankZones } from "@/lib/exercise-bank/filters";
+import { formValues } from "@/lib/exercise-bank/form";
 import { bankMediaUrls } from "@/lib/exercise-bank/load";
 import { requireUser } from "@/lib/auth";
 import { messages } from "@/lib/messages";
@@ -25,9 +26,6 @@ export default async function EditBankExercisePage({ params }: { params: Promise
     .eq("number", decodeURIComponent(number))
     .maybeSingle();
   if (!row) notFound();
-  const c = (row.content ?? {}) as Record<string, unknown>;
-  const text = (v: unknown) => (typeof v === "string" ? v : "");
-  const lines = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").join("\n") : "");
 
   return (
     <div className="space-y-4">
@@ -46,28 +44,7 @@ export default async function EditBankExercisePage({ params }: { params: Promise
       <BankEditForm
         number={row.number}
         zones={bankZones(row)}
-        initial={{
-          titel: row.title,
-          type: row.kind,
-          spelfase: row.phase ?? "",
-          doelgroep: row.target_group ?? "",
-          hoofddoel: text(c.hoofddoel),
-          subdoelen: lines(c.subdoelen),
-          principes: lines(c.principes),
-          aantal_spelers: text(c.aantal_spelers),
-          duur: text(c.duur),
-          veldafmeting: text(c.veldafmeting),
-          belasting: text(c.belasting),
-          belasting_toelichting: text(c.belasting_toelichting),
-          organisatie: lines(c.organisatie),
-          verloop: lines(c.verloop),
-          regels: text(c.regels),
-          coachingspunten: lines(c.coachingspunten),
-          makkelijker: text(c.makkelijker),
-          moeilijker: text(c.moeilijker),
-          materiaal: lines(c.materiaal),
-          tags: row.tags.join(", "),
-        }}
+        initial={formValues(row)}
       />
     </div>
   );

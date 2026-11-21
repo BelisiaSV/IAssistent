@@ -14,13 +14,22 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
  * (RLS: a coach only reads approved exercises). An error gives none: the
  * staff still plans, with the coach's own library and its own proposals.
  */
-export async function bankForStaff(supabase: Supabase, query: string): Promise<BankExercise[]> {
+export async function bankForStaff(supabase: Supabase, query: string, clubRecommended: string[] = []): Promise<BankExercise[]> {
   const { data, error } = await supabase.from("bank_exercises").select(BANK_COLUMNS).eq("status", "approved").order("number").limit(500);
   if (error) {
     console.error("exercise bank could not be loaded", error);
     return [];
   }
-  return rankBank((data ?? []) as BankRow[], query).map(bankExercise);
+  const rows = (data ?? []) as BankRow[];
+  // Exercises the team's club recommends come first and are marked.
+  const recommended = new Set(clubRecommended);
+  const picked = rows.filter((r) => recommended.has(r.number));
+  const rest = rankBank(
+    rows.filter((r) => !recommended.has(r.number)),
+    query,
+  );
+  // At most ten recommended exercises, then the best fit (rankBank keeps its own limit).
+  return [...picked.slice(0, 10).map((r) => ({ ...bankExercise(r), club_aanbevolen: true })), ...rest.map(bankExercise)];
 }
 
 /** Signed URLs (an hour) for files of the bank, by path. */

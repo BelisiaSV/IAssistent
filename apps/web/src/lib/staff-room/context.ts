@@ -4,6 +4,7 @@ import type { Tables } from "@iassistent/db";
 import type { VisionAnswers } from "@iassistent/staff-engine/content";
 
 import { clubDnaForTeam } from "@/lib/clubs/dna";
+import { clubExercisesForStaff } from "@/lib/clubs/exercises-staff";
 import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
@@ -45,9 +46,9 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
   const weekStart = isoWeekday(today) === 7 ? addDays(mondayOf(today), 7) : mondayOf(today);
   const schedule = trainingScheduleSchema.safeParse(team.training_schedule);
   const divisions = team.federation_team ? team.federation_divisions : [];
-  const [clubDna, bank, data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
+  const [clubDna, club, data, { data: profile }, { data: exercises }, { data: tasks }, { data: meetings }, { data: cards }, { data: reports }, { data: weeks }, { data: competitionMatches }, { data: standings }] = await Promise.all([
     clubDnaForTeam(supabase, team),
-    bankForStaff(supabase, question),
+    clubExercisesForStaff(supabase, team, question),
     loadWeek(supabase, team, weekStart),
     supabase.from("coach_profiles").select("vision_summary, vision").eq("coach_id", coachId).maybeSingle(),
     supabase
@@ -88,6 +89,7 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
       .map((p) => [p.task === "default" ? p.role : `${p.role}/${p.task}`, p.output]),
   );
   const vision = profile ? { summary: profile.vision_summary, vision: profile.vision } : null;
+  const bank = await bankForStaff(supabase, question, club.recommendedBank);
   const library = (exercises ?? []).map(libraryExercise);
 
   const context = data.week
@@ -153,6 +155,7 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
     tegenstander: context.tegenstander,
     evaluaties: context.evaluaties,
     bibliotheek: context.bibliotheek,
+    cluboefenstof: club.exercises,
     oefenstofbank: bank,
     goedgekeurd: context.staf,
     goedgekeurde_taken: (tasks ?? []).flatMap((task) => {

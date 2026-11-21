@@ -77,7 +77,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           gesprek-systeem.md + gesprek-gebruiker.md (gesprek met een rol),
                           samenwerking-systeem.md + samenwerking-gebruiker.md (gezamenlijke taak),
                           staffkamer.json + staffkamer-systeem.md + staffkamer-gebruiker.md (groepschat),
-                          taakroutering.json (welke rol een taak van de coach krijgt)
+                          taakroutering.json (welke rol een taak van de coach krijgt),
+                          clubdna.json (vragenlijst Club DNA van een club)
   coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
   player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -537,6 +538,45 @@ Regels:
   (`CodesTable`, `PeopleTable`, `HistoryList`); de code maken zelf in `createCodeFromForm` (`lib/clubs/code.ts`).
   **Eigen team koppelen**: Instellingen van een persoonlijk team → Club (`ClubLink`): kies een club waar je coach bent
   en vraag aan, of trek de aanvraag in; bij een clubteam staat welke club.
+- **Club DNA** (clubmodule `dna`, migratie `club_dna`) — de voetbalidentiteit van een club. Vragenlijst in
+  `staff/_gedeeld/clubdna.json` (zelfde vraagtypes als het visieprofiel, plus `leeftijdsdoelen` per
+  leeftijdscategorie; `parseClubDnaQuestionnaire`, `validateClubDna`, `readClubDna` en `clubDnaContext` in
+  `packages/staff-engine/src/shared/club-dna.ts`). Opslag in `club_dna` per versie (`draft`/`published`/`archived`,
+  hoogstens één concept en één gepubliceerde versie per club; `content` = `{ versie, samenvatting, antwoorden,
+  niveaus ("verplicht"|"aanbevolen" per vraag), leeftijdsdoelen ("<categorie>.<vraag>") }`). Lezen: elk lid de
+  gepubliceerde versie; owner, admin en technisch directeur ook het concept en de historiek. Schrijven enkel via
+  `save_club_dna_draft` (owner/admin/TD), `publish_club_dna` (owner/TD = goedkeuring; vorige versie wordt `archived`)
+  en `discard_club_dna_draft`, enkel zolang de club de module heeft. Pagina's `/clubs/[clubId]/dna` (gepubliceerde
+  versie met niveau per principe, doelen per categorie, versies) en `/dna/edit` (`DnaForm`; vraagvelden gedeeld met het
+  visieprofiel in `components/questionnaire/question-input.tsx`). **AI:** bij een clubteam krijgt de staf `visie.club`
+  (`clubDnaForTeam` in `lib/clubs/dna.ts`: verplicht, aanbevolen en de doelen van de eigen leeftijdscategorie), apart
+  van de visie van de trainer, in elke run, gesprek, taak en staffkamer. Hoe de staf ermee omgaat (verplicht = kader,
+  aanbevolen tenzij de trainer anders wil, tegenstrijdigheden melden, nooit stilzwijgend overschrijven) staat in
+  `staff/_gedeeld/visie-hoofdcoach.md`.
+- **Gedeelde oefenstof van de club** (clubmodule `exercises`, migratie `club_exercises`) — drie lagen: de centrale
+  oefenstofbank (`bank_exercises`, enkel de platformadmin wijzigt), de cluboefenstof (`club_exercises`) en de
+  persoonlijke oefenstof (`exercises`). Een cluboefening heeft de vorm van een bankoefening (titel, type, fase,
+  doelgroep, tags, principes, `content` met de Nederlandse sleutels van de bank, zones) plus `age_categories` en
+  `level`, een nummer `CLUB-<n>` per club, een herkomst (`origin`: `club`, `bank_variant` met `base_bank_number`,
+  `coach_share` met `source_exercise_id`), `status` (`proposed` → `approved` of `archived`) en `recommended`.
+  `club_bank_picks`: bankoefeningen die de club als favoriet kiest, eventueel aanbevolen. Lezen: elk lid de goedgekeurde
+  oefeningen en de keuzes, een auteur zijn eigen voorstellen, owner/admin/TD alles. Schrijven enkel via
+  `save_club_exercise` (elk lid stelt voor; owner/admin/TD maken meteen goedgekeurde oefeningen en wijzigen alles; een
+  auteur wijzigt zijn voorstel; delen enkel van een eigen oefening), `set_club_exercise_status`,
+  `set_club_exercise_recommended` en `set_club_bank_pick` (owner/admin/TD), en enkel met de module. Pagina's
+  `/clubs/[clubId]/exercises` (goedgekeurd, voorstellen, archief; filters van de bank + leeftijd, niveau, enkel
+  aanbevolen: `filterClubExercises` in `lib/clubs/exercises.ts`; de keuzes uit de bank), `/new` (`?bank=OEF-007` =
+  clubvariant), `/[exerciseId]` (goedkeuren, aanbevelen, archiveren, "Overnemen naar mijn oefenstof" met
+  `bankToExercise` en `bank_number` = `CLUB-<n>`) en `/[exerciseId]/edit`. Het formulier is dat van de bankcorrectie
+  (`ContentFields` in `components/exercise-bank/content-fields.tsx`, `recordFromForm`/`formValues` in
+  `lib/exercise-bank/form.ts`, gecontroleerd met `parseBank`). Op een bankoefening (`/exercises/bank/[nummer]`) staat
+  per club "Kies als clubfavoriet", "Beveel aan" en "Maak een clubvariant"; `/exercises/bank/CLUB-3` opent de
+  cluboefening. Bij een eigen oefening staat "Deel met <club>" (`shareExerciseWithClub`, wordt een voorstel).
+  **AI:** de staf van een clubteam krijgt `cluboefenstof` (`clubExercisesForStaff` in `lib/clubs/exercises-staff.ts`:
+  goedgekeurd, aanbevolen eerst, max. 15; placeholder `{{cluboefenstof}}` in `opdracht-gebruiker.md`, ook in de
+  teamcontext) en de bankoefeningen die de club aanbeveelt bovenaan `oefenstofbank` met `club_aanbevolen`
+  (`bankForStaff(…, clubRecommended)`). Volgorde voor een onderdeel: eigen oefenstof, cluboefenstof, oefenstofbank;
+  een cluboefening gaat als `CLUB-3` in `bank_nummer` (weekdocument en trainingsbladen tonen "Cluboefenstof CLUB-3").
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  de clubmodules (Club DNA, gedeelde oefenstof, clubplanning, evaluaties, kennis, rapportage) en de clubcontext
-  voor de AI-staf, visie delen; oefeningen handmatig wijzigen; videodienst.
+  de overige clubmodules (clubplanning, evaluaties, kennis, rapportage) en de Training Quality Engine, visie delen;
+  oefeningen handmatig wijzigen; videodienst.

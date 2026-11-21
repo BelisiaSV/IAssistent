@@ -59,6 +59,16 @@ als de coach nog geen oefenstof heeft.
 
 {{bibliotheek}}
 
+# Cluboefenstof
+
+Enkel bij een team van een club: goedgekeurde oefeningen van de club die het best passen bij deze
+week, in dezelfde vorm als de oefenstofbank, met een nummer zoals `CLUB-3`. `club_aanbevolen: true`
+= de club beveelt de oefening aan. Gebruik ze wanneer de eigen oefenstof van de coach niets
+passends heeft, vóór de oefenstofbank. Leeg bij een persoonlijk team of als de club geen
+gedeelde oefenstof heeft.
+
+{{cluboefenstof}}
+
 # Oefenstofbank
 
 Goedgekeurde oefeningen uit de centrale oefenstofbank van het platform, die het best passen bij
@@ -67,8 +77,9 @@ spelers, organisatie, verloop, regels, coachingspunten, makkelijker, moeilijker,
 `zones` = de zones van het veld waarin de vorm gespeeld wordt, 1–3 aan het eigen doel tot 16–18 aan
 het doel van de tegenstander, telkens links-midden-rechts; `beeld` = "tekening" of "video" als de oefening
 al een eigen beeld heeft, anders null).
-Gebruik ze wanneer de eigen oefenstof van de coach niets passends heeft. Leeg als er geen
-passende oefeningen zijn.
+Gebruik ze wanneer de eigen oefenstof van de coach en de cluboefenstof niets passends hebben.
+`club_aanbevolen: true` = de club van het team beveelt deze oefening aan: kies ze dan eerst. Leeg
+als er geen passende oefeningen zijn.
 
 {{oefenstofbank}}
 

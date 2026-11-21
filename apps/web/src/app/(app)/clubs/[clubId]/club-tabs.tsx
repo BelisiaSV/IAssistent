@@ -11,11 +11,14 @@ export function ClubTabs({
   clubId,
   manage,
   dna,
+  exercises,
 }: {
   clubId: string;
   manage: boolean;
   /** The club has the Club DNA module. */
   dna: boolean;
+  /** The club has the shared exercise library. */
+  exercises: boolean;
 }) {
   const pathname = usePathname();
   const base = `/clubs/${clubId}`;
@@ -23,6 +26,7 @@ export function ClubTabs({
     { href: base, label: t.dashboard, exact: true },
     { href: `${base}/structure`, label: t.structure, exact: false },
     ...(dna ? [{ href: `${base}/dna`, label: t.dna, exact: false }] : []),
+    ...(exercises ? [{ href: `${base}/exercises`, label: t.exercises, exact: false }] : []),
     ...(manage
       ? [{ href: `${base}/licenses`, label: t.licenses, exact: false }]
       : []),

@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { isPlatformAdmin } from "@/lib/admin";
 import { requireUser } from "@/lib/auth";
+import { recordFromForm } from "@/lib/exercise-bank/form";
 import { BANK_TEXT_MAX, parseBank, parseBankText } from "@/lib/exercise-bank/import";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
@@ -123,8 +124,6 @@ export async function saveBankMedia(key: string, path: string): Promise<{ linked
 }
 
 /** Text fields of the edit form; list fields have one item per line. */
-const TEXT_FIELDS = ["titel", "type", "spelfase", "doelgroep", "hoofddoel", "aantal_spelers", "duur", "veldafmeting", "belasting", "belasting_toelichting", "regels", "makkelijker", "moeilijker"] as const;
-const LIST_FIELDS = ["subdoelen", "principes", "organisatie", "verloop", "coachingspunten", "materiaal"] as const;
 
 export type BankEditState = { ok?: true; error?: string };
 
@@ -142,20 +141,12 @@ export async function updateBankExercise(number: string, _prev: BankEditState, f
     .eq("number", number)
     .maybeSingle();
   if (!row) return { error: e.edit };
-  const text = (key: string) => String(formData.get(key) ?? "").trim();
-  const lines = (key: string) => text(key).split("\n").map((l) => l.trim()).filter(Boolean);
   const record: Record<string, unknown> = {
     ...(row.content as Record<string, unknown>),
     nummer: row.number,
     diagram: row.media_key,
     diagram_type: row.media_kind,
-    ...Object.fromEntries(TEXT_FIELDS.map((key) => [key, text(key)])),
-    ...Object.fromEntries(LIST_FIELDS.map((key) => [key, lines(key)])),
-    tags: text("tags").split(",").map((t) => t.trim()).filter(Boolean),
-    zones: text("zones")
-      .split(",")
-      .map(Number)
-      .filter((z) => Number.isInteger(z) && z >= 1 && z <= 18),
+    ...recordFromForm(formData),
   };
   const parsed = parseBank([record]);
   const exercise = parsed?.exercises[0];

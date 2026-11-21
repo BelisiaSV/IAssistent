@@ -154,6 +154,7 @@ export function contextForRole(
     feedback: { previousOutput: unknown; comment: string } | null;
     library?: LibraryExercise[];
     bank?: BankExercise[];
+    clubExercises?: BankExercise[];
     clubDna?: ClubDnaContext | null;
   },
 ) {
@@ -200,6 +201,7 @@ export function contextForRole(
     staff: options.staff,
     feedback: options.feedback,
     clubDna: options.clubDna ?? null,
+    clubExercises: options.clubExercises ?? [],
   });
 }
 
