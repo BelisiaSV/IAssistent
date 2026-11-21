@@ -13,6 +13,7 @@ import { lineupFromMatchPlan } from "@/lib/proposals/lineup";
 import type { MatchPrepOutput } from "@/lib/proposals/types";
 import { RUN_STEPS } from "@/lib/roles";
 import { matchPrepFrom } from "@/lib/staff-runs/gate";
+import { checkRunQuality } from "@/lib/quality/server";
 import { advanceRun, decideRun, RunRequestError, startRun } from "@/lib/staff-runs/server";
 import { formationCatalog } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
@@ -217,6 +218,25 @@ export async function requestRun(
 
   revalidatePath(weekPath(teamId, weekStart));
   redirect(`${weekPath(teamId, weekStart)}?${run.kind}=${run.version}#${run.kind}`);
+}
+
+/** Training Quality Engine: checks a week version (again) on request of the head coach. */
+export async function checkQualityAction(
+  teamId: string,
+  weekStart: string,
+  runId: string,
+): Promise<FormState> {
+  if (!uuid.safeParse(teamId).success || !uuid.safeParse(runId).success || !isMonday(weekStart)) {
+    return { error: messages.quality.errors.failed };
+  }
+  const user = await requireUser();
+  const supabase = await createClient();
+  const { data: team } = await supabase.from("teams").select(SEASON_TEAM_COLUMNS).eq("id", teamId).maybeSingle();
+  if (!team) return { error: messages.quality.errors.failed };
+  const result = await checkRunQuality(supabase, { team, weekStart, runId, coachId: user.id });
+  revalidatePath(weekPath(teamId, weekStart));
+  if (!result.ok) return { error: messages.quality.errors[result.error] };
+  return { success: messages.quality.done };
 }
 
 /** Called by the page while a run is busy: starts the steps that can go next. */

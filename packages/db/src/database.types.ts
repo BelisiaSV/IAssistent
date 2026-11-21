@@ -2038,6 +2038,42 @@ export type Database = {
         Update: { code_id?: string; code?: string };
         Relationships: [];
       };
+      training_quality_reviews: {
+        Row: {
+          id: string;
+          team_id: string;
+          run_id: string;
+          status: string;
+          output: Json | null;
+          average: number | null;
+          verdict: string | null;
+          provider: string;
+          model: string | null;
+          usage: Json | null;
+          content_version: string | null;
+          error: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          run_id: string;
+          status: string;
+          output?: Json | null;
+          average?: number | null;
+          verdict?: string | null;
+          provider: string;
+          model?: string | null;
+          usage?: Json | null;
+          content_version?: string | null;
+          error?: string | null;
+          created_by?: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       platform_admins: {
         Row: { coach_id: string; created_at: string };
         Insert: { coach_id: string; created_at?: string };
@@ -2475,6 +2511,8 @@ export type Database = {
       request_club_team_link: { Args: { p_team_id: string; p_club_id: string; p_federation_team?: string | null }; Returns: string };
       club_federation_teams: { Args: { p_club_id: string }; Returns: { name: string; divisions: string[] }[] };
       reissue_club_activation_code: { Args: { p_code_id: string }; Returns: { id: string; code: string }[] };
+      staff_quality_daily_limit: { Args: Record<PropertyKey, never>; Returns: number };
+      staff_quality_remaining_today: { Args: Record<PropertyKey, never>; Returns: number };
       reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };

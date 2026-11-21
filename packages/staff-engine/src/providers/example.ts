@@ -1,7 +1,7 @@
 import type { BankExercise, LibraryExercise, RoleContext } from "../context";
 import type { CollaborationInput } from "../collaboration";
 import type { ConversationInput } from "../conversation";
-import { COLLABORATION_TASK, CONVERSATION_TASK, MEETING_TASK } from "../layout";
+import { COLLABORATION_TASK, CONVERSATION_TASK, MEETING_TASK, QUALITY_TASK } from "../layout";
 import type { MeetingInput, MeetingOutput, MeetingWeekPlan, WeekPlanDay } from "../meeting";
 import { roleExample, roleTask } from "../prompt";
 import type { Staff, StaffRole } from "../types";
@@ -21,6 +21,12 @@ export const exampleProvider: StaffModelProvider = {
     if (task === CONVERSATION_TASK) return { output: conversationExample(role, input as ConversationInput), provider: "example", model: null, usage: null };
     if (task === MEETING_TASK) return { output: meetingExample(role, input as MeetingInput), provider: "example", model: null, usage: null };
     if (task === COLLABORATION_TASK) return { output: collaborationExample(role, input as CollaborationInput), provider: "example", model: null, usage: null };
+    // Quality check: the example of the task as it is (its criteria match _gedeeld/kwaliteit.json).
+    if (task === QUALITY_TASK) {
+      const example = roleExample(role, task);
+      if (!example) throw new StaffGenerationError("provider_error", `role ${role.id} (${task}) has no example`);
+      return { output: example, provider: "example", model: null, usage: null };
+    }
     const context = input as RoleContext;
     const example = roleExample(role, task) as Example | null;
     if (!example) {
