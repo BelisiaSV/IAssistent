@@ -60,3 +60,21 @@ export async function createCodeFromForm(
   }
   return { code };
 }
+
+/** Replaces an open code by a new one with the same role, team and note (the old one stops working). */
+export async function reissueCode(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  codeId: string,
+): Promise<CodeState> {
+  if (!z.uuid().safeParse(codeId).success) return { error: c.errors.failed };
+  const { data, error } = await supabase.rpc("reissue_club_activation_code", {
+    p_code_id: codeId,
+  });
+  const code = data?.[0]?.code;
+  if (error || !code) {
+    console.error("reissue_club_activation_code failed", error);
+    if (error?.hint === "club_inactive") return { error: c.errors.inactive };
+    return { error: c.errors.failed };
+  }
+  return { code };
+}

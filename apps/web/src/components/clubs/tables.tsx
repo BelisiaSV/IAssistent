@@ -1,7 +1,9 @@
 import { messages } from "@/lib/messages";
 import { longDate } from "@/lib/weeks/dates";
 
-import { ConfirmButton } from "./forms";
+import type { CodeState, FormAction } from "@/lib/clubs/form-state";
+
+import { ConfirmButton, ReissueButton } from "./forms";
 
 const m = messages.clubAdmin;
 const dateTime = new Intl.DateTimeFormat("nl-BE", {
@@ -33,11 +35,16 @@ export function CodesTable({
   codes,
   teamName,
   revoke,
+  reissue,
+  clubName,
 }: {
   clubId: string;
   codes: CodeRow[];
   teamName: Map<string, string>;
   revoke: (formData: FormData) => Promise<void>;
+  /** A new code for an open one (bound to the club). */
+  reissue: FormAction<CodeState>;
+  clubName: string;
 }) {
   if (!codes.length)
     return <p className="text-sm text-slate-600">{m.codes.empty}</p>;
@@ -79,14 +86,21 @@ export function CodesTable({
                 </td>
                 <td className="py-2 text-right">
                   {status === "open" && (
-                    <form action={revoke}>
-                      <input type="hidden" name="clubId" value={clubId} />
-                      <input type="hidden" name="codeId" value={code.id} />
-                      <ConfirmButton
-                        label={m.codes.revoke}
-                        confirmText={m.codes.revokeConfirm}
+                    <div className="flex flex-wrap items-center justify-end gap-3">
+                      <ReissueButton
+                        codeId={code.id}
+                        clubName={clubName}
+                        action={reissue}
                       />
-                    </form>
+                      <form action={revoke}>
+                        <input type="hidden" name="clubId" value={clubId} />
+                        <input type="hidden" name="codeId" value={code.id} />
+                        <ConfirmButton
+                          label={m.codes.revoke}
+                          confirmText={m.codes.revokeConfirm}
+                        />
+                      </form>
+                    </div>
                   )}
                 </td>
               </tr>
