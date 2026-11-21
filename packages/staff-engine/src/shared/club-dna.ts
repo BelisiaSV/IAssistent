@@ -143,6 +143,17 @@ export interface ClubDnaContext {
   aanbevolen: ClubDnaPrinciple[];
   leeftijdscategorie: string;
   doelen: { vraag: string; antwoord: VisionAnswer }[];
+  /** The club's current period for this age category (club planning), if any. */
+  periode?: ClubPeriodContext | null;
+}
+
+/** A period of the club planning with its training goals (club module "planning"). */
+export interface ClubPeriodContext {
+  titel: string;
+  van: string;
+  tot: string;
+  trainingsdoelen: string[];
+  focus: string | null;
 }
 
 export function clubDnaContext(
