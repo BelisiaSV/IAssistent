@@ -2245,6 +2245,90 @@ export type Database = {
         };
         Relationships: [];
       };
+      club_documents: {
+        Row: {
+          id: string;
+          club_id: string;
+          title: string;
+          kind: string;
+          description: string | null;
+          age_categories: string[];
+          file_path: string;
+          file_name: string;
+          size_bytes: number | null;
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          title: string;
+          kind?: string;
+          description?: string | null;
+          age_categories?: string[];
+          file_path: string;
+          file_name: string;
+          size_bytes?: number | null;
+          uploaded_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+        };
+        Relationships: [];
+      };
+      club_shared_trainings: {
+        Row: {
+          id: string;
+          club_id: string;
+          team_id: string;
+          session_date: string;
+          title: string;
+          age_category: string;
+          content: Json;
+          note: string | null;
+          is_example: boolean;
+          shared_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          team_id: string;
+          session_date: string;
+          title: string;
+          age_category: string;
+          content: Json;
+          note?: string | null;
+          is_example?: boolean;
+          shared_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          is_example?: boolean;
+        };
+        Relationships: [];
+      };
+      club_training_comments: {
+        Row: {
+          id: string;
+          training_id: string;
+          club_id: string;
+          body: string;
+          author_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          training_id: string;
+          club_id: string;
+          body: string;
+          author_id?: string;
+          created_at?: string;
+        };
+        Update: {
+        };
+        Relationships: [];
+      };
       platform_admins: {
         Row: { coach_id: string; created_at: string };
         Insert: { coach_id: string; created_at?: string };
@@ -2686,6 +2770,7 @@ export type Database = {
       staff_quality_remaining_today: { Args: Record<PropertyKey, never>; Returns: number };
       save_club_period: { Args: { p_club_id: string; p_id: string | null; p_data: Json }; Returns: string };
       delete_club_period: { Args: { p_id: string }; Returns: undefined };
+      club_member_names: { Args: { p_club_id: string }; Returns: { coach_id: string; name: string | null }[] };
       reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };
