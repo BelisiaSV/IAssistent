@@ -1513,6 +1513,7 @@ export type Database = {
           red_card_ban: number;
           federation_team: string | null;
           federation_divisions: string[];
+          player_goals_enabled: boolean;
         };
         Insert: {
           id?: string;
@@ -1541,6 +1542,7 @@ export type Database = {
           red_card_ban?: number;
           federation_team?: string | null;
           federation_divisions?: string[];
+          player_goals_enabled?: boolean;
         };
         Update: {
           id?: string;
@@ -1569,6 +1571,7 @@ export type Database = {
           red_card_ban?: number;
           federation_team?: string | null;
           federation_divisions?: string[];
+          player_goals_enabled?: boolean;
         };
         Relationships: [
           {
@@ -2090,6 +2093,156 @@ export type Database = {
         };
         Insert: never;
         Update: never;
+        Relationships: [];
+      };
+      training_evaluations: {
+        Row: {
+          id: string;
+          team_id: string;
+          session_date: string;
+          rating: number | null;
+          went_well: string | null;
+          to_improve: string | null;
+          attention_points: string[];
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          session_date: string;
+          rating?: number | null;
+          went_well?: string | null;
+          to_improve?: string | null;
+          attention_points?: string[];
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          session_date?: string;
+          rating?: number | null;
+          went_well?: string | null;
+          to_improve?: string | null;
+          attention_points?: string[];
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      team_goals: {
+        Row: {
+          id: string;
+          team_id: string;
+          title: string;
+          description: string | null;
+          target_date: string | null;
+          status: string;
+          progress: number;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          title: string;
+          description?: string | null;
+          target_date?: string | null;
+          status?: string;
+          progress?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          title?: string;
+          description?: string | null;
+          target_date?: string | null;
+          status?: string;
+          progress?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      team_goal_updates: {
+        Row: {
+          id: number;
+          goal_id: string;
+          team_id: string;
+          status: string;
+          progress: number;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          goal_id: string;
+          team_id: string;
+          status: string;
+          progress: number;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          goal_id?: string;
+          team_id?: string;
+          status?: string;
+          progress?: number;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      player_goals: {
+        Row: {
+          id: string;
+          team_id: string;
+          player_id: string;
+          title: string;
+          note: string | null;
+          target_date: string | null;
+          status: string;
+          progress: number;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          player_id: string;
+          title: string;
+          note?: string | null;
+          target_date?: string | null;
+          status?: string;
+          progress?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          player_id?: string;
+          title?: string;
+          note?: string | null;
+          target_date?: string | null;
+          status?: string;
+          progress?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Relationships: [];
       };
       platform_admins: {

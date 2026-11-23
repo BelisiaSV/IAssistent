@@ -1,3 +1,4 @@
+import type { EvaluationCatalog } from "./shared/evaluation";
 import type { QualityCriteria } from "./shared/quality";
 import type { FormationCatalog } from "./shared/formations";
 import type { MatchDayCatalog } from "./shared/matchdays";
@@ -78,6 +79,8 @@ export interface Staff {
   taskRouting: TaskRouting;
   /** _gedeeld/kwaliteit.json */
   quality: QualityCriteria;
+  /** _gedeeld/evaluatie.json */
+  evaluation: EvaluationCatalog;
 }
 
 export interface StaffIssue {

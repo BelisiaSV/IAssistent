@@ -27,7 +27,7 @@ hoofdcoach anders wil.
 
 Wat de hele staf mag weten: team, visie, kern (rugnummers, geen namen), deze week, de
 goedgekeurde plannen, de goedgekeurde gezamenlijke taken, de oefenstof en passende oefeningen uit
-de oefenstofbank van het platform (en bij een clubteam de oefenstof van de club, `cluboefenstof`). Wat hier niet
+de oefenstofbank van het platform (en bij een clubteam de oefenstof van de club, `cluboefenstof`), de teamdoelen en terugkerende aandachtspunten uit de trainingsevaluaties (`ontwikkeling`). Wat hier niet
 staat, weet je niet.
 
 {{teamcontext}}

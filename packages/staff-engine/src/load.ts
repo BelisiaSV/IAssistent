@@ -18,6 +18,7 @@ import { TEMPLATE_PLACEHOLDERS, templatePlaceholders } from "./prompt";
 import { parseMatchDays } from "./shared/matchdays";
 import { parsePeriodization } from "./shared/periodization";
 import { parseMeetingPlan } from "./shared/meeting";
+import { parseEvaluationCatalog } from "./shared/evaluation";
 import { parseQualityCriteria } from "./shared/quality";
 import { parseTaskRouting } from "./shared/routing";
 import { parseTests } from "./shared/tests";
@@ -136,13 +137,14 @@ async function readStaff(rootDir: string): Promise<LoadResult> {
     else if (checker && !checker.tasks.some((t) => t.id === QUALITY_TASK))
       issues.push({ path: `${SHARED_DIR}/${SHARED_FILES.quality}`, message: `rol "${quality.rol}" heeft geen taak ${ROLE_TASKS_DIR}/${QUALITY_TASK}` });
   }
+  const evaluation = collect(parseEvaluationCatalog(readSharedJson(shared, SHARED_FILES.evaluation, issues)), issues);
   checkTemplates(shared, issues);
 
-  if (!positions || !formations || !vision || !clubDna || !matchDays || !periodization || !tests || !meeting || !taskRouting || !quality) {
+  if (!positions || !formations || !vision || !clubDna || !matchDays || !periodization || !tests || !meeting || !taskRouting || !quality || !evaluation) {
     return { staff: null, issues };
   }
   return {
-    staff: { rootDir: root, shared, roles, positions, formations, vision, clubDna, matchDays, periodization, tests, meeting, taskRouting, quality },
+    staff: { rootDir: root, shared, roles, positions, formations, vision, clubDna, matchDays, periodization, tests, meeting, taskRouting, quality, evaluation },
     issues,
   };
 }

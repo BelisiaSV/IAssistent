@@ -13,6 +13,7 @@ export function ClubTabs({
   dna,
   exercises,
   planning,
+  evaluations,
 }: {
   clubId: string;
   manage: boolean;
@@ -22,6 +23,8 @@ export function ClubTabs({
   exercises: boolean;
   /** The club has the club planning. */
   planning: boolean;
+  /** The club has evaluations and development. */
+  evaluations: boolean;
 }) {
   const pathname = usePathname();
   const base = `/clubs/${clubId}`;
@@ -29,6 +32,7 @@ export function ClubTabs({
     { href: base, label: t.dashboard, exact: true },
     { href: `${base}/structure`, label: t.structure, exact: false },
     ...(planning ? [{ href: `${base}/planning`, label: t.planning, exact: false }] : []),
+    ...(evaluations ? [{ href: `${base}/evaluations`, label: t.evaluations, exact: false }] : []),
     ...(dna ? [{ href: `${base}/dna`, label: t.dna, exact: false }] : []),
     ...(exercises ? [{ href: `${base}/exercises`, label: t.exercises, exact: false }] : []),
     ...(manage

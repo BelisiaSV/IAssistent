@@ -135,6 +135,10 @@ beforeEach(async () => {
     JSON.stringify({ versie: "1", beurten: [{ rol: "test-role", soort: "bijdrage" }, { rol: "test-role", soort: "overzicht" }] }),
   );
   await write("_gedeeld/taakroutering.json", JSON.stringify({ versie: "1", standaard: "test-role", rollen: [{ rol: "test-role", woorden: ["video"] }] }));
+  await write(
+    "_gedeeld/evaluatie.json",
+    JSON.stringify({ versie: "1", beoordeling: { min: 1, max: 5, labels: {} }, aandachtspunten: [{ code: "intensiteit", naam: "Intensiteit" }] }),
+  );
   await write("_gedeeld/kwaliteit-systeem.md", "{{criteria}}\n");
   await write("_gedeeld/kwaliteit-gebruiker.md", "{{voorstel}}\n");
   await write(
@@ -165,6 +169,7 @@ describe("loadStaff", () => {
     expect(staff.shared.map((f) => f.path)).toEqual([
       "_gedeeld/afspraken.md",
       "_gedeeld/clubdna.json",
+      "_gedeeld/evaluatie.json",
       "_gedeeld/formaties.json",
       "_gedeeld/gesprek-gebruiker.md",
       "_gedeeld/gesprek-systeem.md",

@@ -47,6 +47,7 @@ export default async function ClubLayout({
         dna={(ctx.subscription?.modules ?? []).includes("dna")}
         exercises={(ctx.subscription?.modules ?? []).includes("exercises")}
         planning={(ctx.subscription?.modules ?? []).includes("planning")}
+        evaluations={(ctx.subscription?.modules ?? []).includes("evaluations")}
       />
       {children}
     </div>
