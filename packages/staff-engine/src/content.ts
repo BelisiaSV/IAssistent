@@ -11,6 +11,7 @@ export * from "./shared/positions";
 export * from "./shared/club-dna";
 export * from "./shared/vision";
 export * from "./shared/routing";
+export * from "./shared/evaluation";
 export type { ParseResult } from "./shared/parse";
 export type { Staff, StaffFile, StaffIssue, StaffRole, RoleMeta } from "./types";
 export type { ConversationInput, ConversationReply, ConversationTurn, TaskProposal } from "./conversation";

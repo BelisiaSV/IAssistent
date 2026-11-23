@@ -79,7 +79,8 @@ staff/                    ALLE rolinhoud (markdown + JSON)
                           staffkamer.json + staffkamer-systeem.md + staffkamer-gebruiker.md (groepschat),
                           taakroutering.json (welke rol een taak van de coach krijgt),
                           clubdna.json (vragenlijst Club DNA van een club),
-                          kwaliteit.json + kwaliteit-systeem.md + kwaliteit-gebruiker.md (Training Quality Engine)
+                          kwaliteit.json + kwaliteit-systeem.md + kwaliteit-gebruiker.md (Training Quality Engine),
+                          evaluatie.json (beoordeling en aandachtspunten van trainingsevaluaties)
   coordinator/  assistant-coach/  tactical-coach/  physical-coach/  video-analyst/
   player-development/  team-manager/
     rol.md  instructies.md  output-schema.json  referentie/  voorbeelden/  tests/
@@ -606,6 +607,23 @@ Regels:
   lopende periode van de leeftijdscategorie toe als `visie.club.periode` (`periodFor` in `lib/clubs/periods.ts`: eerst
   een periode voor de categorie, dan een voor alle); zonder gepubliceerd Club DNA staat enkel de periode erin. Hoe de
   staf ermee omgaat staat in `staff/_gedeeld/visie-hoofdcoach.md`.
+- **Evaluaties en ontwikkeling** (clubmodule `evaluations` voor het clubhoverzicht; per team voor elke hoofdcoach;
+  migratie `evaluations_development`) — teampagina **Ontwikkeling** (`/teams/[id]/development`, menu Rapportage):
+  **trainingsevaluaties** (`training_evaluations`, één per team en dag: beoordeling, wat ging goed, wat kan beter,
+  aandachtspunten = codes uit `staff/_gedeeld/evaluatie.json`; de trainingen van de laatste 6 weken uit de weekinput,
+  groen = RPE ingevuld, met het kwaliteitsoordeel van die week), **terugkerende aandachtspunten** (laatste 8 weken,
+  minstens 2×: `recurringPoints` in de staff-engine, plus de criteria die de kwaliteitscontrole vaak noemt,
+  `qualityPoints`), **teamdoelen** (`team_goals`: status open/on_track/at_risk/achieved/dropped, voortgang 0–100,
+  streefdatum; elke wijziging van status of voortgang komt in `team_goal_updates` via een trigger) en
+  **ontwikkelingsdoelen per speler** (`player_goals`, enkel als het team ze aanzet, `teams.player_goals_enabled`;
+  trigger controleert team en speler). Lezen `can_read_team`, schrijven `can_write_team`. Server actions in
+  `lib/development/actions.ts`, data in `loadDevelopment` (`lib/development/load.ts`), formulieren in
+  `components/development/forms.tsx`. **Club** (`/clubs/[clubId]/evaluations`, tabblad Evaluaties): per periode (laatste
+  4 weken, dit seizoen of een periode van de clubplanning) per team uitgevoerde/geëvalueerde trainingen, gemiddelde
+  beoordeling, kwaliteit, teamdoelen en terugkerende punten; wat terugkomt in de hele club; de kwaliteitscontroles van
+  de goedgekeurde weekplanningen met het eerste verbeterpunt en een link naar de goedgekeurde versie. **AI:** de
+  teamcontext (gesprek, taak, staffkamer) krijgt `ontwikkeling` (teamdoelen zonder namen, terugkerende aandachtspunten,
+  gemiddelde beoordeling); spelersdoelen en vrije tekst van evaluaties gaan niet naar de AI.
 - **Training Quality Engine** (migratie `training_quality`) — elk weekvoorstel (run `week`) wordt nagekeken voordat de
   hoofdcoach beslist. Criteria, schaal en oordelen in `staff/_gedeeld/kwaliteit.json` (rol die controleert: `rol`,
   standaard de AI Staff Coordinator), de opdracht in `kwaliteit-systeem.md`/`kwaliteit-gebruiker.md` en de taak
@@ -620,5 +638,5 @@ Regels:
   Getoond als `QualityReview` boven het weekdocument en als `QualityBadge` per team in het clubdashboard (goedgekeurde
   versie van deze week, verbeterpunten als tooltip; het laagste oordeel komt bij de aandachtspunten).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  de overige clubmodules (evaluaties, kennis, rapportage), visie delen;
+  de overige clubmodules (kennis, rapportage), visie delen;
   oefeningen handmatig wijzigen; videodienst.

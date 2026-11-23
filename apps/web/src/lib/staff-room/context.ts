@@ -5,10 +5,12 @@ import type { VisionAnswers } from "@iassistent/staff-engine/content";
 
 import { clubDnaForTeam } from "@/lib/clubs/dna";
 import { clubExercisesForStaff } from "@/lib/clubs/exercises-staff";
+import { loadDevelopment, recurring } from "@/lib/development/load";
 import { bankForStaff } from "@/lib/exercise-bank/load";
 import { LIBRARY_COLUMNS, LIBRARY_LIMIT, libraryExercise } from "@/lib/exercises/library";
 import { messages } from "@/lib/messages";
 import { matchEvaluations } from "@/lib/opponents/context";
+import { withoutNames } from "@/lib/proposals/names";
 import { formOf, nextMatchOf, opponentOf } from "@/lib/competition/team";
 import { cardRules, suspensions, yellowCounts } from "@/lib/players/cards";
 import { matchDayCatalog, periodizationCatalog, testCatalog, visionQuestionnaire } from "@/lib/staff";
@@ -144,7 +146,21 @@ export async function teamContextForChat(supabase: Supabase, team: Tables<"teams
     };
   });
 
+  // Development: open team goals, recurring attention points and the average rating of the last 8 weeks.
+  const development = await loadDevelopment(supabase, [team.id], addDays(today, -56), today);
+  const anonymous = (text: string) => withoutNames(text, data.players, messages.staffRoom.unknownPlayer);
+  const ratings = (development?.evaluations ?? []).flatMap((e) => (e.rating ? [e.rating] : []));
+
   return {
+    ontwikkeling: development
+      ? {
+          teamdoelen: development.goals
+            .filter((g) => g.status !== "dropped")
+            .map((g) => ({ titel: anonymous(g.title), status: g.status, voortgang_pct: g.progress, streefdatum: g.target_date })),
+          terugkerende_aandachtspunten: recurring(development.evaluations).map((p) => ({ punt: p.naam, keer: p.aantal })),
+          gemiddelde_beoordeling_trainingen: ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : null,
+        }
+      : null,
     competitie: competitionContext(team.federation_team, competitionMatches ?? [], standings ?? [], today),
     team: { leeftijdscategorie: ageCategory(team.age_category), standaardformatie: teamFormation(team.default_formation).code },
     visie: context.visie,
