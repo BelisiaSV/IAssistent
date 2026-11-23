@@ -4,12 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LoadChart } from "@/components/proposals/load-chart";
+import { Modal } from "@/components/admin/modal";
+import { ShareTrainingForm } from "@/components/clubs/knowledge-forms";
 import { QualityCheckButton } from "@/components/quality/check-button";
 import { QualityReview } from "@/components/quality/quality-review";
 import { MatchPrepView } from "@/components/proposals/tactical-views";
 import { type WeekDocument, WeekDocumentView } from "@/components/proposals/week-document-view";
 import { Alert, Button } from "@/components/ui";
 import { getStaffProvider } from "@/lib/ai";
+import { trainingDays } from "@/lib/clubs/knowledge";
 import { loadWeekExercises } from "@/lib/exercises/week";
 import { messages } from "@/lib/messages";
 import { qualityLabels } from "@/lib/quality/labels";
@@ -101,6 +104,25 @@ export default async function WeekPage({
     : { data: [] };
   const latestReview = (runId: string) => (reviews ?? []).find((x) => x.run_id === runId) ?? null;
   const labels = qualityLabels();
+  // Knowledge module: the head coach of a club team shares a training of the approved week with the club.
+  const share =
+    canEdit && team.club_id && approvedWeekRun
+      ? await (async () => {
+          const [{ data: active }, { data: club }, { data: shared }] = await Promise.all([
+            supabase.rpc("club_has_module", { p_club_id: team.club_id!, p_module: "knowledge" }),
+            supabase.from("clubs").select("name").eq("id", team.club_id!).maybeSingle(),
+            supabase.from("club_shared_trainings").select("session_date").eq("team_id", team.id),
+          ]);
+          if (active !== true) return null;
+          const done = new Set((shared ?? []).map((x) => x.session_date));
+          const days = trainingDays(approvedWeek.ac).map((d) => ({
+            datum: d.datum,
+            label: `${weekdayName(d.datum)} ${shortDate(d.datum)} · ${d.titel}`,
+            shared: done.has(d.datum),
+          }));
+          return days.length ? { clubName: club?.name ?? "", days } : null;
+        })()
+      : null;
   const theirNames = opponentNames(data.opponentLineup);
   const exercises = await loadWeekExercises(
     supabase,
@@ -308,6 +330,14 @@ export default async function WeekPage({
           );
         }}
       />
+
+      {share && approvedWeekRun && (
+        <div className="flex justify-end print:hidden">
+          <Modal label={messages.club.knowledge.share.submit} title={messages.club.knowledge.share.title}>
+            <ShareTrainingForm teamId={team.id} runId={approvedWeekRun.id} clubName={share.clubName} days={share.days} />
+          </Modal>
+        </div>
+      )}
 
       {matchFrom && (
         <RunSection

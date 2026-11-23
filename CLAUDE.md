@@ -624,6 +624,19 @@ Regels:
   de goedgekeurde weekplanningen met het eerste verbeterpunt en een link naar de goedgekeurde versie. **AI:** de
   teamcontext (gesprek, taak, staffkamer) krijgt `ontwikkeling` (teamdoelen zonder namen, terugkerende aandachtspunten,
   gemiddelde beoordeling); spelersdoelen en vrije tekst van evaluaties gaan niet naar de AI.
+- **Kennis en samenwerking** (clubmodule `knowledge`, migratie `club_knowledge`) — `/clubs/[clubId]/knowledge` (tabblad
+  Kennis): **documenten en methodologische richtlijnen** (`club_documents`: titel, soort guideline/agreement/document,
+  omschrijving, leeftijdscategorieën; bestand in de privé bucket `club-documents`, pad `<club_id>/<document_id>/<bestand>`,
+  max. 20 MB, PDF/Word/Excel/PowerPoint/afbeelding/tekst, rechtstreeks uit de browser via een signed upload URL,
+  `DocumentUploadForm`; lezen elk lid met de module, opladen en verwijderen owner/admin/TD), **gedeelde trainingen**
+  (`club_shared_trainings`: de hoofdtrainer van een clubteam deelt op de weekpagina een trainingsdag uit het goedgekeurde
+  weekdocument, "Deel met de club" → `shareTraining`; een momentopname van de dag van de Assistent Coach zonder
+  opmerkingen of individuele programma's en zonder link naar eigen oefenstof, `trainingDaySnapshot` in
+  `lib/clubs/knowledge.ts`; één per team en dag; niets wijzigt behalve `is_example`, dat owner/admin/TD zetten =
+  **voorbeeldtraining**; filter op leeftijdscategorie en enkel voorbeelden; detailpagina `/knowledge/[trainingId]` met
+  `SharedTrainingView`) en **feedback tussen trainers** (`club_training_comments`, elk lid schrijft, de auteur of
+  owner/admin/TD verwijdert). Namen van auteurs via `club_member_names(club)` (geen e-mail, enkel voor leden).
+  Clubfavorieten van oefenstof blijven bij de module Oefenstof.
 - **Training Quality Engine** (migratie `training_quality`) — elk weekvoorstel (run `week`) wordt nagekeken voordat de
   hoofdcoach beslist. Criteria, schaal en oordelen in `staff/_gedeeld/kwaliteit.json` (rol die controleert: `rol`,
   standaard de AI Staff Coordinator), de opdracht in `kwaliteit-systeem.md`/`kwaliteit-gebruiker.md` en de taak
@@ -638,5 +651,5 @@ Regels:
   Getoond als `QualityReview` boven het weekdocument en als `QualityBadge` per team in het clubdashboard (goedgekeurde
   versie van deze week, verbeterpunten als tooltip; het laagste oordeel komt bij de aandachtspunten).
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
-  de overige clubmodules (kennis, rapportage), visie delen;
+  de clubmodule rapportage, visie delen;
   oefeningen handmatig wijzigen; videodienst.
