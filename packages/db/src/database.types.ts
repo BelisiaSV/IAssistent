@@ -2770,7 +2770,7 @@ export type Database = {
       staff_quality_remaining_today: { Args: Record<PropertyKey, never>; Returns: number };
       save_club_period: { Args: { p_club_id: string; p_id: string | null; p_data: Json }; Returns: string };
       delete_club_period: { Args: { p_id: string }; Returns: undefined };
-      club_member_names: { Args: { p_club_id: string }; Returns: { coach_id: string; name: string }[] };
+      club_member_names: { Args: { p_club_id: string }; Returns: { coach_id: string; name: string | null }[] };
       reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };

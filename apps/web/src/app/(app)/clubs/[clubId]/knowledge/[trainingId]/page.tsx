@@ -32,7 +32,7 @@ export default async function SharedTrainingPage({ params }: { params: Promise<{
     supabase.rpc("club_member_names", { p_club_id: clubId }),
   ]);
   const me = ctx.user.id;
-  const name = new Map((people ?? []).map((p) => [p.coach_id, p.name]));
+  const name = new Map((people ?? []).flatMap((p) => (p.name ? [[p.coach_id, p.name] as const] : [])));
   const editor = ctx.roles.some((r) => r === "owner" || r === "admin" || r === "technical_director");
 
   return (

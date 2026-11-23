@@ -200,7 +200,7 @@ begin
     raise exception 'not allowed' using errcode = '42501';
   end if;
   return query
-    select distinct c.id, coalesce(nullif(trim(c.full_name), ''), split_part(c.email, '@', 1))
+    select distinct c.id, nullif(trim(c.full_name), '')
     from public.club_members m
     join public.coaches c on c.id = m.coach_id
     where m.club_id = p_club_id;
