@@ -1,8 +1,8 @@
 import {
-  CLUB_ROLES,
-  CLUB_ROLES_WITH_LICENSE,
+  CLUB_PERSON_ROLES,
+  CLUB_PERSON_TEAM_ROLES,
+  type ClubPersonRole,
   type ClubRole,
-  TEAM_STAFF_ROLES,
   type TeamStaffRole,
 } from "@iassistent/db";
 
@@ -10,81 +10,46 @@ import { messages } from "@/lib/messages";
 import { cellText } from "@/lib/players/import";
 import { AGE_CATEGORIES, type AgeCategory } from "@/lib/teams/age-categories";
 
-const m = messages.clubAdmin.excel;
+const m = messages.clubPeople.file;
 const e = m.errors;
 
 /** Columns per sheet, in order (headers in messages). */
-export const CLUB_COLUMNS = [
-  "name",
-  "number",
-  "address",
-  "contactName",
-  "contactEmail",
-  "contactPhone",
-  "primaryColor",
-  "secondaryColor",
-] as const;
-export const TEAM_COLUMNS = [
-  "teamName",
-  "ageCategory",
-  "season",
-  "federationTeam",
-  "divisions",
-] as const;
-export const STAFF_COLUMNS = ["staffName", "role", "team", "teamRole"] as const;
-type Column =
-  | (typeof CLUB_COLUMNS)[number]
-  | (typeof TEAM_COLUMNS)[number]
-  | (typeof STAFF_COLUMNS)[number];
+export const TEAM_COLUMNS = ["teamName", "category", "federationTeam"] as const;
+export const PEOPLE_COLUMNS = ["name", "email", "role", "team"] as const;
+type Column = (typeof TEAM_COLUMNS)[number] | (typeof PEOPLE_COLUMNS)[number];
 
 export const MAX_TEAMS = 100;
-export const MAX_STAFF = 300;
+export const MAX_PEOPLE = 300;
 
 export interface ClubSheets {
-  club: unknown[][];
   teams: unknown[][];
-  staff: unknown[][];
-}
-
-export interface ClubDetails {
-  name: string;
-  address: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  primaryColor: string;
-  secondaryColor: string;
+  people: unknown[][];
 }
 
 export interface TeamRow {
   line: number;
   name: string;
-  ageCategory: AgeCategory | null;
-  season: string;
+  category: AgeCategory | null;
   federationTeam: string;
-  divisions: string[];
   errors: string[];
 }
 
-export interface StaffRow {
+export interface PersonRow {
   line: number;
   name: string;
-  role: ClubRole | null;
+  email: string;
+  role: ClubPersonRole | null;
   team: string;
-  teamRole: TeamStaffRole | null;
   errors: string[];
 }
 
-export interface ClubImport {
-  club: ClubDetails;
-  clubErrors: string[];
+export interface ClubFile {
   teams: TeamRow[];
-  staff: StaffRow[];
+  people: PersonRow[];
 }
 
 const normal = (s: string) => s.trim().toLowerCase();
-const HEX = /^#[0-9A-Fa-f]{6}$/;
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** A label from the lists or the code itself → the code; "" when empty, null when unknown. */
 function fromLabel<T extends string>(
@@ -123,53 +88,26 @@ function table<C extends Column>(
 }
 
 /**
- * Reads the three sheets the club filled in and checks every row.
- * `existingTeams` are the names of the club's active teams: staff may be put on
- * those even when they are not on the Teams sheet.
+ * Reads the two sheets of the club file and checks every row.
+ * `existingTeams`: the club's active teams (people may be put on those even
+ * when they are not on the Teams sheet). `federationTeams`: the club's teams in
+ * the competition export.
  */
-export function parseClubImport(
+export function parseClubFile(
   sheets: ClubSheets,
   existingTeams: string[] = [],
-): ClubImport | { error: string } {
-  const clubTable = table(sheets.club, CLUB_COLUMNS, m.sheets.club);
-  if ("error" in clubTable) return clubTable;
+  federationTeams: string[] = [],
+): ClubFile | { error: string } {
   const teamTable = table(sheets.teams, TEAM_COLUMNS, m.sheets.teams);
   if ("error" in teamTable) return teamTable;
-  const staffTable = table(sheets.staff, STAFF_COLUMNS, m.sheets.staff);
-  if ("error" in staffTable) return staffTable;
+  const peopleTable = table(sheets.people, PEOPLE_COLUMNS, m.sheets.people);
+  if ("error" in peopleTable) return peopleTable;
   if (teamTable.rows.length > MAX_TEAMS)
     return { error: `${m.sheets.teams}: ${e.tooManyRows(MAX_TEAMS)}` };
-  if (staffTable.rows.length > MAX_STAFF)
-    return { error: `${m.sheets.staff}: ${e.tooManyRows(MAX_STAFF)}` };
+  if (peopleTable.rows.length > MAX_PEOPLE)
+    return { error: `${m.sheets.people}: ${e.tooManyRows(MAX_PEOPLE)}` };
 
-  // Club: the first filled row.
-  const c = clubTable.rows[0]?.values;
-  const club: ClubDetails = {
-    name: c?.name ?? "",
-    address: c?.address ?? "",
-    contactName: c?.contactName ?? "",
-    contactEmail: c?.contactEmail ?? "",
-    contactPhone: c?.contactPhone ?? "",
-    primaryColor: (c?.primaryColor ?? "").toUpperCase(),
-    secondaryColor: (c?.secondaryColor ?? "").toUpperCase(),
-  };
-  const clubErrors: string[] = [];
-  const max = (value: string, n: number, col: Column) => {
-    if (value.length > n) clubErrors.push(e.tooLong(m.columns[col]));
-  };
-  max(club.name, 120, "name");
-  max(club.address, 200, "address");
-  max(club.contactName, 120, "contactName");
-  max(club.contactEmail, 200, "contactEmail");
-  max(club.contactPhone, 40, "contactPhone");
-  if (club.contactEmail && !EMAIL.test(club.contactEmail))
-    clubErrors.push(e.email);
-  if (club.primaryColor && !HEX.test(club.primaryColor))
-    clubErrors.push(e.color(m.columns.primaryColor));
-  if (club.secondaryColor && !HEX.test(club.secondaryColor))
-    clubErrors.push(e.color(m.columns.secondaryColor));
-
-  // Teams
+  const federation = new Map(federationTeams.map((f) => [normal(f), f]));
   const seen = new Set<string>();
   const teams: TeamRow[] = teamTable.rows.map(({ line, values }) => {
     const errors: string[] = [];
@@ -179,67 +117,53 @@ export function parseClubImport(
     else if (seen.has(normal(name))) errors.push(e.duplicateTeam);
     seen.add(normal(name));
     const category = fromLabel(
-      values.ageCategory,
+      values.category,
       AGE_CATEGORIES,
       messages.ageCategories,
     );
-    if (category === null) errors.push(e.ageCategory);
-    if (values.season.length > 20) errors.push(e.tooLong(m.columns.season));
-    if (values.federationTeam.length > 120)
-      errors.push(e.tooLong(m.columns.federationTeam));
-    const divisions = values.divisions
-      .split(/[,;]/)
-      .map((d) => d.trim())
-      .filter(Boolean);
-    if (divisions.some((d) => d.length > 20) || divisions.length > 10)
-      errors.push(e.tooLong(m.columns.divisions));
-    return {
-      line,
-      name,
-      ageCategory: category || null,
-      season: values.season,
-      federationTeam: values.federationTeam,
-      divisions,
-      errors,
-    };
+    if (category === null) errors.push(e.category);
+    let federationTeam = values.federationTeam;
+    if (federationTeam) {
+      const found = federation.get(normal(federationTeam));
+      if (found) federationTeam = found;
+      else errors.push(e.federationTeam);
+    }
+    return { line, name, category: category || null, federationTeam, errors };
   });
 
-  // Staff
   const known = new Set([
     ...teams.map((t) => normal(t.name)),
     ...existingTeams.map(normal),
   ]);
-  const staff: StaffRow[] = staffTable.rows.map(({ line, values }) => {
+  const people: PersonRow[] = peopleTable.rows.map(({ line, values }) => {
     const errors: string[] = [];
-    if (!values.staffName) errors.push(e.required(m.columns.staffName));
-    else if (values.staffName.length > 120)
-      errors.push(e.tooLong(m.columns.staffName));
-    const role = fromLabel(values.role, CLUB_ROLES, messages.clubAdmin.roles);
+    if (values.name.length > 120) errors.push(e.tooLong(m.columns.name));
+    const email = values.email.trim().toLowerCase();
+    if (!email) errors.push(e.required(m.columns.email));
+    else if (!EMAIL.test(email) || email.length > 200) errors.push(e.email);
+    const role = fromLabel(
+      values.role,
+      CLUB_PERSON_ROLES,
+      messages.clubPeople.roles,
+    );
     if (role === "") errors.push(e.required(m.columns.role));
     else if (role === null) errors.push(e.role);
-    const teamRole = fromLabel(
-      values.teamRole,
-      TEAM_STAFF_ROLES,
-      messages.clubAdmin.teamRoles,
-    );
-    if (teamRole === null) errors.push(e.teamRole);
-    if (values.team && !known.has(normal(values.team)))
-      errors.push(e.teamUnknown);
-    if (teamRole && !values.team) errors.push(e.teamRoleWithoutTeam);
-    if (values.team && !teamRole) errors.push(e.required(m.columns.teamRole));
-    if (role && teamRole && !teamRoleFits(role, teamRole))
-      errors.push(e.teamRoleMismatch);
+    if (values.team) {
+      if (!known.has(normal(values.team))) errors.push(e.teamUnknown);
+      else if (role && !CLUB_PERSON_TEAM_ROLES.includes(role))
+        errors.push(e.roleWithoutTeam);
+    }
     return {
       line,
-      name: values.staffName,
+      name: values.name,
+      email,
       role: role || null,
       team: values.team,
-      teamRole: teamRole || null,
       errors,
     };
   });
 
-  return { club, clubErrors, teams, staff };
+  return { teams, people };
 }
 
 /** Head and assistant coaches are coaches; coordinators are team coordinators. */
@@ -248,44 +172,47 @@ export function teamRoleFits(role: ClubRole, teamRole: TeamStaffRole): boolean {
   return role === "coach" || role === "assistant_coach";
 }
 
-/** Licences the staff on the sheet will use. */
-export function seatsNeeded(staff: Pick<StaffRow, "role">[]): number {
-  return staff.filter((s) => s.role && CLUB_ROLES_WITH_LICENSE.includes(s.role))
-    .length;
+/** Person roles that use a licence (technical director and trainers). */
+const LICENSED: readonly ClubPersonRole[] = [
+  "technical_director",
+  "head_coach",
+  "assistant_coach",
+];
+
+/** New licences the file needs: one per e-mail with a licensed role, leaving out who has one already. */
+export function seatsNeeded(
+  people: Pick<PersonRow, "email" | "role">[],
+  licensed: Iterable<string> = [],
+): number {
+  const have = new Set([...licensed].map(normal));
+  return new Set(
+    people
+      .filter((p) => p.role && LICENSED.includes(p.role) && !have.has(p.email))
+      .map((p) => p.email),
+  ).size;
 }
 
-export function hasErrors(data: ClubImport): boolean {
+export function hasErrors(data: ClubFile): boolean {
   return (
-    data.clubErrors.length > 0 ||
     data.teams.some((t) => t.errors.length) ||
-    data.staff.some((s) => s.errors.length)
+    data.people.some((p) => p.errors.length)
   );
 }
 
-/** What admin_import_club expects. */
-export function toImportPayload(data: ClubImport) {
+/** What import_club_file expects. */
+export function toFilePayload(data: ClubFile) {
   return {
-    club: {
-      name: data.club.name,
-      address: data.club.address,
-      contact_name: data.club.contactName,
-      contact_email: data.club.contactEmail,
-      contact_phone: data.club.contactPhone,
-      primary_color: data.club.primaryColor,
-      secondary_color: data.club.secondaryColor,
-    },
     teams: data.teams.map((t) => ({
       name: t.name,
-      age_category: t.ageCategory ?? "",
-      season: t.season,
+      age_category: t.category ?? "",
       federation_team: t.federationTeam,
-      divisions: t.divisions,
     })),
-    staff: data.staff.map((s) => ({
-      name: s.name,
-      role: s.role,
-      team: s.teamRole ? s.team : "",
-      team_role: s.teamRole && s.team ? s.teamRole : "",
+    people: data.people.map((p) => ({
+      name: p.name,
+      email: p.email,
+      role: p.role,
+      team:
+        p.role && CLUB_PERSON_TEAM_ROLES.includes(p.role) ? p.team : "",
     })),
   };
 }

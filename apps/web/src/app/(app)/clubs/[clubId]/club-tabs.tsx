@@ -40,7 +40,7 @@ export function ClubTabs({
     ...(dna ? [{ href: `${base}/dna`, label: t.dna, exact: false }] : []),
     ...(exercises ? [{ href: `${base}/exercises`, label: t.exercises, exact: false }] : []),
     ...(manage
-      ? [{ href: `${base}/licenses`, label: t.licenses, exact: false }]
+      ? [{ href: `${base}/people`, label: t.people, exact: false }]
       : []),
   ];
   return (

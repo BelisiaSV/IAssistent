@@ -60,7 +60,7 @@ export async function createClubCode(
 ): Promise<CodeState> {
   const supabase = await client();
   const result = await createCodeFromForm(supabase, clubId, formData);
-  if (result.code) revalidatePath(`/clubs/${clubId}/licenses`);
+  if (result.code) revalidatePath(`/clubs/${clubId}/people`);
   return result;
 }
 
@@ -75,7 +75,7 @@ export async function reissueClubCode(
     supabase,
     String(formData.get("codeId") ?? ""),
   );
-  if (result.code) revalidatePath(`/clubs/${clubId}/licenses`);
+  if (result.code) revalidatePath(`/clubs/${clubId}/people`);
   return result;
 }
 
@@ -106,7 +106,7 @@ export async function revokeClubCode(formData: FormData) {
     p_code_id: String(formData.get("codeId")),
   });
   if (error) console.error("revokeClubCode failed", error);
-  revalidatePath(`/clubs/${clubId}/licenses`);
+  revalidatePath(`/clubs/${clubId}/people`);
 }
 
 export async function revokeClubLicense(formData: FormData) {

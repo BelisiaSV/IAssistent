@@ -70,10 +70,10 @@ select tests.login('coach@test.local');
 select is((select count(*)::int from public.club_dna), 0, 'a coach does not see the draft');
 select tests.logout();
 
--- The club admin may edit but not publish
+-- Owner and admin are one role (club manager): an admin may publish too
 select tests.login('cadmin@test.local');
-select throws_ok($$select public.publish_club_dna((select id from ids where name = 'club'))$$, '42501', null,
-  'a club admin cannot publish');
+select ok(public.has_club_role((select id from ids where name = 'club'), '{owner,technical_director}'),
+  'a club admin is a club manager and may publish');
 select tests.logout();
 
 select tests.login('td@test.local');

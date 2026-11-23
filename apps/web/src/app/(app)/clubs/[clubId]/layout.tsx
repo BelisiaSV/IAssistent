@@ -36,7 +36,7 @@ export default async function ClubLayout({
         </div>
         <p className="text-sm text-slate-600">
           {m.yourRoles(
-            ctx.roles.map((r) => messages.clubAdmin.roles[r]).join(", "),
+            [...new Set(ctx.roles.map((r) => messages.clubAdmin.roles[r]))].join(", "),
           )}
         </p>
       </div>
