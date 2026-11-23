@@ -84,6 +84,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: m.tests, teamPath: "/tests", member: "physical-coach" },
       { label: m.seasonReport, teamPath: "/reports", exact: true, member: "video-analyst" },
       { label: m.weeklyLoad, teamPath: "/reports/load", member: "physical-coach" },
+      { label: m.development, teamPath: "/development", member: "player-development" },
     ],
   },
 ];

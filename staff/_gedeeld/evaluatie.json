@@ -1,0 +1,31 @@
+{
+  "versie": "1.0.0",
+  "uitleg": "Evaluatie van trainingen door de hoofdcoach (clubmodule Evaluaties en ontwikkeling): de beoordeling van 1 tot 5 en de aandachtspunten die hij kan aanduiden. Wat vaak terugkomt, toont de app als terugkerend aandachtspunt; de staf krijgt ze mee.",
+  "beoordeling": {
+    "min": 1,
+    "max": 5,
+    "labels": {
+      "1": "Slecht",
+      "2": "Zwak",
+      "3": "Voldoende",
+      "4": "Goed",
+      "5": "Uitstekend"
+    }
+  },
+  "aandachtspunten": [
+    { "code": "intensiteit", "naam": "Intensiteit", "uitleg": "Te weinig duelkracht, tempo of inzet in de kern." },
+    { "code": "concentratie", "naam": "Concentratie", "uitleg": "Slordigheid, te veel balverlies door gebrek aan focus." },
+    { "code": "communicatie", "naam": "Communicatie", "uitleg": "Te weinig coaching onder elkaar, geen aanspreekpunten." },
+    { "code": "organisatie", "naam": "Organisatie van de training", "uitleg": "Te veel stilstand, wachten of uitleg; materiaal niet klaar." },
+    { "code": "opkomst", "naam": "Opkomst en stiptheid", "uitleg": "Te weinig spelers of te laat begonnen." },
+    { "code": "techniek_onder_druk", "naam": "Techniek onder druk", "uitleg": "Aanname en passing lukken niet in kleine ruimtes." },
+    { "code": "positiespel", "naam": "Positiespel", "uitleg": "Breedte, diepte en aanspeelbaarheid in balbezit." },
+    { "code": "omschakeling", "naam": "Omschakeling", "uitleg": "Reactie na balverlies of balwinst is te traag." },
+    { "code": "druk_zetten", "naam": "Druk zetten", "uitleg": "Pressing niet samen, signalen niet herkend." },
+    { "code": "defensieve_organisatie", "naam": "Defensieve organisatie", "uitleg": "Afstanden tussen linies, rugdekking, compactheid." },
+    { "code": "afwerking", "naam": "Afwerking", "uitleg": "Te weinig doelpogingen of rendement voor doel." },
+    { "code": "standaardsituaties", "naam": "Standaardsituaties", "uitleg": "Afspraken bij hoekschoppen en vrije trappen zitten niet." },
+    { "code": "discipline", "naam": "Discipline en houding", "uitleg": "Afspraken niet nageleefd, negatieve houding." },
+    { "code": "belasting", "naam": "Belasting", "uitleg": "Groep te vermoeid of net te fris voor wat gepland was." }
+  ]
+}

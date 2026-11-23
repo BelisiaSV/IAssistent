@@ -22,4 +22,5 @@ export * from "./shared/club-dna";
 export * from "./shared/vision";
 export * from "./shared/routing";
 export * from "./shared/quality";
+export * from "./shared/evaluation";
 export type { ParseResult } from "./shared/parse";
