@@ -5,68 +5,45 @@ vi.mock("server-only", () => ({}));
 
 import { messages } from "@/lib/messages";
 
-import { hasErrors, parseClubImport } from "./import";
-import { clubTemplate, readClubFile } from "./template";
+import { hasErrors, parseClubFile } from "./import";
+import { clubFileTemplate, readClubFile } from "./template";
 
-const sheets = messages.clubAdmin.excel.sheets;
+const sheets = messages.clubPeople.file.sheets;
 
-describe("club template", () => {
-  it("round-trips: a filled-in template reads back into club, teams and staff", async () => {
-    const file = await clubTemplate(
-      {
-        name: "Belisia Bilzen SV",
-        number: "00042",
-        address: null,
-        contactName: null,
-        contactEmail: null,
-        contactPhone: null,
-        primaryColor: "#6CB4EE",
-        secondaryColor: null,
-      },
-      [
-        {
-          name: "Belisia Bilzen SV A",
-          ageCategory: "senioren",
-          season: null,
-          federationTeam: "Belisia Bilzen SV A",
-          divisions: ["3B"],
-        },
-      ],
+describe("club file", () => {
+  it("round-trips: a filled-in club file reads back into teams and people", async () => {
+    const file = await clubFileTemplate(
+      "Belisia Bilzen SV",
+      [{ name: "Belisia Bilzen SV A", category: "senioren", federationTeam: "Belisia Bilzen SV A" }],
+      [{ name: "Ann", email: "ann@club.be", role: "club_manager", team: "" }],
+      ["Belisia Bilzen SV A"],
     );
 
-    // The club fills in a staff member.
     const book = new ExcelJS.Workbook();
     await book.xlsx.load(file as unknown as ArrayBuffer);
     expect(book.getWorksheet(sheets.lists)?.state).toBe("hidden");
-    const staff = book.getWorksheet(sheets.staff)!;
-    staff.getRow(2).values = [
+    book.getWorksheet(sheets.people)!.getRow(3).values = [
       "Tom",
-      messages.clubAdmin.roles.coach,
+      "tom@club.be",
+      messages.clubPeople.roles.head_coach,
       "Belisia Bilzen SV A",
-      messages.clubAdmin.teamRoles.head_coach,
     ];
     const filled = await book.xlsx.writeBuffer();
 
     const read = await readClubFile(filled as ArrayBuffer);
     expect(read).not.toBeNull();
-    const data = parseClubImport(read!);
+    const data = parseClubFile(read!, [], ["Belisia Bilzen SV A"]);
     if ("error" in data) throw new Error(data.error);
     expect(hasErrors(data)).toBe(false);
-    expect(data.club.name).toBe("Belisia Bilzen SV");
-    expect(data.teams).toHaveLength(1);
-    expect(data.teams[0]!.ageCategory).toBe("senioren");
-    expect(data.staff[0]).toMatchObject({
-      name: "Tom",
-      role: "coach",
-      teamRole: "head_coach",
-    });
+    expect(data.teams[0]).toMatchObject({ category: "senioren", federationTeam: "Belisia Bilzen SV A" });
+    expect(data.people).toHaveLength(2);
+    expect(data.people[0]).toMatchObject({ role: "club_manager" });
+    expect(data.people[1]).toMatchObject({ name: "Tom", role: "head_coach", team: "Belisia Bilzen SV A" });
   });
 
-  it("reads null for a file that is not the template", async () => {
+  it("reads null for a file that is not the club file", async () => {
     const book = new ExcelJS.Workbook();
     book.addWorksheet("Iets anders");
-    expect(
-      await readClubFile((await book.xlsx.writeBuffer()) as ArrayBuffer),
-    ).toBeNull();
+    expect(await readClubFile((await book.xlsx.writeBuffer()) as ArrayBuffer)).toBeNull();
   });
 });

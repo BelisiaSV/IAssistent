@@ -698,6 +698,62 @@ export type Database = {
           },
         ];
       };
+      club_invitations: {
+        Row: {
+          id: string;
+          club_id: string;
+          email: string;
+          name: string | null;
+          roles: Database["public"]["Enums"]["club_role"][];
+          teams: Json;
+          status: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          accepted_by: string | null;
+          accepted_at: string | null;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          email: string;
+          name?: string | null;
+          roles?: Database["public"]["Enums"]["club_role"][];
+          teams?: Json;
+          status?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          accepted_by?: string | null;
+          accepted_at?: string | null;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          email?: string;
+          name?: string | null;
+          roles?: Database["public"]["Enums"]["club_role"][];
+          teams?: Json;
+          status?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          accepted_by?: string | null;
+          accepted_at?: string | null;
+          revoked_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "club_invitations_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       club_audit_log: {
         Row: {
           id: number;
@@ -2773,6 +2829,13 @@ export type Database = {
       club_member_names: { Args: { p_club_id: string }; Returns: { coach_id: string; name: string | null }[] };
       reveal_club_activation_code: { Args: { p_code_id: string }; Returns: string | null };
       revoke_club_activation_code: { Args: { p_code_id: string }; Returns: undefined };
+      save_club_invitation: {
+        Args: { p_club_id: string; p_email: string; p_name: string | null; p_role: string; p_team_id?: string | null };
+        Returns: string;
+      };
+      revoke_club_invitation: { Args: { p_id: string }; Returns: undefined };
+      accept_club_invitations: { Args: Record<PropertyKey, never>; Returns: string[] };
+      import_club_file: { Args: { p_club_id: string; p_data: Json }; Returns: Json };
       revoke_club_license: { Args: { p_license_id: string }; Returns: undefined };
       can_read_coach_profile: { Args: { p_coach_id: string }; Returns: boolean };
       can_read_team: { Args: { p_team_id: string }; Returns: boolean };

@@ -10,20 +10,11 @@ import { requireUser } from "@/lib/auth";
 import { createCodeFromForm, reissueCode } from "@/lib/clubs/code";
 import type { FederationClub } from "@/lib/clubs/federation";
 import type { CodeState, FormState } from "@/lib/clubs/form-state";
-import {
-  type ClubImport,
-  hasErrors,
-  parseClubImport,
-  seatsNeeded,
-  toImportPayload,
-} from "@/lib/clubs/import";
-import { readClubFile } from "@/lib/clubs/template";
 import { messages } from "@/lib/messages";
 import { createClient } from "@/lib/supabase/server";
 import { AGE_CATEGORIES } from "@/lib/teams/age-categories";
 
 const e = messages.clubAdmin.errors;
-const x = messages.clubAdmin.excel;
 
 export type { CodeState, FormState };
 
@@ -319,145 +310,4 @@ export async function createTeam(
   }
   revalidatePath(`/admin/clubs/${clubId}`);
   return { ok: "" };
-}
-
-// -----------------------------------------------------------------------------
-// Excel import
-// -----------------------------------------------------------------------------
-
-const MAX_BYTES = 2 * 1024 * 1024;
-
-export type ImportState =
-  | { error?: string; preview?: undefined; done?: undefined }
-  | {
-      preview: {
-        data: ClubImport;
-        existingTeams: string[];
-        seatsNeeded: number;
-        seatsFree: number;
-        blocker: string | null;
-      };
-      error?: undefined;
-      done?: undefined;
-    }
-  | {
-      done: {
-        teamsCreated: number;
-        teamsUpdated: number;
-        codes: {
-          name: string;
-          role: string;
-          team: string | null;
-          team_role: string | null;
-          code: string;
-        }[];
-      };
-      error?: undefined;
-      preview?: undefined;
-    };
-
-async function readImport(clubId: string, formData: FormData) {
-  const supabase = await admin();
-  if (!supabase || !z.uuid().safeParse(clubId).success)
-    return { error: e.notAllowed } as const;
-  const file = formData.get("file");
-  if (
-    !(file instanceof File) ||
-    file.size === 0 ||
-    file.size > MAX_BYTES ||
-    !file.name.toLowerCase().endsWith(".xlsx")
-  ) {
-    return { error: x.errors.file } as const;
-  }
-  const sheets = await readClubFile(await file.arrayBuffer());
-  if (!sheets) return { error: x.errors.noSheets } as const;
-  const [{ data: teams }, { data: clubs }] = await Promise.all([
-    supabase.rpc("admin_club_teams", { p_club_id: clubId }),
-    supabase.rpc("admin_clubs"),
-  ]);
-  const existingTeams = (teams ?? [])
-    .filter((t) => !t.archived)
-    .map((t) => t.name);
-  const parsed = parseClubImport(sheets, existingTeams);
-  if ("error" in parsed) return { error: parsed.error } as const;
-  const club = (clubs ?? []).find((cl) => cl.id === clubId);
-  const needed = seatsNeeded(parsed.staff);
-  const free = club ? Math.max(0, club.license_seats - club.seats_used) : 0;
-  const lower = new Set(existingTeams.map((t) => t.toLowerCase()));
-  const newTeams = parsed.teams.filter(
-    (t) => !lower.has(t.name.toLowerCase()),
-  ).length;
-  let blocker: string | null = null;
-  if (!club?.active) blocker = x.inactive;
-  else if (needed > free) blocker = x.notEnoughSeats;
-  else if (
-    club.max_teams !== null &&
-    club.active_teams + newTeams > club.max_teams
-  )
-    blocker = x.tooManyTeams;
-  return {
-    supabase,
-    data: parsed,
-    existingTeams,
-    needed,
-    free,
-    blocker,
-  } as const;
-}
-
-export async function checkClubImport(
-  clubId: string,
-  _prev: ImportState,
-  formData: FormData,
-): Promise<ImportState> {
-  const r = await readImport(clubId, formData);
-  if ("error" in r) return { error: r.error };
-  return {
-    preview: {
-      data: r.data,
-      existingTeams: r.existingTeams,
-      seatsNeeded: r.needed,
-      seatsFree: r.free,
-      blocker: r.blocker,
-    },
-  };
-}
-
-export async function runClubImport(
-  clubId: string,
-  _prev: ImportState,
-  formData: FormData,
-): Promise<ImportState> {
-  const r = await readImport(clubId, formData);
-  if ("error" in r) return { error: r.error };
-  if (hasErrors(r.data) || r.blocker)
-    return { error: r.blocker ?? x.fixErrors };
-  const { data, error } = await r.supabase.rpc("admin_import_club", {
-    p_club_id: clubId,
-    p_data: toImportPayload(r.data) as unknown as Json,
-  });
-  if (error || !data) {
-    console.error("admin_import_club failed", error);
-    return { error: x.errors.failed };
-  }
-  const result = data as {
-    teams_created: number;
-    teams_updated: number;
-    codes: {
-      name: string;
-      role: string;
-      team: string | null;
-      team_role: string | null;
-      code: string;
-    }[];
-  };
-  revalidatePath(`/admin/clubs/${clubId}`);
-  revalidatePath("/admin/clubs");
-  return {
-    done: {
-      teamsCreated: result.teams_created,
-      teamsUpdated: result.teams_updated,
-      codes: result.codes,
-    },
-  };
 }

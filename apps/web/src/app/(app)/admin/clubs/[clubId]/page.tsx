@@ -23,8 +23,10 @@ import {
   PeopleTable,
 } from "@/components/clubs/tables";
 
+import { PeoplePanel } from "@/components/clubs/people-panel";
+import type { ClubTeam } from "@/lib/clubs/people";
+
 import { DetailsForm, SubscriptionForm } from "./club-forms";
-import { ClubImport } from "./club-import";
 
 const m = messages.clubAdmin;
 
@@ -82,6 +84,13 @@ export default async function AdminClubPage({
   if (!club) notFound();
   const stats = (overview ?? []).find((c) => c.id === clubId);
   const activeTeams = (teams ?? []).filter((t) => !t.archived);
+  const peopleTeams: ClubTeam[] = (teams ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    category: t.age_category,
+    federationTeam: t.federation_team,
+    archived: t.archived,
+  }));
   const teamName = new Map((teams ?? []).map((t) => [t.id, t.name]));
   const personName = new Map(
     (members ?? []).map((p) => [p.coach_id, p.name ?? p.email]),
@@ -129,16 +138,6 @@ export default async function AdminClubPage({
                 }
               />
             </Modal>
-            <Modal label={m.sections.excel} wide>
-              <ClubImport clubId={clubId} clubName={club.name} />
-            </Modal>
-            <Modal label={m.codes.create} wide>
-              <CodeForm
-                action={createCode.bind(null, clubId)}
-                clubName={club.name}
-                teams={activeTeams.map((t) => ({ id: t.id, name: t.name }))}
-              />
-            </Modal>
             <Modal label={m.teams.create}>
               <TeamForm action={createTeam.bind(null, clubId)} />
             </Modal>
@@ -151,9 +150,30 @@ export default async function AdminClubPage({
 
       <section className="space-y-1.5">
         <h2 className="text-sm font-semibold text-slate-700">
-          {m.sections.codes}
+          {m.sections.people}
         </h2>
-        <div className="rounded-xl bg-white px-3 py-1 ring-1 ring-slate-200">
+        <PeoplePanel
+          supabase={supabase}
+          clubId={clubId}
+          clubName={club.name}
+          teams={peopleTeams}
+          active={!!stats?.active}
+        />
+      </section>
+
+      <details className="rounded-xl bg-white ring-1 ring-slate-200">
+        <summary className="cursor-pointer px-3 py-2 text-sm font-semibold text-slate-700">
+          {messages.clubPeople.fallback.title}
+        </summary>
+        <div className="space-y-4 border-t border-slate-100 px-3 py-3">
+          <p className="text-sm text-slate-600">{messages.clubPeople.fallback.intro}</p>
+          {stats?.active && (
+            <CodeForm
+              action={createCode.bind(null, clubId)}
+              clubName={club.name}
+              teams={activeTeams.map((t) => ({ id: t.id, name: t.name }))}
+            />
+          )}
           <CodesTable
             clubId={clubId}
             codes={codes ?? []}
@@ -163,7 +183,7 @@ export default async function AdminClubPage({
             clubName={club.name}
           />
         </div>
-      </section>
+      </details>
 
       <Rows title={m.sections.teams} empty={m.teams.empty}>
         {(teams ?? []).map((t) => {
