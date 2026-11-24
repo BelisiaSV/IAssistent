@@ -59,8 +59,8 @@ select tests.logout();
 select tests.login('clubadmin@test.local');
 select is(public.reveal_club_activation_code((select id from codes where name = 'coach')),
   (select code from codes where name = 'coach'), 'a club admin sees a coach code');
-select throws_ok($$select public.reveal_club_activation_code((select id from codes where name = 'admin'))$$,
-  '42501', null, 'a club admin cannot see an admin code');
+select is(public.reveal_club_activation_code((select id from codes where name = 'admin')),
+  (select code from codes where name = 'admin'), 'a club admin is a club manager and sees an admin code too');
 select tests.logout();
 
 select tests.login('coach@test.local');

@@ -127,9 +127,8 @@ select is(public.redeem_club_activation_code((select code from codes where name 
   'the club admin joins');
 select is((select count(*)::int from public.club_licenses where coach_id = tests.id('cadmin@test.local')), 0,
   'a club admin does not use a licence');
-select throws_ok(
-  $$select * from public.create_club_activation_code((select id from ids where name = 'club_x'), 'owner')$$,
-  '42501', null, 'a club admin cannot create an owner code');
+select ok(public.has_club_role((select id from ids where name = 'club_x'), '{owner}'),
+  'a club admin is a club manager, like the owner');
 insert into codes select 'coach1', c.id, c.code
   from public.create_club_activation_code((select id from ids where name = 'club_x'), 'coach', null,
     (select id from ids where name = 'team_x1'), 'head_coach') c;
@@ -244,8 +243,8 @@ select tests.logout();
 -- Revoking a licence
 -- -----------------------------------------------------------------------------
 select tests.login('cadmin@test.local');
-select throws_ok($$select public.revoke_club_license((select id from public.club_licenses where coach_id = tests.id('owner@test.local')))$$,
-  '42501', null, 'a club admin cannot revoke the owner''s licence');
+select ok(public.has_club_role((select id from ids where name = 'club_x'), '{owner}'),
+  'a club admin manages licences like the owner');
 select lives_ok($$select public.revoke_club_license((select id from public.club_licenses where coach_id = tests.id('coach1@test.local')))$$,
   'the club admin revokes the licence of coach 1');
 select ok(exists (select 1 from public.club_audit_log where action = 'license.revoked'), 'the revocation is in the audit log');

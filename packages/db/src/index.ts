@@ -44,3 +44,20 @@ export const CLUB_ROLES_WITH_LICENSE: readonly ClubRole[] = ["owner", "technical
 /** Roles of a person on the staff of a club team (team_staff.role). */
 export const TEAM_STAFF_ROLES = ["head_coach", "assistant_coach", "coordinator"] as const;
 export type TeamStaffRole = (typeof TEAM_STAFF_ROLES)[number];
+
+/**
+ * Roles in the club file and the invitation form (club_invite_person() in the
+ * database): club manager (= owner/admin), technical director, coordinator,
+ * head coach and assistant coach of a team.
+ */
+export const CLUB_PERSON_ROLES = [
+  "club_manager",
+  "technical_director",
+  "coordinator",
+  "head_coach",
+  "assistant_coach",
+] as const;
+export type ClubPersonRole = (typeof CLUB_PERSON_ROLES)[number];
+
+/** Person roles that belong to a team. */
+export const CLUB_PERSON_TEAM_ROLES: readonly ClubPersonRole[] = ["coordinator", "head_coach", "assistant_coach"];

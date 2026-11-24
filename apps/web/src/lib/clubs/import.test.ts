@@ -3,134 +3,96 @@ import { describe, expect, it } from "vitest";
 import { messages } from "@/lib/messages";
 
 import {
-  CLUB_COLUMNS,
-  type ClubImport,
+  type ClubFile,
   hasErrors,
-  parseClubImport,
+  parseClubFile,
+  PEOPLE_COLUMNS,
   seatsNeeded,
-  STAFF_COLUMNS,
   TEAM_COLUMNS,
-  toImportPayload,
+  toFilePayload,
 } from "./import";
 
-const col = messages.clubAdmin.excel.columns;
+const f = messages.clubPeople.file;
+const col = f.columns;
 const header = (cols: readonly (keyof typeof col)[]) => cols.map((c) => col[c]);
 
-function sheets(club: string[][], teams: string[][], staff: string[][]) {
+function sheets(teams: string[][], people: string[][]) {
   return {
-    club: [header(CLUB_COLUMNS), ...club],
     teams: [header(TEAM_COLUMNS), ...teams],
-    staff: [header(STAFF_COLUMNS), ...staff],
+    people: [header(PEOPLE_COLUMNS), ...people],
   };
 }
 
-function ok(result: ReturnType<typeof parseClubImport>): ClubImport {
+function ok(result: ReturnType<typeof parseClubFile>): ClubFile {
   if ("error" in result) throw new Error(result.error);
   return result;
 }
 
-describe("parseClubImport", () => {
-  it("reads club, teams and staff with labels from the lists", () => {
+const roles = messages.clubPeople.roles;
+
+describe("parseClubFile", () => {
+  it("reads teams and people with labels from the lists", () => {
     const data = ok(
-      parseClubImport(
+      parseClubFile(
         sheets(
           [
-            [
-              "Belisia Bilzen SV",
-              "00042",
-              "Sportlaan 1",
-              "Jan",
-              "jan@club.be",
-              "0470",
-              "#6cb4ee",
-              "#FFFFFF",
-            ],
+            ["Eerste ploeg", "Senioren", "belisia bilzen sv a"],
+            ["U15", "U15", ""],
           ],
           [
-            [
-              "A-ploeg",
-              "Seniorenelftal",
-              "2026-2027",
-              "Belisia Bilzen SV A",
-              "3B",
-            ],
-            ["U17", "U17", "2026-2027", "", ""],
-          ],
-          [
-            ["Jordy", "Club Owner", "", ""],
-            ["Tom", "Coach", "U17", "Hoofdtrainer"],
-            ["Lien", "Teamcoördinator", "a-ploeg", "Coördinator"],
-            ["Piet", "Club Admin", "", ""],
+            ["Tom", " Tom@Club.be ", roles.head_coach!, "Eerste ploeg"],
+            ["Tom", "tom@club.be", roles.assistant_coach!, "U15"],
+            ["Ann", "ann@club.be", roles.club_manager!, ""],
+            ["Piet", "piet@club.be", roles.technical_director!, ""],
           ],
         ),
+        [],
+        ["Belisia Bilzen SV A"],
       ),
     );
     expect(hasErrors(data)).toBe(false);
-    expect(data.club.primaryColor).toBe("#6CB4EE");
-    expect(data.teams.map((t) => t.ageCategory)).toEqual(["senioren", "u17"]);
-    expect(data.teams[0]!.divisions).toEqual(["3B"]);
-    expect(data.staff.map((s) => s.role)).toEqual([
-      "owner",
-      "coach",
-      "team_coordinator",
-      "admin",
-    ]);
-    expect(data.staff[1]!.teamRole).toBe("head_coach");
-    expect(seatsNeeded(data.staff)).toBe(2);
-    const payload = toImportPayload(data);
-    expect(payload.staff[1]).toEqual({
-      name: "Tom",
-      role: "coach",
-      team: "U17",
-      team_role: "head_coach",
-    });
-    expect(payload.teams[0]!.age_category).toBe("senioren");
+    expect(data.teams[0]).toMatchObject({ category: "senioren", federationTeam: "Belisia Bilzen SV A" });
+    expect(data.people[0]).toMatchObject({ email: "tom@club.be", role: "head_coach" });
+    // Tom needs one licence, Piet one; the club manager none.
+    expect(seatsNeeded(data.people)).toBe(2);
+    expect(seatsNeeded(data.people, ["piet@club.be"])).toBe(1);
+    expect(toFilePayload(data).people[2]).toEqual({ name: "Ann", email: "ann@club.be", role: "club_manager", team: "" });
   });
 
-  it("marks wrong rows", () => {
+  it("marks errors per row", () => {
     const data = ok(
-      parseClubImport(
+      parseClubFile(
         sheets(
-          [["Club", "", "", "", "geen-mail", "", "blauw", ""]],
           [
-            ["A", "Veteranen", "", "", ""],
-            ["a", "U17", "", "", ""],
+            ["U15", "Iets", "Onbekende ploeg"],
+            ["u15", "U15", ""],
           ],
           [
-            ["", "Coach", "", ""],
-            ["Tom", "Speler", "", ""],
-            ["Lien", "Coach", "Onbekend", "Hoofdtrainer"],
-            ["Piet", "Coach", "A", "Coördinator"],
-            ["Els", "Coach", "", "Hoofdtrainer"],
+            ["X", "geen-mail", roles.head_coach!, ""],
+            ["Y", "y@club.be", "Speler", ""],
+            ["Z", "z@club.be", roles.technical_director!, "U15"],
+            ["W", "w@club.be", roles.head_coach!, "U21"],
           ],
         ),
       ),
     );
-    expect(data.clubErrors).toHaveLength(2);
-    expect(data.teams[0]!.errors).toEqual([
-      messages.clubAdmin.excel.errors.ageCategory,
-    ]);
-    expect(data.teams[1]!.errors).toEqual([
-      messages.clubAdmin.excel.errors.duplicateTeam,
-    ]);
-    expect(data.staff.map((s) => s.errors.length)).toEqual([1, 1, 1, 1, 1]);
-    expect(data.staff[3]!.errors).toEqual([
-      messages.clubAdmin.excel.errors.teamRoleMismatch,
+    expect(data.teams[0]!.errors).toEqual([f.errors.category, f.errors.federationTeam]);
+    expect(data.teams[1]!.errors).toEqual([f.errors.duplicateTeam]);
+    expect(data.people.map((p) => p.errors)).toEqual([
+      [f.errors.email],
+      [f.errors.role],
+      [f.errors.roleWithoutTeam],
+      [f.errors.teamUnknown],
     ]);
   });
 
-  it("accepts a team that already exists in the club", () => {
-    const data = ok(
-      parseClubImport(
-        sheets([], [], [["Tom", "Coach", "B-ploeg", "Hoofdtrainer"]]),
-        ["B-ploeg"],
-      ),
-    );
-    expect(data.staff[0]!.errors).toEqual([]);
+  it("accepts a team that exists already", () => {
+    const data = ok(parseClubFile(sheets([], [["T", "t@club.be", roles.head_coach!, "U17"]]), ["U17"]));
+    expect(hasErrors(data)).toBe(false);
   });
 
-  it("refuses a sheet without the columns of the template", () => {
-    const result = parseClubImport({ club: [["iets"]], teams: [], staff: [] });
-    expect("error" in result).toBe(true);
+  it("reports a missing column", () => {
+    const result = parseClubFile({ teams: [["iets"]], people: [] });
+    expect(result).toEqual({ error: f.errors.missingColumn(f.sheets.teams, col.teamName) });
   });
 });

@@ -650,6 +650,27 @@ Regels:
   wijzigen of verwijderen; daglimiet echte AI `staff_quality_daily_limit()` = 20, `staff_quality_remaining_today()`).
   Getoond als `QualityReview` boven het weekdocument en als `QualityBadge` per team in het clubdashboard (goedgekeurde
   versie van deze week, verbeterpunten als tooltip; het laagste oordeel komt bij de aandachtspunten).
+- **Club in eigen beheer, deel 1: mensen en teams** (migratie `club_self_service`) — owner en admin zijn samen één rol,
+  **Clubbeheerder** (`has_club_role` laat owner en admin elkaar vervangen); `coach` heet Trainer, `team_coordinator`
+  Coördinator. **Uitnodigen op e-mailadres** (`club_invitations`: e-mail in kleine letters, naam, `roles`, `teams`
+  `[{team_id, role}]`, `pending`/`accepted`/`revoked`, één open uitnodiging per e-mail en club; lezen clubbeheerder en
+  platformadmin, schrijven enkel via functies): `save_club_invitation(club, e-mail, naam, rol, team)` met de rollen van
+  `CLUB_PERSON_ROLES` (club_manager → admin, technical_director, coordinator → team_coordinator + teamplaats coördinator,
+  head_coach → coach + hoofdtrainer, assistant_coach), een tweede rol of team komt bij dezelfde uitnodiging.
+  Wie al een account heeft met dat (bevestigde) e-mailadres zit meteen in de club; anders gebeurt dat bij het aanmelden
+  (`accept_club_invitations()` in de app-layout, enkel met `email_confirmed_at`). Licentie, rollen en teamplaatsen zet
+  `club_apply_invitation`. Een open uitnodiging met een rol met licentie houdt een plaats vast (`club_seats_used`).
+  `revoke_club_invitation`. **Clubbestand** (Excel, `clubFileTemplate`/`readClubFile` in `lib/clubs/template.ts`,
+  `parseClubFile` in `lib/clubs/import.ts`): bladen Teams (Teamnaam, Categorie, Competitieploeg uit
+  `club_federation_teams`) en Mensen (Naam, E-mail, Rol, Team; meerdere teams = meerdere rijen), keuzelijsten,
+  vooraf ingevuld met de teams, de ploegen uit de export en de open uitnodigingen (`/clubs/[clubId]/people/template`).
+  `import_club_file(club, {teams, people})`: teams op naam bijwerken of aanmaken, competitiekoppeling met de reeksen uit
+  de export, mensen uitnodigen; niemand verwijderd; de licenties worden aan het einde gecontroleerd. Clubpagina **Mensen
+  en teams** (`/clubs/[clubId]/people`, vroeger `/licenses`): uitnodigen (+), clubbestand, open uitnodigingen
+  ("Kopieer uitnodiging" met link naar registreren), leden en licenties, activatiecodes als reserve (ingeklapt),
+  historiek. Dezelfde bouwstenen (`PeoplePanel` in `components/clubs/people-panel.tsx`, `lib/clubs/people.ts`,
+  `lib/clubs/people-actions.ts`, toegang via `clubAccess`: clubbeheerder of platformadmin) staan op Admin → Clubs → club.
+  `admin_import_club` (oud Excel met codes) wordt niet meer gebruikt.
 - Nog niet gebouwd: verdere Video Analist (evaluaties, video's), volledige stafmeeting; UI voor T2-toegang,
   de clubmodule rapportage, visie delen;
   oefeningen handmatig wijzigen; videodienst.

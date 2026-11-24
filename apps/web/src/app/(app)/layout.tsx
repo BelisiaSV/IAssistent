@@ -14,6 +14,9 @@ import { createClient } from "@/lib/supabase/server";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const supabase = await createClient();
+  // Whoever was invited by e-mail joins the club as soon as he is logged in.
+  const { error: inviteError } = await supabase.rpc("accept_club_invitations");
+  if (inviteError) console.error("accept_club_invitations failed", inviteError);
   const [admin, clubs, { data: teams }] = await Promise.all([
     isPlatformAdmin(supabase),
     loadMyClubs(),
